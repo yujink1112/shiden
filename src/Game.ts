@@ -24,15 +24,7 @@ export class Game {
         this.gameLog = this.battle.text; // Battleクラスからのログを取得
         this.winner = result; // 勝者を保存
         
-        if (result === 1) {
-            this.gameLog += "プレイヤーの勝利！";
-        } else if (result === 2) {
-            this.gameLog += "コンピュータの勝利！";
-        } else if (result === 3) {
-            this.gameLog += "引き分け！";
-        } else {
-            this.gameLog += "ゲームが終了しませんでした。"; // 0 の場合
-        }
+
         return this.winner; // gameLogからwinnerに変更
     }
 

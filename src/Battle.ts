@@ -149,7 +149,7 @@ export class Battle {
                     break;
                 }
 
-                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && (this.turn / 2) * 2 !== this.turn)) {
+                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && Math.floor(this.turn / 2) * 2 !== this.turn)) {
 
                     if (pc1.skill[i] === "剣") {
                         pc1.damage[i] = 0;
@@ -204,7 +204,7 @@ export class Battle {
                 }
 
 
-                if (pc2.type[i] === Player.ATTACK && !(i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "反") && !(pc2.skill[i] === "隠" && (this.turn / 2) * 2 !== this.turn)) {
+                if (pc2.type[i] === Player.ATTACK && !(i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "反") && !(pc2.skill[i] === "隠" && Math.floor(this.turn / 2) * 2 !== this.turn)) {
 
                     if (pc2.skill[i] === "剣") {
                         pc2.damage[i] = 0;
@@ -216,7 +216,7 @@ export class Battle {
                         if (pc2.speed[i] < 0) pc2.speed[i] = 0;
                     }
 
-                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2++;
+                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2+=2;
                     if (pc2.kakugo === 1) speedBufPc2 += 2;
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
@@ -225,7 +225,7 @@ export class Battle {
                 }
 
                 if (pc2.type[i] === Player.BUFF) {
-                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2++;
+                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2+=2;
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
                     speedPc2 = pc2.speed[i] + speedBufPc2;
@@ -375,6 +375,8 @@ export class Battle {
             this.text += "▼終了フェイズ\n";
             this.text += "\n";
 
+            const endLogBefore = this.text;
+
             // 無想の解除
 
             if (pc1.musou === 1) {
@@ -477,6 +479,10 @@ export class Battle {
                 }
             }
 
+            if (this.text === endLogBefore) {
+                this.text += "なし\n";
+            }
+
             if (endFlag === 1) this.text += "\n";
 
             judgeResult = this.judge(pc1, pc2, 3);
@@ -507,26 +513,26 @@ export class Battle {
                     this.text += `＞${pc1.playerName}の狼狽が解除された！\n`;
                     pc1.roubai = 0;
                 }
-                if (pc1.kakugo === 1) {
-                    this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
-                    pc1.kakugo = 0;
-                }
-                if (pc1.bouheki >= 1) {
-                    this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
-                    pc1.bouheki = 0;
-                }
-                if (pc1.gekirin >= 1) {
-                    this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
-                    pc1.gekirin = 0;
-                }
-                if (pc1.musou === 1) {
-                    this.text += `＞${pc1.playerName}の無想が解除された！\n`;
-                    pc1.musou = 0;
-                }
-                if (pc1.sensei === 1) {
-                    this.text += `＞${pc1.playerName}の先制が解除された！\n`;
-                    pc1.sensei = 0;
-                }
+                // if (pc1.kakugo === 1) {
+                //     this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
+                //     pc1.kakugo = 0;
+                // }
+                // if (pc1.bouheki >= 1) {
+                //     this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
+                //     pc1.bouheki = 0;
+                // }
+                // if (pc1.gekirin >= 1) {
+                //     this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
+                //     pc1.gekirin = 0;
+                // }
+                // if (pc1.musou === 1) {
+                //     this.text += `＞${pc1.playerName}の無想が解除された！\n`;
+                //     pc1.musou = 0;
+                // }
+                // if (pc1.sensei === 1) {
+                //     this.text += `＞${pc1.playerName}の先制が解除された！\n`;
+                //     pc1.sensei = 0;
+                // }
 
 
                 if (pc2.stan === 1) {
@@ -596,7 +602,7 @@ export class Battle {
 
             for (i = 0; i < pc1.getSkillsLength(); i++) {
 
-                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && (this.turn / 2) * 2 !== this.turn)) {
+                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && Math.floor(this.turn / 2) * 2 !== this.turn)) {
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}！\n`;
 
 
@@ -623,7 +629,7 @@ export class Battle {
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") {
-                        this.text += `＞【＋速】${i + 2}の効果で速度に+1！\n`;
+                        this.text += `＞【＋速】${i + 2}の効果で速度に+2！\n`;
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "錬") {
@@ -683,7 +689,7 @@ export class Battle {
 
             for (i = pc1.getSkillsLength() - 1; i >= 0; i--) {
 
-                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && (this.turn / 2) * 2 !== this.turn)) {
+                if (pc1.type[i] === Player.ATTACK && !(i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "反") && !(pc1.skill[i] === "隠" && Math.floor(this.turn / 2) * 2 !== this.turn)) {
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}！\n`;
 
 
@@ -710,7 +716,7 @@ export class Battle {
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") {
-                        this.text += `＞【＋速】${i + 2}の効果で速度に+1！\n`;
+                        this.text += `＞【＋速】${i + 2}の効果で速度に+2！\n`;
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "錬") {
@@ -766,7 +772,7 @@ export class Battle {
 
         // 攻撃側の速度決定
 
-        if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "速") speedBufPc1++;
+        if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "速") speedBufPc1+=2;
         if (pc1.kakugo === 1) speedBufPc1 += 2;
         speedPc1 = pc1.speed[use] + speedBufPc1;
         if (pc1.roubai === 1) speedPc1 = 0;
@@ -876,7 +882,7 @@ export class Battle {
                     }
 
 
-                    if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") speedBufPc2Counter++;
+                    if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") speedBufPc2Counter+=2;
                     if (pc2.kakugo === 1) speedBufPc2Counter += 2;
                     speedPc2Counter = pc2.speed[target] + speedBufPc2Counter;
 
@@ -1261,11 +1267,11 @@ export class Battle {
         if (result === 3) result = prior; // 両者のスキルが破壊された場合は先攻が勝者
 
         if (result === 1) {
-            this.text += `${pc1.playerName}の勝利\n\n`;
+            this.text += `${pc1.playerName}の勝利！\n\n`;
             this.text += "===============================================\n";
             return 1;
         } else if (result === 2) {
-            this.text += `${pc2.playerName}の勝利\n\n`;
+            this.text += `${pc2.playerName}の勝利！\n\n`;
             this.text += "===============================================\n";
             return 2;
         } else if (result === 3) {

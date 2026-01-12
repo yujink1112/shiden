@@ -11,11 +11,11 @@ export const ALL_SKILLS = [
   { abbr: "弱", name: "弱撃", icon: "/images/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。" },
   { abbr: "覚", name: "覚悟", icon: "/images/b01.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「覚悟」を与える。" },
   { abbr: "防", name: "防壁", icon: "/images/b02.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「防壁」を3つ与える。" },
-  { abbr: "封", name: "封印", icon: "/images/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態スタン」「狼狽」「衰弱」を与える。" },
+  { abbr: "封", name: "封印", icon: "/images/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「衰弱」を与える。" },
   { abbr: "影", name: "影討", icon: "/images/b04.gif", type: "補助", speed: "LV", description: "相手が所持している先頭のスキルを1つ指定する。\nこのスキルを使用したラウンドの終了フェイズに、相手が所持している指定したスキルと同名のスキルを全て破壊する。" },
   { abbr: "交", name: "交錯", icon: "/images/c01.gif", type: "迎撃", speed: "LV-1", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルにダメージを与えた攻撃スキルである。" },
   { abbr: "搦", name: "搦手", icon: "/images/c02.gif", type: "迎撃", speed: "LV", description: "相手に状態「狼狽」を与える。" },
-  { abbr: "待", name: "待伏", icon: "/images/c03.gif", type: "迎撃", speed: "0", description: "相手に2点のダメージを与える。" },
+  { abbr: "待", name: "待伏", icon: "/images/c03.gif", type: "迎撃", speed: "1", description: "相手に2点のダメージを与える。" },
   { abbr: "玉", name: "玉響", icon: "/images/c04.gif", type: "迎撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、このスキルにダメージを与えた攻撃スキルの速度（最低0）である。" },
   { abbr: "崩", name: "崩技", icon: "/images/c05.gif", type: "迎撃", speed: "LV", description: "相手に状態「スタン」を与える。" },
   { abbr: "疫", name: "疫病", icon: "/images/c06.gif", type: "迎撃", speed: "LV", description: "相手の先頭のスキルがリミテッドでないならば、そのスキルを【疫病】に変化させる。" },
@@ -46,3 +46,19 @@ export interface SkillDetail {
 export const getSkillByAbbr = (abbr: string): SkillDetail | undefined => {
   return ALL_SKILLS.find(skill => skill.abbr === abbr);
 };
+
+export interface StatusDetail {
+    name: string;
+    description: string;
+}
+
+export const STATUS_DATA: StatusDetail[] = [
+    { name: "覚悟", description: "「覚悟」を受けているキャラクターの所持する攻撃スキルは常に与えるダメージに+1、速度に+2される。" },
+    { name: "防壁", description: "攻撃スキルによるダメージを受ける時、1つ解除してそのダメージを全て無効にする。キャラクターが「無想」を受けている場合、この効果は発揮されない。" },
+    { name: "逆鱗", description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【凡打】以外の攻撃スキルを使用した直後に解除される。" },
+    { name: "無想", description: "ダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
+    { name: "先制", description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
+    { name: "スタン", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。" },
+    { name: "狼狽", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。他のあらゆる速度変化効果に対して優先される。" },
+    { name: "衰弱", description: "毎ラウンドの終了フェイズに、自身が所持している【空虚】を除く先頭のスキルが【空虚】に変化する。" },
+];

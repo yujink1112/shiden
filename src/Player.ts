@@ -32,9 +32,10 @@ export class Player {
     tate: number = 0;
 
     constructor(player_data: string) {
+        // 全角のスラッシュ「／」で分割
         const splitData = player_data.split("／");
         this.skillsRaw = splitData[0];
-        if (splitData.length === 2) {
+        if (splitData.length >= 2) {
             this.playerName = splitData[1];
         }
         this.initializeSkills(this.skillsRaw);
@@ -174,7 +175,7 @@ export class Player {
                 case "待":
                     this.name[i] = "待伏";
                     this.type[i] = Player.COUNTER;
-                    this.speed[i] = 0;
+                    this.speed[i] = 1;
                     this.damage[i] = 2;
                     break;
                 case "玉":
@@ -280,7 +281,10 @@ export class Player {
     }
 
     shuffleSkills(): void {
+        // スキル文字列部分のみを取り出す
         const skillsArray = this.skillsRaw.split("");
+        // シャッフルロジック（現在は順番維持のためコメントアウト、または必要に応じて実装）
+        // this.shuffleArray(skillsArray);
         this.skillsRaw = skillsArray.join("");
         this.initializeSkills(this.skillsRaw); // Re-initialize all skill properties based on new skillsRaw
     }
