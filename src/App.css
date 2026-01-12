@@ -1,0 +1,72 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* スライドアニメーション */
+.battle-result-item {
+  opacity: 0;
+  transform: translateX(100%);
+  animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+@media (min-width: 600px) {
+  .skill-card-grid {
+    grid-template-columns: repeat(5, 1fr); /* 5列表示 */
+    display: grid;
+    /*grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* 最小幅100pxで自動調整 */
+    gap: 10px; /* カード間のスペース */
+    justify-items: center;
+  }
+}
+
+.battle-results-scroll-container {
+  max-height: 400px; /* 必要に応じて高さを調整 */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}

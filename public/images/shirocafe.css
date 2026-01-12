@@ -1,0 +1,96 @@
+
+div.title{
+	background:#EBEBFB;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:1px;
+	padding: 10px 10px 10px 10px;
+
+}
+
+div.box{
+	background:#EBEBFB;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:2px;
+	padding: 10px 10px 0px 10px;
+
+}
+
+div.box2{
+	background:#FFDDDD;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:1px;
+	padding: 20px 10px 10px 10px;
+
+}
+
+div.box3{
+	background:#DDFFDD;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:1px;
+	padding: 20px 10px 10px 10px;
+
+}
+
+div.box4{
+	background:#DDDDFF;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:1px;
+	padding: 20px 10px 10px 10px;
+
+}
+
+div.box5{
+	background:#FFFFDD;
+	color=#000000;
+	border-style:outset;
+	border-color:#9999AA;
+	border-width:1px;
+	padding: 20px 10px 10px 10px;
+
+}
+
+div.parallel{
+	background:#000000;
+	color=#000000;
+	border-style:outset;
+	border-color:#FFFFFF;
+	border-width:1px;
+	padding: 10px 10px 10px 10px;
+	color:#FFFFFF;
+}
+
+font.header{
+	font-size:110%;
+	font-weight: bold;
+	line-height: 250%;
+}
+
+font.phase{
+	font-size:150%;
+	font-style: italic;
+}
+
+
+font.action{
+	font-size:150%;
+	font-weight: bold;
+}
+
+font.counter{
+	font-size:150%;
+	font-style: italic;
+}
+
+img.text{
+vertical-align: text-top;
+}
