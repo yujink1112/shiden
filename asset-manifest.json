@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/shiden/static/css/main.242311b3.css",
+    "main.js": "/shiden/static/js/main.36bc6ab3.js",
+    "static/js/453.69eb5c60.chunk.js": "/shiden/static/js/453.69eb5c60.chunk.js",
+    "index.html": "/shiden/index.html",
+    "main.242311b3.css.map": "/shiden/static/css/main.242311b3.css.map",
+    "main.36bc6ab3.js.map": "/shiden/static/js/main.36bc6ab3.js.map",
+    "453.69eb5c60.chunk.js.map": "/shiden/static/js/453.69eb5c60.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.242311b3.css",
+    "static/js/main.36bc6ab3.js"
+  ]
+}
