@@ -1,10 +1,10 @@
 export const ALL_SKILLS = [
   { abbr: "一", name: "一閃", icon: "/images/a01.gif", type: "攻撃", speed: "LV", description: "相手に1点のダメージを与える。" },
-  { abbr: "刺", name: "刺突", icon: "/images/a02.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nダメージの対象は、「このスキルと同じLVのスキル＞このスキルのLV未満のスキルを除いた先頭のスキル＞先頭のスキル」の優先順位で決定される。" },
+  { abbr: "刺", name: "刺突", icon: "/images/a02.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルと最もLVが近いスキル（より高いLVを優先）に変更される。" },
   { abbr: "果", name: "果断", icon: "/images/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。" },
   { abbr: "剣", name: "剣舞", icon: "/images/a04.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、あなたが所持している攻撃スキルの数である。" },
   { abbr: "紫", name: "紫電", icon: "/images/a05.gif", type: "攻撃", speed: "LV+2", description: "相手に1点のダメージを与える。\nあなたに状態「スタン」を与える。" },
-  { abbr: "呪", name: "呪詛", icon: "/images/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nこのスキルが発生させたダメージによって迎撃スキルが発動しなかったならば、相手に状態「衰弱」を与える。" },
+  { abbr: "呪", name: "呪詛", icon: "/images/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nこのスキルが相手にダメージを与えたならば、相手に状態「衰弱」を与える。" },
   { abbr: "雷", name: "雷火", icon: "/images/a07.gif", type: "攻撃（リミテッド）", speed: "LV", description: "相手に2点のダメージを与える。" },
   { abbr: "隠", name: "隠刃", icon: "/images/a08.gif", type: "攻撃", speed: "LV", description: "相手に2点のダメージを与える。\nこのスキルは奇数ラウンドの時、先攻決定フェイズで速度を比較するスキルの対象にならず、また、攻撃フェイズで使用するスキルにも選択されない。" },
   { abbr: "怒", name: "怒濤", icon: "/images/a09.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手にX点のダメージを与える。\nXは、現在のラウンド数である。" },
@@ -21,16 +21,16 @@ export const ALL_SKILLS = [
   { abbr: "疫", name: "疫病", icon: "/images/c06.gif", type: "迎撃", speed: "LV", description: "相手の先頭のスキルがリミテッドでないならば、そのスキルを【疫病】に変化させる。" },
   { abbr: "強", name: "＋強", icon: "/images/d01.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルが与えるダメージは常に+1される。" },
   { abbr: "硬", name: "＋硬", icon: "/images/d02.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルが破壊される直前に効果を発揮する。そのスキルの破壊を無効にし、代わりにこのスキルを破壊する。" },
-  { abbr: "速", name: "＋速", icon: "/images/d03.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルの速度は常に+2される。" },
+  { abbr: "速", name: "＋速", icon: "/images/d03.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルの速度は常に+1される。" },
   { abbr: "反", name: "＋反", icon: "/images/d04.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルは、常に迎撃スキルとして扱われる。" },
   { abbr: "盾", name: "＋盾", icon: "/images/d05.gif", type: "付帯（リミテッド）", speed: "なし", description: "このスキルの直前の攻撃・補助スキルを使用する直前に効果を発揮する。\nそのスキルの効果に「あなたに状態「防壁」を2つ与える。」を追加する。\nこの効果は、攻撃・補助スキルによる「ダメージ以外の効果」として扱う。" },
   { abbr: "錬", name: "＋錬", icon: "/images/d06.gif", type: "付帯（リミテッド）", speed: "なし", description: "このスキルの直前の攻撃スキルを使用する直前に効果を発揮する。\nそのスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。\nダメージを与えた迎撃スキルが発動条件を満たしていなくても、この効果は適用される。" },
   { abbr: "逆", name: "逆鱗", icon: "/images/d07.gif", type: "付帯", speed: "なし", description: "このスキルが破壊された直後に効果を発揮する。\nあなたに状態「逆鱗」を1つ与える。" },
-  { abbr: "無", name: "無想", icon: "/images/d08.gif", type: "付帯（リミテッド）", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。\nあなたに状態「無想」を与える。" },
+  { abbr: "無", name: "無想", icon: "/images/d08.gif", type: "付帯（リミテッド）", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。\nあなたに状態「無想」を与える。このスキルは1つしか選択できない。" },
   { abbr: "裏", name: "裏霞", icon: "/images/d09.gif", type: "付帯", speed: "なし", description: "あなたが使用する攻撃・補助スキルを選択する直前に効果を発揮する。\nあなたが使用する攻撃・補助スキルは、あなたが所持している最後尾のスキルが選択される。" },
   { abbr: "先", name: "先制", icon: "/images/d10.gif", type: "付帯", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。あなたに状態「先制」を与える。" },
-  { abbr: "連", name: "連撃", icon: "/images/d11.gif", type: "付帯", speed: "なし", description: "第LVラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。" },
-  { abbr: "燐", name: "燐光", icon: "/images/d12.gif", type: "付帯", speed: "なし", description: "あなたの攻撃フェイズ開始直後に効果を発揮する。あなたと相手が受けている状態を全て解除する。" },
+  { abbr: "連", name: "連撃", icon: "/images/d11.gif", type: "付帯（リミテッド）", speed: "なし", description: "各ラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。" },
+  { abbr: "燐", name: "燐光", icon: "/images/d12.gif", type: "付帯", speed: "なし", description: "あなたの攻撃フェイズ開始直後に効果を発揮する。あなたが受けている悪い状態を全て解除する。" },
   { abbr: "空", name: "空白", icon: "/images/d13.gif", type: "付帯", speed: "なし", description: "何の効果も持たない。" },
 ];
 
@@ -54,11 +54,11 @@ export interface StatusDetail {
 
 export const STATUS_DATA: StatusDetail[] = [
     { name: "覚悟", description: "「覚悟」を受けているキャラクターの所持する攻撃スキルは常に与えるダメージに+1、速度に+2される。" },
-    { name: "防壁", description: "攻撃スキルによるダメージを受ける時、1つ解除してそのダメージを全て無効にする。キャラクターが「無想」を受けている場合、この効果は発揮されない。" },
+    { name: "防壁", description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。キャラクターが「無想」を受けている場合、この効果は発揮されない。" },
     { name: "逆鱗", description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【凡打】以外の攻撃スキルを使用した直後に解除される。" },
     { name: "無想", description: "ダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
     { name: "先制", description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
     { name: "スタン", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。" },
     { name: "狼狽", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。他のあらゆる速度変化効果に対して優先される。" },
-    { name: "衰弱", description: "毎ラウンドの終了フェイズに、自身が所持している【空虚】を除く先頭のスキルが【空虚】に変化する。" },
+    { name: "衰弱", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
 ];

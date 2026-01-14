@@ -23,7 +23,7 @@ export class Battle {
         const pc1 = new Player(this.dataPc1);
         const pc2 = new Player(this.dataPc2);
 
-        this.text += "===============================================\n\n";
+        this.text += "=============================================\n\n";
         this.text += pc1.playerName + "　VS　" + pc2.playerName + "\n\n";
 
         this.text += "――戦闘開始――\n\n";
@@ -161,7 +161,7 @@ export class Battle {
                         if (pc1.speed[i] < 0) pc1.speed[i] = 0;
                     }
 
-                    if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1+=2;
+                    if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1 += 1;
                     if (pc1.kakugo === 1) speedBufPc1 += 2;
 
                     this.text += `【${pc1.name[i]}】${i + 1}　速度：${pc1.speed[i] + speedBufPc1}　`;
@@ -170,7 +170,7 @@ export class Battle {
                 }
 
                 if (pc1.type[i] === Player.BUFF) {
-                    if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1+=2;
+                    if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1 += 1;
 
                     this.text += `【${pc1.name[i]}】${i + 1}　速度：${pc1.speed[i] + speedBufPc1}　`;
                     speedPc1 = pc1.speed[i] + speedBufPc1;
@@ -216,7 +216,7 @@ export class Battle {
                         if (pc2.speed[i] < 0) pc2.speed[i] = 0;
                     }
 
-                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2+=2;
+                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2 += 1;
                     if (pc2.kakugo === 1) speedBufPc2 += 2;
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
@@ -225,7 +225,7 @@ export class Battle {
                 }
 
                 if (pc2.type[i] === Player.BUFF) {
-                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2+=2;
+                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2 += 1;
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
                     speedPc2 = pc2.speed[i] + speedBufPc2;
@@ -321,23 +321,25 @@ export class Battle {
             }
 
 
-            // 連撃の発動タイミング
+            // 連撃の発動タイミング (ラウンド制限を撤廃: 所持していれば毎ラウンド発動)
 
             let rengekiPc1 = 0; let rengekiPc2 = 0;
 
-            if (this.turn <= pc1.getSkillsLength()) {
-                if (pc1.skill[this.turn - 1] === "連") {
+            for (let i = 0; i < pc1.getSkillsLength(); i++) {
+                if (pc1.skill[i] === "連") {
                     this.text += "\n";
-                    this.text += `${pc1.playerName}の【${pc1.name[this.turn - 1]}】${this.turn}が発動！\n`;
+                    this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}が発動！\n`;
                     rengekiPc1 = 1;
+                    break;
                 }
             }
 
-            if (this.turn <= pc2.getSkillsLength()) {
-                if (pc2.skill[this.turn - 1] === "連") {
+            for (let i = 0; i < pc2.getSkillsLength(); i++) {
+                if (pc2.skill[i] === "連") {
                     this.text += "\n";
-                    this.text += `${pc2.playerName}の【${pc2.name[this.turn - 1]}】${this.turn}が発動！\n`;
+                    this.text += `${pc2.playerName}の【${pc2.name[i]}】${i + 1}が発動！\n`;
                     rengekiPc2 = 1;
+                    break;
                 }
             }
 
@@ -513,60 +515,60 @@ export class Battle {
                     this.text += `＞${pc1.playerName}の狼狽が解除された！\n`;
                     pc1.roubai = 0;
                 }
-                // if (pc1.kakugo === 1) {
-                //     this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
-                //     pc1.kakugo = 0;
-                // }
-                // if (pc1.bouheki >= 1) {
-                //     this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
-                //     pc1.bouheki = 0;
-                // }
-                // if (pc1.gekirin >= 1) {
-                //     this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
-                //     pc1.gekirin = 0;
-                // }
-                // if (pc1.musou === 1) {
-                //     this.text += `＞${pc1.playerName}の無想が解除された！\n`;
-                //     pc1.musou = 0;
-                // }
-                // if (pc1.sensei === 1) {
-                //     this.text += `＞${pc1.playerName}の先制が解除された！\n`;
-                //     pc1.sensei = 0;
-                // }
+                if (pc1.kakugo === 1) {
+                    this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
+                    pc1.kakugo = 0;
+                }
+                if (pc1.bouheki >= 1) {
+                    this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
+                    pc1.bouheki = 0;
+                }
+                if (pc1.gekirin >= 1) {
+                    this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
+                    pc1.gekirin = 0;
+                }
+                if (pc1.musou === 1) {
+                    this.text += `＞${pc1.playerName}の無想が解除された！\n`;
+                    pc1.musou = 0;
+                }
+                if (pc1.sensei === 1) {
+                    this.text += `＞${pc1.playerName}の先制が解除された！\n`;
+                    pc1.sensei = 0;
+                }
 
 
-                if (pc2.stan === 1) {
-                    this.text += `＞${pc2.playerName}のスタンが解除された！\n`;
-                    pc2.stan = 0;
-                }
-                if (pc2.suijaku === 1) {
-                    this.text += `＞${pc2.playerName}の衰弱が解除された！\n`;
-                    pc2.suijaku = 0;
-                }
-                if (pc2.roubai === 1) {
-                    this.text += `＞${pc2.playerName}の狼狽が解除された！\n`;
-                    pc2.roubai = 0;
-                }
-                if (pc2.kakugo === 1) {
-                    this.text += `＞${pc2.playerName}の覚悟が解除された！\n`;
-                    pc2.kakugo = 0;
-                }
-                if (pc2.bouheki >= 1) {
-                    this.text += `＞${pc2.playerName}の防壁が解除された！\n`;
-                    pc2.bouheki = 0;
-                }
-                if (pc2.gekirin >= 1) {
-                    this.text += `＞${pc2.playerName}の逆鱗が解除された！\n`;
-                    pc2.gekirin = 0;
-                }
-                if (pc2.musou === 1) {
-                    this.text += `＞${pc2.playerName}の無想が解除された！\n`;
-                    pc2.musou = 0;
-                }
-                if (pc2.sensei === 1) {
-                    this.text += `＞${pc2.playerName}の先制が解除された！\n`;
-                    pc2.sensei = 0;
-                }
+                // if (pc2.stan === 1) {
+                //     this.text += `＞${pc2.playerName}のスタンが解除された！\n`;
+                //     pc2.stan = 0;
+                // }
+                // if (pc2.suijaku === 1) {
+                //     this.text += `＞${pc2.playerName}の衰弱が解除された！\n`;
+                //     pc2.suijaku = 0;
+                // }
+                // if (pc2.roubai === 1) {
+                //     this.text += `＞${pc2.playerName}の狼狽が解除された！\n`;
+                //     pc2.roubai = 0;
+                // }
+                // if (pc2.kakugo === 1) {
+                //     this.text += `＞${pc2.playerName}の覚悟が解除された！\n`;
+                //     pc2.kakugo = 0;
+                // }
+                // if (pc2.bouheki >= 1) {
+                //     this.text += `＞${pc2.playerName}の防壁が解除された！\n`;
+                //     pc2.bouheki = 0;
+                // }
+                // if (pc2.gekirin >= 1) {
+                //     this.text += `＞${pc2.playerName}の逆鱗が解除された！\n`;
+                //     pc2.gekirin = 0;
+                // }
+                // if (pc2.musou === 1) {
+                //     this.text += `＞${pc2.playerName}の無想が解除された！\n`;
+                //     pc2.musou = 0;
+                // }
+                // if (pc2.sensei === 1) {
+                //     this.text += `＞${pc2.playerName}の先制が解除された！\n`;
+                //     pc2.sensei = 0;
+                // }
 
                 this.text += "\n";
                 break;
@@ -629,7 +631,7 @@ export class Battle {
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") {
-                        this.text += `＞【＋速】${i + 2}の効果で速度に+2！\n`;
+                        this.text += `＞【＋速】${i + 2}の効果で速度に+1！\n`;
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "錬") {
@@ -716,7 +718,7 @@ export class Battle {
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") {
-                        this.text += `＞【＋速】${i + 2}の効果で速度に+2！\n`;
+                        this.text += `＞【＋速】${i + 2}の効果で速度に+1！\n`;
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "錬") {
@@ -772,7 +774,7 @@ export class Battle {
 
         // 攻撃側の速度決定
 
-        if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "速") speedBufPc1+=2;
+        if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "速") speedBufPc1 += 1;
         if (pc1.kakugo === 1) speedBufPc1 += 2;
         speedPc1 = pc1.speed[use] + speedBufPc1;
         if (pc1.roubai === 1) speedPc1 = 0;
@@ -816,28 +818,34 @@ export class Battle {
             }
 
             // 目標指定（刺）
-            let flagMato = 0;
             if (pc1.skill[use] === "刺") {
-                for (let j = use; j < pc2.getSkillsLength(); j++) {
-                    if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
-                        target = j;
-                        flagMato = 1;
-                        break;
-                    }
-                }
+                let bestDiff = 999;
+                let bestTarget = -1;
+                let useLV = use + 1;
 
-                if (flagMato === 0) {
-                    for (let j = 0; j < pc2.getSkillsLength(); j++) {
-                        if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
-                            target = j;
-                            flagMato = 1;
-                            break;
+                // 全ての有効なスキルをチェック
+                for (let j = 0; j < pc2.getSkillsLength(); j++) {
+                    if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
+                        let targetLV = j + 1;
+                        let diff = Math.abs(useLV - targetLV);
+
+                        if (diff < bestDiff) {
+                            bestDiff = diff;
+                            bestTarget = j;
+                        } else if (diff === bestDiff) {
+                            // 同じ差なら、より高いLV（インデックスが大きい方）を優先
+                            if (targetLV > (bestTarget + 1)) {
+                                bestTarget = j;
+                            }
                         }
                     }
                 }
 
-                if (flagMato === 0) suspend = 1;
-                flagMato = 0;
+                if (bestTarget !== -1) {
+                    target = bestTarget;
+                } else {
+                    suspend = 1;
+                }
             }
 
             if (suspend === 1) {
@@ -882,7 +890,7 @@ export class Battle {
                     }
 
 
-                    if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") speedBufPc2Counter+=2;
+                    if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") speedBufPc2Counter += 1;
                     if (pc2.kakugo === 1) speedBufPc2Counter += 2;
                     speedPc2Counter = pc2.speed[target] + speedBufPc2Counter;
 
@@ -892,6 +900,10 @@ export class Battle {
                     if (speedPc2Counter >= speedPc1 || bonda === 1) {
 
                         counterOn = 1;
+
+                        if (pc2.kakugo === 1) {
+                            this.text += `＞覚悟の効果でダメージが1点上昇！速度に+2！\n`;
+                        }
 
                         this.text += `＞${pc2.playerName}の【${pc2.name[target]}】${target + 1}が発動！（速度：${speedPc2Counter}）\n`;
 
@@ -908,7 +920,10 @@ export class Battle {
                             }
 
                             // ダメージの処理
-                            for (let i2 = 0; i2 < pc2.damage[target]; i2++) {
+                            let counterDamage = pc2.damage[target];
+                            if (pc2.kakugo === 1) counterDamage += 1;
+
+                            for (let i2 = 0; i2 < counterDamage; i2++) {
 
                                 if (pc1.musou === 1) {
                                     this.text += `＞＞${pc1.playerName}は無想の効果でダメージを受けない！\n`;
@@ -943,28 +958,32 @@ export class Battle {
 
 
                                 // 目標指定（刺）
-                                let flagMato2 = 0;
                                 if (pc2.skill[target] === "刺") {
-                                    for (let j2 = target; j2 < pc1.getSkillsLength(); j2++) {
-                                        if (pc1.type[j2] !== Player.NONE && pc1.scar[j2] !== 2) {
-                                            target2 = j2;
-                                            flagMato2 = 1;
-                                            break;
-                                        }
-                                    }
+                                    let bestDiff2 = 999;
+                                    let bestTarget2 = -1;
+                                    let useLV2 = target + 1;
 
-                                    if (flagMato2 === 0) {
-                                        for (let j2 = 0; j2 < pc1.getSkillsLength(); j2++) {
-                                            if (pc1.type[j2] !== Player.NONE && pc1.scar[j2] !== 2) {
-                                                target2 = j2;
-                                                flagMato2 = 1;
-                                                break;
+                                    for (let j2 = 0; j2 < pc1.getSkillsLength(); j2++) {
+                                        if (pc1.type[j2] !== Player.NONE && pc1.scar[j2] !== 2) {
+                                            let targetLV2 = j2 + 1;
+                                            let diff2 = Math.abs(useLV2 - targetLV2);
+
+                                            if (diff2 < bestDiff2) {
+                                                bestDiff2 = diff2;
+                                                bestTarget2 = j2;
+                                            } else if (diff2 === bestDiff2) {
+                                                if (targetLV2 > (bestTarget2 + 1)) {
+                                                    bestTarget2 = j2;
+                                                }
                                             }
                                         }
                                     }
 
-                                    if (flagMato2 === 0) suspend2 = 1;
-                                    flagMato2 = 0;
+                                    if (bestTarget2 !== -1) {
+                                        target2 = bestTarget2;
+                                    } else {
+                                        suspend2 = 1;
+                                    }
                                 }
 
 
@@ -1268,15 +1287,15 @@ export class Battle {
 
         if (result === 1) {
             this.text += `${pc1.playerName}の勝利！\n\n`;
-            this.text += "===============================================\n";
+            this.text += "=============================================\n";
             return 1;
         } else if (result === 2) {
             this.text += `${pc2.playerName}の勝利！\n\n`;
-            this.text += "===============================================\n";
+            this.text += "=============================================\n";
             return 2;
         } else if (result === 3) {
             this.text += "引き分け\n\n";
-            this.text += "===============================================\n";
+            this.text += "=============================================\n";
             return 3;
         }
 
