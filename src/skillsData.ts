@@ -4,14 +4,14 @@ export const ALL_SKILLS = [
   { abbr: "果", name: "果断", icon: "/images/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。" },
   { abbr: "剣", name: "剣舞", icon: "/images/a04.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、あなたが所持している攻撃スキルの数である。" },
   { abbr: "紫", name: "紫電", icon: "/images/a05.gif", type: "攻撃", speed: "LV+2", description: "相手に1点のダメージを与える。\nあなたに状態「スタン」を与える。" },
-  { abbr: "呪", name: "呪詛", icon: "/images/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nこのスキルが相手にダメージを与えたならば、相手に状態「衰弱」を与える。" },
+  { abbr: "呪", name: "呪詛", icon: "/images/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nこのスキルが相手にダメージを与えたならば、相手に状態「忘却」を与える。" },
   { abbr: "雷", name: "雷火", icon: "/images/a07.gif", type: "攻撃（リミテッド）", speed: "LV", description: "相手に2点のダメージを与える。" },
   { abbr: "隠", name: "隠刃", icon: "/images/a08.gif", type: "攻撃", speed: "LV", description: "相手に2点のダメージを与える。\nこのスキルは奇数ラウンドの時、先攻決定フェイズで速度を比較するスキルの対象にならず、また、攻撃フェイズで使用するスキルにも選択されない。" },
   { abbr: "怒", name: "怒濤", icon: "/images/a09.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手にX点のダメージを与える。\nXは、現在のラウンド数である。" },
   { abbr: "弱", name: "弱撃", icon: "/images/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。" },
   { abbr: "覚", name: "覚悟", icon: "/images/b01.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「覚悟」を与える。" },
   { abbr: "防", name: "防壁", icon: "/images/b02.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「防壁」を3つ与える。" },
-  { abbr: "封", name: "封印", icon: "/images/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「衰弱」を与える。" },
+  { abbr: "封", name: "封印", icon: "/images/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「忘却」を与える。" },
   { abbr: "影", name: "影討", icon: "/images/b04.gif", type: "補助", speed: "LV", description: "相手が所持している先頭のスキルを1つ指定する。\nこのスキルを使用したラウンドの終了フェイズに、相手が所持している指定したスキルと同名のスキルを全て破壊する。" },
   { abbr: "交", name: "交錯", icon: "/images/c01.gif", type: "迎撃", speed: "LV-1", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルにダメージを与えた攻撃スキルである。" },
   { abbr: "搦", name: "搦手", icon: "/images/c02.gif", type: "迎撃", speed: "LV", description: "相手に状態「狼狽」を与える。" },
@@ -53,12 +53,12 @@ export interface StatusDetail {
 }
 
 export const STATUS_DATA: StatusDetail[] = [
-    { name: "覚悟", description: "「覚悟」を受けているキャラクターの所持する攻撃スキルは常に与えるダメージに+1、速度に+2される。" },
-    { name: "防壁", description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。キャラクターが「無想」を受けている場合、この効果は発揮されない。" },
-    { name: "逆鱗", description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【凡打】以外の攻撃スキルを使用した直後に解除される。" },
+    { name: "覚悟", description: "「覚悟」を受けているキャラクターの所持する攻撃・迎撃スキルは常に与えるダメージに+1、速度に+2される。" },
+    { name: "防壁", description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。" },
+    { name: "逆鱗", description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【弱撃】以外の攻撃スキルを使用した直後に解除される。" },
     { name: "無想", description: "ダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
     { name: "先制", description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
     { name: "スタン", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。" },
     { name: "狼狽", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。他のあらゆる速度変化効果に対して優先される。" },
-    { name: "衰弱", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
+    { name: "忘却", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
 ];

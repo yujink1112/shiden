@@ -45,7 +45,7 @@ export class Battle {
 
             if (pc1.stan === 1) { sta1 = 1; statusPc1 += "ス"; }
             if (pc1.roubai === 1) { sta1 = 1; statusPc1 += "狼"; }
-            if (pc1.suijaku === 1) { sta1 = 1; statusPc1 += "衰"; }
+            if (pc1.suijaku === 1) { sta1 = 1; statusPc1 += "忘"; }
             if (pc1.kakugo === 1) { sta1 = 1; statusPc1 += "覚"; }
             if (pc1.bouheki >= 1) { sta1 = 1; for (let i = 0; i < pc1.bouheki; i++) statusPc1 += "防"; }
             if (pc1.gekirin >= 1) { sta1 = 1; for (let i = 0; i < pc1.gekirin; i++) statusPc1 += "逆"; }
@@ -67,7 +67,7 @@ export class Battle {
 
             if (pc2.stan === 1) { sta2 = 1; statusPc2 += "ス"; }
             if (pc2.roubai === 1) { sta2 = 1; statusPc2 += "狼"; }
-            if (pc2.suijaku === 1) { sta2 = 1; statusPc2 += "衰"; }
+            if (pc2.suijaku === 1) { sta2 = 1; statusPc2 += "忘"; }
             if (pc2.kakugo === 1) { sta2 = 1; statusPc2 += "覚"; }
             if (pc2.bouheki >= 1) { sta2 = 1; for (let i = 0; i < pc2.bouheki; i++) statusPc2 += "防"; }
             if (pc2.gekirin >= 1) { sta2 = 1; for (let i = 0; i < pc2.gekirin; i++) statusPc2 += "逆"; }
@@ -442,11 +442,11 @@ export class Battle {
 
             if (this.breakup(pc1) + this.breakup(pc2) >= 1) endFlag = 1;
 
-            // 衰弱の処理
+            // 忘却の処理
             if (pc1.suijaku === 1) {
                 for (let i = 0; i < pc1.getSkillsLength(); i++) {
                     if (pc1.type[i] !== Player.NONE && pc1.skill[i] !== "空") {
-                        this.text += `衰弱の効果で${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
+                        this.text += `忘却の効果で${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
 
                         pc1.skill[i] = "空";
                         pc1.name[i] = "空虚";
@@ -465,7 +465,7 @@ export class Battle {
             if (pc2.suijaku === 1) {
                 for (let i = 0; i < pc2.getSkillsLength(); i++) {
                     if (pc2.type[i] !== Player.NONE && pc2.skill[i] !== "空") {
-                        this.text += `衰弱の効果で${pc2.playerName}の【${pc2.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
+                        this.text += `忘却の効果で${pc2.playerName}の【${pc2.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
 
                         pc2.skill[i] = "空";
                         pc2.name[i] = "空虚";
@@ -508,7 +508,7 @@ export class Battle {
                     pc1.stan = 0;
                 }
                 if (pc1.suijaku === 1) {
-                    this.text += `＞${pc1.playerName}の衰弱が解除された！\n`;
+                    this.text += `＞${pc1.playerName}の忘却が解除された！\n`;
                     pc1.suijaku = 0;
                 }
                 if (pc1.roubai === 1) {
@@ -542,7 +542,7 @@ export class Battle {
                 //     pc2.stan = 0;
                 // }
                 // if (pc2.suijaku === 1) {
-                //     this.text += `＞${pc2.playerName}の衰弱が解除された！\n`;
+                //     this.text += `＞${pc2.playerName}の忘却が解除された！\n`;
                 //     pc2.suijaku = 0;
                 // }
                 // if (pc2.roubai === 1) {
@@ -1152,7 +1152,7 @@ export class Battle {
         }
 
         if (pc1.suijaku === 2) {
-            this.text += `${pc1.playerName}は衰弱を受けた！\n`;
+            this.text += `${pc1.playerName}は忘却を受けた！\n`;
             pc1.suijaku = 1;
             flag = 1;
         }

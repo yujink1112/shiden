@@ -14,11 +14,11 @@ export const STAGE_DATA: StageConfig[] = [
   {
     no: 1,
     name: "生き残ろう",
-    bossName: "無貌竜アノマ",
-    bossImage: "/images/monster/12.png",
-    bossDescription: "古の伝承に刻まれた翼なき竜。すべてを無に帰す力を持つ。",
-    shopSkills: [],
-    bossSkillAbbrs: "影影硬待硬雷硬交硬果",
+    bossName: "二刀のオーク",
+    bossImage: "/images/monster/1.png",
+    bossDescription: "二本の刃を操るオーク。荒々しい連撃で獲物を追い詰める。",
+    shopSkills: ["一閃", "果断", "待伏"],
+    bossSkillAbbrs: "空一果一果",
   },
   {
     no: 2,
@@ -86,16 +86,16 @@ export const STAGE_DATA: StageConfig[] = [
   {
     no: 9,
     name: "無人島地下鍾乳洞",
-    bossName: "殺戮人形",
+    bossName: "独裁者の庭園",
     bossImage: "/images/monster/9.png",
     bossDescription: "朽ち果てた洞窟で侵入者を待ち続ける、感情なき殺戮兵器。",
-    shopSkills: ["雷火", "連撃", "封印"],
+    shopSkills: ["雷火", "封印", "連撃"],
     bossSkillAbbrs: "先封待待連雷雷",
   },
   {
     no: 10,
     name: "島の秘密",
-    bossName: "レンダリングプラズマ",
+    bossName: "デス・スキャン",
     bossImage: "/images/monster/10.png",
     bossDescription: "実体を持たないエネルギーの集合体。対峙する者の能力を写し取る。",
     shopSkills: ["紫電", "影討","玉響"],
@@ -125,7 +125,7 @@ export const STAGE_DATA: StageConfig[] = [
 export const SPECIAL_BOSSES = [
     { name: "ステュムパリデス", skills: "先交燐果錬" },
     { name: "オピーオーン", skills: "隠隠隠隠剣" },
-    { name: "エディンム", skills: "連逆崩紫盾" },
+    { name: "エディンム", skills: "逆崩連紫盾" },
 ];
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {

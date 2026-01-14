@@ -854,8 +854,7 @@ function App() {
   useEffect(() => {
     if (gameStarted && stageMode === 'BOSS' && battleResults.length > 0) {
         if (battleResults[0].winner === 1) {
-            // 花吹雪 (アニメーション前)
-            triggerVictoryConfetti();
+
             
             // 構成保存
             setBossVictorySkills(prev => {
@@ -867,6 +866,8 @@ function App() {
             // パネル表示自体は少し遅らせる (没入感のため)
             if (logComplete) {
               setShowBossClearPanel(true);
+              // 花吹雪 (アニメーション前)
+              triggerVictoryConfetti();
             }
         }
     }
@@ -899,7 +900,7 @@ function App() {
             {stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `決戦: ${currentStageInfo.bossName}`}
           </h1>
           <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.9rem' }}>
-            {stageMode === 'MID' ? '10戦全勝してボスに挑め！' : '敵の構成を見て対策を練れ！ (1戦勝利でクリア)'}
+            {stageMode === 'MID' ? '10戦全勝してボスに挑め！' : '敵の構成を見て対策を練れ！'}
           </p>
           <button 
             onClick={() => {

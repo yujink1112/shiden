@@ -2,45 +2,45 @@ Boss Battle Simulation (Draw=Lose, Max 10000 unique patterns)
 
 Stage 1: 二刀のオーク (243 patterns)
 Win Rate: 72.84%
-Sample Winning Setups: 果果一待一, 果果一待果, 果果一待待, 果果果待一, 果果果待果
+Sample Winning Setups: 待果果待果, 待果果待待, 待果果待一, 待果一待待, 待果一待果
 ----------------------------------------------------
 Stage 2: オオサソリ (3125 patterns)
 Win Rate: 44.03%
-Sample Winning Setups: 崩果崩一刺, 崩果崩一一, 崩果崩一待, 崩果崩一崩, 崩果崩一果
+Sample Winning Setups: 果待一崩一, 果待一崩果, 果待一崩刺, 果待一崩待, 果待一崩崩
 ----------------------------------------------------
 Stage 3: 肉厚な馬 (10000 patterns)
-Win Rate: 8.26%
-Sample Winning Setups: 待果速待速, 待果崩果速, 待果崩待速, 待果搦待速, 待果搦果速
+Win Rate: 7.54%
+Sample Winning Setups: 一一待速待, 一一待速刺, 一一待速一, 一一崩待速, 一一崩果速
 ----------------------------------------------------
 Stage 4: 大木 (10000 patterns)
-Win Rate: 12.00%
-Sample Winning Setups: 果刺防待待, 果刺防待硬, 果刺崩待硬, 果刺崩待待, 果刺搦待待
+Win Rate: 18.52%
+Sample Winning Setups: 一防硬待待, 一防硬待硬, 一防刺待硬, 一防刺待待, 一防待崩待
 ----------------------------------------------------
 Stage 5: オークマスター (10001 patterns)
-Win Rate: 3.32%
-Sample Winning Setups: 一刺交待速, 一刺交待防, 一刺交待硬, 一刺交待待, 一刺交防待
+Win Rate: 1.43%
+Sample Winning Setups: 刺崩崩防待, 刺崩崩待速, 刺崩崩待防, 刺崩崩果速, 刺崩崩交待
 ----------------------------------------------------
 Stage 6: 肉厚な魚 (10000 patterns)
-Win Rate: 3.91%
-Sample Winning Setups: 果速剣怒盾, 果速剣裏防, 果速剣防怒, 果速剣防裏, 果速剣盾裏
+Win Rate: 2.36%
+Sample Winning Setups: 剣一速怒強, 剣一速怒盾, 剣一速果速, 剣一速防怒, 剣一裏果速
 ----------------------------------------------------
 Stage 7: リザードロード (10000 patterns)
-Win Rate: 7.99%
-Sample Winning Setups: 防果速果一, 防果速果硬, 防果速果怒, 防果速果果, 防果速果盾
+Win Rate: 7.68%
+Sample Winning Setups: 防連崩速果, 防連崩搦果, 防連崩果一, 防連崩果果, 防連崩果連
 ----------------------------------------------------
 Stage 8: 絶望のキマイラ (10000 patterns)
-Win Rate: 1.62%
-Sample Winning Setups: 搦硬呪盾連, 搦硬交防盾, 搦硬交防待, 搦硬交防連, 搦硬交防防
+Win Rate: 42.71%
+Sample Winning Setups: 連待搦崩防, 連待搦崩覚, 連待搦剣盾, 連待搦待防, 連待搦果盾
 ----------------------------------------------------
 Stage 9: 殺戮人形 (10000 patterns)
-Win Rate: 10.38%
-Sample Winning Setups: 先連防崩硬, 先連防崩一, 先連防崩交, 先連防崩雷, 先連防崩果
+Win Rate: 0.68%
+Sample Winning Setups: 果防待連裏, 果防待裏連, 果防先連裏, 果防先裏連, 果防連防裏
 ----------------------------------------------------
 Stage 11: 剣獣 (10000 patterns)
-Win Rate: 19.19%
-Sample Winning Setups: 防覚盾交怒, 防覚盾交刺, 防覚盾交一, 防覚盾交連, 防覚盾交果
+Win Rate: 1.57%
+Sample Winning Setups: 一搦速防連, 一搦速連防, 一搦速隠連, 一搦玉隠連, 一搦玉連防
 ----------------------------------------------------
 Stage 12: 無貌竜アノマ (10000 patterns)
-Win Rate: 7.55%
-Sample Winning Setups: 搦搦隠硬防, 搦搦隠反連, 搦搦隠玉連, 搦搦隠錬防, 搦搦隠待連
+Win Rate: 0.66%
+Sample Winning Setups: 一剣一交無, 一剣強果錬, 一剣強怒錬, 一剣燐怒錬, 一剣燐果錬
 ----------------------------------------------------
