@@ -8,6 +8,8 @@ export class Battle {
     text: string = "";
 
     private turn: number;
+    public pc1: Player | null = null;
+    public pc2: Player | null = null;
 
     constructor(pc1Data: string, pc2Data: string) {
         this.dataPc1 = pc1Data;
@@ -20,8 +22,10 @@ export class Battle {
         // 今回は直接値を使用
         Battle.SHORT = 0;
 
-        const pc1 = new Player(this.dataPc1);
-        const pc2 = new Player(this.dataPc2);
+        this.pc1 = new Player(this.dataPc1);
+        this.pc2 = new Player(this.dataPc2);
+        const pc1 = this.pc1;
+        const pc2 = this.pc2;
 
         this.text += "=============================================\n\n";
         this.text += pc1.playerName + "　VS　" + pc2.playerName + "\n\n";
@@ -798,8 +802,9 @@ export class Battle {
 
             if (pc2.bouheki >= 1) {
                 this.text += `＞${pc2.playerName}は防壁の効果でダメージを受けない！\n`;
-                this.text += `＞${pc2.playerName}の防壁が1つ解除された！\n`;
-                pc2.bouheki--;
+                const removeCount = Math.ceil(pc2.bouheki / 2);
+                this.text += `＞${pc2.playerName}の防壁が${removeCount}個解除された！\n`;
+                pc2.bouheki -= removeCount;
                 break;
             }
 
@@ -927,6 +932,14 @@ export class Battle {
 
                                 if (pc1.musou === 1) {
                                     this.text += `＞＞${pc1.playerName}は無想の効果でダメージを受けない！\n`;
+                                    break;
+                                }
+
+                                if (pc1.bouheki >= 1) {
+                                    this.text += `＞＞${pc1.playerName}は防壁の効果でダメージを受けない！\n`;
+                                    const removeCount = Math.ceil(pc1.bouheki / 2);
+                                    this.text += `＞＞${pc1.playerName}の防壁が${removeCount}個解除された！\n`;
+                                    pc1.bouheki -= removeCount;
                                     break;
                                 }
 

@@ -1,28 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { ref, onValue, push, onDisconnect, set, serverTimestamp } from "firebase/database";
+import { database } from "./firebase";
 import { Game } from './Game';
-import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData'; // SkillDetailをインポート
+import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
 import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName } from './stageData';
 import './App.css';
 
 interface SkillCardProps {
-  skill: SkillDetail; // SkillDetailを使用するように変更
-  isSelected?: boolean; // Optional for computer's public display
-  onClick?: (abbr: string) => void; // Optional for computer's public display
-  disableTooltip?: boolean; // ツールチップを無効化するオプション
+  skill: SkillDetail;
+  isSelected?: boolean;
+  onClick?: (abbr: string) => void;
+  disableTooltip?: boolean;
+  iconMode?: IconMode;
 }
 
 interface BattleResult {
-  playerSkills: SkillDetail[]; // プレイヤーが選択したスキル詳細の配列
-  computerSkills: SkillDetail[]; // コンピュータが選択したスキル詳細の配列
-  winner: number; // 勝者 (1: プレイヤー1, 2: プレイヤー2, 3: 引き分け)
-  resultText: string; // バトルの結果テキスト（勝利、敗北、引き分け）
-  gameLog: string; // ゲームのログ詳細
+  playerSkills: SkillDetail[];
+  computerSkills: SkillDetail[];
+  winner: number;
+  resultText: string;
+  gameLog: string;
+  battleInstance?: any;
 }
 
-
-const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean; isDimmed?: boolean }> = ({ skill, isSelected, onClick, id, isConnected, isDimmed, disableTooltip }) => {
-  const [showTooltip, setShowTooltip] = useState(false); // ツールチップ表示状態
+const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean; isDimmed?: boolean }> = ({ skill, isSelected, onClick, id, isConnected, isDimmed, disableTooltip, iconMode }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
 
   const handleClick = () => {
@@ -32,7 +35,6 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   };
 
   const renderFormattedDescription = (text: string) => {
-    // 状態異常名（スタン、覚悟など）を抽出してタグ化
     let parts: (string | React.ReactNode)[] = [text];
     
     STATUS_DATA.forEach(status => {
@@ -84,8 +86,8 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
     if (showTooltip && cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       const screenWidth = window.innerWidth;
-      const margin = 20; // 画面端からのマージン
-      const tooltipWidth = 220; // minWidth
+      const margin = 20;
+      const tooltipWidth = 220;
 
       if (rect.left < tooltipWidth / 2 + margin) {
         setTooltipPos('left');
@@ -125,54 +127,92 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
     return { ...base, left: '50%', transform: 'translateX(-50%)' };
   };
 
+  const renderIcon = () => {
+    if (iconMode === 'ABBR') {
+      return (
+        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#333', border: '1px solid #666', borderRadius: '4px', fontSize: '18px', fontWeight: 'bold', color: '#fff', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
+          {skill.abbr}
+        </div>
+      );
+    }
+    if (iconMode === 'PHONE') {
+      const allAbbrs = ALL_SKILLS.map(s => s.abbr);
+      const index = allAbbrs.indexOf(skill.abbr);
+      let char = '';
+      if (index >= 0 && index <= 9) char = index.toString();
+      else if (index >= 10 && index <= 35) char = String.fromCharCode(65 + (index - 10)); // A-Z
+      else char = '?';
+      
+      return (
+        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', border: '2px solid #4fc3f7', borderRadius: '50%', fontSize: '20px', fontWeight: 'bold', color: '#4fc3f7', boxShadow: '0 0 5px #4fc3f7', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
+          {char}
+        </div>
+      );
+    }
+    return <img src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   return (
     <div
       id={id}
       ref={cardRef}
       className={(isConnected ? 'synergy-active ' : '') + 'skill-card'}
       onClick={handleClick}
-      onMouseEnter={() => !disableTooltip && setShowTooltip(true)} // マウスエンターでツールチップ表示
-      onMouseLeave={() => !disableTooltip && setShowTooltip(false)} // マウスリーブでツールチップ非表示
+      onMouseEnter={() => !disableTooltip && setShowTooltip(true)}
+      onMouseLeave={() => !disableTooltip && setShowTooltip(false)}
       style={{
         border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : '1px solid #444')),
         borderRadius: '8px',
         padding: '10px',
         margin: '5px',
-        cursor: onClick ? 'pointer' : 'default', // Only clickable if onClick is provided
+        cursor: onClick ? 'pointer' : 'default',
         backgroundColor: isConnected ? '#4a4a00' : (isSelected ? '#333300' : '#1a1a1a'),
         color: isDimmed ? '#666' : '#eee',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         boxShadow: isConnected ? '0 0 20px #ffeb3b, inset 0 0 15px #ffeb3b' : (isDimmed ? 'none' : (isSelected ? '0 0 10px rgba(255,215,0,0.7)' : '0 2px 4px rgba(0,0,0,0.3)')),
-        position: 'relative', // ツールチップの絶対位置指定の基準
+        position: 'relative',
         transition: 'all 0.3s ease',
         filter: isDimmed ? 'grayscale(80%)' : 'none',
         opacity: isDimmed ? 0.7 : 1,
       }}
     >
-      <img src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />
+      {renderIcon()}
       <span className="skill-name">{skill.name}</span>
-      {showTooltip && ( // ツールチップ表示条件
-        <div style={getTooltipStyle()}>
+      {showTooltip && (
+        <div 
+          style={getTooltipStyle()} 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+            <strong>詳細情報</strong>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowTooltip(false); }}
+              style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', padding: '2px 6px' }}
+            >
+              閉じる
+            </button>
+          </div>
           <strong>種別:</strong> <span style={{ color: '#61dafb' }}>{skill.type}</span><br />
           <strong>速度:</strong> <span style={{ color: '#61dafb' }}>{skill.speed}</span><br />
           {renderFormattedDescription(skill.description)}
 
-          {/* 二次ツールチップ: ステータス説明 */}
           {hoveredStatus && (
             <div style={{
               position: 'absolute',
-              left: '105%',
-              top: 0,
+              left: window.innerWidth < 600 ? '0' : '105%',
+              top: window.innerWidth < 600 ? '105%' : 0,
               backgroundColor: '#444',
               color: '#fff',
               padding: '10px',
               borderRadius: '5px',
-              width: '200px',
+              width: window.innerWidth < 600 ? '100%' : '200px',
               boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
               zIndex: 2001,
-              border: '1px solid #ffd700'
+              border: '1px solid #ffd700',
+              boxSizing: 'border-box'
             }}>
               <strong style={{ color: '#ffd700' }}>【{hoveredStatus}】</strong><br />
               {STATUS_DATA.find(s => s.name === hoveredStatus)?.description}
@@ -185,9 +225,50 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
 };
 
 type StageMode = 'MID' | 'BOSS';
+type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
 function App() {
-  const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]); // 型をSkillDetail[]に変更
+  const [isTitle, setIsTitle] = useState(() => {
+    const saved = localStorage.getItem('shiden_is_title');
+    return saved === null ? true : saved === 'true';
+  });
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
+  const [iconMode, setIconMode] = useState<IconMode>(() => {
+    const saved = localStorage.getItem('shiden_icon_mode');
+    return (saved as IconMode) || 'ORIGINAL';
+  });
+  const [showSettings, setShowSettings] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_icon_mode', iconMode);
+  }, [iconMode]);
+
+  const getSkillIconContent = (skill: SkillDetail, isDimmed?: boolean) => {
+    if (iconMode === 'ABBR') {
+      return (
+        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#333', border: '1px solid #666', borderRadius: '4px', fontSize: '18px', fontWeight: 'bold', color: '#fff', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
+          {skill.abbr}
+        </div>
+      );
+    }
+    if (iconMode === 'PHONE') {
+      const allAbbrs = ALL_SKILLS.map(s => s.abbr);
+      const index = allAbbrs.indexOf(skill.abbr);
+      let char = '';
+      if (index >= 0 && index <= 9) char = index.toString();
+      else if (index >= 10 && index <= 35) char = String.fromCharCode(65 + (index - 10)); // A-Z
+      else char = '?';
+      
+      return (
+        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', border: '2px solid #4fc3f7', borderRadius: '50%', fontSize: '20px', fontWeight: 'bold', color: '#4fc3f7', boxShadow: '0 0 5px #4fc3f7', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
+          {char}
+        </div>
+      );
+    }
+    return <img src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
+  };
+  const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
   const [connections, setConnections] = useState<{ fromId: string; toId: string }[]>([]);
   const [dimmedIndices, setDimmedIndices] = useState<number[]>([]);
@@ -198,7 +279,6 @@ function App() {
   // 所持スキル
   const [ownedSkillAbbrs, setOwnedSkillAbbrs] = useState<string[]>(() => {
     const saved = localStorage.getItem('shiden_owned_skills');
-    // 初期スキルは「一閃」のみ
     return saved ? JSON.parse(saved) : ["一"];
   });
 
@@ -207,7 +287,10 @@ function App() {
   const [bossClearRewardPending, setBossClearRewardPending] = useState<boolean>(false);
 
   // ステージ管理
-  const [stageMode, setStageMode] = useState<StageMode>('MID');
+  const [stageMode, setStageMode] = useState<StageMode>(() => {
+    const saved = localStorage.getItem('shiden_stage_mode');
+    return (saved as StageMode) || 'MID';
+  });
   const [stageCycle, setStageCycle] = useState<number>(() => {
     const saved = localStorage.getItem('shiden_stage_cycle');
     return saved ? parseInt(saved, 10) : 1;
@@ -215,66 +298,25 @@ function App() {
   const [bossSkills, setBossSkills] = useState<SkillDetail[]>([]);
   const [canGoToBoss, setCanGoToBoss] = useState<boolean>(false);
 
-  const [computerSkillsRaw, setComputerSkillsRaw] = useState<string>("");
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [battleResults, setBattleResults] = useState<BattleResult[]>([]);
   const [showLogForBattleIndex, setShowLogForBattleIndex] = useState<number>(-1);
 
-  // ボス勝利時の構成を保存
-  const [bossVictorySkills, setBossVictorySkills] = useState<{ [stageNo: number]: string[] }>(() => {
-    const saved = localStorage.getItem('shiden_boss_victory_skills');
+  const [stageVictorySkills, setStageVictorySkills] = useState<{ [key: string]: string[] }>(() => {
+    const saved = localStorage.getItem('shiden_stage_victory_skills');
     return saved ? JSON.parse(saved) : {};
   });
 
-  const SKILL_DRAW_COUNT = 10; // プレイヤーに提示されるスキル数
-  const PLAYER_SKILL_COUNT = 5; // プレイヤーが選択するスキル数
+  const PLAYER_SKILL_COUNT = 5;
 
   const getSkillCardsFromAbbrs = (abbrs: string[]) => {
     return abbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
   };
 
-  // スキルをシャッフルして指定枚数選ぶヘルパー関数
-  const drawRandomSkills = (count: number): SkillDetail[] => { // 戻り値の型をSkillDetail[]に変更
-    const filteredSkills = ALL_SKILLS.filter(skill => skill.name !== "弱撃" && skill.name !== "空白");
-    const shuffled = [...filteredSkills].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count) as SkillDetail[]; // 型アサーションを追加
-  };
-
-  // シナジーを考慮してスキルを選ぶ（コンピュータ用）
-  const drawSmartSkills = (count: number): SkillDetail[] => {
-    const selected: SkillDetail[] = [];
-    const baseSkills = ALL_SKILLS.filter(skill => skill.name !== "弱撃" && skill.name !== "空白");
-
-    for (let i = 0; i < count; i++) {
-      let available = [...baseSkills];
-      if (i === 0) {
-        available = available.filter(s => !s.name.startsWith("＋"));
-      } else {
-        const prev = selected[i - 1];
-        available = available.filter(s => {
-          if (s.name.startsWith("＋")) {
-            if (s.name === "＋硬" || s.name === "＋速") {
-              return prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃");
-            } else {
-              return prev.type.includes("攻撃");
-            }
-          }
-          return true;
-        });
-      }
-      const chosen = available[Math.floor(Math.random() * available.length)];
-      selected.push(chosen);
-    }
-    return selected;
-  };
-
-  // ゲーム開始時またはリセット時にスキルカードを生成
   useEffect(() => {
     if (!gameStarted) {
-      // プレイヤーに提示されるカードを「所持スキル」から選ぶように変更
       const getAvailableOwnedSkills = () => {
         const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
-        // skillsData.ts の ALL_SKILLS の順序でソート
         return owned.sort((a, b) => {
           const indexA = ALL_SKILLS.findIndex(s => s.abbr === a.abbr);
           const indexB = ALL_SKILLS.findIndex(s => s.abbr === b.abbr);
@@ -283,7 +325,6 @@ function App() {
       };
       
       const available = getAvailableOwnedSkills();
-      // 所持スキルをすべて表示するように変更（10個制限を撤廃）
       setAvailablePlayerCards(available);
       
       setSelectedPlayerSkills([]);
@@ -293,13 +334,13 @@ function App() {
     }
   }, [gameStarted, ownedSkillAbbrs]);
 
-  // ボススキルは stageCycle や stageMode が変わるたびに更新（gameStartedに関わらず）
   useEffect(() => {
     if (stageMode === 'BOSS') {
       const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-      // stageCycle10 の場合はプレイヤーのスキルをリアルタイムに反映
       if (stageCycle === 10) {
-        setBossSkills(getSkillCardsFromAbbrs(selectedPlayerSkills));
+        const gekirin = getSkillByAbbr("逆")!;
+        const playerDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
+        setBossSkills([gekirin, gekirin, gekirin, ...playerDetails]);
       } else {
         const bossAbbrs = currentStage.bossSkillAbbrs.split("");
         const skills = bossAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
@@ -310,16 +351,13 @@ function App() {
     }
   }, [stageMode, stageCycle, selectedPlayerSkills]);
 
-  // プレイヤーが提示されたスキルを選択する際のハンドラ（重複選択を許可）
   const handlePlayerSkillSelectionClick = (abbr: string) => {
     if (selectedPlayerSkills.length < PLAYER_SKILL_COUNT) {
       setSelectedPlayerSkills([...selectedPlayerSkills, abbr]);
     }
   };
 
-  // 選択中のスキルをクリックして解除する際のハンドラ
   const handleSelectedSkillClick = (abbr: string) => {
-    // 選択解除は重複を考慮せず、最初に見つかったものを削除
     const index = selectedPlayerSkills.indexOf(abbr);
     if (index > -1) {
       const newSelectedSkills = [...selectedPlayerSkills];
@@ -328,25 +366,89 @@ function App() {
     }
   };
 
-  // 永続化
   useEffect(() => {
     localStorage.setItem('shiden_owned_skills', JSON.stringify(ownedSkillAbbrs));
   }, [ownedSkillAbbrs]);
 
-  // 中間ステージでの通算勝利数（無限稼ぎ防止用）
-  const [midStageWinCount, setMidStageWinCount] = useState<number>(0);
-
-  // 初期化 (ページ読み込み時に内部データをリセット)
   useEffect(() => {
+    localStorage.setItem('shiden_stage_mode', stageMode);
+  }, [stageMode]);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_is_title', isTitle.toString());
+  }, [isTitle]);
+
+  const handleNewGame = () => {
+    if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
+    localStorage.removeItem('shiden_stage_cycle');
+    localStorage.removeItem('shiden_owned_skills');
+    // localStorage.removeItem('shiden_stage_victory_skills'); // クリア履歴は保持する
+    localStorage.removeItem('shiden_stage_mode');
+    localStorage.setItem('shiden_is_title', 'false');
+    window.location.reload();
+  };
+
+  const handleContinue = () => {
+    setIsTitle(false);
+  };
+
+  useEffect(() => {
+    // アクティブユーザーの追跡
+    const connectionsRef = ref(database, 'connections');
+    const myConnectionRef = push(connectionsRef);
+
+    // 接続状態の監視
+    const connectedRef = ref(database, '.info/connected');
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        // 切断時に自動削除するよう設定
+        onDisconnect(myConnectionRef).remove();
+        // 接続を記録
+        set(myConnectionRef, {
+          lastActive: serverTimestamp()
+        });
+      }
+    });
+
+    // 合計接続数の監視
+    onValue(connectionsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setActiveUsers(Object.keys(snapshot.val()).length);
+      } else {
+        setActiveUsers(0);
+      }
+    });
+
     setBattleResults([]);
     setLogComplete(false);
     setCanGoToBoss(false);
     setShowBossClearPanel(false);
-    setComputerSkillsRaw("");
     setSelectedPlayerSkills([]);
+
+    // 画像のプリロード
+    const imageUrls = [
+      process.env.PUBLIC_URL + '/images/background/background.jpg',
+      process.env.PUBLIC_URL + '/images/title/titlelogo.png'
+    ];
+    let loadedCount = 0;
+    imageUrls.forEach(url => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === imageUrls.length) {
+          setIsAssetsLoaded(true);
+        }
+      };
+      img.onerror = () => { // エラー時もカウントして進める
+        loadedCount++;
+        if (loadedCount === imageUrls.length) {
+          setIsAssetsLoaded(true);
+        }
+      };
+    });
   }, []);
 
-  // 接続線と暗転表示を更新する
   useEffect(() => {
     const newConnections: { fromId: string; toId: string }[] = [];
     const newDimmedIndices: number[] = [];
@@ -354,32 +456,21 @@ function App() {
 
     for (let i = 0; i < skillDetails.length; i++) {
       const current = skillDetails[i];
-      
       if (current.name.startsWith("＋")) {
         if (i > 0) {
           const prev = skillDetails[i - 1];
-          
-          // シナジー判定
           let hasSynergy = false;
           if (current.name === "＋硬" || current.name === "＋速") {
-            // ＋硬, ＋速は攻撃・補助・迎撃すべてとシナジー
             hasSynergy = prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃");
           } else {
-            // それ以外は攻撃のみ
             hasSynergy = prev.type.includes("攻撃");
           }
-
           if (hasSynergy) {
-            newConnections.push({
-              fromId: `selected-skill-${i - 1}`,
-              toId: `selected-skill-${i}`
-            });
+            newConnections.push({ fromId: `selected-skill-${i - 1}`, toId: `selected-skill-${i}` });
           } else {
-            // シナジーがない＋スキルは暗くする
             newDimmedIndices.push(i);
           }
         } else {
-          // 先頭の＋スキルは暗くする
           newDimmedIndices.push(i);
         }
       }
@@ -388,7 +479,6 @@ function App() {
     setDimmedIndices(newDimmedIndices);
   }, [selectedPlayerSkills]);
 
-  // SVGのパスを計算するためのヘルパー
   const [lineCoords, setLineCoords] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   useEffect(() => {
@@ -419,11 +509,7 @@ function App() {
   }, [connections, selectedPlayerSkills]);
 
   const triggerVictoryConfetti = () => {
-    const positions = [
-      { x: 0.8, y: 0.8 },
-      { x: 0.2, y: 0.9 },
-      { x: 0.5, y: 0.95 },
-    ];
+    const positions = [{ x: 0.8, y: 0.8 }, { x: 0.2, y: 0.9 }, { x: 0.5, y: 0.95 }];
     [300, 500, 800].forEach((delay, index) => {
       setTimeout(() => {
         confetti({
@@ -442,82 +528,86 @@ function App() {
   const handleStartGame = () => {
     if (selectedPlayerSkills.length === PLAYER_SKILL_COUNT) {
       const playerSkillsRaw = selectedPlayerSkills.join("");
-
-      // ボス戦開始時に花吹雪を出す（勝利を確信している場合や演出として）
-      // ただし、今回は「勝利確定時かつアニメーション前」なので、ここではなく結果判定後
       const results: BattleResult[] = [];
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
-      const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
 
-      // 10戦行う (ボス戦は1戦だが、UI共通化のため10戦のループを回す。ボス戦時は全て同じ敵構成)
       const battleCount = 10;
       for (let i = 0; i < battleCount; i++) {
         let currentComputerSkills: SkillDetail[];
         let enemyName = "コンピュータ";
         
         if (stageMode === 'MID') {
-          // 中間ステージ：敵のスキルは基本4つまで
-          const enemyPool = getAvailableSkillsUntilStage(stageCycle);
+          const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+          const newSkills = currentStage.shopSkills.map(name => getSkillByName(name)).filter(Boolean) as SkillDetail[];
+          const allPool = getAvailableSkillsUntilStage(stageCycle);
           const kuuhaku = getSkillByAbbr("空")!;
           
-          const drawEnemySkills = (baseCount: number): SkillDetail[] => {
-            let count = baseCount;
-            let forceKuuhakuCount = 0;
-
-            // 特殊ステージロジック
-            if (stageCycle === 1) {
-              // 1~2個を空白に
-              forceKuuhakuCount = Math.floor(Math.random() * 2) + 1;
-            } else if (stageCycle === 4) {
-              // 空白8~11個 + 迎撃1個
+          const generateSmartEnemySkills = (): SkillDetail[] => {
+            if (stageCycle === 4) {
               const totalKuuhaku = Math.floor(Math.random() * 4) + 8;
-              const geigekiPool = enemyPool.filter(s => s.type.includes("迎撃"));
+              const geigekiPool = allPool.filter(s => s.type.includes("迎撃"));
               const chosenGeigeki = geigekiPool.length > 0 ? geigekiPool[Math.floor(Math.random() * geigekiPool.length)] : kuuhaku;
               const resultSkills = Array(totalKuuhaku).fill(kuuhaku);
               resultSkills.splice(Math.floor(Math.random() * resultSkills.length), 0, chosenGeigeki);
               return resultSkills;
-            } else if (stageCycle === 5) {
-              // 0~1個を空白に
-              forceKuuhakuCount = Math.floor(Math.random() * 2);
+            }
+            
+            const selected: SkillDetail[] = Array(4).fill(null);
+            const newSkillMax = Math.floor(Math.random() * 3); // 0～2個
+            let newSkillCount = 0;
+
+            // 攻撃スキルの配置（3個目か4個目、つまりインデックス2か3）
+            const attackPos = Math.random() > 0.5 ? 2 : 3;
+            const attackPool = allPool.filter(s => s.type.includes("攻撃") && !s.name.startsWith("＋") && s.name !== "空白");
+            selected[attackPos] = attackPool[Math.floor(Math.random() * attackPool.length)];
+
+            // 残りの枠を埋める
+            for (let j = 0; j < 4; j++) {
+                if (selected[j] !== null) continue;
+
+                const prev = j > 0 ? selected[j - 1] : null;
+                const weightedPool: SkillDetail[] = [];
+                
+                allPool.forEach(s => {
+                    if (s.name === "空白") return;
+                    let weight = 1;
+                    
+                    // 新スキルの制限
+                    const isNew = newSkills.some(ns => ns.abbr === s.abbr);
+                    if (isNew) {
+                        if (newSkillCount >= newSkillMax) weight = 0;
+                        else weight = 5;
+                    }
+
+                    // 付帯スキルのシナジー
+                    if (s.name.startsWith("＋") && prev) {
+                        const canConnect = (s.name === "＋硬" || s.name === "＋速")
+                            ? (prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃"))
+                            : prev.type.includes("攻撃");
+                        if (canConnect) weight = 10;
+                        else weight = 0;
+                    } else if (s.name.startsWith("＋")) {
+                        weight = 0; // 1番目には置かない
+                    }
+
+                    for (let k = 0; k < weight; k++) weightedPool.push(s);
+                });
+
+                const picked = weightedPool.length > 0 
+                    ? weightedPool[Math.floor(Math.random() * weightedPool.length)]
+                    : kuuhaku;
+                
+                selected[j] = picked;
+                if (newSkills.some(ns => ns.abbr === picked.abbr)) newSkillCount++;
             }
 
-            const selected: SkillDetail[] = [];
-            const effectiveCount = count - forceKuuhakuCount;
-
-            // 有効なスキルを先に選ぶ
-            for (let j = 0; j < effectiveCount; j++) {
-                let available = [...enemyPool];
-                if (j === 0) {
-                    available = available.filter(s => !s.name.startsWith("＋"));
-                } else {
-                    const prev = selected[j-1];
-                    available = available.filter(s => {
-                        if (s.name.startsWith("＋")) {
-                            if (s.name === "＋硬" || s.name === "＋速") {
-                                return prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃");
-                            } else {
-                                return prev.type.includes("攻撃");
-                            }
-                        }
-                        return true;
-                    });
-                }
-                if (available.length === 0) available = [getSkillByName("一閃")!];
-                const chosen = available[Math.floor(Math.random() * available.length)];
-                selected.push(chosen);
-            }
-
-            // 空白を混ぜてシャッフル
-            for (let j = 0; j < forceKuuhakuCount; j++) {
-              selected.push(kuuhaku);
-            }
-            return [...selected].sort(() => 0.5 - Math.random());
+            if (stageCycle === 1) selected[Math.floor(Math.random() * 4)] = kuuhaku;
+            return selected;
           };
-          
-          currentComputerSkills = drawEnemySkills(4);
+          currentComputerSkills = generateSmartEnemySkills();
         } else {
-          // ボスステージ
           currentComputerSkills = [...bossSkills];
+          const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
           enemyName = currentStage.bossName;
           if (stageCycle === 10) {
             const playerDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
@@ -527,69 +617,46 @@ function App() {
         }
 
         const currentComputerSkillsRaw = currentComputerSkills.map(s => s.abbr).join("");
-        // プレイヤー名を「あなた」、敵の名前を設定
         const game = new Game(playerSkillsRaw + "／あなた", currentComputerSkillsRaw + "／" + enemyName);
-        const winner = game.startGame(); // Game.tsから勝者を取得
-        const gameLog = game.gameLog; // Game.tsからログを取得
+        const winner = game.startGame();
+        const gameLog = game.gameLog;
         
-        let resultText = "";
-        if (winner === 1) { // winnerプロパティを使用
-          resultText = "勝利";
-        } else if (winner === 2) { // winnerプロパティを使用
-          resultText = "敗北";
-        } else if (winner === 3) { // winnerプロパティを使用
-          resultText = "引き分け";
-        } else {
-          resultText = "ゲーム結果不明";
-        }
+        let resultText = winner === 1 ? "Win!" : winner === 2 ? "Lose" : "Draw";
 
         results.push({
-          playerSkills: playerSkillDetails, // プレイヤーのスキル詳細を保存
-          computerSkills: currentComputerSkills, // コンピュータのスキル詳細を保存
-          winner: winner, // 勝者を保存
+          playerSkills: playerSkillDetails,
+          computerSkills: currentComputerSkills,
+          winner: winner,
           resultText: resultText,
           gameLog: gameLog,
+          battleInstance: game.battle,
         });
-
-        // ボス戦の場合は1回で終了
         if (stageMode === 'BOSS') break;
       }
       setBattleResults(results);
       setGameStarted(true);
-      setShowLogForBattleIndex(0); // 結果リスト表示にリセット
+      setShowLogForBattleIndex(0);
 
       const winCount = results.filter(r => r.winner === 1).length;
-
       if (stageMode === 'MID') {
-        if (winCount == 10) { // ボスステージへ
+        if (winCount === 10) {
           setCanGoToBoss(true);
           triggerVictoryConfetti();
         }
-        setMidStageWinCount(prev => prev + winCount);
-        
-        // 報酬選択肢があるか確認
-        const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
-        if (availableRewards.length > 0) {
+        if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
           setRewardSelectionMode(true);
         }
       } else {
-        // ボス戦判定
         if (winCount >= 1) { 
-          setCanGoToBoss(true); // 次のステージへ
-          
-          // 報酬選択肢があるか確認
-          const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
-          if (availableRewards.length > 0) {
+          setCanGoToBoss(true);
+          if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
             setBossClearRewardPending(true);
           } else {
-            // 選べるスキルがなければそのままクリア処理（次のステージへ）
             setBossClearRewardPending(false);
             setShowBossClearPanel(true);
           }
         } else {
-          // ボス戦敗北時も救済 (報酬があれば)
-          const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
-          if (availableRewards.length > 0) {
+          if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
             setRewardSelectionMode(true);
           }
         }
@@ -613,21 +680,15 @@ function App() {
   };
 
   const handleRewardSelection = (abbr: string) => {
-    if (selectedRewards.includes(abbr)) {
-      setSelectedRewards([]);
-    } else {
-      setSelectedRewards([abbr]); // 常に1つ
-    }
+    if (selectedRewards.includes(abbr)) setSelectedRewards([]);
+    else setSelectedRewards([abbr]);
   };
 
   const confirmRewards = () => {
     setOwnedSkillAbbrs(prev => [...prev, ...selectedRewards]);
     setSelectedRewards([]);
     setRewardSelectionMode(false);
-    // ボス戦クリア後の報酬獲得後は次のステージへ
-    if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) {
-        clearBossAndNextCycle();
-    }
+    if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle();
   };
 
   const clearBossAndNextCycle = () => {
@@ -639,14 +700,10 @@ function App() {
           return;
         }
     }
-
     setStageMode('MID');
-    setMidStageWinCount(0); // ステージ移行時にリセット
     const nextCycle = stageCycle + 1;
     setStageCycle(nextCycle);
     localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
-    
-    // ボス戦の状態を確実にリセット
     setShowBossClearPanel(false);
     setCanGoToBoss(false);
     setLogComplete(false);
@@ -655,16 +712,130 @@ function App() {
     setShowLogForBattleIndex(-1);
   };
 
-  const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean }> = ({ log, onComplete, immediate }) => {
-    // ログをラウンドごとに分割 (戦闘開始のメッセージも含める)
+  const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance }) => {
     const rounds = log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== '');
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
     const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
     const [roundFinished, setRoundFinished] = useState<boolean[]>(new Array(rounds.length).fill(false));
     
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const [bossAnim, setBossAnim] = useState<'idle' | 'attack' | 'damage' | 'counter' | 'defeat'>('idle');
+    const [popupDamage, setPopupDamage] = useState<{ value: string; type: 'player' | 'enemy' } | null>(null);
+    const [activeSkillIcon, setActiveSkillIcon] = useState<{ icon: string; name: string; side: 'player' | 'enemy' } | null>(null);
+    const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
+    const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
 
-    const currentRoundLines = rounds[currentRoundIdx].split('\n').filter(line => !line.includes('====') && line.trim() !== '');
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const currentRoundLines = rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [];
+
+    const lastProcessedLineIdx = useRef<number>(-1);
+    const lastProcessedRoundIdx = useRef<number>(-1);
+
+    useEffect(() => {
+        if (!roundFinished[currentRoundIdx]) {
+            const currentLineIdx = roundVisibleCounts[currentRoundIdx];
+            if (currentLineIdx < currentRoundLines.length && (currentLineIdx !== lastProcessedLineIdx.current || currentRoundIdx !== lastProcessedRoundIdx.current)) {
+                lastProcessedLineIdx.current = currentLineIdx;
+                lastProcessedRoundIdx.current = currentRoundIdx;
+                const line = currentRoundLines[currentLineIdx];
+
+                // スキルの破壊をトレース (HPゲージへの反映)
+                if (line.includes('破壊された')) {
+                  if (line.includes('あなたの')) {
+                    const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
+                    if (m) {
+                        const idx = parseInt(m[1], 10) - 1;
+                        setCurrentPc1Scar(prev => {
+                            const next = [...prev];
+                            next[idx] = 1;
+                            return next;
+                        });
+                    }
+                  } else if (line.includes(`${bossName}の`)) {
+                    const m = line.match(new RegExp(`${bossName}の【.*?】(\\d+)が破壊された`));
+                    if (m) {
+                        const idx = parseInt(m[1], 10) - 1;
+                        setCurrentPc2Scar(prev => {
+                            const next = [...prev];
+                            next[idx] = 1;
+                            return next;
+                        });
+                    }
+                  }
+                }
+
+                // スキル発動演出の特定
+                const skillMatch = line.match(/(あなた|${bossName})の【(.*?)】が発動/);
+                // 通常スキルの使用を特定 (末尾にLVなどの数字がついているもの、または弱撃0など)
+                const useMatch = line.match(/(あなた|${bossName})の【(.*?)】(\d+)！/);
+                
+                if (skillMatch) {
+                    const side = skillMatch[1] === 'あなた' ? 'player' : 'enemy';
+                    const skillName = skillMatch[2];
+                    const skillDetail = ALL_SKILLS.find(s => s.name === skillName);
+                    // if (skillDetail && skillName !== "逆鱗") { // 逆鱗は破壊時に多数出る可能性があるので除外
+                    //     setActiveSkillIcon({ icon: skillDetail.icon, name: skillName, side });
+                    //     setTimeout(() => setActiveSkillIcon(null), 1200);
+                    // }
+                } else if (useMatch) {
+                    const side = useMatch[1] === 'あなた' ? 'player' : 'enemy';
+                    const skillName = useMatch[2];
+                    const skillDetail = ALL_SKILLS.find(s => s.name === skillName);
+                    // if (skillDetail) {
+                    //     setActiveSkillIcon({ icon: skillDetail.icon, name: skillName, side });
+                    //     setTimeout(() => setActiveSkillIcon(null), 1200);
+                    // }
+                }
+
+                if (bossName) {
+                    if (line.includes(`${bossName}の勝利`) || line.includes(`${bossName}が破壊された`)) setBossAnim('defeat');
+                    else if (line.includes(`${bossName}の【`) && line.includes('が発動')) { setBossAnim('counter'); setTimeout(() => setBossAnim('idle'), 800); }
+                    else if (line.includes(`${bossName}の攻撃フェイズ`)) { 
+                        setBossAnim('attack'); 
+                        setTimeout(() => setBossAnim('idle'), 800); 
+
+                        // 敵の攻撃フェイズ開始時のアイコン表示 (最初の攻撃スキルを推測)
+                        // const currentRoundText = rounds[currentRoundIdx];
+                        // const enemySkillsPart = currentRoundText.split('\n').find(l => l.includes(`／${bossName}`));
+                        // if (enemySkillsPart) {
+                        //   const match = enemySkillsPart.match(/【(.*?)】/);
+                        //   if (match) {
+                        //     const skillName = match[1];
+                        //     const skillDetail = ALL_SKILLS.find(s => s.name === skillName);
+                        //     if (skillDetail) {
+                        //       setActiveSkillIcon({ icon: skillDetail.icon, name: skillName, side: 'enemy' });
+                        //       setTimeout(() => setActiveSkillIcon(null), 1200);
+                        //     }
+                        //   }
+                        // }
+                    }
+                    else if (line.includes('あなたの攻撃フェイズ')) {
+                        // プレイヤーの攻撃フェイズ開始時のアイコン表示
+                        // const currentRoundText = rounds[currentRoundIdx];
+                        // const playerSkillsPart = currentRoundText.split('\n').find(l => l.includes('／あなた'));
+                        // if (playerSkillsPart) {
+                        //   const match = playerSkillsPart.match(/【(.*?)】/);
+                        //   if (match) {
+                        //     const skillName = match[1];
+                        //     const skillDetail = ALL_SKILLS.find(s => s.name === skillName);
+                        //     if (skillDetail) {
+                        //       setActiveSkillIcon({ icon: skillDetail.icon, name: skillName, side: 'player' });
+                        //       setTimeout(() => setActiveSkillIcon(null), 1200);
+                        //     }
+                        //   }
+                        // }
+                    }
+                    else if (line.includes(`${bossName}に`) && line.includes('のダメージ')) {
+                        setBossAnim('damage');
+                        setTimeout(() => setBossAnim('idle'), 800);
+                    }
+                    else if (line.includes(`${bossName}の【`) && line.includes('にダメージを与えた')) {
+                        setBossAnim('damage');
+                        setTimeout(() => setBossAnim('idle'), 800);
+                    }
+                }
+            }
+        }
+    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished]);
 
     useEffect(() => {
       if (immediate) {
@@ -674,175 +845,163 @@ function App() {
         onComplete();
         return;
       }
-
-      // 勝敗判定は常に即時
-      if (rounds[currentRoundIdx].includes('勝敗判定')) {
-          const newCounts = [...roundVisibleCounts];
-          newCounts[currentRoundIdx] = currentRoundLines.length;
-          setRoundVisibleCounts(newCounts);
-          const newFinished = [...roundFinished];
-          newFinished[currentRoundIdx] = true;
-          setRoundFinished(newFinished);
+      if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
+          const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
+          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
           onComplete();
           return;
       }
-
-      // 現在のラウンドが未完了ならアニメーション
       if (!roundFinished[currentRoundIdx]) {
         if (roundVisibleCounts[currentRoundIdx] < currentRoundLines.length) {
           const timer = setTimeout(() => {
-            const newCounts = [...roundVisibleCounts];
-            newCounts[currentRoundIdx]++;
-            setRoundVisibleCounts(newCounts);
-          }, 400); // 間隔を遅く
+            const nc = [...roundVisibleCounts]; nc[currentRoundIdx]++; setRoundVisibleCounts(nc);
+          }, 400);
           return () => clearTimeout(timer);
         } else {
-          const newFinished = [...roundFinished];
-          newFinished[currentRoundIdx] = true;
-          setRoundFinished(newFinished);
+          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
           if (currentRoundIdx === rounds.length - 1) onComplete();
         }
       }
-    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines.length, immediate, rounds.length, onComplete, rounds]);
+    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds.length, onComplete, rounds]);
 
     useEffect(() => {
       if (scrollRef.current) {
         const container = scrollRef.current;
-        // 基本は中央付近、ただし最後の方は一番下まで行くように
         const maxScroll = container.scrollHeight - container.clientHeight;
         const targetScroll = Math.min(maxScroll, container.scrollHeight - container.clientHeight * 0.6);
-        
-        container.scrollTo({ 
-          top: targetScroll, 
-          behavior: 'smooth' 
-        });
+        container.scrollTo({ top: targetScroll, behavior: 'smooth' });
       }
     }, [roundVisibleCounts]);
 
     const goNext = () => {
       if (!roundFinished[currentRoundIdx]) {
-        // 現在のラウンドが終わっていない場合は即座に完了させる
-        const newCounts = [...roundVisibleCounts];
-        newCounts[currentRoundIdx] = currentRoundLines.length;
-        setRoundVisibleCounts(newCounts);
-        const newFinished = [...roundFinished];
-        newFinished[currentRoundIdx] = true;
-        setRoundFinished(newFinished);
+        // SKIP処理: 現在のラウンドの全ての行を処理したことにする
+        const fullLines = currentRoundLines;
+        let newPc1Scar = [...currentPc1Scar];
+        let newPc2Scar = [...currentPc2Scar];
+
+        fullLines.forEach(line => {
+            if (line.includes('破壊された')) {
+                if (line.includes('あなたの')) {
+                    const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
+                    if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1;
+                } else if (line.includes(`${bossName}の`)) {
+                    const m = line.match(new RegExp(`${bossName}の【.*?】(\\d+)が破壊された`));
+                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
+                }
+            }
+        });
+        setCurrentPc1Scar(newPc1Scar);
+        setCurrentPc2Scar(newPc2Scar);
+
+        const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
+        const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
         if (currentRoundIdx === rounds.length - 1) onComplete();
       } else if (currentRoundIdx < rounds.length - 1) {
-        // すでに完了している場合は次のラウンドへ
         setCurrentRoundIdx(prev => prev + 1);
       }
     };
+    const goBack = () => { if (currentRoundIdx > 0) setCurrentRoundIdx(prev => prev - 1); };
 
-    const goBack = () => {
-      if (currentRoundIdx > 0) {
-        setCurrentRoundIdx(prev => prev - 1);
-      }
+    const renderGauge = (player: any, scars: number[], color: string) => {
+      if (!player) return null;
+      const totalSkills = player.getSkillsLength();
+      const brokenSkills = scars.filter((s: number) => s === 1).length;
+      const currentSkills = totalSkills - brokenSkills;
+      const percentage = Math.max(0, (currentSkills / totalSkills) * 100);
+      
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.8))', width: '80px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 'bold', marginBottom: '6px', color: '#fff', textShadow: '0 0 4px #000, 1px 1px 2px #000', textAlign: 'center', width: '100%', wordBreak: 'break-all', height: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1.2' }}>
+            {player.playerName}
+          </div>
+          <div style={{ height: '140px', width: '16px', backgroundColor: 'rgba(20,20,20,0.8)', border: '2px solid #fff', borderRadius: '4px', boxSizing: 'border-box', boxShadow: '0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ 
+              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`, 
+              background: `linear-gradient(to top, ${color}, ${color}dd)`, 
+              transition: 'height 0.6s cubic-bezier(0.22, 1, 0.36, 1)', 
+              boxShadow: `0 0 15px ${color}` 
+            }} />
+            <div style={{ 
+              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`, 
+              backgroundColor: '#fff', opacity: 0.3, filter: 'blur(2px)', mixBlendMode: 'overlay'
+            }} />
+          </div>
+        </div>
+      );
     };
 
     return (
-      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', padding: '0 5px' }}>
-          <button 
-            disabled={currentRoundIdx === 0}
-            onClick={goBack}
-            style={{ padding: '5px 15px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', opacity: currentRoundIdx === 0 ? 0.3 : 1 }}
-          >
-            ← 前のラウンド
-          </button>
-          <button 
-            disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1}
-            onClick={goNext}
-            style={{ 
-              padding: '5px 15px', 
-              background: '#333', 
-              color: '#fff', 
-              border: '1px solid #555', 
-              borderRadius: '5px', 
-              cursor: 'pointer', 
-              opacity: (roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1) ? 0.3 : 1 
-            }}
-          >
-            {!roundFinished[currentRoundIdx] ? 'スキップ' : '次へ進む →'}
-          </button>
-        </div>
-
-        <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
-          {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
-            let className = "log-line";
-            let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards' };
+      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
+        {bossImage && (
+          <div className="boss-stage-area sticky-boss-area" style={{ 
+            height: '240px', minHeight: '240px', display: 'flex', justifyContent: 'center', alignItems: 'center', 
+            backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`,
+            paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
+          }}>
+            {/* 背景を暗くするオーバーレイ */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
             
-            // 派手な戦闘開始演出
-            if (line.includes('VS')) {
-              const [p1, p2] = line.split('VS');
-              return (
-                <div key={i} style={{ 
-                  margin: '30px 0', 
-                  textAlign: 'center', 
-                  animation: 'zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-                  background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)',
-                  padding: '20px 0',
-                  borderTop: '2px solid #ff5252',
-                  borderBottom: '2px solid #ff5252',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px', letterSpacing: '2px' }}>BATTLE START</div>
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
-                    <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)' }}>{p1.trim()}</span>
-                    <span style={{ fontSize: '2.5rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic', textShadow: '0 0 15px #ff5252' }}>VS</span>
-                    <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,82,82,0.5)' }}>{p2.trim()}</span>
-                  </div>
-                  {/* アニメーション用の光 */}
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                    animation: 'shimmer 2s infinite'
-                  }} />
+            <div style={{ position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 30px', boxSizing: 'border-box' }}>
+              {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
+              <img src={process.env.PUBLIC_URL + bossImage} alt={bossName} className={`boss-battle-image boss-anim-${bossAnim}`} style={{ height: '190px', objectFit: 'contain', filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))' }} />
+              {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
+            </div>
+            
+            {bossAnim === 'damage' && <div className="damage-flash" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.5)', zIndex: 10 }} />}
+            {popupDamage && <div className={`damage-popup type-${popupDamage.type}`} key={Math.random()} style={{ position: 'absolute', top: '50%', left: popupDamage.type === 'enemy' ? '50%' : '30%', transform: 'translate(-50%, -50%)', fontSize: '32px', fontWeight: 'bold', color: '#ff0', textShadow: '2px 2px 0 #000', zIndex: 20 }}>{popupDamage.value}</div>}
+            
+            {activeSkillIcon && (
+              <div key={Math.random()} className={`skill-activation-overlay side-${activeSkillIcon.side}`} style={{
+                position: 'absolute',
+                top: '50%',
+                left: activeSkillIcon.side === 'player' ? '70%' : '30%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 30,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                animation: 'skillPopIn 1.2s ease-out forwards'
+              }}>
+                <div style={{ backgroundColor: 'rgba(0,0,0,0.7)', padding: '5px', borderRadius: '5px', border: '2px solid #fff', boxShadow: '0 0 15px #fff' }}>
+                  <img src={process.env.PUBLIC_URL + activeSkillIcon.icon} alt={activeSkillIcon.name} style={{ width: '60px', height: '60px', display: 'block' }} />
                 </div>
-              );
-            }
-
-            if (line.includes('戦闘開始')) {
-              return (
-                <div key={i} style={{ 
-                  textAlign: 'center', 
-                  fontSize: '1.5rem', 
-                  fontWeight: 'bold', 
-                  color: '#ffd54f', 
-                  margin: '20px 0',
-                  animation: 'pulse 1.5s infinite',
-                  letterSpacing: '5px',
-                  textShadow: '0 0 10px rgba(255,213,79,0.5)'
-                }}>
-                  {line.replace(/[-―=]/g, '').trim()}
-                </div>
-              );
-            }
-
-            if (line.includes('ラウンド') || line.includes('勝敗判定')) {
-              style = { ...style, color: '#61dafb', fontSize: '1.2em', borderBottom: '1px solid #333', paddingBottom: '8px', marginTop: '10px' };
-            } else if (line.includes('フェイズ')) {
-              style = { ...style, color: '#81c784', fontWeight: 'bold', marginTop: '15px' };
-            } else if (line.includes('ダメージ') || line.includes('破壊')) {
-              style = { ...style, color: '#ff5252', paddingLeft: '10px', borderLeft: '2px solid #ff5252' };
-            } else if (line.includes('発動') || line.includes('効果')) {
-              style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
-            }
-
-            return (
-              <div key={i} className={className} style={style}>
-                {line}
+                <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px', marginTop: '5px', textShadow: '0 0 5px #000, 2px 2px 2px #000', backgroundColor: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{activeSkillIcon.name}</div>
               </div>
-            );
-          })}
-          {/* 末尾の余白 */}
-          <div style={{ height: '100px' }} />
+            )}
+          </div>
+        )}
+        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', padding: '0 5px' }}>
+            <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ padding: '5px 15px', background: '#000', color: '#fff', border: '1px solid #fff', borderRadius: '0', cursor: 'pointer', opacity: currentRoundIdx === 0 ? 0.3 : 1, fontFamily: 'monospace' }}>{'<'}</button>
+            <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ padding: '5px 15px', background: '#000', color: '#fff', border: '1px solid #fff', borderRadius: '0', cursor: 'pointer', opacity: (roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1) ? 0.3 : 1, fontFamily: 'monospace' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
+          </div>
+          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', marginTop: '0', scrollbarWidth: 'none' }}>
+            {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
+              let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards' };
+              if (line.includes('VS')) {
+                const [p1, p2] = line.split('VS');
+                return (
+                  <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'nowrap' }}>
+                      <span className="battle-start-player-name" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{p1.trim()}</span>
+                      <span className="battle-start-vs" style={{ fontSize: '2.5rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
+                      <span className="battle-start-enemy-name" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,82,82,0.5)', whiteSpace: 'nowrap' }}>{p2.trim()}</span>
+                    </div>
+                  </div>
+                );
+              }
+              if (line.includes('戦闘開始')) return <div key={i} style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#ffd54f', margin: '20px 0' }}>{line.replace(/[-―=]/g, '').trim()}</div>;
+              if (line.includes('ラウンド') || line.includes('勝敗判定')) style = { ...style, color: '#61dafb', fontSize: '1.2em', borderBottom: '1px solid #333' };
+              else if (line.includes('フェイズ')) style = { ...style, color: '#81c784', fontWeight: 'bold' };
+              else if (line.includes('ダメージ') || line.includes('破壊')) style = { ...style, color: '#ff5252', paddingLeft: '10px', borderLeft: '2px solid #ff5252' };
+              else if (line.includes('発動') || line.includes('効果')) style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
+              return <div key={i} className="log-line" style={style}>{line}</div>;
+            })}
+            <div style={{ height: '100px' }} />
+          </div>
         </div>
       </div>
     );
@@ -850,92 +1009,82 @@ function App() {
 
   const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
 
-  // ボス戦勝利時の処理 (ログ完了を待たずに花吹雪とデータ保存)
   useEffect(() => {
-    if (gameStarted && stageMode === 'BOSS' && battleResults.length > 0) {
-        if (battleResults[0].winner === 1) {
-
-            
-            // 構成保存
-            setBossVictorySkills(prev => {
-                const next = { ...prev, [stageCycle]: selectedPlayerSkills };
-                localStorage.setItem('shiden_boss_victory_skills', JSON.stringify(next));
-                return next;
-            });
-
-            // パネル表示自体は少し遅らせる (没入感のため)
-            if (logComplete) {
-              setShowBossClearPanel(true);
-              // 花吹雪 (アニメーション前)
-              triggerVictoryConfetti();
-            }
-        }
+    if (gameStarted && battleResults.length > 0) {
+      const winCount = battleResults.filter(r => r.winner === 1).length;
+      const isVictory = stageMode === 'BOSS' ? winCount >= 1 : winCount === 10;
+      
+      if (isVictory) {
+          setStageVictorySkills(prev => {
+              const next = { ...prev, [`${stageMode}_${stageCycle}`]: selectedPlayerSkills };
+              localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(next));
+              return next;
+          });
+          if (stageMode === 'BOSS' && logComplete) { setShowBossClearPanel(true); triggerVictoryConfetti(); }
+      }
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete]);
 
+  if (isTitle) {
+    if (!isAssetsLoaded) {
+      return (
+        <div className="TitleScreenContainer" style={{ backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+        </div>
+      );
+    }
+
+    const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
+
+    return (
+      <div className="TitleScreenContainer">
+        <div className="TitleBackgroundEffect"></div>
+        <div className="TitleContent">
+          <div className="TitleLogoWrapper">
+            <img src={process.env.PUBLIC_URL + '/images/title/titlelogo.png'} alt="紫電一閃" className="TitleLogo" />
+          </div>
+          <div className="TitleMenu">
+            <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
+            <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
+          </div>
+          <div className="TitleFooter">
+            <div style={{ marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem', textShadow: '0 0 5px rgba(0,210,255,0.5)' }}>
+              Active Users: {activeUsers}
+            </div>
+            © 2026 Shiden-Game
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="AppContainer" style={{ 
-      display: 'flex', 
-      height: '100vh', 
-      fontFamily: 'Arial, sans-serif', 
-      backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/22358574.jpg)`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      color: '#eee' 
-    }}>
-      <div className="MainGameArea" style={{ 
-        flex: 2, 
-        padding: '20px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        overflowY: 'auto',
-        backgroundColor: 'rgba(10, 10, 10, 0.7)' // 背景画像を見やすくするために半透明の黒を重ねる
-      }}>
-        
-        {/* ステージ情報ヘッダー */}
-        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', boxShadow: '0 0 10px rgba(0,0,0,0.5)', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box' }}>
-          <h1 style={{ margin: 0, color: stageMode === 'MID' ? '#4fc3f7' : '#ff5252', fontSize: '1.5rem' }}>
-            {stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `決戦: ${currentStageInfo.bossName}`}
-          </h1>
-          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.9rem' }}>
-            {stageMode === 'MID' ? '10戦全勝してボスに挑め！' : '敵の構成を見て対策を練れ！'}
-          </p>
-          <button 
-            onClick={() => {
-              if (window.confirm('進捗をリセットして最初から始めますか？')) {
-                localStorage.removeItem('shiden_stage_cycle');
-                localStorage.removeItem('shiden_owned_skills');
-                window.location.reload();
-              }
-            }}
-            style={{ position: 'absolute', right: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer' }}
-          >
-            RESET
-          </button>
+    <div className="AppContainer" style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif', color: '#eee' }}>
+      <div className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box' }}>
+          <button onClick={() => setIsTitle(true)} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer' }}>TITLE</button>
+          <h1 style={{ margin: 0, color: stageMode === 'MID' ? '#4fc3f7' : '#ff5252', fontSize: '1.5rem' }}>{stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `決戦: ${currentStageInfo.bossName}`}</h1>
+          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.9rem' }}>{stageMode === 'MID' ? '10戦全勝してボスに挑め！' : '敵の構成を見て対策を練れ！'}</p>
+          <button onClick={() => { if (window.confirm('進捗をリセットして最初から始めますか？')) { localStorage.removeItem('shiden_stage_cycle'); localStorage.removeItem('shiden_owned_skills'); window.location.reload(); } }} style={{ position: 'absolute', right: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer' }}>RESET</button>
         </div>
 
-        {stageMode === 'BOSS' && !gameStarted && !battleResults[0]?.winner && (
-          <div className="BossSkillPreview" style={{ marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '20px', border: '2px solid #ff5252', borderRadius: '10px', background: '#2c0a0a', boxShadow: '0 0 20px rgba(255,82,82,0.3)', boxSizing: 'border-box' }}>
-            <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 10px 0', fontSize: '1.2rem' }}>BOSS SKILLS DISCLOSED</h2>
-            <div className="boss-skill-grid">
-              {bossSkills.map((skill, index) => (
-                <div key={`boss-${index}`} className="boss-skill-card-wrapper">
-                  <SkillCard 
-                    skill={skill}
-                    isSelected={false}
-                    disableTooltip={true}
-                  />
-                </div>
-              ))}
-            </div>
-            
-            {bossVictorySkills[stageCycle] && (
-              <div style={{ marginTop: '20px', borderTop: '1px dashed #ff5252', paddingTop: '15px' }}>
-                <h3 style={{ color: '#ffd700', fontSize: '1rem', textAlign: 'center', marginBottom: '10px' }}>Previous Victory Setup</h3>
+        {!gameStarted && stageMode === 'MID' && (
+          <div style={{ width: '100%', maxWidth: '800px', height: '200px', marginBottom: '20px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #4fc3f7', boxSizing: 'border-box' }} />
+        )}
+
+        {((stageMode === 'BOSS' && !gameStarted && !battleResults[0]?.winner) || (stageMode === 'MID' && !gameStarted && stageVictorySkills[`${stageMode}_${stageCycle}`]?.length > 0)) && (
+          <div className="BossSkillPreview" style={{ marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '20px', border: `2px solid ${stageMode === 'BOSS' ? '#ff5252' : '#4fc3f7'}`, borderRadius: '10px', background: stageMode === 'BOSS' ? '#2c0a0a' : '#0a1a2c', boxSizing: 'border-box' }}>
+            {stageMode === 'BOSS' && (
+              <>
+                <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 10px 0', fontSize: '1.2rem' }}>BOSS SKILLS DISCLOSED</h2>
+                <div className="boss-skill-grid">{bossSkills.map((skill, index) => <div key={`boss-${index}`} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)}</div>
+              </>
+            )}
+            {stageVictorySkills[`${stageMode}_${stageCycle}`] && stageVictorySkills[`${stageMode}_${stageCycle}`].length > 0 && (
+              <div style={{ marginTop: stageMode === 'BOSS' ? '20px' : '0', borderTop: stageMode === 'BOSS' ? '1px dashed #ff5252' : 'none', paddingTop: stageMode === 'BOSS' ? '15px' : '0' }}>
+                <h3 style={{ color: '#ffd700', fontSize: '1rem', textAlign: 'center', marginTop: '5px', marginBottom: '10px' }}>戦いの記憶</h3>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
-                  {getSkillCardsFromAbbrs(bossVictorySkills[stageCycle]).map((skill, idx) => (
+                  {getSkillCardsFromAbbrs(stageVictorySkills[`${stageMode}_${stageCycle}`]).map((skill, idx) => (
                     <img key={idx} src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} title={skill.name} style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }} />
                   ))}
                 </div>
@@ -944,280 +1093,86 @@ function App() {
           </div>
         )}
 
-        {/* 選択中のスキルパネル */}
         {selectedPlayerSkills.length > 0 && (
-        <div 
-          className="SelectedSkillsPanel" 
-          ref={panelRef}
-          style={{ position: 'relative', marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '15px', border: '1px solid #333', borderRadius: '10px', background: '#121212', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}
-        >
-          
-          <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 3 }}>
-            <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#ffeb3b" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-            </defs>
-            {lineCoords.map((coord, idx) => (
-              <g key={idx}>
-                {/* 外側の太い光 */}
-                <line 
-                  x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2}
-                  stroke="#ffeb3b"
-                  strokeWidth="20"
-                  strokeOpacity="0.5"
-                  filter="url(#glow)"
-                />
-                {/* 中間の光 */}
-                <line 
-                  x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2}
-                  stroke="#ffff00"
-                  strokeWidth="10"
-                  strokeOpacity="0.8"
-                  filter="url(#glow)"
-                />
-                {/* 内側のメイン線 */}
-                <line 
-                  x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2}
-                  stroke="#ffffff"
-                  strokeWidth="4"
-                  strokeDasharray="15 10"
-                  filter="url(#glow)"
-                >
-                  <animate
-                    attributeName="stroke-dashoffset"
-                    from="50"
-                    to="0"
-                    dur="1s"
-                    repeatCount="indefinite"
-                  />
-                </line>
-              </g>
-            ))}
-          </svg>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
-            {getSkillCardsFromAbbrs(selectedPlayerSkills).map((skill, index) => {
-              const isConnected = connections.some(c => c.fromId === `selected-skill-${index}` || c.toId === `selected-skill-${index}`);
-              const isDimmed = dimmedIndices.includes(index);
-              return (
-                <SkillCard 
-                  key={`${skill.abbr}-${index}`}
-                  id={`selected-skill-${index}`}
-                  skill={skill}
-                  isSelected={true}
-                  isConnected={isConnected}
-                  isDimmed={isDimmed}
-                  onClick={gameStarted ? undefined : handleSelectedSkillClick} // ゲーム開始後はクリック無効化
-                />
-              );
-            })}
+          <div className="SelectedSkillsPanel" ref={panelRef} style={{ position: 'relative', marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '15px 0px 15px 0px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
+            <div style={{ position: 'absolute', right: '10px', top: '10px', zIndex: 10 }}>
+              <button 
+                onClick={() => setShowSettings(true)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#888' }}
+                title="設定"
+              >
+                ⚙️
+              </button>
+            </div>
+            <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 3 }}>
+              <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="blur" /><feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#ffeb3b" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter></defs>
+              {lineCoords.map((coord, idx) => (
+                <g key={idx}>
+                  <line x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2} stroke="#ffeb3b" strokeWidth="20" strokeOpacity="0.5" filter="url(#glow)" />
+                  <line x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2} stroke="#ffff00" strokeWidth="10" strokeOpacity="0.8" filter="url(#glow)" />
+                  <line x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2} stroke="#ffffff" strokeWidth="4" strokeDasharray="15 10" filter="url(#glow)"><animate attributeName="stroke-dashoffset" from="50" to="0" dur="1s" repeatCount="indefinite" /></line>
+                </g>
+              ))}
+            </svg>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', position: 'relative', zIndex: 2 }}>{getSkillCardsFromAbbrs(selectedPlayerSkills).map((skill, index) => { const isConnected = connections.some(c => c.fromId === `selected-skill-${index}` || c.toId === `selected-skill-${index}`); const isDimmed = dimmedIndices.includes(index); return <SkillCard key={`${skill.abbr}-${index}`} id={`selected-skill-${index}`} skill={skill} isSelected={true} isConnected={isConnected} isDimmed={isDimmed} onClick={gameStarted ? undefined : handleSelectedSkillClick} iconMode={iconMode} />; })}</div>
           </div>
-        </div>
         )}
 
-        {!gameStarted ? (
-          <div style={{ width: '100%', maxWidth: '800px' }}>
-            <div className="PlayerSkillSelection" style={{ marginBottom: '20px', width: '100%', padding: '15px', border: '1px solid #333', borderRadius: '10px', background: '#121212', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
-              <h2 style={{ color: '#4fc3f7' }}>所持スキルから編成してください</h2>
-              <div className= "skill-card-grid">
-                {availablePlayerCards.map((skill) => (
-                  <SkillCard 
-                    key={skill.abbr}
-                    skill={skill}
-                    isSelected={selectedPlayerSkills.some(s => s === skill.abbr)}
-                    onClick={handlePlayerSkillSelectionClick}
-                  />
-                ))}
+        {showSettings && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ backgroundColor: '#1a1a1a', border: '2px solid #fff', padding: '30px', borderRadius: '10px', width: '400px', textAlign: 'center' }}>
+              <h2 style={{ color: '#4fc3f7', marginBottom: '20px' }}>設定</h2>
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '15px' }}>アイコン表示モード</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <button onClick={() => setIconMode('ORIGINAL')} style={{ padding: '10px', background: iconMode === 'ORIGINAL' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>元のアイコン</button>
+                  <button onClick={() => setIconMode('ABBR')} style={{ padding: '10px', background: iconMode === 'ABBR' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>スキルの略字</button>
+                  <button onClick={() => setIconMode('PHONE')} style={{ padding: '10px', background: iconMode === 'PHONE' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>電話番号風 (0-9, A-Z)</button>
+                </div>
               </div>
-              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-around', width: '100%' }}>
-                <button 
-                  onClick={handleStartGame}
-                  disabled={selectedPlayerSkills.length !== PLAYER_SKILL_COUNT}
-                  style={{
-                    padding: '10px 20px', fontSize: '18px', cursor: 'pointer',
-                    backgroundColor: selectedPlayerSkills.length === PLAYER_SKILL_COUNT ? '#28a745' : '#cccccc',
-                    color: 'white', border: 'none', borderRadius: '5px'
-                  }}
-                >
-                  戦闘開始
-                </button>
-              </div>
+              <button onClick={() => setShowSettings(false)} style={{ padding: '10px 30px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
             </div>
           </div>
-        ) : (
-          null
         )}
 
-        {gameStarted && (logComplete || stageMode === 'MID') && ( // ゲームが開始されたら結果一覧とリセットボタンを表示
+        {!gameStarted && (
+          <div style={{ width: '100%', maxWidth: '800px' }}>
+            <div className="PlayerSkillSelection" style={{ marginBottom: '20px', width: '100%', padding: '15px 0px 15px 0px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
+              <h2 style={{ padding: '0px 0px 0px 20px', color: '#4fc3f7' }}>所持スキルから編成してください</h2>
+              <div className= "skill-card-grid">{availablePlayerCards.map((skill) => <SkillCard key={skill.abbr} skill={skill} isSelected={selectedPlayerSkills.some(s => s === skill.abbr)} onClick={handlePlayerSkillSelectionClick} iconMode={iconMode} />)}</div>
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-around', width: '100%' }}><button onClick={handleStartGame} disabled={selectedPlayerSkills.length !== PLAYER_SKILL_COUNT} style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: selectedPlayerSkills.length === PLAYER_SKILL_COUNT ? '#28a745' : '#cccccc', color: 'white', border: 'none', borderRadius: '5px' }}>戦闘開始</button></div>
+            </div>
+          </div>
+        )}
+
+        {gameStarted && (logComplete || stageMode === 'MID') && (
           <div className="ResultsOverview" style={{ marginTop: '0px', width: '100%', maxWidth: '800px' }}>
-            
             {rewardSelectionMode && (
               <div className="RewardSelection" style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '10px' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{battleResults.every(r => r.winner === 1) ? '努力が実った！' : '修行するぞ！'}スキルを1つ選んでください</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
-                  {getAvailableSkillsUntilStage(stageCycle).map(skill => {
-                    const alreadyOwned = ownedSkillAbbrs.includes(skill.abbr);
-                    const isSelected = selectedRewards.includes(skill.abbr);
-                    
-                    // 獲得済みのスキルは非表示にする
-                    if (alreadyOwned) return null;
-
-                    // 「無想」は1つしか持てない制限
-                    if (skill.name === "無想" && ownedSkillAbbrs.includes(skill.abbr)) return null;
-                    
-                    return (
-                      <div 
-                        key={skill.abbr} 
-                        onClick={() => handleRewardSelection(skill.abbr)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <SkillCard skill={skill} isSelected={isSelected} />
-                      </div>
-                    );
-                  })}
-                </div>
-                <button 
-                  disabled={selectedRewards.length === 0}
-                  onClick={confirmRewards}
-                  style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}
-                >
-                  スキルを獲得する
-                </button>
-                <div style={{ marginTop: '15px' }}>
-                    <button 
-                        onClick={() => {
-                            setSelectedRewards([]);
-                            setRewardSelectionMode(false);
-                            // ボス戦クリア後の報酬選択をスキップした場合も次のステージへ進めるようにする
-                            if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) {
-                                clearBossAndNextCycle();
-                            }
-                        }}
-                        style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}
-                    >
-                        報酬を受け取らない
-                    </button>
-                </div>
+                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}スキルを1つ選んでください</h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>{getAvailableSkillsUntilStage(stageCycle).map(skill => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}</div>
+                <button disabled={selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>スキルを獲得する</button>
+                <div style={{ marginTop: '15px' }}><button onClick={() => { setSelectedRewards([]); setRewardSelectionMode(false); if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
               </div>
             )}
-
             {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
-              <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px', animation: 'slideUp 0.5s ease' }}>
-                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>
-                  {stageMode === 'MID' ? '全勝！ボスへの道が開かれた！' : `${currentStageInfo.bossName}撃破！素晴らしいです！！`}
-                </h2>
-                <button 
-                  onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle}
-                  style={{ padding: '15px 30px', fontSize: '20px', cursor: 'pointer', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}
-                >
-                  {stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}
-                </button>
+              <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
+                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{currentStageInfo.bossName}撃破！<br />素晴らしいです！！</>}</h2>
+                <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', cursor: 'pointer', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
               </div>
             )}
-
-            {/* <h2 style={{ color: '#01579b', textAlign: 'center' }}>戦闘結果一覧</h2> */}
-            {(stageMode === 'MID' || showBossClearPanel || battleResults.length > 0) && (
-            <div className="battle-results-scroll-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {battleResults.map((battle, index) => (
-                <div
-                  key={index}
-                  className="battle-result-item"
-                  onClick={() => setShowLogForBattleIndex(index)}
-                  style={{
-                    padding: '10px',
-                    border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, // 選択中の結果を強調
-                    borderRadius: '5px',
-                    backgroundColor: showLogForBattleIndex === index ? '#263238' : '#1e1e1e',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                    marginBottom: '10px',
-                    color: '#eee',
-                    animationDelay: `${index * 0.1}s`,
-                  }}
-                >
-                  <span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.resultText === '勝利' ? '#66bb6a' : battle.resultText === '敗北' ? '#ef5350' : '#eee' }}>
-                    Battle {index + 1}: {battle.resultText}
-                  </span>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    {battle.computerSkills.map((skill, skillIndex) => (
-                      <img
-                        key={skillIndex}
-                        src={process.env.PUBLIC_URL + skill.icon}
-                        alt={skill.name}
-                        style={{ width: '30px', height: '30px', borderRadius: '3px' }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            )}
-            {(battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss))) && (
-              <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>
-                  {battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}
-                </div>
-                <button 
-                  onClick={handleResetGame}
-                  style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px' }}
-                >
-                  再挑戦
-                </button>
-              </div>
-            )}
+            <div className="battle-results-scroll-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => (<div key={index} className="battle-result-item" onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: showLogForBattleIndex === index ? '#263238' : '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center', marginBottom: '10px', color: '#eee' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.resultText === 'Win!' ? '#66bb6a' : battle.resultText === 'Lose' ? '#ef5350' : '#eee' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((skill, skillIndex) => (<img key={skillIndex} src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} style={{ width: '30px', height: '30px', borderRadius: '3px' }} />))}</div></div>))}</div>
+            {(battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss))) && (<div style={{ marginTop: '20px', textAlign: 'center' }}><div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div><button onClick={handleResetGame} style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px' }}>再挑戦</button></div>)}
           </div>
         )}
-
       </div>
 
-      <div className="GameLogFrame" style={{ 
-        flex: 1, 
-        padding: '20px', 
-        backgroundColor: 'rgba(26, 26, 26, 0.85)', // ログエリアも少し透過させる
-        color: '#f8f8f2', 
-        overflowY: 'hidden', 
-        borderLeft: '1px solid #333', 
-        boxShadow: "-2px 0 5px rgba(0,0,0,0.5)",
-        backdropFilter: 'blur(5px)' // ログの可読性を上げるためにぼかしを入れる
-      }}>
-        <h2 style={{ color: stageMode === 'BOSS' ? '#ff5252' : '#61dafb' }}>
-          {stageMode === 'BOSS' ? 'BOSS' : 'ゲームログ'}
-        </h2>
+      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', color: '#f8f8f2', overflowY: 'hidden', borderLeft: '1px solid #333' }}>
+        <h2 style={{ color: stageMode === 'BOSS' ? '#ff5252' : '#61dafb' }}>{stageMode === 'BOSS' ? (logComplete && battleResults[0]?.winner === 1 ? '戦闘ログ' : 'BOSS') : 'ゲームログ'}</h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          stageMode === 'BOSS' ? (
-            <AnimatedRichLog 
-              log={battleResults[showLogForBattleIndex].gameLog} 
-              onComplete={() => setLogComplete(true)} 
-              immediate={false}
-            />
-          ) : (
-            <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
-              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                {battleResults[showLogForBattleIndex].gameLog}
-              </pre>
-            </div>
-          )
+          stageMode === 'BOSS' ? (<AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} immediate={false} bossImage={currentStageInfo.bossImage} bossName={currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} />) : (<div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>)
         ) : (
-          stageMode === 'BOSS' ? (
-            <div style={{ textAlign: 'center', padding: '20px', animation: 'fadeIn 1s' }}>
-              <img 
-                src={process.env.PUBLIC_URL + currentStageInfo.bossImage} 
-                alt={currentStageInfo.bossName} 
-                style={{ width: '100%', maxWidth: '300px', borderRadius: '10px', marginBottom: '20px', boxShadow: '0 0 20px rgba(255,82,82,0.5)' }}
-              />
-              <h3 style={{ color: '#ff5252', fontSize: '1.5rem', marginBottom: '10px' }}>{currentStageInfo.bossName}</h3>
-              <p style={{ lineHeight: '1.6', color: '#eee', textAlign: 'left', background: 'rgba(0,0,0,0.4)', padding: '15px', borderRadius: '8px' }}>
-                {currentStageInfo.bossDescription}
-              </p>
-            </div>
-          ) : (
-            "ログがありません。"
-          )
+          stageMode === 'BOSS' ? (<div style={{ textAlign: 'center', padding: '20px' }}><img src={process.env.PUBLIC_URL + currentStageInfo.bossImage} alt={currentStageInfo.bossName} style={{ width: '100%', maxWidth: '150px', borderRadius: '10px', marginBottom: '20px' }} /><h3 style={{ color: '#ff5252', fontSize: '1.5rem', marginBottom: '10px' }}>{currentStageInfo.bossName}</h3><p style={{ lineHeight: '1.6', color: '#eee', textAlign: 'left', background: 'rgba(0,0,0,0.4)', padding: '15px', borderRadius: '8px' }}>{currentStageInfo.bossDescription}</p></div>) : ("ログがありません。")
         )}
       </div>
     </div>

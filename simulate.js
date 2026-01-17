@@ -215,18 +215,18 @@ const STAGES = [
     { no: 4, name: "大木", boss: "空空刺硬空空刺硬", pool: "一果待崩刺搦速防硬盾" },
     { no: 5, name: "オークマスター", boss: "崩待防果速", pool: "一果待崩刺搦速防硬盾剣交強" },
     { no: 6, name: "肉厚な魚", boss: "搦搦果反一強", pool: "一果待崩刺搦速防硬盾剣交強怒裏反" },
-    { no: 7, name: "リザードロード", boss: "交一裏一裏剣", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連" },
-    { no: 8, name: "絶望のキマイラ", boss: "疫硬搦硬刺怒硬", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚" },
-    { no: 9, name: "殺戮人形", boss: "先封待待連雷雷", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封" },
+    { no: 7, name: "リザードロード", boss: "交一裏一裏剣", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠" },
+    { no: 8, name: "絶望のキマイラ", boss: "疫硬搦硬刺怒怒", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠先逆覚" },
+    { no: 9, name: "殺戮人形", boss: "先待待封連雷雷", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠先逆覚雷連封" },
     { no: 11, name: "剣獣", boss: "無覚交果反燐玉紫強", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
-    { no: 12, name: "無貌竜アノマ", boss: "影影硬待硬雷硬交硬果", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
+    { no: 12, name: "無貌竜アノマ", boss: "影影硬待硬雷硬交硬一", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
 ];
 
 function getAllSetups(pool, count = 5) {
     const availablePool = pool.split('');
     let results = new Set();
     function generate(current) {
-        if (results.size >= 10000) return;
+        if (results.size >= 500000) return;
         if (current.length === count) { results.add(current.join('')); return; }
         const i = current.length;
         let options = availablePool.filter(s => {
@@ -238,18 +238,17 @@ function getAllSetups(pool, count = 5) {
             return true;
         });
         options.sort(() => Math.random() - 0.5);
-        for (const opt of options) { generate([...current, opt]); if (results.size >= 10000) return; }
+        for (const opt of options) { generate([...current, opt]); if (results.size >= 500000) return; }
     }
     generate([]); return Array.from(results);
 }
 
-let report = "Boss Battle Simulation (Draw=Lose, Max 10000 unique patterns)\n\n";
+let report = "Boss Battle Simulation (Draw=Lose, Max 500000 unique patterns)\n\n";
 
 STAGES.forEach(stage => {
     let wins = 0; let winningSetups = [];
     let patterns = getAllSetups(stage.pool);
-    if (stage.no === 5) patterns.push("崩待防果速"); // コピー構成を強制追加
-    
+
     patterns.forEach(setup => {
         if (new BattleSimulator(new Player(setup, "P"), new Player(stage.boss, "B")).start() === 1) {
             wins++; if (winningSetups.length < 5) winningSetups.push(setup);

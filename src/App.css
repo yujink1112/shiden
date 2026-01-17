@@ -28,6 +28,18 @@
   color: #61dafb;
 }
 
+.AppContainer {
+  background-image: url('../public/images/background/background.jpg');
+  background-size: cover;
+}
+
+.boss-stage-area {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.5s ease-in-out;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -60,6 +72,13 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+@keyframes skillPopIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
 }
 
 @keyframes pulse {
@@ -303,6 +322,123 @@
     font-size: 11px !important;
     white-space: normal !important; /* 報酬画面では改行を許可して見やすく */
   }
+
+  /* ボス演出エリアのスマホ調整 */
+  .sticky-boss-area {
+    height: 120px !important;
+  }
+  .boss-battle-image {
+    height: 100px !important;
+  }
+
+  /* ログ画面の「VS」ヘッダーのスマホ調整 */
+  .battle-start-header {
+    margin: 15px 0 !important;
+    padding: 10px 0 !important;
+  }
+  .battle-start-header > div:first-child {
+    font-size: 0.8rem !important;
+    margin-bottom: 5px !important;
+  }
+  .battle-start-player-name,
+  .battle-start-enemy-name {
+    font-size: 1.1rem !important;
+  }
+  .battle-start-vs {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ボスバトルアニメーション */
+.boss-battle-image {
+  transition: transform 0.2s ease-out, filter 0.2s;
+}
+
+.boss-anim-attack {
+  animation: bossAttack 0.5s ease-in-out;
+}
+
+.boss-anim-damage {
+  animation: bossDamage 0.5s ease-in-out;
+  filter: sepia(1) saturate(5) hue-rotate(-50deg); /* 赤っぽくフラッシュ */
+}
+
+.boss-anim-counter {
+  animation: bossCounter 0.8s ease-in-out;
+  filter: brightness(1.5) drop-shadow(0 0 15px gold);
+}
+
+.boss-anim-defeat {
+  filter: grayscale(1) opacity(0.5);
+  transform: scale(0.9) translateY(20px);
+}
+
+@keyframes bossAttack {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3) translateY(20px); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bossDamage {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+@keyframes bossCounter {
+  0% { transform: scale(1); }
+  20% { transform: scale(0.8); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+.damage-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 0, 0, 0.3);
+  animation: flashEffect 0.3s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes flashEffect {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ダメージポップアップのアニメーション */
+.damage-popup {
+  position: absolute;
+  font-size: 3rem;
+  font-weight: 900;
+  font-style: italic;
+  color: #ff5252;
+  text-shadow: 0 0 10px #000, 0 0 20px #f00;
+  animation: damageFloat 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  z-index: 110;
+  pointer-events: none;
+}
+
+.damage-popup.type-player {
+  color: #ef5350;
+  left: 20%;
+  top: 40%;
+}
+
+.damage-popup.type-enemy {
+  color: #ffd54f;
+  right: 20%;
+  top: 30%;
+  font-size: 3.5rem;
+}
+
+@keyframes damageFloat {
+  0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+  20% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+  100% { transform: scale(1) translateY(-40px); opacity: 0; }
 }
 
 .boss-skill-grid {
@@ -369,4 +505,141 @@
   border: none;
   border-top: 1px dashed #99aa99;
   margin: 10px 0;
+}
+
+/* タイトル画面のスタイル */
+.TitleScreenContainer {
+  height: 100vh;
+  width: 100%;
+  background-color: #050505;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Arial Black', sans-serif;
+}
+
+.TitleBackgroundEffect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
+  opacity: 0.8;
+}
+
+.TitleBackgroundEffect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+.TitleContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+.TitleLogoWrapper {
+  filter: drop-shadow(0 0 20px rgba(0, 191, 255, 0.4));
+}
+
+.TitleLogo {
+  max-width: 600px;
+  height: auto;
+}
+
+.TitleMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 280px;
+}
+
+.TitleButton {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: transparent;
+  border: 2px solid;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.TitleButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #444 !important;
+  color: #444 !important;
+  box-shadow: none !important;
+}
+
+.TitleButton.neon-blue {
+  color: #00d2ff;
+  border-color: #00d2ff;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.2), inset 0 0 10px rgba(0, 210, 255, 0.2);
+}
+
+.TitleButton.neon-blue:hover:not(:disabled) {
+  background: #00d2ff;
+  color: #000;
+  box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+}
+
+.TitleButton.neon-gold {
+  color: #ffd700;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.TitleButton.neon-gold:hover:not(:disabled) {
+  background: #ffd700;
+  color: #000;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+}
+
+.TitleFooter {
+  color: #444;
+  font-size: 0.8rem;
+  margin-top: 20px;
+}
+
+@keyframes logoEntry {
+  from { 
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .TitleLogo {
+    max-width: 90vw;
+  }
+  .TitleMenu {
+    width: 220px;
+  }
+  .TitleButton {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
 }
