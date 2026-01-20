@@ -32,14 +32,17 @@ class Player {
         this.skill = skillsRaw.split('');
         this.type = this.skill.map(s => skillTypes[s] || 0);
         this.name = this.skill.map(s => skillNames[s] || "？");
+        this.speed = new Array(this.skill.length).fill(0);
+        this.damage = new Array(this.skill.length).fill(0);
         this.scar = new Array(this.skill.length).fill(0);
         this.gekirin = 0; this.stan = 0; this.roubai = 0; this.suijaku = 0; this.kakugo = 0;
         this.bouheki = 0; this.bouheki_ = 0; this.musou = 0; this.sensei = 0; this.tate = 0;
-        this.limited = this.skill.map(s => ["雷", "覚", "防", "封", "盾", "錬", "無"].includes(s) ? 1 : 0);
+        this.limited = this.skill.map(s => ["雷", "覚", "防", "封", "盾", "錬", "無", "連"].includes(s) ? 1 : 0);
         this.kage = new Array(this.skill.length).fill(0);
     }
     getSkillsLength() { return this.skill.length; }
     getSpeed(i, turn) {
+        if (i === -1) return 0; // 弱撃
         let spd = skillSpeeds[this.skill[i]];
         let base = 0;
         if (spd === "LV") base = i + 1;
@@ -57,45 +60,89 @@ class Player {
         let dmg = 0;
         if (s === "一" || s === "刺" || s === "紫" || s === "呪" || s === "弱" || s === "交") dmg = 1;
         else if (s === "果") dmg = i + 1;
-        else if (s === "雷" || s === "隠" || s === "待") dmg = 2;
+        else if (s === "雷" || s === "隠" || s === "待" || s === "待") dmg = 2;
         else if (s === "剣") dmg = this.skill.filter((ss, idx) => this.type[idx] === ATTACK && !(idx < this.getSkillsLength() - 1 && this.skill[idx+1] === "反")).length;
         else if (s === "怒") dmg = turn;
-        if (i < this.getSkillsLength() - 1 && this.skill[i+1] === "強") dmg += 1;
-        if (this.kakugo === 1) dmg += 1;
-        return dmg + this.gekirin;
+        
+        let damageBuf = 0;
+        if (i < this.getSkillsLength() - 1 && this.skill[i+1] === "強") damageBuf += 1;
+        if (this.kakugo === 1) damageBuf += 1;
+        
+        // 逆鱗のバフ消費は一度きり
+        if (this.gekirin > 0) {
+            damageBuf += this.gekirin;
+            this.gekirin = 0;
+        }
+        
+        return dmg + damageBuf;
     }
 }
 
 class BattleSimulator {
-    constructor(p1, p2) { this.pc1 = p1; this.pc2 = p2; this.turn = 1; }
+    constructor(p1, p2) { 
+        this.pc1 = p1; 
+        this.pc2 = p2; 
+        this.turn = 1; 
+        this.log = [];
+    }
+    addLog(msg) { this.log.push(msg); }
     start() {
+        this.addLog("=============================================");
+        this.addLog(`${this.pc1.playerName} VS ${this.pc2.playerName}`);
+        this.addLog("――戦闘開始――");
         for (this.turn = 1; this.turn <= 20; this.turn++) {
+            this.addLog(`\n【第${this.turn}ラウンド】`);
+            this.addLog(this.pc1.skill.map((s, i) => this.pc1.type[i] === NONE ? "　　" : `【${skillNames[s]}】`).join('') + `／${this.pc1.playerName}`);
+            this.addLog(this.pc2.skill.map((s, i) => this.pc2.type[i] === NONE ? "　　" : `【${skillNames[s]}】`).join('') + `／${this.pc2.playerName}`);
+
             this.processStartPhase(this.pc1); this.processStartPhase(this.pc2);
             let sp1 = this.determineFirstActionSpeed(this.pc1);
             let sp2 = this.determineFirstActionSpeed(this.pc2);
-            if (sp1 > sp2) {
-                if (this.unitTurn(this.pc1, this.pc2)) return 1;
-                if (this.unitTurn(this.pc2, this.pc1)) return 2;
-            } else if (sp1 < sp2) {
-                if (this.unitTurn(this.pc2, this.pc1)) return 2;
-                if (this.unitTurn(this.pc1, this.pc2)) return 1;
+            if (sp1 >= sp2) { // 速度同値はpc1先攻
+                this.addLog(`${this.pc1.playerName}の先攻！${sp1 === sp2 ? "（速度同値）" : ""}`);
+                this.addLog(`▼${this.pc1.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc1, this.pc2)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
+                
+                this.addLog(`▼${this.pc2.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc2, this.pc1)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
             } else {
-                // 速度同値はプレイヤー(pc1)先攻
-                if (this.unitTurn(this.pc1, this.pc2)) return 1;
-                if (this.unitTurn(this.pc2, this.pc1)) return 2;
+                this.addLog(`${this.pc2.playerName}の先攻！`);
+                this.addLog(`▼${this.pc2.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc2, this.pc1)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+
+                this.addLog(`▼${this.pc1.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc1, this.pc2)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
             }
-            if (this.pc1.skill.includes("連")) if (this.unitTurn(this.pc1, this.pc2)) return 1;
-            if (this.pc2.skill.includes("連")) if (this.unitTurn(this.pc2, this.pc1)) return 2;
+
+            if (this.pc1.skill.includes("連")) {
+                this.addLog(`\n${this.pc1.playerName}の【連撃】が発動！`);
+                this.addLog(`▼${this.pc1.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc1, this.pc2)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
+            }
+            if (this.pc2.skill.includes("連")) {
+                this.addLog(`\n${this.pc2.playerName}の【連撃】が発動！`);
+                this.addLog(`▼${this.pc2.playerName}の攻撃フェイズ`);
+                if (this.unitTurn(this.pc2, this.pc1)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+            }
             this.processEndPhase(this.pc1); this.processEndPhase(this.pc2);
-            if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) return 1;
-            if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) return 2;
+            if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) { this.addLog(`\n${this.pc1.playerName}の勝利！`); return 1; }
+            if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) { this.addLog(`\n${this.pc2.playerName}の勝利！`); return 2; }
         }
-        return 3; // 引き分け
+        this.addLog("\n引き分け");
+        return 3;
     }
     determineFirstActionSpeed(pc) {
         if (pc.stan === 1) return -999; if (pc.sensei === 1) return 999;
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if ((pc.type[i] === ATTACK || pc.type[i] === BUFF) && pc.scar[i] === 0) {
+                // ＋反がついている攻撃スキルは攻撃フェイズでは発動しない（迎撃としてのみ扱われる）
+                if (pc.type[i] === ATTACK && i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "反") continue;
                 if (pc.skill[i] === "隠" && this.turn % 2 !== 0) continue;
                 return pc.getSpeed(i, this.turn);
             }
@@ -112,6 +159,8 @@ class BattleSimulator {
         if (!uragasumi) {
             for (let i = 0; i < attacker.getSkillsLength(); i++) {
                 if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) {
+                    // ＋反がついている攻撃スキルは通常の攻撃フェイズでは発動しない
+                    if (attacker.type[i] === ATTACK && i < attacker.getSkillsLength() - 1 && attacker.skill[i+1] === "反") continue;
                     if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue;
                     useIdx = i; break;
                 }
@@ -119,13 +168,19 @@ class BattleSimulator {
         } else {
             for (let i = attacker.getSkillsLength() - 1; i >= 0; i--) {
                 if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) {
+                    // ＋反がついている攻撃スキルは通常の攻撃フェイズでは発動しない
+                    if (attacker.type[i] === ATTACK && i < attacker.getSkillsLength() - 1 && attacker.skill[i+1] === "反") continue;
                     if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue;
                     useIdx = i; break;
                 }
             }
         }
-        if (useIdx === -1) { this.applyDamage(attacker, defender, 1, 0, -1, true); }
+        if (useIdx === -1) { 
+            this.addLog(`${attacker.playerName}の【弱撃】0！`);
+            this.applyDamage(attacker, defender, 1, 0, -1, true); 
+        }
         else {
+            this.addLog(`${attacker.playerName}の【${attacker.name[useIdx]}】${useIdx + 1}！`);
             if (attacker.limited[useIdx] === 1) attacker.limited[useIdx] = 2;
             if (attacker.type[useIdx] === ATTACK) {
                 this.applyDamage(attacker, defender, attacker.getDamage(useIdx, this.turn), attacker.getSpeed(useIdx, this.turn), useIdx, false);
@@ -133,15 +188,19 @@ class BattleSimulator {
             if (attacker.skill[useIdx] === "覚") attacker.kakugo = 2;
             if (attacker.skill[useIdx] === "防") attacker.bouheki_ = 2;
             if (attacker.skill[useIdx] === "封") { defender.stan = 2; defender.roubai = 2; defender.suijaku = 2; }
+            if (attacker.skill[useIdx] === "呪") defender.suijaku = 2;
+            
+            // ＋盾の判定（攻撃または補助スキルの直後にある場合）
             if (useIdx < attacker.getSkillsLength() - 1 && attacker.skill[useIdx+1] === "盾") {
-                attacker.tate = 2; attacker.limited[useIdx+1] = 2;
+                this.addLog(`＞【＋盾】${useIdx + 2}の効果で防壁が2つ与えられる！`);
+                attacker.tate = 2; 
+                attacker.limited[useIdx+1] = 2; // リミテッド消費予約
             }
         }
         this.resolveEffects(attacker, defender); this.breakup(attacker); this.breakup(defender);
         return (defender.skill.every((s, i) => defender.type[i] === NONE));
     }
     applyDamage(attacker, defender, dmg, spd, useIdx, isBonda) {
-        if (attacker.gekirin > 0) attacker.gekirin = 0;
         for (let d = 0; d < dmg; d++) {
             if (defender.musou === 1 || defender.bouheki > 0) { if (defender.bouheki > 0) defender.bouheki--; break; }
             let tIdx = -1;
@@ -160,15 +219,35 @@ class BattleSimulator {
                 }
             }
             if (tIdx !== -1) {
+                this.addLog(`＞${defender.playerName}の【${defender.name[tIdx]}】${tIdx + 1}にダメージを与えた！`);
                 defender.scar[tIdx] = 1;
                 if (defender.type[tIdx] === COUNTER || (defender.type[tIdx] === ATTACK && tIdx < defender.getSkillsLength()-1 && defender.skill[tIdx+1] === "反")) {
                     if (!(useIdx !== -1 && useIdx < attacker.getSkillsLength()-1 && attacker.skill[useIdx+1] === "錬")) {
                         let cSpd = defender.getSpeed(tIdx, this.turn);
                         if (cSpd >= spd || isBonda) {
+                            this.addLog(`＞${defender.playerName}の【${defender.name[tIdx]}】${tIdx + 1}が発動！`);
                             if (defender.limited[tIdx] === 1) defender.limited[tIdx] = 2;
-                            if (defender.skill[tIdx] === "交") { if (!isBonda) attacker.scar[useIdx] = 1; }
-                            else if (defender.skill[tIdx] === "玉") this.applyDamage(defender, attacker, spd, cSpd, tIdx, false);
-                            else this.applyDamage(defender, attacker, defender.getDamage(tIdx, this.turn), cSpd, tIdx, false);
+                            if (defender.skill[tIdx] === "交") { 
+                                if (!isBonda) {
+                                    this.addLog(`＞${attacker.playerName}の【${attacker.name[useIdx]}】${useIdx + 1}にダメージを与えた！`);
+                                    attacker.scar[useIdx] = 1; 
+                                }
+                            }
+                            else if (defender.skill[tIdx] === "玉") {
+                                // 玉響のダメージ計算（速度参照）
+                                let counterDmg = spd;
+                                if (defender.kakugo === 1) counterDmg += 1;
+                                this.applyDamage(defender, attacker, counterDmg, cSpd, tIdx, false);
+                            }
+                            else {
+                                // 待伏、一閃（反）などの迎撃ダメージ
+                                let counterDmg = defender.getDamage(tIdx, this.turn);
+                                // getDamage内で覚悟補正が乗っているはずだが、applyDamage側でも本編に合わせて補正を確認
+                                this.applyDamage(defender, attacker, counterDmg, cSpd, tIdx, false);
+                                
+                                // 呪詛迎撃時の忘却予約
+                                if (defender.skill[tIdx] === "呪") attacker.suijaku = 2;
+                            }
                             break;
                         }
                     }
@@ -178,33 +257,57 @@ class BattleSimulator {
     }
     resolveEffects(p1, p2) {
         [p1, p2].forEach(p => {
-            if (p.kakugo === 2) p.kakugo = 1; if (p.bouheki_ === 2) { p.bouheki += 3; p.bouheki_ = 0; }
-            if (p.tate === 2) { p.bouheki += 2; p.tate = 0; } if (p.stan === 2) p.stan = 1;
-            if (p.roubai === 2) p.roubai = 1; if (p.suijaku === 2) p.suijaku = 1;
+            if (p.kakugo === 2) { this.addLog(`${p.playerName}に覚悟が与えられた！`); p.kakugo = 1; }
+            if (p.bouheki_ === 2) { this.addLog(`${p.playerName}に防壁が与えられた！`); p.bouheki += 3; p.bouheki_ = 0; }
+            if (p.tate === 2) { this.addLog(`${p.playerName}に防壁が与えられた！`); p.bouheki += 2; p.tate = 0; }
+            if (p.stan === 2) { this.addLog(`${p.playerName}はスタンを受けた！`); p.stan = 1; }
+            if (p.roubai === 2) { this.addLog(`${p.playerName}は狼狽を受けた！`); p.roubai = 1; }
+            if (p.suijaku === 2) { this.addLog(`${p.playerName}は忘却を受けた！`); p.suijaku = 1; }
         });
     }
     breakup(pc) {
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if (pc.scar[i] === 1) {
-                if (i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "硬") { pc.skill[i+1] = "＿"; pc.type[i+1] = NONE; pc.scar[i] = 0; }
-                else { if (pc.skill[i] === "逆") pc.gekirin++; pc.skill[i] = "＿"; pc.type[i] = NONE; }
+                if (pc.type[i] !== ENCHANT && i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "硬") { 
+                    this.addLog(`${pc.playerName}の【＋硬】${i+2}によって【${pc.name[i]}】${i+1}の破壊が無効化された！`);
+                    pc.skill[i+1] = "＿"; pc.type[i+1] = NONE; pc.scar[i+1] = 0; pc.limited[i+1] = 0;
+                    pc.scar[i] = 0; 
+                }
+                else { 
+                    this.addLog(`${pc.playerName}の【${pc.name[i]}】${i+1}が破壊された！`);
+                    if (pc.skill[i] === "逆") {
+                        this.addLog(`＞${pc.playerName}に逆鱗が与えられた！`);
+                        pc.gekirin++; 
+                    }
+                    pc.skill[i] = "＿"; pc.type[i] = NONE; 
+                    pc.speed[i] = 0; pc.damage[i] = 0; pc.scar[i] = 0; pc.limited[i] = 0; pc.kage[i] = 0;
+                }
             }
         }
     }
     processStartPhase(pc) {
         if (this.turn <= pc.getSkillsLength()) {
-            if (pc.skill[this.turn-1] === "無") pc.musou = 1; if (pc.skill[this.turn-1] === "先") pc.sensei = 1;
+            if (pc.skill[this.turn-1] === "無") { this.addLog(`${pc.playerName}の【無想】${this.turn}が発動！`); pc.musou = 1; }
+            if (pc.skill[this.turn-1] === "先") { this.addLog(`${pc.playerName}の【先制】${this.turn}が発動！`); pc.sensei = 1; }
         }
     }
     processEndPhase(pc) {
         pc.musou = 0; pc.sensei = 0;
         for (let i = 0; i < pc.getSkillsLength(); i++) { if (pc.limited[i] === 2) { pc.limited[i] = 1; pc.scar[i] = 1; } }
+        
+        // 破壊の処理を先に行う
+        this.breakup(pc);
+
         if (pc.suijaku === 1) {
             for (let i = 0; i < pc.getSkillsLength(); i++) {
-                if (pc.type[i] !== NONE && pc.skill[i] !== "空") { pc.skill[i] = "空"; pc.type[i] = ENCHANT; break; }
+                if (pc.type[i] !== NONE && pc.skill[i] !== "空") { 
+                    this.addLog(`忘却の効果で${pc.playerName}の【${pc.name[i]}】${i+1}が【空白】${i+1}に変化した！`);
+                    pc.skill[i] = "空"; pc.name[i] = "空白"; pc.type[i] = ENCHANT; 
+                    pc.speed[i] = 0; pc.damage[i] = 0; pc.scar[i] = 0; pc.limited[i] = 0;
+                    break; 
+                }
             }
         }
-        this.breakup(pc);
     }
 }
 
@@ -218,8 +321,8 @@ const STAGES = [
     { no: 7, name: "リザードロード", boss: "交一裏一裏剣", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠" },
     { no: 8, name: "絶望のキマイラ", boss: "疫硬搦硬刺怒怒", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠先逆覚" },
     { no: 9, name: "殺戮人形", boss: "先待待封連雷雷", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠先逆覚雷連封" },
-    { no: 11, name: "剣獣", boss: "無覚交果反燐玉紫強", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
-    { no: 12, name: "無貌竜アノマ", boss: "影影硬待硬雷硬交硬一", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
+    { no: 11, name: "剣獣", boss: "無覚交果反燐玉紫盾", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
+    { no: 12, name: "無貌竜アノマ", boss: "待硬燐硬雷反交硬一", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
 ];
 
 function getAllSetups(pool, count = 5) {
@@ -246,19 +349,26 @@ function getAllSetups(pool, count = 5) {
 let report = "Boss Battle Simulation (Draw=Lose, Max 500000 unique patterns)\n\n";
 
 STAGES.forEach(stage => {
-    let wins = 0; let winningSetups = [];
+    let wins = 0; let winningSetups = []; let firstWinLog = "";
     let patterns = getAllSetups(stage.pool);
 
     patterns.forEach(setup => {
-        if (new BattleSimulator(new Player(setup, "P"), new Player(stage.boss, "B")).start() === 1) {
-            wins++; if (winningSetups.length < 5) winningSetups.push(setup);
+        const sim = new BattleSimulator(new Player(setup, "P"), new Player(stage.boss, "B"));
+        if (sim.start() === 1) {
+            wins++; 
+            if (winningSetups.length < 5) winningSetups.push(setup);
+            if (!firstWinLog) firstWinLog = sim.log.join('\n');
         }
     });
 
     const winRate = ((wins / patterns.length) * 100).toFixed(2);
     report += `Stage ${stage.no}: ${stage.name} (${patterns.length} patterns)\n`;
     report += `Win Rate: ${winRate}%\n`;
-    if (wins > 0) report += `Sample Winning Setups: ${winningSetups.join(', ')}\n`;
+    if (wins > 0) {
+        report += `Sample Winning Setups: ${winningSetups.join(', ')}\n`;
+        report += `\n--- Battle Log for first winning setup (${winningSetups[0]}) ---\n`;
+        report += firstWinLog + "\n";
+    }
     else report += `!!! UNBEATABLE !!!\n`;
     report += "----------------------------------------------------\n";
 });

@@ -358,8 +358,9 @@ export class Battle {
                 if (this.breakup(pc1) + this.breakup(pc2) >= 1) this.text += "\n";
                 judgeResult = this.judge(pc1, pc2, 2);
                 if (judgeResult > 0) return judgeResult;
-            } else if (rengekiPc2 === 1) {
+            }
 
+            if (rengekiPc2 === 1) {
                 this.text += "\n";
                 this.text += `▼${pc2.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
@@ -370,9 +371,7 @@ export class Battle {
                 if (this.breakup(pc2) + this.breakup(pc1) >= 1) this.text += "\n";
                 judgeResult = this.judge(pc1, pc2, 1);
                 if (judgeResult > 0) return judgeResult;
-
             }
-
 
             //↓終了フェイズ
 
@@ -450,10 +449,10 @@ export class Battle {
             if (pc1.suijaku === 1) {
                 for (let i = 0; i < pc1.getSkillsLength(); i++) {
                     if (pc1.type[i] !== Player.NONE && pc1.skill[i] !== "空") {
-                        this.text += `忘却の効果で${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
+                        this.text += `忘却の効果で${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【空白】${i + 1}に変化した！\n`;
 
                         pc1.skill[i] = "空";
-                        pc1.name[i] = "空虚";
+                        pc1.name[i] = "空白";
                         pc1.type[i] = Player.ENCHANT;
                         pc1.speed[i] = 0;
                         pc1.damage[i] = 0;
@@ -469,10 +468,10 @@ export class Battle {
             if (pc2.suijaku === 1) {
                 for (let i = 0; i < pc2.getSkillsLength(); i++) {
                     if (pc2.type[i] !== Player.NONE && pc2.skill[i] !== "空") {
-                        this.text += `忘却の効果で${pc2.playerName}の【${pc2.name[i]}】${i + 1}が【空虚】${i + 1}に変化した！\n`;
+                        this.text += `忘却の効果で${pc2.playerName}の【${pc2.name[i]}】${i + 1}が【空白】${i + 1}に変化した！\n`;
 
                         pc2.skill[i] = "空";
-                        pc2.name[i] = "空虚";
+                        pc2.name[i] = "空白";
                         pc2.type[i] = Player.ENCHANT;
                         pc2.speed[i] = 0;
                         pc2.damage[i] = 0;
@@ -515,30 +514,30 @@ export class Battle {
                     this.text += `＞${pc1.playerName}の忘却が解除された！\n`;
                     pc1.suijaku = 0;
                 }
-                if (pc1.roubai === 1) {
-                    this.text += `＞${pc1.playerName}の狼狽が解除された！\n`;
-                    pc1.roubai = 0;
-                }
-                if (pc1.kakugo === 1) {
-                    this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
-                    pc1.kakugo = 0;
-                }
-                if (pc1.bouheki >= 1) {
-                    this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
-                    pc1.bouheki = 0;
-                }
-                if (pc1.gekirin >= 1) {
-                    this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
-                    pc1.gekirin = 0;
-                }
-                if (pc1.musou === 1) {
-                    this.text += `＞${pc1.playerName}の無想が解除された！\n`;
-                    pc1.musou = 0;
-                }
-                if (pc1.sensei === 1) {
-                    this.text += `＞${pc1.playerName}の先制が解除された！\n`;
-                    pc1.sensei = 0;
-                }
+                // if (pc1.roubai === 1) {
+                //     this.text += `＞${pc1.playerName}の狼狽が解除された！\n`;
+                //     pc1.roubai = 0;
+                // }
+                // if (pc1.kakugo === 1) {
+                //     this.text += `＞${pc1.playerName}の覚悟が解除された！\n`;
+                //     pc1.kakugo = 0;
+                // }
+                // if (pc1.bouheki >= 1) {
+                //     this.text += `＞${pc1.playerName}の防壁が解除された！\n`;
+                //     pc1.bouheki = 0;
+                // }
+                // if (pc1.gekirin >= 1) {
+                //     this.text += `＞${pc1.playerName}の逆鱗が解除された！\n`;
+                //     pc1.gekirin = 0;
+                // }
+                // if (pc1.musou === 1) {
+                //     this.text += `＞${pc1.playerName}の無想が解除された！\n`;
+                //     pc1.musou = 0;
+                // }
+                // if (pc1.sensei === 1) {
+                //     this.text += `＞${pc1.playerName}の先制が解除された！\n`;
+                //     pc1.sensei = 0;
+                // }
 
 
                 // if (pc2.stan === 1) {
@@ -645,6 +644,7 @@ export class Battle {
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "盾") {
                         this.text += `＞【＋盾】${i + 2}の効果で防壁が2つ与えられる！\n`;
+                        pc1.limited[i + 1] = 2;
                     }
 
                     if (pc1.kakugo === 1) {
@@ -670,6 +670,7 @@ export class Battle {
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "盾") {
                         this.text += `＞【＋盾】${i + 2}の効果で防壁が2つ与えられる！\n`;
+                        pc1.limited[i + 1] = 2;
                     }
 
                     // リミテッド処理
@@ -1296,7 +1297,11 @@ export class Battle {
 
         }
 
-        if (result === 3) result = prior; // 両者のスキルが破壊された場合は先攻が勝者
+        if (result === 3) {
+            if (prior === 1) result = 2; // あなたの攻撃フェイズ中に両者全滅ならあなたの敗北（相手1の勝利）
+            else if (prior === 2) result = 1; // 相手の攻撃フェイズ中に両者全滅なら相手の敗北（あなた1の勝利）
+            else result = 3; // フェイズ情報がない（同時・終了フェイズ）なら引き分け
+        }
 
         if (result === 1) {
             this.text += `${pc1.playerName}の勝利！\n\n`;

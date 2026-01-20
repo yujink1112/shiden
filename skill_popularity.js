@@ -29,6 +29,8 @@ class Player {
     constructor(skillsRaw, name) {
         this.playerName = name; this.skillsRaw = skillsRaw; this.skill = skillsRaw.split('');
         this.type = this.skill.map(s => skillTypes[s] || 0); this.name = this.skill.map(s => skillNames[s] || "？");
+        this.speed = new Array(this.skill.length).fill(0);
+        this.damage = new Array(this.skill.length).fill(0);
         this.scar = new Array(this.skill.length).fill(0); this.gekirin = 0; this.stan = 0; this.roubai = 0; this.suijaku = 0; this.kakugo = 0;
         this.bouheki = 0; this.bouheki_ = 0; this.musou = 0; this.sensei = 0; this.tate = 0;
         this.limited = this.skill.map(s => ["雷", "覚", "防", "封", "盾", "錬", "無", "連"].includes(s) ? 1 : 0);
@@ -36,6 +38,7 @@ class Player {
     }
     getSkillsLength() { return this.skill.length; }
     getSpeed(i, turn) {
+        if (i === -1) return 0;
         let spd = skillSpeeds[this.skill[i]]; let base = 0;
         if (spd === "LV") base = i + 1; else if (spd === "LV-1") base = Math.max(0, i);
         else if (spd === "LV+2") base = i + 3; else if (spd === "LV-2（最低0）") base = Math.max(0, i - 1);
@@ -49,8 +52,15 @@ class Player {
         else if (s === "果") dmg = i + 1; else if (s === "雷" || s === "隠" || s === "待") dmg = 2;
         else if (s === "剣") dmg = this.skill.filter((ss, idx) => this.type[idx] === ATTACK && !(idx < this.getSkillsLength() - 1 && this.skill[idx+1] === "反")).length;
         else if (s === "怒") dmg = turn;
-        if (i < this.getSkillsLength() - 1 && this.skill[i+1] === "強") dmg += 1;
-        if (this.kakugo === 1) dmg += 1; return dmg + this.gekirin;
+        
+        let damageBuf = 0;
+        if (i < this.getSkillsLength() - 1 && this.skill[i+1] === "強") damageBuf += 1;
+        if (this.kakugo === 1) damageBuf += 1;
+        if (this.gekirin > 0) {
+            damageBuf += this.gekirin;
+            this.gekirin = 0;
+        }
+        return dmg + damageBuf;
     }
 }
 
@@ -60,10 +70,25 @@ class BattleSimulator {
         for (this.turn = 1; this.turn <= 20; this.turn++) {
             this.processStartPhase(this.pc1); this.processStartPhase(this.pc2);
             let sp1 = this.determineFirstActionSpeed(this.pc1); let sp2 = this.determineFirstActionSpeed(this.pc2);
-            if (sp1 >= sp2) { if (this.unitTurn(this.pc1, this.pc2)) return 1; if (this.unitTurn(this.pc2, this.pc1)) return 2; }
-            else { if (this.unitTurn(this.pc2, this.pc1)) return 2; if (this.unitTurn(this.pc1, this.pc2)) return 1; }
-            if (this.pc1.skill.includes("連")) if (this.unitTurn(this.pc1, this.pc2)) return 1;
-            if (this.pc2.skill.includes("連")) if (this.unitTurn(this.pc2, this.pc1)) return 2;
+            if (sp1 >= sp2) {
+                if (this.unitTurn(this.pc1, this.pc2)) return 1;
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) return 2;
+                if (this.unitTurn(this.pc2, this.pc1)) return 2;
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) return 1;
+            } else {
+                if (this.unitTurn(this.pc2, this.pc1)) return 2;
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) return 1;
+                if (this.unitTurn(this.pc1, this.pc2)) return 1;
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) return 2;
+            }
+            if (this.pc1.skill.includes("連")) {
+                if (this.unitTurn(this.pc1, this.pc2)) return 1;
+                if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) return 2;
+            }
+            if (this.pc2.skill.includes("連")) {
+                if (this.unitTurn(this.pc2, this.pc1)) return 2;
+                if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) return 1;
+            }
             this.processEndPhase(this.pc1); this.processEndPhase(this.pc2);
             if (this.pc2.skill.every((s, i) => this.pc2.type[i] === NONE)) return 1;
             if (this.pc1.skill.every((s, i) => this.pc1.type[i] === NONE)) return 2;
@@ -73,28 +98,31 @@ class BattleSimulator {
         if (pc.stan === 1) return -999; if (pc.sensei === 1) return 999;
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if ((pc.type[i] === ATTACK || pc.type[i] === BUFF) && pc.scar[i] === 0) {
+                if (pc.type[i] === ATTACK && i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "反") continue;
                 if (pc.skill[i] === "隠" && this.turn % 2 !== 0) continue; return pc.getSpeed(i, this.turn);
             }
         } return 0;
     }
     unitTurn(attacker, defender) {
-        if (attacker.skill.includes("燐")) { attacker.stan = 0; attacker.suijaku = 0; attacker.roubai = 0; attacker.kakugo = 0; attacker.bouheki = 0; attacker.gekirin = 0; attacker.musou = 0; attacker.sensei = 0; }
+        if (attacker.skill.includes("燐")) { 
+            attacker.stan = 0; attacker.suijaku = 0; attacker.roubai = 0; attacker.kakugo = 0; attacker.bouheki = 0; attacker.gekirin = 0; attacker.musou = 0; attacker.sensei = 0; 
+        }
         let useIdx = -1; let uragasumi = attacker.skill.includes("裏");
-        if (!uragasumi) { for (let i = 0; i < attacker.getSkillsLength(); i++) { if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) { if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue; useIdx = i; break; } } }
-        else { for (let i = attacker.getSkillsLength() - 1; i >= 0; i--) { if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) { if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue; useIdx = i; break; } } }
+        if (!uragasumi) { for (let i = 0; i < attacker.getSkillsLength(); i++) { if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) { if (attacker.type[i] === ATTACK && i < attacker.getSkillsLength() - 1 && attacker.skill[i+1] === "反") continue; if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue; useIdx = i; break; } } }
+        else { for (let i = attacker.getSkillsLength() - 1; i >= 0; i--) { if ((attacker.type[i] === ATTACK || attacker.type[i] === BUFF) && attacker.scar[i] === 0) { if (attacker.type[i] === ATTACK && i < attacker.getSkillsLength() - 1 && attacker.skill[i+1] === "反") continue; if (attacker.skill[i] === "隠" && this.turn % 2 !== 0) continue; useIdx = i; break; } } }
         if (useIdx === -1) { this.applyDamage(attacker, defender, 1, 0, -1, true); }
         else {
             if (attacker.limited[useIdx] === 1) attacker.limited[useIdx] = 2;
             if (attacker.type[useIdx] === ATTACK) this.applyDamage(attacker, defender, attacker.getDamage(useIdx, this.turn), attacker.getSpeed(useIdx, this.turn), useIdx, false);
             if (attacker.skill[useIdx] === "覚") attacker.kakugo = 2; if (attacker.skill[useIdx] === "防") attacker.bouheki_ = 2;
             if (attacker.skill[useIdx] === "封") { defender.stan = 2; defender.roubai = 2; defender.suijaku = 2; }
+            if (attacker.skill[useIdx] === "呪") defender.suijaku = 2;
             if (useIdx < attacker.getSkillsLength() - 1 && attacker.skill[useIdx+1] === "盾") { attacker.tate = 2; attacker.limited[useIdx+1] = 2; }
         }
         this.resolveEffects(attacker, defender); this.breakup(attacker); this.breakup(defender);
         return (defender.skill.every((s, i) => defender.type[i] === NONE));
     }
     applyDamage(attacker, defender, dmg, spd, useIdx, isBonda) {
-        if (attacker.gekirin > 0) attacker.gekirin = 0;
         for (let d = 0; d < dmg; d++) {
             if (defender.musou === 1 || defender.bouheki > 0) { if (defender.bouheki > 0) defender.bouheki--; break; }
             let tIdx = -1;
@@ -105,16 +133,53 @@ class BattleSimulator {
                 defender.scar[tIdx] = 1;
                 if (defender.type[tIdx] === COUNTER || (defender.type[tIdx] === ATTACK && tIdx < defender.getSkillsLength()-1 && defender.skill[tIdx+1] === "反")) {
                     if (!(useIdx !== -1 && useIdx < attacker.getSkillsLength()-1 && attacker.skill[useIdx+1] === "錬")) {
-                        let c = defender.getSpeed(tIdx, this.turn); if (c >= spd || isBonda) { if (defender.limited[tIdx] === 1) defender.limited[tIdx] = 2; if (defender.skill[tIdx] === "交") { if (!isBonda) attacker.scar[useIdx] = 1; } else if (defender.skill[tIdx] === "玉") this.applyDamage(defender, attacker, spd, c, tIdx, false); else this.applyDamage(defender, attacker, defender.getDamage(tIdx, this.turn), c, tIdx, false); break; }
+                        let c = defender.getSpeed(tIdx, this.turn); if (c >= spd || isBonda) { 
+                            if (defender.limited[tIdx] === 1) defender.limited[tIdx] = 2; 
+                            if (defender.skill[tIdx] === "交") { if (!isBonda) attacker.scar[useIdx] = 1; } 
+                            else if (defender.skill[tIdx] === "玉") this.applyDamage(defender, attacker, spd, c, tIdx, false); 
+                            else {
+                                this.applyDamage(defender, attacker, defender.getDamage(tIdx, this.turn), c, tIdx, false);
+                                if (defender.skill[tIdx] === "呪") attacker.suijaku = 2;
+                            }
+                            break; 
+                        }
                     }
                 }
             }
         }
     }
     resolveEffects(p1, p2) { [p1, p2].forEach(p => { if (p.kakugo === 2) p.kakugo = 1; if (p.bouheki_ === 2) { p.bouheki += 3; p.bouheki_ = 0; } if (p.tate === 2) { p.bouheki += 2; p.tate = 0; } if (p.stan === 2) p.stan = 1; if (p.roubai === 2) p.roubai = 1; if (p.suijaku === 2) p.suijaku = 1; }); }
-    breakup(pc) { for (let i = 0; i < pc.getSkillsLength(); i++) { if (pc.scar[i] === 1) { if (i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "硬") { pc.skill[i+1] = "＿"; pc.type[i+1] = NONE; pc.scar[i] = 0; } else { if (pc.skill[i] === "逆") pc.gekirin++; pc.skill[i] = "＿"; pc.type[i] = NONE; } } } }
+    breakup(pc) { 
+        for (let i = 0; i < pc.getSkillsLength(); i++) { 
+            if (pc.scar[i] === 1) { 
+                if (pc.type[i] !== ENCHANT && i < pc.getSkillsLength() - 1 && pc.skill[i+1] === "硬") { 
+                    pc.skill[i+1] = "＿"; pc.type[i+1] = NONE; pc.scar[i+1] = 0; pc.limited[i+1] = 0;
+                    pc.scar[i] = 0; 
+                } else { 
+                    if (pc.skill[i] === "逆") pc.gekirin++; 
+                    pc.skill[i] = "＿"; pc.type[i] = NONE; 
+                    pc.speed[i] = 0; pc.damage[i] = 0; pc.scar[i] = 0; pc.limited[i] = 0; pc.kage[i] = 0;
+                } 
+            } 
+        } 
+    }
     processStartPhase(pc) { if (this.turn <= pc.getSkillsLength()) { if (pc.skill[this.turn-1] === "無") pc.musou = 1; if (pc.skill[this.turn-1] === "先") pc.sensei = 1; } }
-    processEndPhase(pc) { pc.musou = 0; pc.sensei = 0; for (let i = 0; i < pc.getSkillsLength(); i++) { if (pc.limited[i] === 2) { pc.limited[i] = 1; pc.scar[i] = 1; } } if (pc.suijaku === 1) { for (let i = 0; i < pc.getSkillsLength(); i++) { if (pc.type[i] !== NONE && pc.skill[i] !== "空") { pc.skill[i] = "空"; pc.type[i] = ENCHANT; break; } } } this.breakup(pc); }
+    processEndPhase(pc) { 
+        pc.musou = 0; pc.sensei = 0; 
+        for (let i = 0; i < pc.getSkillsLength(); i++) { if (pc.limited[i] === 2) { pc.limited[i] = 1; pc.scar[i] = 1; } } 
+        
+        this.breakup(pc);
+
+        if (pc.suijaku === 1) { 
+            for (let i = 0; i < pc.getSkillsLength(); i++) { 
+                if (pc.type[i] !== NONE && pc.skill[i] !== "空") { 
+                    pc.skill[i] = "空"; pc.name[i] = "空白"; pc.type[i] = ENCHANT; 
+                    pc.speed[i] = 0; pc.damage[i] = 0; pc.scar[i] = 0; pc.limited[i] = 0;
+                    break; 
+                } 
+            } 
+        } 
+    }
 }
 
 const STAGES = [
@@ -128,7 +193,7 @@ const STAGES = [
     { no: 8, name: "絶望のキマイラ", boss: "疫硬搦硬刺怒硬", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫隠先逆覚" },
     { no: 9, name: "殺戮人形", boss: "先連封待待呪呪", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷連封" },
     { no: 11, name: "剣獣", boss: "無覚交果反燐玉紫強", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
-    { no: 12, name: "無貌竜アノマ", boss: "影影硬待硬雷硬交硬果", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
+    { no: 12, name: "無貌竜アノマ", boss: "影影コンセプトに従い修正", pool: "一果待崩刺搦速防硬盾剣交強怒裏反呪疫連先逆覚雷隠封紫影玉錬無燐" },
 ];
 
 function getAllSetups(pool, count = 5) {

@@ -26,7 +26,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossName: "オオサソリ",
     bossImage: "/images/monster/2.png",
     bossDescription: "食べられない……。",
-    shopSkills: ["崩技", "果断"],
+    shopSkills: ["崩技", "刺突"],
     bossSkillAbbrs: "崩崩待刺刺",
   },
   {
@@ -41,10 +41,10 @@ export const STAGE_DATA: StageConfig[] = [
   {
     no: 4,
     name: "家を作ろう",
-    bossName: "ジュロウシ",
+    bossName: "コノキナンノキ",
     bossImage: "/images/monster/4.png",
-    bossDescription: "見るからに由緒がある。",
-    shopSkills: ["防壁", "＋硬", "＋盾", ],
+    bossDescription: "見たこともないが由緒がありそうだ。",
+    shopSkills: ["防壁", "＋硬", "＋盾"],
     bossSkillAbbrs: "空空刺硬空空刺硬",
   },
   {
@@ -90,7 +90,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossImage: "/images/monster/9.png",
     bossDescription: "殺戮兵器は邪悪に微笑む。",
     shopSkills: ["雷火", "封印", "連撃"],
-    bossSkillAbbrs: "先封待待連雷雷",
+    bossSkillAbbrs: "先待待封連雷雷",
   },
   {
     no: 10,
@@ -108,20 +108,20 @@ export const STAGE_DATA: StageConfig[] = [
     bossImage: "/images/monster/11.png",
     bossDescription: "かつて剣に全てを捧げた者達がいた。",
     shopSkills: ["＋錬", "無想","燐光"],
-    bossSkillAbbrs: "無覚交果反燐玉紫強",
+    bossSkillAbbrs: "無覚交果反玉連紫盾",
   },
   {
     no: 12,
     name: "生き残ろう",
     bossName: "アノマ",
     bossImage: "/images/monster/12.png",
-    bossDescription: "ハハハハハハハハハハハハハ！！！",
+    bossDescription: "「ハハハハハハハハハハハハハ！！！」",
     shopSkills: [],
-    bossSkillAbbrs: "影影硬待硬雷硬交硬一",
+    bossSkillAbbrs: "影影硬逆燐雷反交硬一",
   },
 ];
 
-// 補助的な追加データ（テキストの下の方にあったもの）
+// 補助的な追加データ
 export const SPECIAL_BOSSES = [
     { name: "ステュムパリデス", skills: "先交燐果錬" },
     { name: "オピーオーン", skills: "隠隠隠隠剣" },
@@ -130,11 +130,15 @@ export const SPECIAL_BOSSES = [
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {
     const skillNames = new Set<string>();
+    // Stage 1のスキルを含めるために、i <= stageNo かつ STAGE_DATAが1-indexedか0-indexedかを確認
+    // データの定義は0番目がStage 1, 1番目がStage 2...となっているので
     for (let i = 0; i < stageNo; i++) {
-        STAGE_DATA[i].shopSkills.forEach(name => skillNames.add(name));
+        if (STAGE_DATA[i]) {
+            STAGE_DATA[i].shopSkills.forEach(name => skillNames.add(name));
+        }
     }
-    // 基本スキルも加える? (弱撃など)
-    return ALL_SKILLS.filter(s => skillNames.has(s.name));
+    // 基本スキルも加える
+    return ALL_SKILLS.filter(s => skillNames.has(s.name) || s.name === "一閃");
 };
 
 export const getSkillByName = (name: string): SkillDetail | undefined => {

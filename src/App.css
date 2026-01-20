@@ -325,10 +325,12 @@
 
   /* ボス演出エリアのスマホ調整 */
   .sticky-boss-area {
-    height: 120px !important;
+    height: 160px !important;
+    align-items: flex-end !important;
+    padding-bottom: 25px !important;
   }
   .boss-battle-image {
-    height: 100px !important;
+    height: 110px !important;
   }
 
   /* ログ画面の「VS」ヘッダーのスマホ調整 */
@@ -383,6 +385,16 @@
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-10px); }
   40%, 80% { transform: translateX(10px); }
+}
+
+@keyframes bossDamageLarge {
+  0%, 100% { transform: translateX(-50%); }
+  20%, 60% { transform: translateX(calc(-50% - 10px)); }
+  40%, 80% { transform: translateX(calc(-50% + 10px)); }
+}
+
+.boss-battle-image.is-large.boss-anim-damage {
+  animation: bossDamageLarge 0.5s ease-in-out;
 }
 
 @keyframes bossCounter {

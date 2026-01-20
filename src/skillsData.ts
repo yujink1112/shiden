@@ -4,7 +4,7 @@ export const ALL_SKILLS = [
   { abbr: "果", name: "果断", icon: "/images/skill/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。" },
   { abbr: "剣", name: "剣舞", icon: "/images/skill/a04.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、あなたが所持している攻撃スキルの数である。" },
   { abbr: "紫", name: "紫電", icon: "/images/skill/a05.gif", type: "攻撃", speed: "LV+2", description: "相手に1点のダメージを与える。\nあなたに状態「スタン」を与える。" },
-  { abbr: "呪", name: "呪詛", icon: "/images/skill/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nこのスキルが相手にダメージを与えたならば、相手に状態「忘却」を与える。" },
+  { abbr: "呪", name: "呪詛", icon: "/images/skill/a06.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。相手に状態「忘却」を与える。" },
   { abbr: "雷", name: "雷火", icon: "/images/skill/a07.gif", type: "攻撃（リミテッド）", speed: "LV", description: "相手に2点のダメージを与える。" },
   { abbr: "隠", name: "隠刃", icon: "/images/skill/a08.gif", type: "攻撃", speed: "LV", description: "相手に2点のダメージを与える。\nこのスキルは奇数ラウンドの時、先攻決定フェイズで速度を比較するスキルの対象にならず、また、攻撃フェイズで使用するスキルにも選択されない。" },
   { abbr: "怒", name: "怒濤", icon: "/images/skill/a09.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手にX点のダメージを与える。\nXは、現在のラウンド数である。" },

@@ -49,115 +49,135 @@ Stage 5: オークマスター (178 wins from 10000 patterns)
   - 刺突 (刺): 10.7% presence in winning setups
   - ＋強 (強): 4.5% presence in winning setups
 ------------------------------------------------
-Stage 6: 肉厚な魚 (718 wins from 10000 patterns)
-  - 一閃 (一): 120.1% presence in winning setups
-  - 待伏 (待): 86.8% presence in winning setups
-  - 防壁 (防): 48.6% presence in winning setups
-  - 崩技 (崩): 33.6% presence in winning setups
-  - 怒濤 (怒): 32.6% presence in winning setups
-  - 果断 (果): 30.6% presence in winning setups
-  - 裏霞 (裏): 21.4% presence in winning setups
-  - 剣舞 (剣): 20.5% presence in winning setups
-  - 刺突 (刺): 20.2% presence in winning setups
-  - ＋硬 (硬): 18.4% presence in winning setups
-  - ＋盾 (盾): 15.5% presence in winning setups
-  - ＋速 (速): 12.8% presence in winning setups
-  - 搦手 (搦): 12.0% presence in winning setups
-  - ＋反 (反): 10.3% presence in winning setups
-  - 交錯 (交): 10.0% presence in winning setups
-  - ＋強 (強): 6.7% presence in winning setups
+Stage 6: 肉厚な魚 (462 wins from 10000 patterns)
+  - 一閃 (一): 132.0% presence in winning setups
+  - 防壁 (防): 80.1% presence in winning setups
+  - 待伏 (待): 62.3% presence in winning setups
+  - 怒濤 (怒): 40.5% presence in winning setups
+  - 果断 (果): 36.8% presence in winning setups
+  - 崩技 (崩): 29.7% presence in winning setups
+  - 刺突 (刺): 23.8% presence in winning setups
+  - ＋盾 (盾): 21.9% presence in winning setups
+  - 剣舞 (剣): 14.3% presence in winning setups
+  - ＋硬 (硬): 13.2% presence in winning setups
+  - ＋強 (強): 11.3% presence in winning setups
+  - 交錯 (交): 8.4% presence in winning setups
+  - 搦手 (搦): 8.2% presence in winning setups
+  - ＋速 (速): 8.0% presence in winning setups
+  - 裏霞 (裏): 5.0% presence in winning setups
+  - ＋反 (反): 4.5% presence in winning setups
 ------------------------------------------------
-Stage 7: リザードロード (676 wins from 10000 patterns)
-  - 一閃 (一): 163.3% presence in winning setups
-  - 果断 (果): 148.8% presence in winning setups
-  - 怒濤 (怒): 21.7% presence in winning setups
-  - ＋盾 (盾): 17.3% presence in winning setups
-  - 防壁 (防): 16.7% presence in winning setups
-  - 隠刃 (隠): 13.3% presence in winning setups
-  - ＋強 (強): 12.0% presence in winning setups
-  - 裏霞 (裏): 10.9% presence in winning setups
-  - 待伏 (待): 10.8% presence in winning setups
-  - 崩技 (崩): 10.8% presence in winning setups
-  - 搦手 (搦): 10.8% presence in winning setups
-  - 交錯 (交): 10.8% presence in winning setups
-  - ＋硬 (硬): 10.2% presence in winning setups
-  - ＋速 (速): 8.6% presence in winning setups
-  - 疫病 (疫): 8.0% presence in winning setups
-  - ＋反 (反): 7.0% presence in winning setups
-  - 刺突 (刺): 6.4% presence in winning setups
-  - 剣舞 (剣): 6.4% presence in winning setups
-  - 呪詛 (呪): 6.2% presence in winning setups
+Stage 7: リザードロード (710 wins from 10000 patterns)
+  - 一閃 (一): 163.1% presence in winning setups
+  - 果断 (果): 149.0% presence in winning setups
+  - 怒濤 (怒): 21.0% presence in winning setups
+  - ＋盾 (盾): 16.8% presence in winning setups
+  - 防壁 (防): 16.2% presence in winning setups
+  - 隠刃 (隠): 12.8% presence in winning setups
+  - ＋強 (強): 11.7% presence in winning setups
+  - 呪詛 (呪): 11.0% presence in winning setups
+  - 裏霞 (裏): 10.7% presence in winning setups
+  - 待伏 (待): 10.6% presence in winning setups
+  - 崩技 (崩): 10.6% presence in winning setups
+  - 搦手 (搦): 10.6% presence in winning setups
+  - 交錯 (交): 10.6% presence in winning setups
+  - ＋硬 (硬): 9.7% presence in winning setups
+  - ＋速 (速): 8.5% presence in winning setups
+  - 疫病 (疫): 7.7% presence in winning setups
+  - ＋反 (反): 6.9% presence in winning setups
+  - 刺突 (刺): 6.3% presence in winning setups
+  - 剣舞 (剣): 6.3% presence in winning setups
 ------------------------------------------------
-Stage 8: 絶望のキマイラ (0 wins from 10000 patterns)
-  - No wins recorded in this simulation pool.
+Stage 8: 絶望のキマイラ (4 wins from 10000 patterns)
+  - 一閃 (一): 150.0% presence in winning setups
+  - 待伏 (待): 100.0% presence in winning setups
+  - 裏霞 (裏): 100.0% presence in winning setups
+  - 呪詛 (呪): 100.0% presence in winning setups
+  - 果断 (果): 50.0% presence in winning setups
 ------------------------------------------------
-Stage 9: 殺戮人形 (67 wins from 10000 patterns)
+Stage 9: 殺戮人形 (62 wins from 10000 patterns)
+  - 一閃 (一): 203.2% presence in winning setups
+  - ＋盾 (盾): 72.6% presence in winning setups
+  - 連撃 (連): 71.0% presence in winning setups
+  - 呪詛 (呪): 32.3% presence in winning setups
+  - 裏霞 (裏): 27.4% presence in winning setups
+  - 防壁 (防): 22.6% presence in winning setups
+  - 果断 (果): 11.3% presence in winning setups
+  - 怒濤 (怒): 9.7% presence in winning setups
+  - ＋反 (反): 9.7% presence in winning setups
+  - 剣舞 (剣): 4.8% presence in winning setups
+  - 封印 (封): 4.8% presence in winning setups
+  - 待伏 (待): 3.2% presence in winning setups
+  - 崩技 (崩): 3.2% presence in winning setups
+  - 刺突 (刺): 3.2% presence in winning setups
+  - 搦手 (搦): 3.2% presence in winning setups
+  - ＋硬 (硬): 3.2% presence in winning setups
+  - 交錯 (交): 3.2% presence in winning setups
+  - 疫病 (疫): 3.2% presence in winning setups
+  - 先制 (先): 3.2% presence in winning setups
+  - 逆鱗 (逆): 3.2% presence in winning setups
+  - 雷火 (雷): 1.6% presence in winning setups
+------------------------------------------------
+Stage 11: 剣獣 (88 wins from 10000 patterns)
   - 一閃 (一): 204.5% presence in winning setups
-  - 連撃 (連): 92.5% presence in winning setups
-  - ＋盾 (盾): 61.2% presence in winning setups
-  - 防壁 (防): 52.2% presence in winning setups
-  - 裏霞 (裏): 14.9% presence in winning setups
-  - 封印 (封): 9.0% presence in winning setups
-  - 果断 (果): 7.5% presence in winning setups
-  - 待伏 (待): 4.5% presence in winning setups
-  - 崩技 (崩): 4.5% presence in winning setups
-  - 刺突 (刺): 4.5% presence in winning setups
-  - 搦手 (搦): 4.5% presence in winning setups
-  - 剣舞 (剣): 4.5% presence in winning setups
-  - 交錯 (交): 4.5% presence in winning setups
-  - 怒濤 (怒): 4.5% presence in winning setups
-  - 呪詛 (呪): 4.5% presence in winning setups
-  - 疫病 (疫): 4.5% presence in winning setups
-  - 先制 (先): 4.5% presence in winning setups
-  - 逆鱗 (逆): 4.5% presence in winning setups
-  - ＋速 (速): 1.5% presence in winning setups
-  - ＋硬 (硬): 1.5% presence in winning setups
-  - ＋強 (強): 1.5% presence in winning setups
-  - ＋反 (反): 1.5% presence in winning setups
-  - 覚悟 (覚): 1.5% presence in winning setups
-  - 雷火 (雷): 1.5% presence in winning setups
-------------------------------------------------
-Stage 11: 剣獣 (13 wins from 10000 patterns)
-  - 一閃 (一): 200.0% presence in winning setups
-  - 連撃 (連): 100.0% presence in winning setups
-  - 防壁 (防): 84.6% presence in winning setups
-  - 裏霞 (裏): 30.8% presence in winning setups
-  - 待伏 (待): 15.4% presence in winning setups
-  - 崩技 (崩): 15.4% presence in winning setups
-  - 搦手 (搦): 15.4% presence in winning setups
-  - ＋盾 (盾): 15.4% presence in winning setups
-  - 交錯 (交): 15.4% presence in winning setups
-  - ＋硬 (硬): 7.7% presence in winning setups
-------------------------------------------------
-Stage 12: 無貌竜アノマ (130 wins from 10000 patterns)
-  - 一閃 (一): 203.8% presence in winning setups
-  - 交錯 (交): 51.5% presence in winning setups
-  - 怒濤 (怒): 51.5% presence in winning setups
-  - 防壁 (防): 27.7% presence in winning setups
-  - 裏霞 (裏): 23.1% presence in winning setups
-  - 無想 (無): 23.1% presence in winning setups
-  - 待伏 (待): 20.0% presence in winning setups
-  - 果断 (果): 13.8% presence in winning setups
-  - ＋錬 (錬): 13.8% presence in winning setups
-  - 封印 (封): 7.7% presence in winning setups
-  - ＋盾 (盾): 6.2% presence in winning setups
-  - 剣舞 (剣): 6.2% presence in winning setups
-  - 崩技 (崩): 5.4% presence in winning setups
-  - 搦手 (搦): 5.4% presence in winning setups
-  - ＋硬 (硬): 5.4% presence in winning setups
-  - 刺突 (刺): 3.8% presence in winning setups
-  - ＋速 (速): 3.8% presence in winning setups
-  - 連撃 (連): 3.8% presence in winning setups
-  - 雷火 (雷): 3.8% presence in winning setups
-  - 隠刃 (隠): 3.8% presence in winning setups
-  - 紫電 (紫): 3.8% presence in winning setups
+  - 防壁 (防): 87.5% presence in winning setups
+  - 連撃 (連): 85.2% presence in winning setups
+  - 隠刃 (隠): 13.6% presence in winning setups
+  - 果断 (果): 10.2% presence in winning setups
+  - ＋盾 (盾): 9.1% presence in winning setups
+  - 封印 (封): 9.1% presence in winning setups
+  - 怒濤 (怒): 8.0% presence in winning setups
+  - 待伏 (待): 6.8% presence in winning setups
+  - 崩技 (崩): 6.8% presence in winning setups
+  - 搦手 (搦): 6.8% presence in winning setups
+  - 交錯 (交): 6.8% presence in winning setups
+  - ＋速 (速): 4.5% presence in winning setups
+  - ＋強 (強): 4.5% presence in winning setups
+  - 裏霞 (裏): 4.5% presence in winning setups
+  - ＋硬 (硬): 3.4% presence in winning setups
+  - ＋錬 (錬): 3.4% presence in winning setups
+  - 刺突 (刺): 2.3% presence in winning setups
+  - 剣舞 (剣): 2.3% presence in winning setups
+  - 呪詛 (呪): 2.3% presence in winning setups
+  - 疫病 (疫): 2.3% presence in winning setups
+  - 先制 (先): 2.3% presence in winning setups
+  - 逆鱗 (逆): 2.3% presence in winning setups
+  - 覚悟 (覚): 2.3% presence in winning setups
+  - 雷火 (雷): 2.3% presence in winning setups
+  - 紫電 (紫): 2.3% presence in winning setups
   - 玉響 (玉): 2.3% presence in winning setups
-  - ＋強 (強): 1.5% presence in winning setups
-  - 呪詛 (呪): 1.5% presence in winning setups
-  - 疫病 (疫): 1.5% presence in winning setups
-  - 逆鱗 (逆): 1.5% presence in winning setups
-  - 燐光 (燐): 1.5% presence in winning setups
-  - ＋反 (反): 0.8% presence in winning setups
-  - 先制 (先): 0.8% presence in winning setups
-  - 覚悟 (覚): 0.8% presence in winning setups
+  - 無想 (無): 2.3% presence in winning setups
+------------------------------------------------
+Stage 12: 無貌竜アノマ (9974 wins from 10000 patterns)
+  - 一閃 (一): 216.2% presence in winning setups
+  - 果断 (果): 16.2% presence in winning setups
+  - 刺突 (刺): 16.2% presence in winning setups
+  - 剣舞 (剣): 16.2% presence in winning setups
+  - 防壁 (防): 15.0% presence in winning setups
+  - 待伏 (待): 14.7% presence in winning setups
+  - 崩技 (崩): 14.7% presence in winning setups
+  - 搦手 (搦): 14.7% presence in winning setups
+  - 交錯 (交): 14.7% presence in winning setups
+  - ＋速 (速): 11.8% presence in winning setups
+  - ＋硬 (硬): 11.8% presence in winning setups
+  - ＋盾 (盾): 10.0% presence in winning setups
+  - ＋強 (強): 9.1% presence in winning setups
+  - 怒濤 (怒): 7.6% presence in winning setups
+  - 呪詛 (呪): 7.6% presence in winning setups
+  - 雷火 (雷): 7.6% presence in winning setups
+  - 隠刃 (隠): 7.6% presence in winning setups
+  - 紫電 (紫): 7.6% presence in winning setups
+  - 覚悟 (覚): 7.2% presence in winning setups
+  - 封印 (封): 7.2% presence in winning setups
+  - 疫病 (疫): 7.1% presence in winning setups
+  - 玉響 (玉): 7.1% presence in winning setups
+  - 影討 (影): 7.0% presence in winning setups
+  - 連撃 (連): 6.9% presence in winning setups
+  - 先制 (先): 6.9% presence in winning setups
+  - 逆鱗 (逆): 6.9% presence in winning setups
+  - 無想 (無): 6.9% presence in winning setups
+  - 燐光 (燐): 6.7% presence in winning setups
+  - 裏霞 (裏): 6.6% presence in winning setups
+  - ＋反 (反): 2.2% presence in winning setups
+  - ＋錬 (錬): 2.2% presence in winning setups
 ------------------------------------------------

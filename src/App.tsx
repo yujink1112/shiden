@@ -234,16 +234,22 @@ function App() {
   });
   const [activeUsers, setActiveUsers] = useState(0);
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [iconMode, setIconMode] = useState<IconMode>(() => {
     const saved = localStorage.getItem('shiden_icon_mode');
     return (saved as IconMode) || 'ORIGINAL';
   });
+  const [bgmEnabled, setBgmEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem('shiden_bgm_enabled');
+    return saved === null ? true : saved === 'true';
+  });
+  const [bgmVolume, setBgmVolume] = useState<number>(() => {
+    const saved = localStorage.getItem('shiden_bgm_volume');
+    return saved === null ? 0.5 : parseFloat(saved);
+  });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const midiPlayerRef = useRef<any>(null);
   const [showSettings, setShowSettings] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem('shiden_icon_mode', iconMode);
-  }, [iconMode]);
-
   const getSkillIconContent = (skill: SkillDetail, isDimmed?: boolean) => {
     if (iconMode === 'ABBR') {
       return (
@@ -301,6 +307,10 @@ function App() {
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [battleResults, setBattleResults] = useState<BattleResult[]>([]);
   const [showLogForBattleIndex, setShowLogForBattleIndex] = useState<number>(-1);
+  const [storyContent, setStoryContent] = useState<string | null>(null);
+  const [showEpilogue, setShowEpilogue] = useState(false);
+  const [winRateDisplay, setWinRateDisplay] = useState<number | null>(null);
+  const [stage10TrialActive, setStage10TrialActive] = useState(false);
 
   const [stageVictorySkills, setStageVictorySkills] = useState<{ [key: string]: string[] }>(() => {
     const saved = localStorage.getItem('shiden_stage_victory_skills');
@@ -314,6 +324,23 @@ function App() {
   };
 
   useEffect(() => {
+    const fetchStory = async () => {
+      if (stageMode === 'MID' && !gameStarted) {
+        try {
+          const response = await fetch(`${process.env.PUBLIC_URL}/story/${stageCycle}.txt`);
+          if (response.ok) {
+            const text = await response.text();
+            setStoryContent(text);
+          }
+        } catch (e) {
+          console.error("Story fetch error:", e);
+        }
+      } else {
+        setStoryContent(null);
+      }
+    };
+    fetchStory();
+
     if (!gameStarted) {
       const getAvailableOwnedSkills = () => {
         const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
@@ -377,6 +404,90 @@ function App() {
   useEffect(() => {
     localStorage.setItem('shiden_is_title', isTitle.toString());
   }, [isTitle]);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_bgm_enabled', bgmEnabled.toString());
+    if (audioRef.current) {
+      if (bgmEnabled) audioRef.current.play().catch(() => {});
+      else audioRef.current.pause();
+    }
+  }, [bgmEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_bgm_volume', bgmVolume.toString());
+    if (audioRef.current) {
+      audioRef.current.volume = bgmVolume;
+    }
+  }, [bgmVolume]);
+
+  useEffect(() => {
+    const getBgmPath = () => {
+      if (stageMode === 'BOSS') {
+        if (stageCycle === 11) return '/audio/(t)月下の死闘.MID';
+        if (stageCycle === 12) return '/audio/Knight_in_the_wind.MID';
+      }
+      return null;
+    };
+
+    const bgmPath = getBgmPath();
+    
+    // MIDI再生用の関数
+    const setupMidiPlayer = async (url: string) => {
+      const MidiPlayer = (window as any).MidiPlayer;
+      const Soundfont = (window as any).Soundfont;
+      if (!MidiPlayer || !Soundfont) return;
+
+      // 前の再生を確実に止める
+      if (midiPlayerRef.current) {
+        midiPlayerRef.current.stop();
+      }
+
+      const ac = new AudioContext();
+      // 高品質なSoundfontのURL
+      const instrument = await Soundfont.instrument(ac, 'https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/gh-pages/MusyngKite/acoustic_grand_piano-mp3.js');
+      
+      const player = new MidiPlayer.Player((event: any) => {
+        if (event.name === 'Note on') {
+          instrument.play(event.noteName, ac.currentTime, { gain: (event.velocity / 128) * bgmVolume });
+        }
+        // RPGツクール2000仕様のループ（CC#111 など）の簡易的なエミュレーションは
+        // ライブラリの低レイヤ解析が必要なため、ここでは確実な「末尾から先頭へのループ」を保証する
+      });
+
+      try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        player.loadArrayBuffer(arrayBuffer);
+        
+        // ループ設定
+        player.on('endOfFile', () => {
+          player.skipToTick(0);
+          player.play();
+        });
+        
+        midiPlayerRef.current = player;
+        if (bgmEnabled) player.play();
+      } catch (e) {
+        console.error("MIDI Load Error:", e);
+      }
+    };
+
+    if (bgmPath) {
+      const fullUrl = process.env.PUBLIC_URL + bgmPath;
+      setupMidiPlayer(fullUrl).catch(console.error);
+    } else {
+      if (midiPlayerRef.current) {
+        midiPlayerRef.current.stop();
+        midiPlayerRef.current = null;
+      }
+    }
+
+    return () => {
+      if (midiPlayerRef.current) {
+        midiPlayerRef.current.stop();
+      }
+    };
+  }, [stageMode, stageCycle, bgmEnabled, bgmVolume]);
 
   const handleNewGame = () => {
     if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
@@ -527,11 +638,14 @@ function App() {
 
   const handleStartGame = () => {
     if (selectedPlayerSkills.length === PLAYER_SKILL_COUNT) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       const playerSkillsRaw = selectedPlayerSkills.join("");
       const results: BattleResult[] = [];
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
 
-      const battleCount = 10;
+      const isStage11MID = stageMode === 'MID' && stageCycle === 11;
+      const battleCount = isStage11MID ? 100 : (stageMode === 'BOSS' ? 1 : 10);
+      
       for (let i = 0; i < battleCount; i++) {
         let currentComputerSkills: SkillDetail[];
         let enemyName = "コンピュータ";
@@ -543,6 +657,53 @@ function App() {
           const kuuhaku = getSkillByAbbr("空")!;
           
           const generateSmartEnemySkills = (): SkillDetail[] => {
+            if (isStage11MID) {
+                // 強力なスキル5つの敵を戦略的に生成
+                const selected: (SkillDetail | null)[] = Array(5).fill(null);
+                
+                const geigekiPool = allPool.filter(s => s.type.includes("迎撃"));
+                const attackPool = allPool.filter(s => s.type.includes("攻撃") && !s.name.startsWith("＋"));
+                const plusPool = allPool.filter(s => s.name.startsWith("＋"));
+
+                // 1. 左側(0,1)に迎撃を配置
+                for (let k = 0; k < 2; k++) {
+                  if (Math.random() > 0.3) {
+                    selected[k] = geigekiPool[Math.floor(Math.random() * geigekiPool.length)];
+                  }
+                }
+
+                // 2. 右側(2,3,4)に攻撃を優先配置
+                for (let k = 2; k < 5; k++) {
+                  if (selected[k] === null && Math.random() > 0.2) {
+                    selected[k] = attackPool[Math.floor(Math.random() * attackPool.length)];
+                  }
+                }
+
+                // 3. 攻撃スキルの後ろに ＋ を配置
+                for (let k = 0; k < 4; k++) {
+                  const current = selected[k];
+                  if (current && (current.type.includes("攻撃") || (k < 2 && current.type.includes("迎撃")))) {
+                    if (selected[k+1] === null && Math.random() > 0.4) {
+                      // ＋硬は迎撃の後ろでもOK、他は攻撃の後ろ
+                      const validPlus = plusPool.filter(s => {
+                        if (s.name === "＋硬") return true;
+                        return current.type.includes("攻撃");
+                      });
+                      if (validPlus.length > 0) {
+                        selected[k+1] = validPlus[Math.floor(Math.random() * validPlus.length)];
+                      }
+                    }
+                  }
+                }
+
+                // 4. 残りをランダムに埋める
+                for (let k = 0; k < 5; k++) {
+                  if (selected[k] === null) {
+                    selected[k] = allPool[Math.floor(Math.random() * allPool.length)];
+                  }
+                }
+                return selected as SkillDetail[];
+            }
             if (stageCycle === 4) {
               const totalKuuhaku = Math.floor(Math.random() * 4) + 8;
               const geigekiPool = allPool.filter(s => s.type.includes("迎撃"));
@@ -638,7 +799,28 @@ function App() {
       setShowLogForBattleIndex(0);
 
       const winCount = results.filter(r => r.winner === 1).length;
-      if (stageMode === 'MID') {
+      const actualWinRate = Math.round((winCount / battleCount) * 100);
+
+      if (isStage11MID) {
+        setStage10TrialActive(true); // ステート名はそのまま再利用
+        let currentRate = 0;
+        const interval = setInterval(() => {
+          currentRate += 1;
+          setWinRateDisplay(currentRate);
+          if (currentRate >= actualWinRate) {
+            clearInterval(interval);
+            setTimeout(() => {
+                if (actualWinRate >= 80) {
+                    setCanGoToBoss(true);
+                    triggerVictoryConfetti();
+                }
+                setStage10TrialActive(false);
+            }, 1000);
+          }
+        }, 30);
+      }
+
+      if (stageMode === 'MID' && !isStage11MID) {
         if (winCount === 10) {
           setCanGoToBoss(true);
           triggerVictoryConfetti();
@@ -944,9 +1126,30 @@ function App() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
             
             <div style={{ position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 30px', boxSizing: 'border-box' }}>
-              {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
-              <img src={process.env.PUBLIC_URL + bossImage} alt={bossName} className={`boss-battle-image boss-anim-${bossAnim}`} style={{ height: '190px', objectFit: 'contain', filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))' }} />
-              {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
+              <div style={{ zIndex: 10, position: 'relative' }}>
+                {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
+              </div>
+              
+              <img 
+                src={process.env.PUBLIC_URL + bossImage} 
+                alt={bossName} 
+                className={`boss-battle-image boss-anim-${bossAnim}${ [4, 8, 12].includes(stageCycle) ? ' is-large' : ''}`} 
+                style={{ 
+                    position: [4, 8, 12].includes(stageCycle) ? 'absolute' : 'relative',
+                    left: [4, 8, 12].includes(stageCycle) ? '50%' : 'auto',
+                    height: [4, 8, 12].includes(stageCycle) ? '235px' : '200px', 
+                    width: [4, 8, 12].includes(stageCycle) ? '100%' : 'auto',
+                    maxWidth: [4, 8, 12].includes(stageCycle) ? 'none' : '60%',
+                    objectFit: 'contain', 
+                    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+                    zIndex: 5,
+                    transform: [4, 8, 12].includes(stageCycle) ? 'translateX(-50%)' : 'none'
+                }} 
+              />
+              
+              <div style={{ zIndex: 10, position: 'relative' }}>
+                {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
+              </div>
             </div>
             
             {bossAnim === 'damage' && <div className="damage-flash" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.5)', zIndex: 10 }} />}
@@ -1028,9 +1231,7 @@ function App() {
   if (isTitle) {
     if (!isAssetsLoaded) {
       return (
-        <div className="TitleScreenContainer" style={{ backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-
-        </div>
+        <div className="TitleScreenContainer" style={{ backgroundColor: '#000' }} />
       );
     }
 
@@ -1052,8 +1253,30 @@ function App() {
               Active Users: {activeUsers}
             </div>
             © 2026 Shiden-Game
+            <div 
+              onDoubleClick={() => setShowAdmin(true)} 
+              style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0, cursor: 'default' }} 
+            />
           </div>
         </div>
+        {showAdmin && (
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, boxShadow: '0 0 20px #000' }}>
+            <h2 style={{ color: '#ff5252', marginTop: 0 }}>管理者パネル</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
+                <button key={n} onClick={() => {
+                  setStageCycle(n);
+                  setStageMode('MID');
+                  localStorage.setItem('shiden_stage_cycle', n.toString());
+                  localStorage.setItem('shiden_stage_mode', 'MID');
+                  setIsTitle(false);
+                  setShowAdmin(false);
+                }} style={{ padding: '10px', background: '#333', color: '#fff', border: '1px solid #555', cursor: 'pointer' }}>Stage {n}</button>
+              ))}
+            </div>
+            <button onClick={() => setShowAdmin(false)} style={{ width: '100%', padding: '10px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>閉じる</button>
+          </div>
+        )}
       </div>
     );
   }
@@ -1063,9 +1286,17 @@ function App() {
       <div className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box' }}>
           <button onClick={() => setIsTitle(true)} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer' }}>TITLE</button>
-          <h1 style={{ margin: 0, color: stageMode === 'MID' ? '#4fc3f7' : '#ff5252', fontSize: '1.5rem' }}>{stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `決戦: ${currentStageInfo.bossName}`}</h1>
-          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.9rem' }}>{stageMode === 'MID' ? '10戦全勝してボスに挑め！' : '敵の構成を見て対策を練れ！'}</p>
-          <button onClick={() => { if (window.confirm('進捗をリセットして最初から始めますか？')) { localStorage.removeItem('shiden_stage_cycle'); localStorage.removeItem('shiden_owned_skills'); window.location.reload(); } }} style={{ position: 'absolute', right: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer' }}>RESET</button>
+          <h1 style={{ margin: 0, color: stageMode === 'MID' ? '#4fc3f7' : '#ff5252', fontSize: '1.5rem' }}>{stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `VS ${currentStageInfo.bossName}`}</h1>
+          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.9rem' }}>{stageMode === 'MID' ? (stageCycle === 11 ? '100人の敵を倒せ！(勝率80%で通過)' : '10戦全勝してボスに挑め！') : '敵の構成を見て対策を練れ！'}</p>
+          <div style={{ position: 'absolute', right: '10px', top: '10px', zIndex: 10 }}>
+            <button 
+              onClick={() => setShowSettings(true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#888' }}
+              title="設定"
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
 
         {!gameStarted && stageMode === 'MID' && (
@@ -1095,15 +1326,6 @@ function App() {
 
         {selectedPlayerSkills.length > 0 && (
           <div className="SelectedSkillsPanel" ref={panelRef} style={{ position: 'relative', marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '15px 0px 15px 0px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
-            <div style={{ position: 'absolute', right: '10px', top: '10px', zIndex: 10 }}>
-              <button 
-                onClick={() => setShowSettings(true)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#888' }}
-                title="設定"
-              >
-                ⚙️
-              </button>
-            </div>
             <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 3 }}>
               <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="blur" /><feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#ffeb3b" /><feComposite in="SourceGraphic" in2="blur" operator="over" /></filter></defs>
               {lineCoords.map((coord, idx) => (
@@ -1122,6 +1344,32 @@ function App() {
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ backgroundColor: '#1a1a1a', border: '2px solid #fff', padding: '30px', borderRadius: '10px', width: '400px', textAlign: 'center' }}>
               <h2 style={{ color: '#4fc3f7', marginBottom: '20px' }}>設定</h2>
+              <div style={{ marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '10px' }}>オーディオ設定</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', background: '#222', padding: '15px', borderRadius: '5px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <span style={{ color: '#ccc', fontSize: '0.9rem' }}>BGM再生</span>
+                    <button 
+                      onClick={() => setBgmEnabled(!bgmEnabled)} 
+                      style={{ padding: '5px 15px', background: bgmEnabled ? '#28a745' : '#dc3545', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      {bgmEnabled ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                  <div style={{ width: '100%', marginTop: '5px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', fontSize: '0.8rem', marginBottom: '5px' }}>
+                      <span>音量</span>
+                      <span>{Math.round(bgmVolume * 100)}%</span>
+                    </div>
+                    <input 
+                      type="range" min="0" max="1" step="0.01" 
+                      value={bgmVolume} 
+                      onChange={(e) => setBgmVolume(parseFloat(e.target.value))}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+              </div>
               <div style={{ marginBottom: '30px' }}>
                 <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '15px' }}>アイコン表示モード</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1147,6 +1395,19 @@ function App() {
 
         {gameStarted && (logComplete || stageMode === 'MID') && (
           <div className="ResultsOverview" style={{ marginTop: '0px', width: '100%', maxWidth: '800px' }}>
+            {stageCycle === 11 && stageMode === 'MID' && winRateDisplay !== null && (
+              <div style={{ textAlign: 'center', marginBottom: '20px', padding: '30px', background: '#000', border: '3px solid #ff5252', borderRadius: '15px', boxShadow: '0 0 20px rgba(255,82,82,0.5)' }}>
+                <h2 style={{ color: '#aaa', margin: '0 0 10px 0', fontSize: '1rem' }}>WIN RATE</h2>
+                <div style={{ fontSize: '5rem', fontWeight: 'bold', color: winRateDisplay >= 70 ? '#66bb6a' : '#ff5252', textShadow: `0 0 15px ${winRateDisplay >= 70 ? '#66bb6a' : '#ff5252'}`, fontFamily: 'monospace' }}>
+                  {winRateDisplay}%
+                </div>
+                {!stage10TrialActive && (
+                  <div style={{ marginTop: '10px', fontSize: '1.5rem', fontWeight: 'bold', color: winRateDisplay >= 80 ? '#66bb6a' : '#ff5252' }}>
+                    {winRateDisplay >= 80 ? 'SUCCESS - TARGET REACHED' : 'FAILED - 80% REQUIRED'}
+                  </div>
+                )}
+              </div>
+            )}
             {rewardSelectionMode && (
               <div className="RewardSelection" style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '10px' }}>
                 <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}スキルを1つ選んでください</h2>
@@ -1155,24 +1416,68 @@ function App() {
                 <div style={{ marginTop: '15px' }}><button onClick={() => { setSelectedRewards([]); setRewardSelectionMode(false); if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
               </div>
             )}
-            {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
+            {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && !stage10TrialActive && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
                 <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{currentStageInfo.bossName}撃破！<br />素晴らしいです！！</>}</h2>
-                <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', cursor: 'pointer', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+                    <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', cursor: 'pointer', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
+                    {stageMode === 'BOSS' && stageCycle === 12 && (
+                        <button onClick={async () => {
+                            try {
+                                const response = await fetch(`${process.env.PUBLIC_URL}/story/epilogue.txt`);
+                                if (response.ok) {
+                                    const text = await response.text();
+                                    setStoryContent(text);
+                                    setShowEpilogue(true);
+                                }
+                            } catch (e) {
+                                console.error("Epilogue fetch error:", e);
+                            }
+                        }} style={{ padding: '15px 30px', fontSize: '20px', cursor: 'pointer', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>エピローグ</button>
+                    )}
+                </div>
               </div>
             )}
-            <div className="battle-results-scroll-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => (<div key={index} className="battle-result-item" onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: showLogForBattleIndex === index ? '#263238' : '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center', marginBottom: '10px', color: '#eee' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.resultText === 'Win!' ? '#66bb6a' : battle.resultText === 'Lose' ? '#ef5350' : '#eee' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((skill, skillIndex) => (<img key={skillIndex} src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} style={{ width: '30px', height: '30px', borderRadius: '3px' }} />))}</div></div>))}</div>
-            {(battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss))) && (<div style={{ marginTop: '20px', textAlign: 'center' }}><div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div><button onClick={handleResetGame} style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px' }}>再挑戦</button></div>)}
+            <div className="battle-results-scroll-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => (<div key={index} className="battle-result-item" onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: showLogForBattleIndex === index ? '#263238' : '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center', marginBottom: '10px', color: '#eee' }}><span style={{ marginRight: '10px', fontWeight: 'bold', flexShrink: 0, minWidth: '80px', color: battle.resultText === 'Win!' ? '#66bb6a' : battle.resultText === 'Lose' ? '#ef5350' : '#eee' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flex: 1 }}>{battle.computerSkills.map((skill, skillIndex) => (<img key={skillIndex} src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} style={{ width: '30px', height: '30px', borderRadius: '3px' }} />))}</div></div>))}</div>
+            {(battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && !stage10TrialActive && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss))) && (<div style={{ marginTop: '20px', textAlign: 'center' }}><div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div><button onClick={handleResetGame} style={{ padding: '10px 20px', fontSize: '18px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px' }}>再挑戦</button></div>)}
           </div>
         )}
       </div>
 
       <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', color: '#f8f8f2', overflowY: 'hidden', borderLeft: '1px solid #333' }}>
-        <h2 style={{ color: stageMode === 'BOSS' ? '#ff5252' : '#61dafb' }}>{stageMode === 'BOSS' ? (logComplete && battleResults[0]?.winner === 1 ? '戦闘ログ' : 'BOSS') : 'ゲームログ'}</h2>
-        {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
+        <h2 style={{ color: stageMode === 'BOSS' ? '#ff5252' : '#61dafb' }}>{showEpilogue ? 'エピローグ' : (storyContent && !gameStarted ? 'ストーリー' : (stageMode === 'BOSS' ? (logComplete && battleResults[0]?.winner === 1 ? '戦闘ログ' : 'BOSS') : 'ゲームログ'))}</h2>
+        {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] && !showEpilogue ? (
           stageMode === 'BOSS' ? (<AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} immediate={false} bossImage={currentStageInfo.bossImage} bossName={currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} />) : (<div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>)
         ) : (
-          stageMode === 'BOSS' ? (<div style={{ textAlign: 'center', padding: '20px' }}><img src={process.env.PUBLIC_URL + currentStageInfo.bossImage} alt={currentStageInfo.bossName} style={{ width: '100%', maxWidth: '150px', borderRadius: '10px', marginBottom: '20px' }} /><h3 style={{ color: '#ff5252', fontSize: '1.5rem', marginBottom: '10px' }}>{currentStageInfo.bossName}</h3><p style={{ lineHeight: '1.6', color: '#eee', textAlign: 'left', background: 'rgba(0,0,0,0.4)', padding: '15px', borderRadius: '8px' }}>{currentStageInfo.bossDescription}</p></div>) : ("ログがありません。")
+          storyContent ? (
+            <div className="story-area" style={{ overflowY: 'auto', height: 'calc(100% - 60px)', padding: '10px', animation: 'fadeIn 1s ease-in' }}>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontFamily: 'serif', fontSize: '1.1rem', lineHeight: '1.8' }}>{storyContent}</pre>
+              {showEpilogue && (
+                <button 
+                    onClick={() => {
+                        setIsTitle(true);
+                        setShowEpilogue(false);
+                        setStoryContent(null);
+                    }}
+                    style={{ marginTop: '30px', padding: '10px 20px', background: '#00d2ff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', width: '100%' }}
+                >
+                    タイトルへ戻る
+                </button>
+              )}
+            </div>
+          ) : (
+            stageMode === 'BOSS' && !showEpilogue ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                <img 
+                    src={process.env.PUBLIC_URL + currentStageInfo.bossImage} 
+                    alt={currentStageInfo.bossName} 
+                    style={{ width: '100%', maxWidth: stageCycle === 12 ? '100%' : '150px', borderRadius: '10px', marginBottom: '20px' }} 
+                />
+                <h3 style={{ color: '#ff5252', fontSize: '1.5rem', marginBottom: '10px' }}>{currentStageInfo.bossName}</h3>
+                <p style={{ lineHeight: '1.6', color: '#eee', textAlign: 'left', background: 'rgba(0,0,0,0.4)', padding: '15px', borderRadius: '8px' }}>{currentStageInfo.bossDescription}</p>
+                </div>
+            ) : ("ログがありません。")
+          )
         )}
       </div>
     </div>
