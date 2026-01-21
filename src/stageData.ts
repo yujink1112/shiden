@@ -26,7 +26,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossName: "オオサソリ",
     bossImage: "/images/monster/2.png",
     bossDescription: "食べられない……。",
-    shopSkills: ["崩技", "刺突"],
+    shopSkills: ["崩技", "果断"],
     bossSkillAbbrs: "崩崩待刺刺",
   },
   {
