@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/shiden/static/css/main.686d0bf2.css",
-    "main.js": "/shiden/static/js/main.6691dc98.js",
+    "main.js": "/shiden/static/js/main.f233d15b.js",
     "static/js/453.69eb5c60.chunk.js": "/shiden/static/js/453.69eb5c60.chunk.js",
     "static/media/background.jpg": "/shiden/static/media/background.5ecd21ffe6a0caecc7c0.jpg",
     "index.html": "/shiden/index.html",
     "main.686d0bf2.css.map": "/shiden/static/css/main.686d0bf2.css.map",
-    "main.6691dc98.js.map": "/shiden/static/js/main.6691dc98.js.map",
+    "main.f233d15b.js.map": "/shiden/static/js/main.f233d15b.js.map",
     "453.69eb5c60.chunk.js.map": "/shiden/static/js/453.69eb5c60.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.686d0bf2.css",
-    "static/js/main.6691dc98.js"
+    "static/js/main.f233d15b.js"
   ]
 }
