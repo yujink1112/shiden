@@ -90,6 +90,9 @@ export class Battle {
             this.text += "▼開始フェイズ\n";
             this.text += "\n";
 
+            this.rinko(pc1);
+            this.rinko(pc2);
+
             if (this.turn <= pc1.getSkillsLength()) {
 
                 if (pc1.skill[this.turn - 1] === "無") {
@@ -254,7 +257,7 @@ export class Battle {
 
                 this.text += `▼${pc1.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc1, pc2);
+                
                 this.attack(pc1, pc2);
                 this.text += "\n";
                 if (this.effect(pc1, pc2) + this.effect(pc2, pc1) >= 1) this.text += "\n";
@@ -264,7 +267,6 @@ export class Battle {
 
                 this.text += `▼${pc2.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc2, pc1);
                 this.attack(pc2, pc1);
                 this.text += "\n";
                 if (this.effect(pc2, pc1) + this.effect(pc1, pc2) >= 1) this.text += "\n";
@@ -279,7 +281,6 @@ export class Battle {
 
                 this.text += `▼${pc2.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc2, pc1);
                 this.attack(pc2, pc1);
                 this.text += "\n";
                 if (this.effect(pc2, pc1) + this.effect(pc1, pc2) >= 1) this.text += "\n";
@@ -289,7 +290,6 @@ export class Battle {
 
                 this.text += `▼${pc1.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc1, pc2);
                 this.attack(pc1, pc2);
                 this.text += "\n";
                 if (this.effect(pc1, pc2) + this.effect(pc2, pc1) >= 1) this.text += "\n";
@@ -305,7 +305,6 @@ export class Battle {
 
                 this.text += `▼${pc1.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc1, pc2);
                 this.attack(pc1, pc2);
                 this.text += "\n";
                 if (this.effect(pc1, pc2) + this.effect(pc2, pc1) >= 1) this.text += "\n";
@@ -315,7 +314,6 @@ export class Battle {
 
                 this.text += `▼${pc2.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc2, pc1);
                 this.attack(pc2, pc1);
                 this.text += "\n";
                 if (this.effect(pc2, pc1) + this.effect(pc1, pc2) >= 1) this.text += "\n";
@@ -351,7 +349,6 @@ export class Battle {
                 this.text += "\n";
                 this.text += `▼${pc1.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc1, pc2);
                 this.attack(pc1, pc2);
                 this.text += "\n";
                 if (this.effect(pc1, pc2) + this.effect(pc2, pc1) >= 1) this.text += "\n";
@@ -364,7 +361,6 @@ export class Battle {
                 this.text += "\n";
                 this.text += `▼${pc2.playerName}の攻撃フェイズ\n`;
                 this.text += "\n";
-                this.rinko(pc2, pc1);
                 this.attack(pc2, pc1);
                 this.text += "\n";
                 if (this.effect(pc2, pc1) + this.effect(pc1, pc2) >= 1) this.text += "\n";
@@ -500,7 +496,7 @@ export class Battle {
         return 0;
     }
 
-    rinko(pc1: Player, pc2: Player): void {
+    rinko(pc1: Player): void {
 
         for (let i = 0; i < pc1.getSkillsLength(); i++) {
             if (pc1.skill[i] === "燐") {

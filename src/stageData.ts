@@ -41,7 +41,7 @@ export const STAGE_DATA: StageConfig[] = [
   {
     no: 4,
     name: "家を作ろう",
-    bossName: "コノキナンノキ",
+    bossName: "古古考古考古古木",
     bossImage: "/images/monster/4.png",
     bossDescription: "見たこともないが由緒がありそうだ。",
     shopSkills: ["防壁", "＋硬", "＋盾"],
@@ -94,7 +94,7 @@ export const STAGE_DATA: StageConfig[] = [
   },
   {
     no: 10,
-    name: "島の秘密",
+    name: "零地",
     bossName: "レンダリングダスト",
     bossImage: "/images/monster/10.png",
     bossDescription: "弱点なんて分からないよ。",
@@ -103,7 +103,7 @@ export const STAGE_DATA: StageConfig[] = [
   },
   {
     no: 11,
-    name: "宇多",
+    name: "<串>",
     bossName: "剣獣",
     bossImage: "/images/monster/11.png",
     bossDescription: "かつて剣に全てを捧げた者達がいた。",
@@ -126,6 +126,8 @@ export const SPECIAL_BOSSES = [
     { name: "ステュムパリデス", skills: "先交燐果錬" },
     { name: "オピーオーン", skills: "隠隠隠隠剣" },
     { name: "エディンム", skills: "逆崩連紫盾" },
+    { name: "ヤマタノオロチ", skills: "隠隠隠連剣" },
+    { name: "ジャヴァウォック", skills: "逆崩連紫盾" },
 ];
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {

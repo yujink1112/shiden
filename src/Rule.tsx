@@ -48,7 +48,8 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                     <img src={(process.env.PUBLIC_URL || '') + skill.icon} alt="" style={{ width: '40px', height: '40px' }} />
                     <div>
-                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>{skill.name}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>{skill.name}<span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{skill.kana}</span></div>
+                      
                       <div style={{ fontSize: '0.8rem', color: '#aaa' }}>{skill.type} / 速度: {skill.speed}</div>
                     </div>
                   </div>
