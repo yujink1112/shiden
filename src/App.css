@@ -626,6 +626,30 @@
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
 }
 
+.TitleButton.neon-green {
+  color: #00ff99;
+  border-color: #00ff99;
+  box-shadow: 0 0 10px rgba(0, 255, 153, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.TitleButton.neon-green:hover:not(:disabled) {
+  background: #00ff99;
+  color: #000;
+  box-shadow: 0 0 30px rgba(0, 255, 153, 0.6);
+}
+
+.TitleButton.neon-purple {
+  color: #ff00ff;
+  border-color: #ff00ff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.TitleButton.neon-purple:hover:not(:disabled) {
+  background: #ff00ff;
+  color: #000;
+  box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+}
+
 .TitleFooter {
   color: #444;
   font-size: 0.8rem;

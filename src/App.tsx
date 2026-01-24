@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, serverTimestamp, get } from "firebase/database";
 import { database, auth, googleProvider } from "./firebase";
-import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
 import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName } from './stageData';
@@ -30,6 +30,7 @@ interface BattleResult {
 
 const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean; isDimmed?: boolean }> = ({ skill, isSelected, onClick, id, isConnected, isDimmed, disableTooltip, iconMode }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isTooltipForceClosed, setIsTooltipForceClosed] = useState(false);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
 
   const handleClick = () => {
@@ -162,8 +163,17 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       ref={cardRef}
       className={(isConnected ? 'synergy-active ' : '') + 'skill-card'}
       onClick={handleClick}
-      onMouseEnter={() => !disableTooltip && setShowTooltip(true)}
-      onMouseLeave={() => !disableTooltip && setShowTooltip(false)}
+      onMouseEnter={() => {
+        if (!disableTooltip) {
+          setShowTooltip(true);
+          setIsTooltipForceClosed(false);
+        }
+      }}
+      onMouseLeave={() => {
+        if (!disableTooltip) {
+          setShowTooltip(false);
+        }
+      }}
       style={{
         border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : '1px solid #444')),
         borderRadius: '8px',
@@ -184,7 +194,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
     >
       {renderIcon()}
       <span className="skill-name">{skill.name}</span>
-      {showTooltip && (
+      {showTooltip && !isTooltipForceClosed && (
         <div 
           style={getTooltipStyle()} 
           onClick={(e) => e.stopPropagation()}
@@ -195,7 +205,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
                 <span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{skill.kana}</span>
             </div>
             <button 
-              onClick={(e) => { e.stopPropagation(); setShowTooltip(false); }}
+              onClick={(e) => { e.stopPropagation(); setIsTooltipForceClosed(true); }}
               style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', padding: '2px 6px' }}
             >
               閉じる
@@ -299,6 +309,7 @@ function App() {
   const [battleResults, setBattleResults] = useState<BattleResult[]>([]);
   const [showLogForBattleIndex, setShowLogForBattleIndex] = useState<number>(-1);
   const [storyContent, setStoryContent] = useState<string | null>(null);
+  const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [winRateDisplay, setWinRateDisplay] = useState<number | null>(null);
   const [stage10TrialActive, setStage10TrialActive] = useState(false);
@@ -333,6 +344,19 @@ function App() {
       }
     };
     fetchStory();
+
+    const fetchEpilogue = async () => {
+      try {
+        const response = await fetch(`${process.env.PUBLIC_URL}/story/epilogue.txt`);
+        if (response.ok) {
+          const text = await response.text();
+          setEpilogueContent(text);
+        }
+      } catch (e) {
+        console.error("Epilogue fetch error:", e);
+      }
+    };
+    fetchEpilogue();
 
     if (!gameStarted) {
       const getAvailableOwnedSkills = () => {
@@ -477,7 +501,7 @@ function App() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      setStageMode('MYPAGE');
+      setStageMode('LOUNGE');
       setIsTitle(false);
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -520,14 +544,42 @@ function App() {
     }
   };
 
-  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string) => {
-    if (!user || !myProfile) return;
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    if (!window.confirm("本当に退会しますか？この操作は取り消せません。")) return;
+
+    try {
+      // 1. Delete profile from RTDB
+      const profileRef = ref(database, `profiles/${user.uid}`);
+      await set(profileRef, null);
+
+      // 2. Delete user from Firebase Auth
+      await deleteUser(user);
+
+      alert("ユーザー登録を解除しました。");
+      setStageMode('MID');
+      setIsTitle(true);
+    } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        alert("セキュリティのため、再ログインしてから再度お試しください。");
+        await signOut(auth);
+        setStageMode('MID');
+        setIsTitle(true);
+      } else {
+        alert("エラーが発生しました: " + error.message);
+      }
+    }
+  };
+
+  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string) => {
+    if (!user ) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
     await set(profileRef, {
       ...myProfile,
       displayName,
       favoriteSkill,
       comment: comment.substring(0, 10),
+      photoURL: photoURL,
       lastActive: Date.now()
     });
   };
@@ -619,21 +671,14 @@ function App() {
     onValue(connectedRef, (snap) => {
       if (snap.val() === true) {
         onDisconnect(myConnectionRef).remove();
-        const updateConn = () => {
-          set(myConnectionRef, {
-            uid: auth.currentUser?.uid || null,
-            lastActive: serverTimestamp()
-          });
-        };
-        updateConn();
-        const unsub = onAuthStateChanged(auth, updateConn);
-        return () => unsub();
+        // ストレージ容量を節約するため、単純な boolean 値をセットする
+        set(myConnectionRef, true);
       }
     });
 
     onValue(connectionsRef, (snapshot) => {
       if (snapshot.exists()) {
-        setActiveUsers(Object.keys(snapshot.val()).length);
+        setActiveUsers(snapshot.size);
       } else {
         setActiveUsers(0);
       }
@@ -651,7 +696,8 @@ function App() {
         const profileRef = ref(database, `profiles/${user.uid}`);
         onValue(profileRef, (snapshot) => {
           if (snapshot.exists()) {
-            setMyProfile(snapshot.val());
+            const data = snapshot.val();
+            setMyProfile(data);
           } else {
             const initialProfile: UserProfile = {
               uid: user.uid,
@@ -800,6 +846,11 @@ function App() {
 
   const handlePlayerSkillSelectionClick = (abbr: string) => {
     if (selectedPlayerSkills.length < PLAYER_SKILL_COUNT) {
+      const skill = getSkillByAbbr(abbr);
+      if (skill?.name === "無想" && selectedPlayerSkills.some(s => getSkillByAbbr(s)?.name === "無想")) {
+        alert("「無想」は編成に1つしか入れられません。");
+        return;
+      }
       setSelectedPlayerSkills([...selectedPlayerSkills, abbr]);
     }
   };
@@ -816,30 +867,36 @@ function App() {
           setBattleResults(results);
           setGameStarted(true);
           setShowLogForBattleIndex(0);
+          const winRateVal = Math.round((winCount / battleCount) * 100);
+
           if (isStage11MID) {
             setStage10TrialActive(true); // ステート名はそのまま再利用
             let currentRate = 0;
-            const actualWinRate = Math.round((winCount / battleCount) * 100);
             const interval = setInterval(() => {
               currentRate += 1;
               setWinRateDisplay(currentRate);
-              if (currentRate >= actualWinRate) {
+              if (currentRate >= winRateVal) {
                 clearInterval(interval);
                 setTimeout(() => {
-                    if (actualWinRate >= 80) {
+                    if (winRateVal >= 80) {
                         setCanGoToBoss(true);
                         triggerVictoryConfetti();
                     } else {
                         setCanGoToBoss(false);
+                    }
+                    if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
+                      setRewardSelectionMode(true);
                     }
                     setStage10TrialActive(false);
                 }, 1000);
               }
             }, 30);
           }
-          if (stageMode === 'MID' && !isStage11MID) {
-            if (winCount === 10) { setCanGoToBoss(true); triggerVictoryConfetti(); }
-            if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) setRewardSelectionMode(true);
+          if (stageMode === 'MID') {
+            if (!isStage11MID) {
+              if (winCount === 10) { setCanGoToBoss(true); triggerVictoryConfetti(); }
+              if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) setRewardSelectionMode(true);
+            }
           } else if (stageMode === 'BOSS' || stageMode === 'KENJU') {
             if (winCount >= 1) { 
               setCanGoToBoss(true);
@@ -871,7 +928,8 @@ function App() {
           const allPool = getAvailableSkillsUntilStage(stageCycle);
           const kuuhaku = getSkillByAbbr("空")!;
           const generateSmartEnemySkills = (eName: string): SkillDetail[] => {
-            const selected: (SkillDetail|null)[] = Array(4).fill(null);
+            const skillCount = stageCycle === 11 ? 5 : 4;
+            const selected: (SkillDetail|null)[] = Array(skillCount).fill(null);
             
             // Stage 10 Special Rule
             let fixedSkill: SkillDetail | null = null;
@@ -884,19 +942,27 @@ function App() {
             }
             
             if (fixedSkill && !fixedSkill.name.startsWith("＋")) {
-                selected[3] = fixedSkill;
+                selected[skillCount - 1] = fixedSkill;
             }
 
+            // Stage 4 Rule: No attack skills
+            const isStage4 = stageCycle === 4;
+
             const attackPool = allPool.filter(s => s.type.includes("攻撃") && !s.name.startsWith("＋") && s.name !== "空白");
-            const attackPos = Math.random() > 0.5 ? 2 : (selected[3] ? 2 : 3);
-            if (!selected[attackPos]) selected[attackPos] = attackPool[Math.floor(Math.random() * attackPool.length)];
+            if (!isStage4 && attackPool.length > 0) {
+              const attackPos = Math.random() > 0.5 ? skillCount - 2 : (selected[skillCount - 1] ? skillCount - 2 : skillCount - 1);
+              if (!selected[attackPos]) selected[attackPos] = attackPool[Math.floor(Math.random() * attackPool.length)];
+            }
             
-            for (let j = 0; j < 4; j++) {
+            for (let j = 0; j < skillCount; j++) {
                 if (selected[j] !== null) continue;
                 const prev = j > 0 ? selected[j - 1] : null;
                 const weightedPool: SkillDetail[] = [];
                 allPool.forEach(s => {
                     if (s.name === "空白") return;
+                    if (isStage4 && s.type.includes("攻撃") && !s.name.startsWith("＋")) return;
+                    if (s.name === "無想" && selected.some(sel => sel?.name === "無想")) return;
+
                     let weight = 1;
                     if (s.name.startsWith("＋") && prev) {
                         const canConnect = (s.name === "＋硬" || s.name === "＋速") ? (prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃")) : prev.type.includes("攻撃");
@@ -909,17 +975,66 @@ function App() {
             
             if (fixedSkill && fixedSkill.name.startsWith("＋")) {
                 let placed = false;
-                for (let k = 0; k < 3; k++) {
+                for (let k = 0; k < skillCount - 1; k++) {
                     if (selected[k] && (selected[k]!.type.includes("攻撃") || selected[k]!.type.includes("迎撃"))) {
                         selected[k+1] = fixedSkill;
                         placed = true;
                         break;
                     }
                 }
-                if (!placed) selected[3] = fixedSkill;
+                if (!placed) selected[skillCount - 1] = fixedSkill;
             }
+
+            // Stage 1 Rule: 1 empty slot
+            if (stageCycle === 1) {
+              selected[Math.floor(Math.random() * skillCount)] = kuuhaku;
+            }
+
+            // Sorting logic: 迎撃 first, 攻撃 last, +skill after its target
+            const nonPlusSkills = selected.filter(s => s && !s.name.startsWith("＋"));
+            const plusSkills = selected.filter(s => s && s.name.startsWith("＋"));
+
+            nonPlusSkills.sort((a, b) => {
+              const typeA = a!.type;
+              const typeB = b!.type;
+              if (typeA.includes("迎撃") && !typeB.includes("迎撃")) return -1;
+              if (!typeA.includes("迎撃") && typeB.includes("迎撃")) return 1;
+              if (typeA.includes("攻撃") && !typeB.includes("攻撃")) return 1;
+              if (!typeA.includes("攻撃") && typeB.includes("攻撃")) return -1;
+              return 0;
+            });
+
+            const result: SkillDetail[] = [];
+            const usedPlus = new Set<number>();
+
+            nonPlusSkills.forEach(s => {
+              result.push(s!);
+              // Find suitable plus skill
+              for (let i = 0; i < plusSkills.length; i++) {
+                if (usedPlus.has(i)) continue;
+                const p = plusSkills[i]!;
+                const canConnect = (p.name === "＋硬" || p.name === "＋速") 
+                  ? (s!.type.includes("攻撃") || s!.type.includes("補助") || s!.type.includes("迎撃")) 
+                  : s!.type.includes("攻撃");
+                
+                if (canConnect) {
+                  result.push(p);
+                  usedPlus.add(i);
+                  break;
+                }
+              }
+            });
+
+            // Add remaining plus skills (should not happen if logic is correct, but for safety)
+            plusSkills.forEach((p, i) => {
+              if (!usedPlus.has(i)) result.push(p!);
+            });
+
+            // Trim or pad to skillCount
+            while (result.length > skillCount) result.pop();
+            while (result.length < skillCount) result.push(kuuhaku);
             
-            return selected as SkillDetail[];
+            return result;
           };
           currentComputerSkills = generateSmartEnemySkills(enemyName);
         } else {
@@ -966,6 +1081,10 @@ function App() {
     if (bossClearRewardPending) {
         const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
         if (availableRewards.length > 0) { setRewardSelectionMode(true); setBossClearRewardPending(false); return; }
+    }
+    if (stageCycle === 12) {
+      setShowEpilogue(true);
+      return;
     }
     setStageMode('MID');
     const nextCycle = stageCycle + 1;
@@ -1206,6 +1325,7 @@ function App() {
         onSignOut={handleSignOut}
         onUpdateProfile={handleUpdateProfile}
         onKenjuBattle={handleKenjuBattle}
+        onDeleteAccount={handleDeleteAccount}
         onBack={() => { setIsTitle(true); setStageMode('MID'); }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
         stageMode={stageMode as any}
@@ -1233,12 +1353,12 @@ function App() {
           <div className="TitleMenu">
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-            <button className="TitleButton" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); }} style={{ color: '#4fc3f7', border: '1px solid #4fc3f7'}}>LOUNGE</button>
-            <button className="TitleButton" onClick={() => { setShowRule(true); }} style={{ color: '#aaa', border: '1px solid #555'}}>RULE</button>
+            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); }} >LOUNGE</button>
+            <button className="TitleButton neon-purple" onClick={() => { setShowRule(true); }} >RULE</button>
           </div>
           <div className="TitleFooter">
             <div style={{ marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>Active Users: {activeUsers}</div>
-            © 2026 Shiden-Game
+            © 2026 Shiden Games
             <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
           </div>
         </div>
@@ -1261,7 +1381,18 @@ function App() {
 
   return (
     <div className="AppContainer" style={{ display: 'flex', height: '100vh', color: '#eee' }}>
-      <div className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', visibility: isLoungeMode ? 'hidden' : 'visible' }}>
+      {showEpilogue && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: '#000', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: '800px', width: '100%', backgroundColor: '#1a1a1a', border: '2px solid #ffd700', borderRadius: '15px', padding: '40px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
+            <h1 style={{ color: '#ffd700', textAlign: 'center', marginBottom: '30px', fontSize: '2rem' }}>エピローグ</h1>
+            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif', fontSize: '1.2rem', lineHeight: '1.8', color: '#eee' }}>{epilogueContent || 'Loading...'}</pre>
+            <div style={{ textAlign: 'center', marginTop: '40px' }}>
+              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); setIsTitle(true); setStageMode('MID'); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', visibility: (isLoungeMode || showEpilogue) ? 'hidden' : 'visible' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { setIsTitle(true); setStageMode('MID'); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
@@ -1371,7 +1502,16 @@ function App() {
                 <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
               </div>
             )}
-            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss)) && <div style={{ marginBottom: '20px', textAlign: 'center' }}><div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div><button onClick={handleResetGame} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>再挑戦</button></div>}
+            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss)) && (
+              <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                {!stage10TrialActive && (
+                  <>
+                    <div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div>
+                    <button onClick={handleResetGame} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>再挑戦</button>
+                  </>
+                )}
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => <div key={index} onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.winner === 1 ? '#66bb6a' : '#ef5350' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((s, si) => <img key={si} src={process.env.PUBLIC_URL + s.icon} alt="" style={{ width: '30px', height: '30px' }} />)}</div></div>)}</div>
           </div>
         )}
@@ -1383,7 +1523,7 @@ function App() {
         </h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
           (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
-        ) : (storyContent && !gameStarted ? <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre></div> : ((stageMode === 'BOSS' || stageMode === 'KENJU') ? <div style={{ textAlign: 'center' }}><img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={{ width: '150px' }} /><h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3><p>{stageMode === 'KENJU' ? '日替わりの強敵。勝利で100pt獲得。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
+        ) : (storyContent && !gameStarted ? <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre></div> : ((stageMode === 'BOSS' || stageMode === 'KENJU') ? <div style={{ textAlign: 'center' }}><img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={{ width: '150px' }} /><h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3><p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
       </div>
       {showRule && <Rule onClose={() => setShowRule(false)} />}
       {showSettings && (

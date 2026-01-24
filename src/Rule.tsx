@@ -134,9 +134,12 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
           <div className="rule-content-section">
             <h2>著作権表記</h2>
             <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                <p>© 2026 Shiden-Game Project</p>
+                <p>© 2026 Shiden Games Project</p>
                 <p>All Rights Reserved.</p>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '30px' }}>本アプリに使用されている画像、音声等の二次配布を禁じます。</p>
+                <div style={{ marginTop: '30px', fontSize: '0.9rem', color: '#ccc' }}>
+                  <p>画像：Ｒド様 (<a href="http://rpgdot3319.g1.xrea.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>http://rpgdot3319.g1.xrea.com/</a>)</p>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '30px' }}>本アプリに使用されている画像、音声等の二次配布・AI学習を禁じます。</p>
             </div>
           </div>
         );
