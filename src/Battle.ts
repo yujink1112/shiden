@@ -927,10 +927,10 @@ export class Battle {
 
                             for (let i2 = 0; i2 < counterDamage; i2++) {
 
-                                if (pc1.musou === 1) {
-                                    this.text += `＞＞${pc1.playerName}は無想の効果でダメージを受けない！\n`;
-                                    break;
-                                }
+                                // if (pc1.musou === 1) {
+                                //     this.text += `＞＞${pc1.playerName}は無想の効果でダメージを受けない！\n`;
+                                //     break;
+                                // }
 
                                 if (pc1.bouheki >= 1) {
                                     this.text += `＞＞${pc1.playerName}は防壁の効果でダメージを受けない！\n`;
@@ -1075,15 +1075,8 @@ export class Battle {
 
         }
 
-        if (counterOn === 0) { // 迎撃スキルが発動しなかった
-
-
-            if (pc1.skill[use] === "呪") {
-
-                pc2.suijaku = 2;
-
-            }
-
+        if (pc1.skill[use] === "呪") {
+            pc2.suijaku = 2;
         }
 
         // ここから補助スキル

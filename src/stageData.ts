@@ -123,11 +123,14 @@ export const STAGE_DATA: StageConfig[] = [
 
 // 補助的な追加データ
 export const SPECIAL_BOSSES = [
-    { name: "ステュムパリデス", skills: "先交燐果錬" },
-    { name: "オピーオーン", skills: "隠隠隠隠剣" },
-    { name: "エディンム", skills: "逆崩連紫盾" },
+    { name: "ゼルエル", skills: "先交燐果錬" },
+    { name: "ステュムパリデス", skills: "搦交硬一強" },
+    { name: "エディンム", skills: "無崩連紫盾" },
     { name: "ヤマタノオロチ", skills: "隠隠隠連剣" },
-    { name: "ジャヴァウォック", skills: "逆崩連紫盾" },
+    { name: "オピーオーン", skills: "疫硬玉刺怒" },
+    { name: "ニーベルングの指輪", skills: "玉玉玉玉玉" },
+    { name: "諦めぬ鉄の大鷲", skills: "逆逆逆崩一" },
+    { name: "セト", skills: "雷反待硬呪" }
 ];
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {

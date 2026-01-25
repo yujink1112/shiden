@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { ref, onValue, push, onDisconnect, set, serverTimestamp, get } from "firebase/database";
+import { ref, onValue, push, onDisconnect, set, serverTimestamp } from "firebase/database";
 import { database, auth, googleProvider } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
@@ -240,7 +240,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   );
 };
 
-type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'VERIFY_EMAIL';
+type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT';
 type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
 function App() {
@@ -289,6 +289,8 @@ function App() {
   const [lastActiveProfiles, setLastActiveProfiles] = useState<{[uid: string]: number}>({});
   const [kenjuBoss, setKenjuBoss] = useState<{name: string, image: string, skills: SkillDetail[]} | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [rewardSelectionMode, setRewardSelectionMode] = useState<boolean>(false);
   const [selectedRewards, setSelectedRewards] = useState<string[]>([]);
   const [bossClearRewardPending, setBossClearRewardPending] = useState<boolean>(false);
@@ -313,6 +315,17 @@ function App() {
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [winRateDisplay, setWinRateDisplay] = useState<number | null>(null);
   const [stage10TrialActive, setStage10TrialActive] = useState(false);
+
+  const NG_WORDS = ["死ね", "殺す", "バカ", "あほ", "カス", "ゴミ", "クズ", "卑猥", "セックス", "チンコ", "マンコ"];
+
+  const filterNGWords = (text: string) => {
+    let filtered = text;
+    NG_WORDS.forEach(word => {
+      const reg = new RegExp(word, 'gi');
+      filtered = filtered.replace(reg, '*'.repeat(word.length));
+    });
+    return filtered;
+  };
 
   const [stageVictorySkills, setStageVictorySkills] = useState<{ [key: string]: string[] }>(() => {
     const saved = localStorage.getItem('shiden_stage_victory_skills');
@@ -360,7 +373,8 @@ function App() {
 
     if (!gameStarted) {
       const getAvailableOwnedSkills = () => {
-        const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+        // 全スキルを持っているものとする
+        const owned = ALL_SKILLS.filter(s => s.abbr !== "空" && s.abbr !== "／");
         return owned.sort((a, b) => {
           const indexA = ALL_SKILLS.findIndex(s => s.abbr === a.abbr);
           const indexB = ALL_SKILLS.findIndex(s => s.abbr === b.abbr);
@@ -509,6 +523,10 @@ function App() {
   };
 
   const handleEmailSignUp = async (email: string, pass: string) => {
+    if (!email || !pass) {
+      alert("メールアドレスとパスワードを入力してください。");
+      return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       await sendEmailVerification(userCredential.user);
@@ -520,6 +538,10 @@ function App() {
   };
 
   const handleEmailSignIn = async (email: string, pass: string) => {
+    if (!email || !pass) {
+      alert("メールアドレスとパスワードを入力してください。");
+      return;
+    }
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       if (!userCredential.user.emailVerified) {
@@ -549,14 +571,36 @@ function App() {
     if (!window.confirm("本当に退会しますか？この操作は取り消せません。")) return;
 
     try {
-      // 1. Delete profile from RTDB
-      const profileRef = ref(database, `profiles/${user.uid}`);
-      await set(profileRef, null);
+      const uid = user.uid;
+      // 1. Delete profile from RTDB (Failure is okay here)
+      try {
+        const profileRef = ref(database, `profiles/${uid}`);
+        await set(profileRef, null);
+      } catch (dbError) {
+        console.warn("Database profile deletion failed (ignoring):", dbError);
+      }
 
       // 2. Delete user from Firebase Auth
-      await deleteUser(user);
+      try {
+        await deleteUser(user);
+      } catch (authError: any) {
+        if (authError.code === 'auth/requires-recent-login') {
+          throw authError; // re-throw to be caught by outer catch
+        }
+        // If user is already gone from Auth but DB had data, we continue
+        console.warn("Auth user deletion failed (possibly already deleted):", authError);
+      }
 
-      alert("ユーザー登録を解除しました。");
+      // 3. Ensure sign out (though deleteUser should handle it)
+      await signOut(auth);
+
+      // LocalStorage もクリアして完全リセット
+      localStorage.removeItem('shiden_stage_cycle');
+      localStorage.removeItem('shiden_owned_skills');
+      localStorage.removeItem('shiden_stage_mode');
+      localStorage.removeItem('shiden_stage_victory_skills');
+
+      alert("退会処理が完了しました。ご利用ありがとうございました。");
       setStageMode('MID');
       setIsTitle(true);
     } catch (error: any) {
@@ -567,19 +611,29 @@ function App() {
         setIsTitle(true);
       } else {
         alert("エラーが発生しました: " + error.message);
+        // エラーが出ても最悪 LocalStorage だけは消してやり直せるようにする
+        localStorage.removeItem('shiden_stage_cycle');
+        localStorage.removeItem('shiden_owned_skills');
+        setStageMode('MID');
+        setIsTitle(true);
       }
     }
   };
 
-  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string) => {
-    if (!user ) return;
+  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string) => {
+    if (!user || !myProfile) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
+    
+    const filteredName = filterNGWords(displayName);
+    const filteredComment = filterNGWords(comment);
+
     await set(profileRef, {
       ...myProfile,
-      displayName,
+      displayName: filteredName,
       favoriteSkill,
-      comment: comment.substring(0, 10),
-      photoURL: photoURL,
+      comment: filteredComment.substring(0, 10),
+      photoURL: photoURL || myProfile.photoURL,
+      title: title || myProfile.title || "",
       lastActive: Date.now()
     });
   };
@@ -704,6 +758,7 @@ function App() {
               displayName: user.displayName || "名無しの剣士",
               photoURL: user.photoURL || "",
               favoriteSkill: "一",
+              title: "",
               comment: "よろしく！",
               lastActive: Date.now(),
               points: 0,
@@ -721,10 +776,17 @@ function App() {
     const profilesRef = ref(database, 'profiles');
     onValue(profilesRef, (snapshot) => {
       if (snapshot.exists()) {
-        const data = snapshot.val();
-        const profilesList = Object.values(data) as UserProfile[];
-        const sortedByActive = [...profilesList].sort((a, b) => b.lastActive - a.lastActive);
-        setAllProfiles(sortedByActive);
+        try {
+          const data = snapshot.val();
+          const profilesList = Object.values(data) as UserProfile[];
+          // displayName が存在し、空でないユーザーのみを表示
+          const filteredList = profilesList.filter(p => p.displayName && p.displayName.trim() !== "");
+          setAllProfiles(filteredList);
+        } catch (err) {
+          console.error("Error processing profiles:", err);
+        }
+      } else {
+        setAllProfiles([]);
       }
     });
 
@@ -1272,7 +1334,7 @@ function App() {
   const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
   const isMobile = window.innerWidth < 768;
   const isLargeScreen = window.innerWidth > 1024;
-  const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING'].includes(stageMode);
+  const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT'].includes(stageMode);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -1284,13 +1346,24 @@ function App() {
               localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(next));
               return next;
           });
-          if (stageMode === 'BOSS' && logComplete) { setShowBossClearPanel(true); triggerVictoryConfetti(); }
+          if (stageMode === 'BOSS' && logComplete) { 
+            setShowBossClearPanel(true); 
+            triggerVictoryConfetti(); 
+            // ボス勝利で「剣聖」勲章
+            if (user && myProfile && !(myProfile.medals || []).includes('master')) {
+              const profileRef = ref(database, `profiles/${user.uid}`);
+              const newMedals = [...(myProfile.medals || []), 'master'];
+              set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+            }
+          }
           if (stageMode === 'KENJU' && logComplete) {
               triggerVictoryConfetti();
               if (user && myProfile) {
                 const profileRef = ref(database, `profiles/${user.uid}`);
-                set(profileRef, { ...myProfile, points: (myProfile.points || 0) + 100, lastActive: Date.now() });
-                alert("剣獣に勝利しました！100pt獲得！");
+                const currentMedals = myProfile.medals || [];
+                const newMedals = currentMedals.includes('kenju') ? currentMedals : [...currentMedals, 'kenju'];
+                set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                alert("剣獣に勝利しました！「獣殺し」の勲章を授与します。");
                 setStageMode('LOUNGE');
               }
           }
@@ -1311,12 +1384,25 @@ function App() {
       );
   }
 
-  if (['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING'].includes(stageMode) && !isTitle) {
+  if (['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT'].includes(stageMode) && !isTitle) {
+    const currentUid = auth.currentUser?.uid;
+    const sortedProfiles = [...allProfiles].sort((a, b) => {
+        if (currentUid) {
+          if (a.uid === currentUid) return -1;
+          if (b.uid === currentUid) return 1;
+        }
+        const timeA = a.lastActive || 0;
+        const timeB = b.lastActive || 0;
+        return timeB - timeA;
+    });
+
+    const pagedProfiles = sortedProfiles.slice((currentPage - 1) * 20, currentPage * 20);
+
     return (
       <Lounge 
         user={user}
         myProfile={myProfile}
-        allProfiles={allProfiles}
+        allProfiles={pagedProfiles}
         lastActiveProfiles={lastActiveProfiles}
         kenjuBoss={kenjuBoss}
         onGoogleSignIn={handleGoogleSignIn}
@@ -1333,6 +1419,9 @@ function App() {
         viewingProfile={viewingProfile}
         allSkills={ALL_SKILLS}
         getSkillByAbbr={getSkillByAbbr}
+        allProfilesCount={allProfiles.length}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
       />
     );
   }
@@ -1347,7 +1436,7 @@ function App() {
           <div className="TitleLogoWrapper"><img src={process.env.PUBLIC_URL + '/images/title/titlelogo.png'} alt="紫電一閃" className="TitleLogo" /></div>
           {user && (
             <div style={{ marginBottom: '20px', color: '#ffd700', fontSize: '1.1rem', textShadow: '0 0 5px rgba(255, 215, 0, 0.5)' }}>
-                剣士: {myProfile?.displayName || "名もなき人"}
+                ユーザ名: {myProfile?.displayName || "名もなき人"}
             </div>
           )}
           <div className="TitleMenu">
@@ -1519,7 +1608,7 @@ function App() {
       <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'hidden', borderLeft: '1px solid #333', visibility: isLoungeMode ? 'hidden' : 'visible' }}>
         <h2 style={{ color: '#61dafb' }}>
             {storyContent && !gameStarted ? 'ストーリー' : 
-             ((stageMode === 'BOSS' || stageMode === 'KENJU') && !logComplete ? 'BOSS' : 'ゲームログ')}
+             ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
           (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>

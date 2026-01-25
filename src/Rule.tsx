@@ -25,11 +25,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
         return (
           <div className="rule-content-section">
             <h2>どんなゲーム？</h2>
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <div style={{ background: '#333', padding: '20px', borderRadius: '10px', border: '1px dashed #666', color: '#888' }}>
-                    [ サンプル画像スペース ]
-                </div>
-            </div>
+            <div className="TitleLogoWrapper"><img src={process.env.PUBLIC_URL + '/images/title/titlelogo.png'} alt="紫電一閃" className="TitleLogo" /></div>
             <p style={{ fontSize: '1.2rem', color: '#ffeb3b', fontWeight: 'bold' }}>スキルで攻撃！相手のスキルを破壊しろ！</p>
             <p>プレイヤーと敵はそれぞれスキルを装備して戦います。攻撃スキルによって相手のスキルを一つずつ破壊していきます。</p>
             <p style={{ fontSize: '1.2rem', color: '#ffeb3b', fontWeight: 'bold' }}>遅い攻撃には迎撃スキル！ダメージを軽減できる！</p>
@@ -83,7 +79,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
             <ul style={{ lineHeight: '2' }}>
               <li><strong style={{ color: '#66bb6a' }}>勝利：</strong> 相手の全スキルを破壊する。</li>
               <li><strong style={{ color: '#ef5350' }}>敗北：</strong> 自分の全スキルが破壊される。</li>
-              <li><strong style={{ color: '#aaa' }}>引き分け：</strong> 規定ラウンド（最大10ラウンド）終了時にお互いのスキルが残っている、または同時に全破壊された場合。</li>
+              <li><strong style={{ color: '#aaa' }}>引き分け：</strong> 両者のスキルが全て同時に破壊される。</li>
             </ul>
           </div>
         );
@@ -91,11 +87,22 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
         return (
           <div className="rule-content-section">
             <h2>ダメージの処理</h2>
-            <p>本作では<span style={{ color: '#ef5350', fontWeight: 'bold' }}>「同時行動フェイズ」は存在しません</span>。</p>
-            <p>全ての行動は速度順に処理されます。速度が同一の場合はプレイヤーが優先されます。</p>
-            <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,82,82,0.1)', borderRadius: '8px', border: '1px solid #ff5252' }}>
-                攻撃がヒットすると、対象のスキルの耐久値が減少します。耐久値が0になったスキルは「破壊」され、使用不能になります。
+
+            <p>このゲームにおいて、<span style={{ color: '#ffeb3b', fontWeight: 'bold' }}>スキルが発生させるダメージは、スキルに対して与えられます。</span>ダメージを与えられたスキルは破壊されます。</p>
+            <p>スキルに書かれている<span style={{ color: '#ffeb3b', fontWeight: 'bold' }}>「X点のダメージを与える」という効果は、「相手のスキルをX個破壊する」ことを意味します</span>（迎撃スキルなどの効果で破壊できないこともあります）。
+            破壊されたスキルは戦闘から除外され、使用することも効果を発揮することも出来なくなり、ダメージの対象にもならなくなります。</p>
+            <p>破壊されたスキルのスペースは空白として残り、先頭に詰めるなどといったスキルの移動は発生しません。</p>
+            <p>特別な記載がない限り、<span style={{ color: '#ffeb3b', fontWeight: 'bold' }}>ダメージの対象は「ダメージ処理中のスキルがダメージを与えていない先頭のスキル」です。</span></p>
+
+            <p>ダメージの処理は、以下の手順で行います。</p>
+            <div style={{ marginBottom: '10px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
+              <p>① ダメージの対象となったスキルにダメージカウンタを置く（以後この行為を「スキルにダメージを与える」と表記する）。</p>
+              <p>② ダメージを与えたスキルが迎撃スキルであり、かつ迎撃スキルの発動条件を満たしているならば、迎撃スキルが発生させたダメージの処理を行った後にダメージの処理を中断する。</p>
+              <p>③ （スキルが発生させたダメージ）回①～②を繰り返す。</p>
+              <p>④ 両者のスキルにダメージ以外の効果があれば、その処理を行う。</p>
+              <p>⑤ ダメージを与えられた両者のスキルを全て破壊する。</p>
             </div>
+
           </div>
         );
       case 5:
@@ -104,7 +111,10 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
             <h2>スキル種別</h2>
             <div style={{ display: 'grid', gap: '15px' }}>
                 <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px' }}>
-                    <strong style={{ color: '#ef5350' }}>【攻撃】：</strong> 相手を攻撃し、スキルを破壊することを目的としたスキル。
+                    <strong style={{ color: '#ef5350' }}>攻撃スキル</strong> 
+                    <p>攻撃フェイズで使用するスキルです。</p>
+                    <p>キャラクターが所持している最も先頭にある攻撃・補助スキルを選択して使用します。</p>
+                    <p>また、先攻決定フェイズで両者の速度を比較する際にも用います。</p>
                 </div>
                 <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '5px' }}>
                     <strong style={{ color: '#66bb6a' }}>【迎撃】：</strong> 相手の攻撃に合わせて発動し、ダメージを軽減したり、無効化・反撃したりするスキル。
