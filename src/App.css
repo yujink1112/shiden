@@ -353,7 +353,7 @@
 
 /* ボスバトルアニメーション */
 .boss-battle-image {
-  transition: transform 0.2s ease-out, filter 0.2s;
+  transition: filter 0.2s;
 }
 
 .boss-anim-attack {

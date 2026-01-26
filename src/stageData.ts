@@ -72,7 +72,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossImage: "/images/monster/7.png",
     bossDescription: "悪夢にようこそ。",
     shopSkills: ["呪詛", "疫病", "隠刃"],
-    bossSkillAbbrs: "交一裏一裏剣",
+    bossSkillAbbrs: "一交裏一裏剣",
   },
   {
     no: 8,
@@ -81,7 +81,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossImage: "/images/monster/8.png",
     bossDescription: "絶対に負けられない。あなたは剣を取る。",
     shopSkills: ["先制", "逆鱗", "覚悟"],
-    bossSkillAbbrs: "疫硬搦硬刺怒速",
+    bossSkillAbbrs: "疫硬搦硬刺怒硬",
   },
   {
     no: 9,
@@ -97,13 +97,13 @@ export const STAGE_DATA: StageConfig[] = [
     name: "零地",
     bossName: "レンダリングダスト",
     bossImage: "/images/monster/10.png",
-    bossDescription: "弱点なんて分からないよ。",
+    bossDescription: "自分自身に打ち勝つのよ！",
     shopSkills: ["紫電", "影討","玉響"],
     bossSkillAbbrs: "逆逆逆", // ＋自分の構成
   },
   {
     no: 11,
-    name: "<串>",
+    name: "＜串＞",
     bossName: "剣獣",
     bossImage: "/images/monster/11.png",
     bossDescription: "かつて剣に全てを捧げた者達がいた。",
@@ -115,9 +115,9 @@ export const STAGE_DATA: StageConfig[] = [
     name: "生き残ろう",
     bossName: "アノマ",
     bossImage: "/images/monster/12.png",
-    bossDescription: "「ハハハハハハハハハハハハハ！！！」",
+    bossDescription: "「ハハハハハハハハハ！！！」 もう何も感じていないようだ。",
     shopSkills: [],
-    bossSkillAbbrs: "影影硬逆燐雷反交硬一",
+    bossSkillAbbrs: "影影硬逆燐一雷反交怒",
   },
 ];
 

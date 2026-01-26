@@ -9,13 +9,120 @@ export interface UserProfile {
   favoriteSkill: string;
   title: string;
   comment: string;
+  oneThing?: string;
   lastActive: number;
   points?: number;
-  kenjuLife?: number;
   lastKenjuDate?: string;
   winCount?: number;
   medals?: string[];
 }
+
+interface UserListTableProps {
+  profiles: UserProfile[];
+  lastActiveProfiles: {[uid: string]: number};
+  getSkillByAbbr: (abbr: string) => SkillDetail | undefined;
+  onViewProfile: (profile: UserProfile) => void;
+  allProfilesCount: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}
+
+const UserListTable: React.FC<UserListTableProps> = ({
+  profiles,
+  lastActiveProfiles,
+  getSkillByAbbr,
+  onViewProfile,
+  allProfilesCount,
+  currentPage,
+  onPageChange
+}) => {
+  return (
+    <>
+      <h2 style={{ color: '#ffd700', marginTop: '30px' }}>参加者</h2>
+      <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
+              <th style={{ padding: '12px', textAlign: 'center' }}>状態</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>名前</th>
+              <th style={{ padding: '12px', textAlign: 'center' }}>好き</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていきたい</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
+            </tr>
+          </thead>
+          <tbody>
+            {profiles.map(p => {
+              const isActive = !!lastActiveProfiles[p.uid];
+              const favSkill = getSkillByAbbr(p.favoriteSkill);
+              return (
+                <tr
+                  key={p.uid}
+                  onClick={() => onViewProfile(p)}
+                  style={{ borderBottom: '1px solid #333', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#222'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <td style={{ padding: '10px', textAlign: 'center' }}>
+                    <div style={{
+                      width: '12px', height: '12px', borderRadius: '50%', margin: '0 auto',
+                      backgroundColor: isActive ? '#4caf50' : '#333',
+                      boxShadow: isActive ? '0 0 8px #4caf50' : 'none',
+                      border: '1px solid ' + (isActive ? '#81c784' : '#555')
+                    }} title={isActive ? "オンライン" : "オフライン"} />
+                  </td>
+                  <td style={{ padding: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={((p.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (p.photoURL || 'https://via.placeholder.com/40')} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
+                        {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '10px', textAlign: 'center' }}>
+                    {favSkill && (
+                      <img
+                        src={process.env.PUBLIC_URL + favSkill.icon}
+                        alt={favSkill.name}
+                        title={favSkill.name}
+                        style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }}
+                      />
+                    )}
+                  </td>
+                  <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
+                    {p.oneThing || '-'}
+                  </td>
+                  <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
+                    {p.comment}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {/* ページング UI */}
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+          {Array.from({ length: Math.ceil(allProfilesCount / 20) }, (_, i) => (
+              <button
+                  key={i}
+                  onClick={() => onPageChange(i + 1)}
+                  style={{
+                      padding: '5px 10px',
+                      background: currentPage === i + 1 ? '#4fc3f7' : '#333',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '3px',
+                      cursor: 'pointer'
+                  }}
+              >
+                  {i + 1}
+              </button>
+          ))}
+      </div>
+    </>
+  );
+};
 
 interface LoungeProps {
   user: User | null;
@@ -27,7 +134,7 @@ interface LoungeProps {
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
-  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string) => void;
+  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: () => void;
   onBack: () => void;
@@ -75,11 +182,11 @@ export const Lounge: React.FC<LoungeProps> = ({
 
   const medals = [
     { id: 'master', name: '剣聖', description: 'すべての試練を乗り越えた証' },
-    { id: 'kenju', name: '獣殺し', description: '剣獣に勝利した証' }
+    { id: 'kenju', name: '獣殺し', description: '剣獣に勝利した証' },
+    { id: 'monkey', name: 'サルの一味', description: '無条件で獲得' }
   ];
 
   if (stageMode === 'LOUNGE') {
-    const life = (myProfile?.lastKenjuDate === today ? myProfile?.kenjuLife : 5) ?? 5;
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
         <h1 style={{ color: '#4fc3f7' }}>LOUNGE</h1>
@@ -132,94 +239,24 @@ export const Lounge: React.FC<LoungeProps> = ({
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                         <img src={(process.env.PUBLIC_URL || '') + kenjuBoss.image} alt={kenjuBoss.name} style={{ width: '120px' }} />
                         <div style={{ textAlign: 'left' }}>
-                            <div style={{ color: '#fff', marginBottom: '5px' }}>残り挑戦回数: {life} / 5</div>
                             <button className="TitleButton neon-gold" onClick={onKenjuBattle} style={{ padding: '10px 30px', fontSize: '1rem' }}>剣獣戦に挑む</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <h2 style={{ color: '#ffd700' }}>剣士たち</h2>
-            <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
-                    <th style={{ padding: '12px', textAlign: 'center' }}>状態</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>剣士</th>
-                    <th style={{ padding: '12px', textAlign: 'center' }}>好</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allProfiles.map(p => {
-                    const isActive = !!lastActiveProfiles[p.uid];
-                    const favSkill = getSkillByAbbr(p.favoriteSkill);
-                    return (
-                      <tr 
-                        key={p.uid} 
-                        onClick={() => onViewProfile(p)} 
-                        style={{ borderBottom: '1px solid #333', cursor: 'pointer', transition: 'background 0.2s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#222'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <td style={{ padding: '10px', textAlign: 'center' }}>
-                          <div style={{ 
-                            width: '12px', height: '12px', borderRadius: '50%', margin: '0 auto',
-                            backgroundColor: isActive ? '#4caf50' : '#333',
-                            boxShadow: isActive ? '0 0 8px #4caf50' : 'none',
-                            border: '1px solid ' + (isActive ? '#81c784' : '#555')
-                          }} title={isActive ? "オンライン" : "オフライン"} />
-                        </td>
-                        <td style={{ padding: '10px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <img src={(p.photoURL.startsWith('/') ? process.env.PUBLIC_URL : '') + (p.photoURL || 'https://via.placeholder.com/40')} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
-                              {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '10px', textAlign: 'center' }}>
-                          {favSkill && (
-                            <img 
-                              src={process.env.PUBLIC_URL + favSkill.icon} 
-                              alt={favSkill.name} 
-                              title={favSkill.name}
-                              style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }} 
-                            />
-                          )}
-                        </td>
-                        <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
-                          {p.comment}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {/* ページング UI */}
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                {Array.from({ length: Math.ceil(allProfilesCount / 20) }, (_, i) => (
-                    <button 
-                        key={i} 
-                        onClick={() => onPageChange(i + 1)}
-                        style={{
-                            padding: '5px 10px',
-                            background: currentPage === i + 1 ? '#4fc3f7' : '#333',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '3px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-            </div>
+            <UserListTable
+              profiles={allProfiles}
+              lastActiveProfiles={lastActiveProfiles}
+              getSkillByAbbr={getSkillByAbbr}
+              onViewProfile={onViewProfile}
+              allProfilesCount={allProfilesCount}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
+            />
           </div>
         )}
-        <button onClick={onBack} style={{ marginTop: '30px', marginBottom: '30px', padding: '15px 40px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '1.1rem' }}>戻る</button>
+        <button onClick={onBack} style={{ marginTop: '30px', marginBottom: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem' }}>戻る</button>
       </div>
     );
   }
@@ -260,7 +297,7 @@ export const Lounge: React.FC<LoungeProps> = ({
           if (ctx) {
             ctx.drawImage(img, 0, 0, 64, 64);
             const dataUrl = canvas.toDataURL('image/png');
-            onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title);
+            onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing);
           }
         };
         img.src = event.target?.result as string;
@@ -276,7 +313,7 @@ export const Lounge: React.FC<LoungeProps> = ({
 
     const handlePresetIconSelect = (iconName: string) => {
       const iconPath = `/images/icon/${iconName}`;
-      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title);
+      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title, myProfile.oneThing);
     };
 
     return (
@@ -285,57 +322,103 @@ export const Lounge: React.FC<LoungeProps> = ({
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #2196f3', width: '100%', maxWidth: '500px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
             <div style={{ textAlign: 'center' }}>
-              <img src={(myProfile.photoURL.startsWith('/') ? process.env.PUBLIC_URL : '') + (myProfile.photoURL || 'https://via.placeholder.com/80')} alt={myProfile.displayName} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', display: 'block', marginBottom: '10px', border: '2px solid #2196f3', background: '#222' }} />
+              <img src={((myProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (myProfile.photoURL || 'https://via.placeholder.com/80')} alt={myProfile.displayName} style={{ width: '80px', height: '80px', borderRadius: '5%', objectFit: 'cover', display: 'block', marginBottom: '10px', border: '2px solid #2196f3', background: '#222' }} />
               <label style={{ background: '#2196f3', color: '#fff', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem' }}>
                 画像アップ
                 <input type="file" accept="image/*" onChange={handleIconChange} style={{ display: 'none' }} />
               </label>
             </div>
             <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>名前</label>
+                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>名前(10文字以内)</label>
                 <input 
-                type="text" 
-                value={myProfile.displayName} 
-                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title)}
+                type="text"
+                maxLength={10}
+                value={myProfile.displayName}
+                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
                 style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
             </div>
           </div>
+
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px' }}>称号を選択</label>
-            <select 
-              value={myProfile.title || ""} 
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value)}
+            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', color: '#aaa' }}>プリセットアイコンから選ぶ</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+              {presetIcons.map(icon => (
+                <img 
+                  key={icon} 
+                  src={`${process.env.PUBLIC_URL}/images/icon/${icon}`}
+                  alt=""
+                  onClick={() => handlePresetIconSelect(icon)}
+                  style={{ width: '100%', cursor: 'pointer', border: (myProfile.photoURL || '').includes(icon) ? '2px solid #ffd700' : '1px solid #444', borderRadius: '4px', padding: '2px', background: '#222' }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>称号を選択</label>
+            <select
+              value={myProfile.title || ""}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
             >
               <option value="">なし</option>
+              <option value="サルの一味">サルの一味</option>
               {(myProfile.medals || []).map(mId => {
                 const medal = medals.find(m => m.id === mId);
-                return medal ? <option key={mId} value={medal.name}>{medal.name}</option> : null;
+                return medal && mId !== 'monkey' ? <option key={mId} value={medal.name}>{medal.name}</option> : null;
               })}
             </select>
           </div>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px' }}>好きなスキル</label>
-            <select 
-              value={myProfile.favoriteSkill} 
-              onChange={(e) => onUpdateProfile(myProfile.displayName, e.target.value, myProfile.comment, myProfile.photoURL, myProfile.title)}
-              style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
-            >
-              {allSkills.map(s => <option key={s.abbr} value={s.abbr}>{s.name}</option>)}
-            </select>
+            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>好きなスキル</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', maxHeight: '200px', overflowY: 'auto', padding: '10px', background: '#222', borderRadius: '5px', border: '1px solid #444' }}>
+              {allSkills.map(s => (
+                <div
+                  key={s.abbr}
+                  onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
+                  style={{
+                    cursor: 'pointer',
+                    border: myProfile.favoriteSkill === s.abbr ? '2px solid #ffd700' : '1px solid #444',
+                    borderRadius: '4px',
+                    padding: '2px',
+                    background: myProfile.favoriteSkill === s.abbr ? '#333' : '#1a1a1a',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                  title={s.name}
+                >
+                  <img src={`${process.env.PUBLIC_URL}${s.icon}`} alt={s.name} style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+                </div>
+              ))}
+            </div>
+            {/* 選択中のスキル名を表示 */}
+            <div style={{ marginTop: '5px', textAlign: 'center', color: '#ffd700', fontSize: '0.9rem' }}>
+                選択中: {getSkillByAbbr(myProfile.favoriteSkill)?.name}
+            </div>
           </div>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px' }}>一言 (10文字以内)</label>
-            <input 
-              type="text" 
+            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>無人島に一つ持っていけるとしたら？ (10文字以内)</label>
+            <input
+              type="text"
               maxLength={10}
-              value={myProfile.comment} 
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title)}
+              value={myProfile.oneThing}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
           </div>
           <div style={{ marginBottom: '20px' }}>
+            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>一言 (20文字以内)</label>
+            <input
+              type="text"
+              maxLength={20}
+              value={myProfile.comment}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
+              style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
+            />
+          </div>
+          {/* <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', color: '#aaa' }}>獲得した勲章</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
               {(myProfile.medals || []).length === 0 && <div style={{ color: '#666', fontSize: '0.8rem' }}>まだ勲章を持っていません</div>}
@@ -348,24 +431,12 @@ export const Lounge: React.FC<LoungeProps> = ({
                 );
               })}
             </div>
-          </div>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', color: '#aaa' }}>プリセットアイコンから選ぶ</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
-              {presetIcons.map(icon => (
-                <img 
-                  key={icon} 
-                  src={`${process.env.PUBLIC_URL}/images/icon/${icon}`} 
-                  alt="" 
-                  onClick={() => handlePresetIconSelect(icon)}
-                  style={{ width: '100%', cursor: 'pointer', border: myProfile.photoURL.includes(icon) ? '2px solid #ffd700' : '1px solid #444', borderRadius: '4px', padding: '2px', background: '#222' }}
-                />
-              ))}
-            </div>
-          </div>
+          </div> */}
+
           <p style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>※入力すると自動で保存されます</p>
+
           <div style={{ borderTop: '1px solid #444', marginTop: '30px', paddingTop: '20px', textAlign: 'center' }}>
-            <button 
+            <button
               type="button"
               onClick={(e) => {
                 e.preventDefault();
@@ -387,8 +458,8 @@ export const Lounge: React.FC<LoungeProps> = ({
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center' }}>
         <h1 style={{ color: '#ff5252' }}>ユーザー登録解除</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #ff5252', maxWidth: '500px' }}>
-          <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>ユーザー登録を解除しますか？</p>
-          <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '30px' }}>※この操作は取り消せません。あなたのプロフィールデータなどはすべて削除されます。</p>
+          <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '20px' }}>ユーザー登録を解除しますか？</p>
+          <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '30px' }}>※この操作は取り消せません。<br></br>あなたのプロフィールデータなどはすべて削除されます。</p>
           <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
             <button onClick={onDeleteAccount} style={{ padding: '10px 30px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>登録を解除する</button>
             <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '10px 30px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>キャンセル</button>
@@ -404,10 +475,16 @@ export const Lounge: React.FC<LoungeProps> = ({
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
         <h1 style={{ color: '#ffd700' }}>PROFILE</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #ffd700', width: '100%', maxWidth: '500px', textAlign: 'center' }}>
-          <img src={(viewingProfile.photoURL.startsWith('/') ? process.env.PUBLIC_URL : '') + (viewingProfile.photoURL || 'https://via.placeholder.com/100')} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
+          <img src={((viewingProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (viewingProfile.photoURL || 'https://via.placeholder.com/100')} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
           <h2 style={{ margin: '0 0 5px 0' }}>{viewingProfile.displayName}</h2>
           {viewingProfile.title && <div style={{ color: '#ffd700', fontSize: '0.9rem', marginBottom: '15px' }}>称号: {viewingProfile.title}</div>}
-          <p style={{ color: '#aaa', fontStyle: 'italic', marginBottom: '30px' }}>"{viewingProfile.comment}"</p>
+          <p style={{ color: '#aaa', fontStyle: 'italic', marginBottom: '15px' }}>"{viewingProfile.comment}"</p>
+          {viewingProfile.oneThing && (
+            <div style={{ color: '#4fc3f7', fontSize: '0.9rem', marginBottom: '30px', borderTop: '1px dashed #444', paddingTop: '15px' }}>
+                <span style={{ color: '#888', fontSize: '0.8rem' }}>無人島に一つ持っていけるとしたら？</span><br/>
+                {viewingProfile.oneThing}
+            </div>
+          )}
           <div style={{ textAlign: 'left', background: '#222', padding: '15px', borderRadius: '10px' }}>
             <h3 style={{ fontSize: '1rem', color: '#ffd700', marginTop: 0 }}>お気に入りスキル</h3>
             {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={(process.env.PUBLIC_URL || '') + favSkill.icon} alt={favSkill.name} style={{ width: '40px' }} /><span>{favSkill.name}</span></div>}

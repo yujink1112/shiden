@@ -267,8 +267,7 @@ function App() {
     const saved = localStorage.getItem('shiden_bgm_volume');
     return saved === null ? 0.5 : parseFloat(saved);
   });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const midiPlayerRef = useRef<any>(null);
+
   const [showSettings, setShowSettings] = useState(false);
   const [showRule, setShowRule] = useState(false);
   
@@ -277,6 +276,7 @@ function App() {
   const [connections, setConnections] = useState<{ fromId: string; toId: string }[]>([]);
   const [dimmedIndices, setDimmedIndices] = useState<number[]>([]);
   const panelRef = useRef<HTMLDivElement>(null);
+  const mainGameAreaRef = useRef<HTMLDivElement>(null);
   
   const [logComplete, setLogComplete] = useState(false);
 
@@ -334,7 +334,77 @@ function App() {
 
   const [midEnemyData, setMidEnemyData] = useState<{ [stage: number]: string[] }>({});
 
-  const PLAYER_SKILL_COUNT = 5;
+const PLAYER_SKILL_COUNT = 5;
+
+/**
+ * stageCycleに応じたボス画像の表示サイズ設定
+ */
+const BOSS_IMAGE_SIZE_CONFIG: Record<number, { height: string | ((isLarge: boolean) => string), width: string }> = {
+  4: {
+    height: 'auto',
+    width: '100%'
+  },
+  8: {
+    height: 'auto',
+    width: '100%'
+  },
+  12: {
+    height: 'auto',
+    width: '100%'
+  },
+};
+
+/**
+ * スマホ版のボス画像のレイアウト設定
+ * ここにステージごとのスタイル定義を追加してください
+ */
+const BOSS_IMAGE_MOBILE_CONFIG: Record<number, React.CSSProperties> = {
+  1: { width: '100%' },
+  2: { width: '100%' },
+  3: { width: '100%' },
+  4: { width: '100%' },
+  5: { width: '100%' },
+  6: { width: '100%' },
+  7: { width: '100%' },
+  8: { width: '100%' },
+  9: { width: '100%' },
+  10: { width: '100%' },
+  11: { width: '100%' },
+  12: { width: '100%' },
+};
+
+const DEFAULT_BOSS_SIZE = {
+  height: (isLarge: boolean) => isLarge ? '200px' : '200px',
+  width: 'auto'
+};
+
+const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile: boolean): React.CSSProperties => {
+  const config = BOSS_IMAGE_SIZE_CONFIG[stageCycle] || DEFAULT_BOSS_SIZE;
+  const height = typeof config.height === 'function' ? config.height(isLargeScreen) : config.height;
+  const width = config.width;
+
+  const baseStyle: React.CSSProperties = {
+    height,
+    width,
+    maxWidth: 'none',
+    objectFit: (stageCycle === 12) ? 'cover' : 'contain',
+    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+    flexShrink: 0
+  };
+
+  if (isMobile) {
+    const mobileConfig = BOSS_IMAGE_MOBILE_CONFIG[stageCycle] || {};
+    return {
+        ...baseStyle,
+        width: '100%',
+        height: 'auto',
+        maxWidth: '100%',
+        ...mobileConfig
+    };
+  }
+
+  return baseStyle;
+};
 
   const getSkillCardsFromAbbrs = (abbrs: string[]) => {
     return abbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
@@ -373,8 +443,7 @@ function App() {
 
     if (!gameStarted) {
       const getAvailableOwnedSkills = () => {
-        // 全スキルを持っているものとする
-        const owned = ALL_SKILLS.filter(s => s.abbr !== "空" && s.abbr !== "／");
+        const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
         return owned.sort((a, b) => {
           const indexA = ALL_SKILLS.findIndex(s => s.abbr === a.abbr);
           const indexB = ALL_SKILLS.findIndex(s => s.abbr === b.abbr);
@@ -429,88 +498,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('shiden_is_title', isTitle.toString());
   }, [isTitle]);
-
-  useEffect(() => {
-    localStorage.setItem('shiden_bgm_enabled', bgmEnabled.toString());
-    if (audioRef.current) {
-      if (bgmEnabled) audioRef.current.play().catch(() => {});
-      else audioRef.current.pause();
-    }
-  }, [bgmEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem('shiden_bgm_volume', bgmVolume.toString());
-    if (audioRef.current) {
-      audioRef.current.volume = bgmVolume;
-    }
-    if (midiPlayerRef.current) {
-      // midiPlayerRef.current は読み込み時に bgmVolume を使用する実装になっているが、
-      // リアルタイム反映のために念のため
-    }
-  }, [bgmVolume]);
-
-  useEffect(() => {
-    const getBgmPath = () => {
-      if (stageMode === 'BOSS') {
-        if (stageCycle === 11) return '/audio/(t)月下の死闘.MID';
-        if (stageCycle === 12) return '/audio/Knight_in_the_wind.MID';
-      }
-      return null;
-    };
-
-    const bgmPath = getBgmPath();
-    
-    const setupMidiPlayer = async (url: string) => {
-      const MidiPlayer = (window as any).MidiPlayer;
-      const Soundfont = (window as any).Soundfont;
-      if (!MidiPlayer || !Soundfont) return;
-
-      if (midiPlayerRef.current) {
-        midiPlayerRef.current.stop();
-      }
-
-      const ac = new AudioContext();
-      const instrument = await Soundfont.instrument(ac, 'https://raw.githubusercontent.com/gleitz/midi-js-soundfonts/gh-pages/MusyngKite/acoustic_grand_piano-mp3.js');
-      
-      const player = new MidiPlayer.Player((event: any) => {
-        if (event.name === 'Note on') {
-          instrument.play(event.noteName, ac.currentTime, { gain: (event.velocity / 128) * bgmVolume });
-        }
-      });
-
-      try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        player.loadArrayBuffer(arrayBuffer);
-        
-        player.on('endOfFile', () => {
-          player.skipToTick(0);
-          player.play();
-        });
-        
-        midiPlayerRef.current = player;
-        if (bgmEnabled) player.play();
-      } catch (e) {
-        console.error("MIDI Load Error:", e);
-      }
-    };
-
-    if (bgmPath) {
-      const fullUrl = process.env.PUBLIC_URL + bgmPath;
-      setupMidiPlayer(fullUrl).catch(console.error);
-    } else {
-      if (midiPlayerRef.current) {
-        midiPlayerRef.current.stop();
-        midiPlayerRef.current = null;
-      }
-    }
-
-    return () => {
-      if (midiPlayerRef.current) {
-        midiPlayerRef.current.stop();
-      }
-    };
-  }, [stageMode, stageCycle, bgmEnabled, bgmVolume]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -687,15 +674,9 @@ function App() {
   const handleKenjuBattle = async () => {
     if (!user || !myProfile || !kenjuBoss) return;
     const today = new Date().toLocaleDateString();
-    let currentLife = myProfile.kenjuLife ?? 5;
-    if (myProfile.lastKenjuDate !== today) currentLife = 5;
-
-    if (currentLife <= 0) {
-        alert("ライフが足りません。また明日挑戦してください！")
-    }
 
     const profileRef = ref(database, `profiles/${user.uid}`);
-    await set(profileRef, { ...myProfile, kenjuLife: currentLife - 1, lastKenjuDate: today, lastActive: Date.now() });
+    await set(profileRef, { ...myProfile, lastKenjuDate: today, lastActive: Date.now() });
     setStageMode('KENJU');
     handleResetGame();
   };
@@ -762,7 +743,6 @@ function App() {
               comment: "よろしく！",
               lastActive: Date.now(),
               points: 0,
-              kenjuLife: 5,
               lastKenjuDate: new Date().toLocaleDateString()
             };
             set(profileRef, initialProfile);
@@ -780,7 +760,7 @@ function App() {
           const data = snapshot.val();
           const profilesList = Object.values(data) as UserProfile[];
           // displayName が存在し、空でないユーザーのみを表示
-          const filteredList = profilesList.filter(p => p.displayName && p.displayName.trim() !== "");
+          const filteredList = profilesList.filter(p => p && p.displayName && p.displayName.trim() !== "");
           setAllProfiles(filteredList);
         } catch (err) {
           console.error("Error processing profiles:", err);
@@ -920,6 +900,7 @@ function App() {
   const handleStartGame = () => {
     if (selectedPlayerSkills.length === PLAYER_SKILL_COUNT) {
       window.scrollTo({ top: 0 });
+      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
       const results: BattleResult[] = [];
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
       const isStage11MID = stageMode === 'MID' && stageCycle === 11;
@@ -1256,12 +1237,13 @@ function App() {
     };
 
     const isLargeScreen = window.innerWidth > 1024;
+    const isMobile = window.innerWidth < 768;
 
     return (
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
         {bossImage && (
-          <div className="boss-stage-area sticky-boss-area" style={{ 
-            height: '240px', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', 
+          <div className="boss-stage-area sticky-boss-area" style={{
+            height: '240px', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
             backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
@@ -1269,24 +1251,19 @@ function App() {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1 }} />
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
             
-            <div style={{ position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 30px', boxSizing: 'border-box' }}>
+            <div style={{ zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
               <div style={{ zIndex: 10, position: 'relative' }}>
                 {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
               </div>
               
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 5, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
-                <img 
-                  src={(process.env.PUBLIC_URL || '') + bossImage} 
-                  alt={bossName} 
-                  className={`boss-battle-image boss-anim-${bossAnim}${ [4, 5, 8, 11, 12].includes(stageCycle) ? ' is-large' : ''}`} 
-                  style={{ 
-                      height: (stageCycle === 12) ? '100%' : (stageCycle === 8 ? 'auto' : (stageCycle === 4 ? (isLargeScreen ? '400px' : '300px') : (isLargeScreen ? '350px' : '200px'))),
-                      width: [4, 8, 12].includes(stageCycle) ? '100%' : 'auto',
-                      maxWidth: 'none',
-                      objectFit: (stageCycle === 12) ? 'cover' : 'contain', 
-                      filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
-                      flexShrink: 0
-                  }} 
+                <img
+                  src={(process.env.PUBLIC_URL || '') + bossImage}
+                  alt={bossName}
+                  className={`boss-battle-image boss-anim-${bossAnim}${ [4, 5, 8, 11, 12].includes(stageCycle) ? ' is-large' : ''}`}
+                  style={{
+                      ...getBossImageStyle(stageCycle, isLargeScreen, isMobile)
+                  }}
                 />
               </div>
               
@@ -1346,11 +1323,11 @@ function App() {
               localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(next));
               return next;
           });
-          if (stageMode === 'BOSS' && logComplete) { 
-            setShowBossClearPanel(true); 
-            triggerVictoryConfetti(); 
-            // ボス勝利で「剣聖」勲章
-            if (user && myProfile && !(myProfile.medals || []).includes('master')) {
+          if (stageMode === 'BOSS' && logComplete) {
+            setShowBossClearPanel(true);
+            triggerVictoryConfetti();
+            // Stage12のボス勝利で「剣聖」勲章
+            if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
               const profileRef = ref(database, `profiles/${user.uid}`);
               const newMedals = [...(myProfile.medals || []), 'master'];
               set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
@@ -1358,14 +1335,14 @@ function App() {
           }
           if (stageMode === 'KENJU' && logComplete) {
               triggerVictoryConfetti();
-              if (user && myProfile) {
-                const profileRef = ref(database, `profiles/${user.uid}`);
-                const currentMedals = myProfile.medals || [];
-                const newMedals = currentMedals.includes('kenju') ? currentMedals : [...currentMedals, 'kenju'];
-                set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                alert("剣獣に勝利しました！「獣殺し」の勲章を授与します。");
-                setStageMode('LOUNGE');
-              }
+              // if (user && myProfile) {
+              //   const profileRef = ref(database, `profiles/${user.uid}`);
+              //   const currentMedals = myProfile.medals || [];
+              //   const newMedals = currentMedals.includes('kenju') ? currentMedals : [...currentMedals, 'kenju'];
+              //   set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+              //   alert("剣獣に勝利しました！「獣殺し」の勲章を授与します。");
+              //   setStageMode('LOUNGE');
+              // }
           }
       }
     }
@@ -1481,9 +1458,9 @@ function App() {
           </div>
         </div>
       )}
-      <div className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', visibility: (isLoungeMode || showEpilogue) ? 'hidden' : 'visible' }}>
+      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', visibility: (isLoungeMode || showEpilogue) ? 'hidden' : 'visible' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { setIsTitle(true); setStageMode('MID'); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <button onClick={() => { setIsTitle(true); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageMode === 'KENJU' ? `VS ${kenjuBoss?.name}` : (stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `VS ${currentStageInfo.bossName}`)}
           </h1>
@@ -1500,19 +1477,14 @@ function App() {
           )}
 
           {((stageMode === 'BOSS' && !battleResults[0]?.winner) || (stageMode === 'KENJU' && kenjuBoss)) && (
-            <div style={{ width: '100%', height: '240px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '320px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
-                <img 
-                  src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} 
-                  alt="" 
-                  style={{ 
-                      height: (stageCycle === 12) ? '100%' : (stageCycle === 8 ? 'auto' : (stageCycle === 4 ? (isLargeScreen ? '400px' : '300px') : (isLargeScreen ? '350px' : '200px'))),
-                      width: [4, 8, 12].includes(stageCycle) ? '100%' : 'auto',
-                      maxWidth: 'none',
-                      objectFit: (stageCycle === 12) ? 'cover' : 'contain', 
-                      filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
-                      flexShrink: 0
-                  }} 
+                <img
+                  src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)}
+                  alt=""
+                  style={{
+                      ...getBossImageStyle(stageCycle, isLargeScreen, isMobile)
+                  }}
                 />
               </div>
               {!gameStarted && (
@@ -1523,11 +1495,11 @@ function App() {
                          stageCycle === 8 ? 'WALLOP' :
                          stageCycle === 9 ? "IT'S ANNOYING" :
                          stageCycle === 10 ? 'BUILD ME' :
-                         stageCycle === 11 ? 'SHARPEN YOUR FLASH' :
+                         stageCycle === 11 ? 'SHARPEN YOUR FLASH!' :
                          stageCycle === 12 ? 'A HORRIBLE FIGURE APPEARED' :
                          'BOSS SKILLS DISCLOSED'}
                     </h2>
-                    <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : 'scale(0.8)', transformOrigin: 'center', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>{(stageMode === 'KENJU' ? kenjuBoss?.skills : bossSkills)?.map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)}</div>
+                    <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : 'scale(0.8)', transformOrigin: 'center', display: 'flex', flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>{(stageMode === 'KENJU' ? kenjuBoss?.skills : bossSkills)?.map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)}</div>
                 </div>
               )}
             </div>
@@ -1605,20 +1577,20 @@ function App() {
           </div>
         )}
       </div>
-      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'hidden', borderLeft: '1px solid #333', visibility: isLoungeMode ? 'hidden' : 'visible' }}>
+      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'auto', borderLeft: '1px solid #333', visibility: isLoungeMode ? 'hidden' : 'visible', display: 'flex', flexDirection: 'column' }}>
         <h2 style={{ color: '#61dafb' }}>
-            {storyContent && !gameStarted ? 'ストーリー' : 
+            {storyContent && !gameStarted ? 'ストーリー' :
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
           (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
-        ) : (storyContent && !gameStarted ? <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre></div> : ((stageMode === 'BOSS' || stageMode === 'KENJU') ? <div style={{ textAlign: 'center' }}><img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={{ width: '150px' }} /><h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3><p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
+        ) : (storyContent && !gameStarted ? <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre></div> : ((stageMode === 'BOSS' || stageMode === 'KENJU') ? <div style={{ textAlign: 'center' }}><img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={{ maxWidth: '100%' }} /><h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3><p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
       </div>
       {showRule && <Rule onClose={() => setShowRule(false)} />}
       {showSettings && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ backgroundColor: '#1a1a1a', border: '2px solid #fff', padding: '30px', borderRadius: '10px', width: '400px', maxWidth: '90%', textAlign: 'center' }}>
-            <h2 style={{ color: '#4fc3f7' }}>設定</h2>
+            <h2 style={{ padding: '0px', color: '#4fc3f7' }}>設定</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               <button onClick={() => setIconMode('ORIGINAL')} style={{ padding: '10px', background: iconMode === 'ORIGINAL' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>元のアイコン</button>
               <button onClick={() => setIconMode('ABBR')} style={{ padding: '10px', background: iconMode === 'ABBR' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>スキルの略字</button>
