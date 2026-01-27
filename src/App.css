@@ -329,9 +329,6 @@
     align-items: flex-end !important;
     padding-bottom: 25px !important;
   }
-  .boss-battle-image {
-    height: 110px !important;
-  }
 
   /* ログ画面の「VS」ヘッダーのスマホ調整 */
   .battle-start-header {
@@ -474,6 +471,19 @@
 }
 
 /* リッチログ用のスタイル */
+.rich-log-modern {
+  overflow-y: scroll !important;
+  height: 100%;
+}
+
+.rich-log-modern::-webkit-scrollbar {
+  display: none;
+}
+
+.rich-log-modern {
+  scrollbar-width: none;
+}
+
 .rich-log {
   font-family: "MS UI Gothic", "Arial", sans-serif;
   background-color: #bbccbb;
@@ -678,4 +688,119 @@
     font-size: 1rem;
     padding: 12px 20px;
   }
+}
+
+/* エピローグ用の演出 */
+.EpilogueContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.EpilogueBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #000c18 0%, #002c4c 50%, #004c88 100%);
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.EpilogueStars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.3;
+  animation: starsTwinkle 4s infinite alternate;
+  z-index: 2;
+}
+
+@keyframes starsTwinkle {
+  from { opacity: 0.2; }
+  to { opacity: 0.5; }
+}
+
+.EpilogueContent {
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 10;
+  scrollbar-width: none;
+}
+
+.EpilogueContent::-webkit-scrollbar {
+  display: none;
+}
+
+.EpilogueText {
+  white-space: pre-wrap;
+  font-family: "Sawarabi Mincho", "Hiragino Mincho ProN", "MS Mincho", serif;
+  font-size: 1.3rem;
+  line-height: 2.2;
+  color: #f0f0f0;
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+  margin-bottom: 50px;
+}
+
+@media (max-width: 600px) {
+  .EpilogueText {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .EpilogueTitle {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+}
+
+.EpilogueLine {
+  display: block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: epilogueFadeIn 1.5s forwards;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes epilogueFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.EpilogueTitle {
+  color: #ffd700;
+  text-align: center;
+  margin-bottom: 50px;
+  font-size: 2.5rem;
+  letter-spacing: 0.5rem;
+  font-weight: normal;
+  opacity: 0;
+  animation: epilogueFadeIn 2s forwards;
 }

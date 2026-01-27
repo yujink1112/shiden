@@ -240,7 +240,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   );
 };
 
-type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT';
+type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT' | 'ADMIN_ANALYTICS';
 type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
 function App() {
@@ -255,6 +255,7 @@ function App() {
   const [activeUsers, setActiveUsers] = useState(0);
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
   const [iconMode, setIconMode] = useState<IconMode>(() => {
     const saved = localStorage.getItem('shiden_icon_mode');
     return (saved as IconMode) || 'ORIGINAL';
@@ -339,71 +340,80 @@ const PLAYER_SKILL_COUNT = 5;
 /**
  * stageCycleに応じたボス画像の表示サイズ設定
  */
-const BOSS_IMAGE_SIZE_CONFIG: Record<number, { height: string | ((isLarge: boolean) => string), width: string }> = {
+interface BossImageStyleConfig {
+  pc: React.CSSProperties;
+  mobile: React.CSSProperties;
+}
+
+const BOSS_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  1: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  2: {
+    pc: { height: '50%', width: '50%' },
+    mobile: { height: '50%', width: '50%' }
+  },
+  3: {
+    pc: { height: '80%', width: '60%' },
+    mobile: { height: '80%', width: '60%' }
+  },
   4: {
-    height: 'auto',
-    width: '100%'
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  5: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  6: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  7: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
   },
   8: {
-    height: 'auto',
-    width: '100%'
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  9: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  10: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '100%', width: '100%' }
+  },
+  11: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
   },
   12: {
-    height: 'auto',
-    width: '100%'
-  },
-};
-
-/**
- * スマホ版のボス画像のレイアウト設定
- * ここにステージごとのスタイル定義を追加してください
- */
-const BOSS_IMAGE_MOBILE_CONFIG: Record<number, React.CSSProperties> = {
-  1: { width: '100%' },
-  2: { width: '100%' },
-  3: { width: '100%' },
-  4: { width: '100%' },
-  5: { width: '100%' },
-  6: { width: '100%' },
-  7: { width: '100%' },
-  8: { width: '100%' },
-  9: { width: '100%' },
-  10: { width: '100%' },
-  11: { width: '100%' },
-  12: { width: '100%' },
-};
-
-const DEFAULT_BOSS_SIZE = {
-  height: (isLarge: boolean) => isLarge ? '200px' : '200px',
-  width: 'auto'
-};
-
-const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile: boolean): React.CSSProperties => {
-  const config = BOSS_IMAGE_SIZE_CONFIG[stageCycle] || DEFAULT_BOSS_SIZE;
-  const height = typeof config.height === 'function' ? config.height(isLargeScreen) : config.height;
-  const width = config.width;
-
-  const baseStyle: React.CSSProperties = {
-    height,
-    width,
-    maxWidth: 'none',
-    objectFit: (stageCycle === 12) ? 'cover' : 'contain',
-    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
-    flexShrink: 0
-  };
-
-  if (isMobile) {
-    const mobileConfig = BOSS_IMAGE_MOBILE_CONFIG[stageCycle] || {};
-    return {
-        ...baseStyle,
-        width: '100%',
-        height: 'auto',
-        maxWidth: '100%',
-        ...mobileConfig
-    };
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
   }
+};
 
-  return baseStyle;
+const DEFAULT_BOSS_IMAGE_CONFIG: BossImageStyleConfig = {
+  pc: { },
+  mobile: {}
+};
+
+
+
+const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProperties => {
+  const config = BOSS_IMAGE_CONFIGS[stageCycle] || DEFAULT_BOSS_IMAGE_CONFIG;
+  const style = isMobile ? config.mobile : config.pc;
+
+  return {
+    maxWidth: 'none',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+    flexShrink: 0,
+    ...style
+  };
 };
 
   const getSkillCardsFromAbbrs = (abbrs: string[]) => {
@@ -607,7 +617,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
     }
   };
 
-  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string) => {
+  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string) => {
     if (!user || !myProfile) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
     
@@ -621,6 +631,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
       comment: filteredComment.substring(0, 10),
       photoURL: photoURL || myProfile.photoURL,
       title: title || myProfile.title || "",
+      oneThing: oneThing || myProfile.oneThing || "", // oneThing を追加
       lastActive: Date.now()
     });
   };
@@ -727,6 +738,9 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
            setIsTitle(false);
         } else if (stageMode === 'VERIFY_EMAIL') {
            setStageMode('LOUNGE');
+        }
+        if (user.uid === process.env.REACT_APP_ADMIN_UID) {
+          setShowAdmin(true);
         }
         const profileRef = ref(database, `profiles/${user.uid}`);
         onValue(profileRef, (snapshot) => {
@@ -966,13 +980,30 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
             enemyName = kenjuBoss.name;
         } else if (stageMode === 'MID') {
           const namesAtStage = midEnemyData[stageCycle] || ["コンピュータ"];
-          enemyName = namesAtStage[Math.floor(Math.random() * namesAtStage.length)];
+          // 重複を避けるためにシャッフルしてi番目を選択
+          const shuffledNames = [...namesAtStage].sort(() => Math.random() - 0.5);
+          enemyName = shuffledNames[i % shuffledNames.length];
             
           const allPool = getAvailableSkillsUntilStage(stageCycle);
           const kuuhaku = getSkillByAbbr("空")!;
           const generateSmartEnemySkills = (eName: string): SkillDetail[] => {
-            const skillCount = stageCycle === 11 ? 5 : 4;
+            const skillCount = (stageCycle === 11 || stageCycle === 12) ? 5 : 4;
             const selected: (SkillDetail|null)[] = Array(skillCount).fill(null);
+
+            // Stage 12 Special Rule for the first skill
+            if (stageCycle === 12) {
+              const r = Math.random();
+              if (r < 0.3) {
+                selected[0] = getSkillByAbbr("無")!;
+              } else if (r < 0.6) {
+                selected[0] = getSkillByAbbr("先")!;
+              } else {
+                const counterPool = allPool.filter(s => s.type.includes("迎撃"));
+                if (counterPool.length > 0) {
+                  selected[0] = counterPool[Math.floor(Math.random() * counterPool.length)];
+                }
+              }
+            }
             
             // Stage 10 Special Rule
             let fixedSkill: SkillDetail | null = null;
@@ -1143,7 +1174,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
   };
 
   const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance }) => {
-    const rounds = log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== '');
+    const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
     const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
     const [roundFinished, setRoundFinished] = useState<boolean[]>(new Array(rounds.length).fill(false));
@@ -1151,7 +1182,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
     const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
     const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
     const scrollRef = useRef<HTMLDivElement>(null);
-    const currentRoundLines = rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [];
+    const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
     useEffect(() => {
         if (!roundFinished[currentRoundIdx]) {
             const currentLineIdx = roundVisibleCounts[currentRoundIdx];
@@ -1178,8 +1209,18 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
     useEffect(() => {
       if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
       if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
-          const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
-          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf); onComplete(); return;
+          const nc = [...roundVisibleCounts];
+          if (nc[currentRoundIdx] !== currentRoundLines.length) {
+            nc[currentRoundIdx] = currentRoundLines.length;
+            setRoundVisibleCounts(nc);
+          }
+          if (!roundFinished[currentRoundIdx]) {
+            const nf = [...roundFinished];
+            nf[currentRoundIdx] = true;
+            setRoundFinished(nf);
+          }
+          onComplete();
+          return;
       }
       if (!roundFinished[currentRoundIdx]) {
         if (roundVisibleCounts[currentRoundIdx] < currentRoundLines.length) {
@@ -1244,7 +1285,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
         {bossImage && (
           <div className="boss-stage-area sticky-boss-area" style={{
             height: '240px', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`,
+            backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
             {/* 背景を暗くするオーバーレイ */}
@@ -1256,13 +1297,13 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
                 {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
               </div>
               
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 5, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', zIndex: 5, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
                   src={(process.env.PUBLIC_URL || '') + bossImage}
                   alt={bossName}
-                  className={`boss-battle-image boss-anim-${bossAnim}${ [4, 5, 8, 11, 12].includes(stageCycle) ? ' is-large' : ''}`}
+                  className={`boss-battle-image boss-anim-${bossAnim}`}
                   style={{
-                      ...getBossImageStyle(stageCycle, isLargeScreen, isMobile)
+                      ...getBossImageStyle(stageCycle, isMobile)
                   }}
                 />
               </div>
@@ -1273,7 +1314,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
             </div>
           </div>
         )}
-        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', height: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
             <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
             <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
@@ -1301,7 +1342,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
               else if (line.includes('発動') || line.includes('効果')) style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
               return <div key={i} className="log-line" style={style}>{line}</div>;
             })}
-            <div style={{ height: '100px' }} />
+            
           </div>
         </div>
       </div>
@@ -1311,7 +1352,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
   const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
   const isMobile = window.innerWidth < 768;
   const isLargeScreen = window.innerWidth > 1024;
-  const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT'].includes(stageMode);
+  const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'].includes(stageMode);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -1326,7 +1367,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
           if (stageMode === 'BOSS' && logComplete) {
             setShowBossClearPanel(true);
             triggerVictoryConfetti();
-            // Stage12のボス勝利で「剣聖」勲章
+            // Stage12のボス勝利で「クリアしたよ！」の称号
             if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
               const profileRef = ref(database, `profiles/${user.uid}`);
               const newMedals = [...(myProfile.medals || []), 'master'];
@@ -1376,7 +1417,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
     const pagedProfiles = sortedProfiles.slice((currentPage - 1) * 20, currentPage * 20);
 
     return (
-      <Lounge 
+      <Lounge
         user={user}
         myProfile={myProfile}
         allProfiles={pagedProfiles}
@@ -1399,6 +1440,7 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
         allProfilesCount={allProfiles.length}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        isAdmin={isAdmin}
       />
     );
   }
@@ -1423,8 +1465,11 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
             <button className="TitleButton neon-purple" onClick={() => { setShowRule(true); }} >RULE</button>
           </div>
           <div className="TitleFooter">
-            <div style={{ marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>Active Users: {activeUsers}</div>
-            © 2026 Shiden Games
+            <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
+            <div style={{fontSize: '0.8rem'}}> © 2026 Shiden Games </div>
+            {isAdmin && (
+              <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
+            )}
             <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
           </div>
         </div>
@@ -1448,11 +1493,44 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
   return (
     <div className="AppContainer" style={{ display: 'flex', height: '100vh', color: '#eee' }}>
       {showEpilogue && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: '#000', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', boxSizing: 'border-box' }}>
-          <div style={{ maxWidth: '800px', width: '100%', backgroundColor: '#1a1a1a', border: '2px solid #ffd700', borderRadius: '15px', padding: '40px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
-            <h1 style={{ color: '#ffd700', textAlign: 'center', marginBottom: '30px', fontSize: '2rem' }}>エピローグ</h1>
-            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif', fontSize: '1.2rem', lineHeight: '1.8', color: '#eee' }}>{epilogueContent || 'Loading...'}</pre>
-            <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        <div className="EpilogueContainer">
+          <div className="EpilogueBackground"></div>
+          <div className="EpilogueStars"></div>
+          <div className="EpilogueContent">
+            <h1 className="EpilogueTitle">エピローグ</h1>
+            <div className="EpilogueText">
+              {(epilogueContent || '').split('\n').map((line, idx) => (
+                <span
+                  key={idx}
+                  className="EpilogueLine"
+                  style={{
+                    animationDelay: `${idx * 1.2}s`,
+                    display: 'block',
+                    width: '100%',
+                    minHeight: line.trim() === '' ? '1.5rem' : 'auto'
+                  }}
+                >
+                  {line}
+                </span>
+              ))}
+            </div>
+            <div style={{
+                opacity: 0,
+                animation: 'epilogueFadeIn 3s forwards',
+                animationDelay: `${((epilogueContent || '').split('\n').length + 2) * 1.2}s`,
+                textAlign: 'center',
+                marginTop: '100px',
+                marginBottom: '100px'
+            }}>
+                <div style={{ fontSize: '3rem', color: '#ffd700', fontFamily: 'serif', letterSpacing: '0.5rem' }}>完</div>
+            </div>
+            <div style={{
+              textAlign: 'center',
+              marginTop: '40px',
+              opacity: 0,
+              animation: 'epilogueFadeIn 2s forwards',
+              animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
+            }}>
               <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); setIsTitle(true); setStageMode('MID'); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
             </div>
           </div>
@@ -1473,17 +1551,18 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
 
         <div style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           {(stageMode === 'MID') && (
-            <div style={{ width: '100%', height: '240px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #4fc3f7', boxSizing: 'border-box' }} />
+            <div style={{ width: '100%', height: '240px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #4fc3f7', boxSizing: 'border-box' }} />
           )}
 
           {((stageMode === 'BOSS' && !battleResults[0]?.winner) || (stageMode === 'KENJU' && kenjuBoss)) && (
-            <div style={{ width: '100%', height: '320px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.${stageCycle === 8 ? 'png' : 'jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '320px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
                   src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)}
                   alt=""
+                  className="boss-battle-image"
                   style={{
-                      ...getBossImageStyle(stageCycle, isLargeScreen, isMobile)
+                      ...getBossImageStyle(stageCycle, isMobile)
                   }}
                 />
               </div>
@@ -1528,8 +1607,8 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
                 <button onClick={handleStartGame} style={{ padding: '10px 60px', fontSize: '20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 0 15px rgba(40, 167, 69, 0.5)', fontWeight: 'bold' }}>戦闘開始</button>
               </div>
             )}
-            <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
-              <h2 style={{ color: '#4fc3f7' }}>所持スキルから編成してください</h2>
+            <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
+              <h2 style={{ padding: '10px', color: '#4fc3f7' }}>所持スキルから編成してください</h2>
               <div className="skill-card-grid">{availablePlayerCards.map(skill => <SkillCard key={skill.abbr} skill={skill} isSelected={selectedPlayerSkills.includes(skill.abbr)} onClick={handlePlayerSkillSelectionClick} iconMode={iconMode} />)}</div>
             </div>
           </div>
@@ -1584,17 +1663,31 @@ const getBossImageStyle = (stageCycle: number, isLargeScreen: boolean, isMobile:
         </h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
           (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
-        ) : (storyContent && !gameStarted ? <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre></div> : ((stageMode === 'BOSS' || stageMode === 'KENJU') ? <div style={{ textAlign: 'center' }}><img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={{ maxWidth: '100%' }} /><h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3><p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
+        ) :
+        
+        (storyContent && !gameStarted ? 
+        
+        <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
+          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre>
+          </div> :
+          ((stageMode === 'BOSS' || stageMode === 'KENJU') ?
+           <div style={{ textAlign: 'center' }}>
+            <img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={getBossImageStyle(currentStageInfo.no, isMobile)} />
+            <h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3>
+            <p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
       </div>
       {showRule && <Rule onClose={() => setShowRule(false)} />}
       {showSettings && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ backgroundColor: '#1a1a1a', border: '2px solid #fff', padding: '30px', borderRadius: '10px', width: '400px', maxWidth: '90%', textAlign: 'center' }}>
             <h2 style={{ padding: '0px', color: '#4fc3f7' }}>設定</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              <button onClick={() => setIconMode('ORIGINAL')} style={{ padding: '10px', background: iconMode === 'ORIGINAL' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>元のアイコン</button>
-              <button onClick={() => setIconMode('ABBR')} style={{ padding: '10px', background: iconMode === 'ABBR' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>スキルの略字</button>
-              <button onClick={() => setIconMode('PHONE')} style={{ padding: '10px', background: iconMode === 'PHONE' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>電話番号風</button>
+            <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
+              <h3 style={{ textAlign: 'left', color: '#4fc3f7', marginBottom: '20px' }}>アイコン</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button onClick={() => setIconMode('ORIGINAL')} style={{ padding: '10px', background: iconMode === 'ORIGINAL' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>通常アイコン</button>
+                <button onClick={() => setIconMode('ABBR')} style={{ padding: '10px', background: iconMode === 'ABBR' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>スキルの略字</button>
+                <button onClick={() => setIconMode('PHONE')} style={{ padding: '10px', background: iconMode === 'PHONE' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>電話番号風</button>
+              </div>
             </div>
             <button onClick={() => setShowSettings(false)} style={{ padding: '10px 30px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
           </div>

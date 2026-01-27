@@ -1,6 +1,7 @@
 import React from 'react';
 import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
+import { AdminAnalytics } from './AdminAnalytics';
 
 export interface UserProfile {
   uid: string;
@@ -43,7 +44,6 @@ const UserListTable: React.FC<UserListTableProps> = ({
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
-              <th style={{ padding: '12px', textAlign: 'center' }}>状態</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>名前</th>
               <th style={{ padding: '12px', textAlign: 'center' }}>好き</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていきたい</th>
@@ -62,19 +62,11 @@ const UserListTable: React.FC<UserListTableProps> = ({
                   onMouseEnter={(e) => e.currentTarget.style.background = '#222'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
-                    <div style={{
-                      width: '12px', height: '12px', borderRadius: '50%', margin: '0 auto',
-                      backgroundColor: isActive ? '#4caf50' : '#333',
-                      boxShadow: isActive ? '0 0 8px #4caf50' : 'none',
-                      border: '1px solid ' + (isActive ? '#81c784' : '#555')
-                    }} title={isActive ? "オンライン" : "オフライン"} />
-                  </td>
                   <td style={{ padding: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={((p.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (p.photoURL || 'https://via.placeholder.com/40')} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
+                      <img src={((p.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (p.photoURL || 'https://via.placeholder.com/40')} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
+                        <div style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
                         {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
                       </div>
                     </div>
@@ -124,6 +116,58 @@ const UserListTable: React.FC<UserListTableProps> = ({
   );
 };
 
+const PrivacyPolicyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 30000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px', boxSizing: 'border-box', color: '#eee'
+    }}>
+      <div style={{
+        width: '100%', maxWidth: '600px', maxHeight: '80vh',
+        backgroundColor: '#1a1a1a', border: '2px solid #4fc3f7',
+        borderRadius: '15px', padding: '30px', overflowY: 'auto',
+        position: 'relative', boxShadow: '0 0 30px rgba(79, 195, 247, 0.3)'
+      }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: '#888', fontSize: '24px', cursor: 'pointer' }}>×</button>
+        <h2 style={{ color: '#4fc3f7', marginTop: 0 }}>プライバシーポリシー</h2>
+        <div style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#ccc' }}>
+          <p>当サービス（以下「本サービス」）は、Google Firebaseを利用した認証システムを導入しています。</p>
+          
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>1. 取得する情報</h3>
+          <p>本サービスは、以下の情報を取得します。</p>
+          <ul>
+            <li>メールアドレス（メール認証時）</li>
+            <li>Googleアカウントの表示名、プロフィール画像、メールアドレス（Googleログイン時）</li>
+          </ul>
+
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>2. 利用目的</h3>
+          <p>取得した情報は、以下の目的で利用します。</p>
+          <ul>
+            <li>ユーザーの識別および認証</li>
+            <li>ラウンジ内でのプレイヤー情報の表示</li>
+            <li>サービスの提供および改善</li>
+          </ul>
+
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>3. データの保存と管理</h3>
+          <p>ユーザーデータは、Google Cloud PlatformのFirebaseサービス上に保存されます。適切なセキュリティ対策を講じ、不正アクセスや漏洩の防止に努めます。</p>
+
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>4. 第三者提供</h3>
+          <p>本サービスは、法令に基づき開示が必要な場合を除き、ユーザーの同意なく第三者に個人情報を提供することはありません。</p>
+
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>5. データの削除</h3>
+          <p>ユーザーは、本サービス内の「アカウント削除」機能を利用することで、いつでも自身のデータを削除することができます。</p>
+
+          <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>6. お問い合わせ</h3>
+          <p>本サービスに関するお問い合わせは、開発者までご連絡ください。</p>
+        </div>
+        <button onClick={onClose} style={{ width: '100%', marginTop: '20px', padding: '10px', background: '#4fc3f7', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
+      </div>
+    </div>
+  );
+};
+
 interface LoungeProps {
   user: User | null;
   myProfile: UserProfile | null;
@@ -139,7 +183,7 @@ interface LoungeProps {
   onKenjuBattle: () => void;
   onBack: () => void;
   onViewProfile: (profile: UserProfile) => void;
-  stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL';
+  stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL' | 'ADMIN_ANALYTICS';
   setStageMode: (mode: any) => void;
   viewingProfile: UserProfile | null;
   allSkills: SkillDetail[];
@@ -147,7 +191,9 @@ interface LoungeProps {
   allProfilesCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  isAdmin: boolean;
 }
+
 
 export const Lounge: React.FC<LoungeProps> = ({
   user,
@@ -171,18 +217,20 @@ export const Lounge: React.FC<LoungeProps> = ({
   getSkillByAbbr,
   allProfilesCount,
   currentPage,
-  onPageChange
+  onPageChange,
+  isAdmin
 }) => {
   const today = new Date().toLocaleDateString();
 
   const [email, setEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
   const [isSignUp, setIsSignUp] = React.useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false);
   const isInitializing = React.useRef(false);
 
   const medals = [
-    { id: 'master', name: '剣聖', description: 'すべての試練を乗り越えた証' },
-    { id: 'kenju', name: '獣殺し', description: '剣獣に勝利した証' },
+    { id: 'master', name: 'クリアしたよ！', description: 'Stage12をクリア' },
+    { id: 'traveler', name: '旅人', description: '無条件で獲得' },
     { id: 'monkey', name: 'サルの一味', description: '無条件で獲得' }
   ];
 
@@ -221,6 +269,12 @@ export const Lounge: React.FC<LoungeProps> = ({
                 アカウント削除・データ初期化
               </button>
             </div>
+            <button
+              onClick={() => setShowPrivacyPolicy(true)}
+              style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8rem' }}
+            >
+              プライバシーポリシー
+            </button>
           </div>
         ) : (
           <div style={{ width: '100%', maxWidth: '800px' }}>
@@ -230,20 +284,16 @@ export const Lounge: React.FC<LoungeProps> = ({
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={onSignOut} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>サインアウト</button>
+                {isAdmin && (
+                  <button onClick={() => setStageMode('ADMIN_ANALYTICS')} style={{ padding: '10px 20px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Admin Analytics</button>
+                )}
               </div>
             </div>
 
-            {kenjuBoss && (
-                <div style={{ background: '#2c0a0a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center' }}>
-                    <h2 style={{ color: '#ff5252', margin: '0 0 10px 0' }}>本日の剣獣: {kenjuBoss.name}</h2>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                        <img src={(process.env.PUBLIC_URL || '') + kenjuBoss.image} alt={kenjuBoss.name} style={{ width: '120px' }} />
-                        <div style={{ textAlign: 'left' }}>
-                            <button className="TitleButton neon-gold" onClick={onKenjuBattle} style={{ padding: '10px 30px', fontSize: '1rem' }}>剣獣戦に挑む</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #555', marginBottom: '30px', textAlign: 'center' }}>
+                <h2 style={{ color: '#888', margin: '0 0 10px 0', fontSize: '1.2rem' }}>剣獣戦</h2>
+                <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
+            </div>
 
             <UserListTable
               profiles={allProfiles}
@@ -257,6 +307,7 @@ export const Lounge: React.FC<LoungeProps> = ({
           </div>
         )}
         <button onClick={onBack} style={{ marginTop: '30px', marginBottom: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem' }}>戻る</button>
+        {showPrivacyPolicy && <PrivacyPolicyModal onClose={() => setShowPrivacyPolicy(false)} />}
       </div>
     );
   }
@@ -362,7 +413,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
             >
-              <option value="">なし</option>
+              <option value="旅人">旅人</option>
               <option value="サルの一味">サルの一味</option>
               {(myProfile.medals || []).map(mId => {
                 const medal = medals.find(m => m.id === mId);
@@ -403,8 +454,10 @@ export const Lounge: React.FC<LoungeProps> = ({
             <input
               type="text"
               maxLength={10}
-              value={myProfile.oneThing}
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value)}
+              value={myProfile.oneThing || ''}
+              onChange={(e) => {
+                onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value);
+              }}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
           </div>
@@ -475,8 +528,8 @@ export const Lounge: React.FC<LoungeProps> = ({
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
         <h1 style={{ color: '#ffd700' }}>PROFILE</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #ffd700', width: '100%', maxWidth: '500px', textAlign: 'center' }}>
-          <img src={((viewingProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (viewingProfile.photoURL || 'https://via.placeholder.com/100')} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
-          <h2 style={{ margin: '0 0 5px 0' }}>{viewingProfile.displayName}</h2>
+          <img src={((viewingProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (viewingProfile.photoURL || 'https://via.placeholder.com/100')} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '10%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
+          <h2 style={{ color: '#FFFFFF', margin: '0 0 5px 0' }}>{viewingProfile.displayName}</h2>
           {viewingProfile.title && <div style={{ color: '#ffd700', fontSize: '0.9rem', marginBottom: '15px' }}>称号: {viewingProfile.title}</div>}
           <p style={{ color: '#aaa', fontStyle: 'italic', marginBottom: '15px' }}>"{viewingProfile.comment}"</p>
           {viewingProfile.oneThing && (
@@ -487,11 +540,24 @@ export const Lounge: React.FC<LoungeProps> = ({
           )}
           <div style={{ textAlign: 'left', background: '#222', padding: '15px', borderRadius: '10px' }}>
             <h3 style={{ fontSize: '1rem', color: '#ffd700', marginTop: 0 }}>お気に入りスキル</h3>
-            {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={(process.env.PUBLIC_URL || '') + favSkill.icon} alt={favSkill.name} style={{ width: '40px' }} /><span>{favSkill.name}</span></div>}
+            {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={(process.env.PUBLIC_URL || '') + favSkill.icon} alt={favSkill.name} style={{ width: '40px' }} /><span ><div style={{ color: '#FFFFFF' }}>{favSkill.name}</div></span></div>}
           </div>
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
       </div>
+    );
+  }
+
+  if (stageMode === 'ADMIN_ANALYTICS') {
+    if (!isAdmin) {
+      // 管理者でない場合はラウンジにリダイレクト
+      setStageMode('LOUNGE');
+      return null;
+    }
+    return (
+      <AdminAnalytics
+        onBack={() => setStageMode('LOUNGE')}
+      />
     );
   }
 

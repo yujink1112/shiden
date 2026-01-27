@@ -94,7 +94,7 @@ export const STAGE_DATA: StageConfig[] = [
   },
   {
     no: 10,
-    name: "零地",
+    name: "精霊の森",
     bossName: "レンダリングダスト",
     bossImage: "/images/monster/10.png",
     bossDescription: "自分自身に打ち勝つのよ！",
@@ -119,18 +119,6 @@ export const STAGE_DATA: StageConfig[] = [
     shopSkills: [],
     bossSkillAbbrs: "影影硬逆燐一雷反交怒",
   },
-];
-
-// 補助的な追加データ
-export const SPECIAL_BOSSES = [
-    { name: "ゼルエル", skills: "先交燐果錬" },
-    { name: "ステュムパリデス", skills: "搦交硬一強" },
-    { name: "エディンム", skills: "無崩連紫盾" },
-    { name: "ヤマタノオロチ", skills: "隠隠隠連剣" },
-    { name: "オピーオーン", skills: "疫硬玉刺怒" },
-    { name: "ニーベルングの指輪", skills: "玉玉玉玉玉" },
-    { name: "諦めぬ鉄の大鷲", skills: "逆逆逆崩一" },
-    { name: "セト", skills: "雷反待硬呪" }
 ];
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {
