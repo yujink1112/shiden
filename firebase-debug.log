@@ -1,0 +1,16 @@
+[debug] [2026-01-28T22:36:51.608Z] ----------------------------------------------------------------------
+[debug] [2026-01-28T22:36:51.610Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Kazuaki\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-01-28T22:36:51.611Z] CLI Version:   15.4.0
+[debug] [2026-01-28T22:36:51.611Z] Platform:      win32
+[debug] [2026-01-28T22:36:51.611Z] Node Version:  v24.12.0
+[debug] [2026-01-28T22:36:51.611Z] Time:          Thu Jan 29 2026 07:36:51 GMT+0900 (日本標準時)
+[debug] [2026-01-28T22:36:51.611Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-28T22:36:52.771Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-28T22:36:52.771Z] > authorizing via signed-in user (shirocafe@yahoo.co.jp)
+[debug] [2026-01-28T22:36:52.771Z] [iam] checking project shiden-games for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-01-28T22:36:52.772Z] Checked if tokens are valid: true, expires at: 1769640853158
+[debug] [2026-01-28T22:36:52.772Z] Checked if tokens are valid: true, expires at: 1769640853158
+[debug] [2026-01-28T22:36:52.773Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/shiden-games:testIamPermissions [none]
+[debug] [2026-01-28T22:36:52.773Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/shiden-games:testIamPermissions x-goog-quota-user=projects/shiden-games
+[debug] [2026-01-28T22:36:52.773Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/shiden-games:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}

@@ -299,6 +299,10 @@ function App() {
   // ステージ管理
   const [stageMode, setStageMode] = useState<StageMode>(() => {
     const saved = localStorage.getItem('shiden_stage_mode');
+    // LOUNGE などの一時的なモードは保存しないようにしたいため、それらが保存されている場合は MID に戻す
+    if (saved === 'LOUNGE' || saved === 'MYPAGE' || saved === 'PROFILE' || saved === 'RANKING' || saved === 'KENJU' || saved === 'VERIFY_EMAIL' || saved === 'DELETE_ACCOUNT' || saved === 'ADMIN_ANALYTICS') {
+      return 'MID';
+    }
     return (saved as StageMode) || 'MID';
   });
   const [stageCycle, setStageCycle] = useState<number>(() => {
@@ -306,7 +310,10 @@ function App() {
     return saved ? parseInt(saved, 10) : 1;
   });
   const [bossSkills, setBossSkills] = useState<SkillDetail[]>([]);
-  const [canGoToBoss, setCanGoToBoss] = useState<boolean>(false);
+  const [canGoToBoss, setCanGoToBoss] = useState<boolean>(() => {
+    const saved = localStorage.getItem('shiden_can_go_to_boss');
+    return saved === 'true';
+  });
 
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [battleResults, setBattleResults] = useState<BattleResult[]>([]);
@@ -315,9 +322,10 @@ function App() {
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [winRateDisplay, setWinRateDisplay] = useState<number | null>(null);
-  const [stage10TrialActive, setStage10TrialActive] = useState(false);
+  const [stage11TrialActive, setStage11TrialActive] = useState(false);
 
-  const NG_WORDS = ["死ね", "殺す", "バカ", "あほ", "カス", "ゴミ", "クズ", "卑猥", "セックス", "チンコ", "マンコ"];
+  const NG_WORDS = ["死ね", "殺す", "バカ", "アホ", "カス", "ゴミ", "クズ", "卑猥", "セックス", "チンコ", "マンコ",
+    "しね", "ころす", "なぁ", "あほ", "かす", "ごみ", "くず", "エロ", "セックス", "ちんこ", "まんこ"];
 
   const filterNGWords = (text: string) => {
     let filtered = text;
@@ -345,7 +353,7 @@ interface BossImageStyleConfig {
   mobile: React.CSSProperties;
 }
 
-const BOSS_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   1: {
     pc: { height: '80%', width: '80%' },
     mobile: { height: '60%', width: '60%' }
@@ -355,8 +363,8 @@ const BOSS_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
     mobile: { height: '50%', width: '50%' }
   },
   3: {
-    pc: { height: '80%', width: '60%' },
-    mobile: { height: '80%', width: '60%' }
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
   },
   4: {
     pc: { height: '80%', width: '80%' },
@@ -375,33 +383,162 @@ const BOSS_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
     mobile: { height: '80%', width: '80%' }
   },
   8: {
-    pc: { height: '80%', width: '80%' },
-    mobile: { height: '80%', width: '80%' }
+    pc: { height: '100%', width: '100%' },
+    mobile: { height: '100%', width: '100%' }
   },
   9: {
     pc: { height: '80%', width: '80%' },
     mobile: { height: '60%', width: '60%' }
   },
   10: {
-    pc: { height: '80%', width: '80%' },
+    pc: { height: '100%', width: '100%' },
     mobile: { height: '100%', width: '100%' }
   },
   11: {
+    pc: { height: '90%', width: '90%' },
+    mobile: { height: '90%', width: '90%' }
+  },
+  12: {
+    pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'},
+    mobile: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' }
+  }
+};
+
+
+const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  1: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  2: {
+    pc: { height: '50%', width: '50%' },
+    mobile: { height: '50%', width: '50%' }
+  },
+  3: {
+    pc: { height: '60%', width: '60%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  4: {
     pc: { height: '80%', width: '80%' },
     mobile: { height: '80%', width: '80%' }
   },
-  12: {
+  5: {
     pc: { height: '80%', width: '80%' },
     mobile: { height: '80%', width: '80%' }
+  },
+  6: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  7: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  8: {
+    pc: { height: '100%', width: '100%' },
+    mobile: { height: '100%', width: '100%' }
+  },
+  9: {
+    pc: { height: '60%', width: '60%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  10: {
+    pc: { height: '100%', width: '100%' },
+    mobile: { height: '100%', width: '100%' }
+  },
+  11: {
+    pc: { height: '90%', width: '90%' },
+    mobile: { height: '90%', width: '90%' }
+  },
+  12: {
+    pc: { height: '150%', width: '150%' },
+    mobile: { height: '150%', width: '150%' }
   }
 };
+
+const BOSS_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  1: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  2: {
+    pc: { height: '50%', width: '50%' },
+    mobile: { height: '50%', width: '50%' }
+  },
+  3: {
+    pc: { height: '60%', width: '60%' },
+    mobile: { height: '40%', width: '40%' }
+  },
+  4: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  5: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  6: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  7: {
+    pc: { height: '60%', width: '60%' },
+    mobile: { height: '40%', width: '40%' }
+  },
+  8: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  9: {
+    pc: { height: '50%', width: '50%' },
+    mobile: { height: '40%', width: '40%' }
+  },
+  10: {
+    pc: { height: '80%', width: '80%' },
+    mobile: { height: '80%', width: '80%' }
+  },
+  11: {
+    pc: { height: '70%', width: '70%' },
+    mobile: { height: '60%', width: '60%' }
+  },
+  12: {
+    pc: { height: '100%', width: '100%'},
+    mobile: { height: '100%', width: '100%'}
+  }
+};
+
+
 
 const DEFAULT_BOSS_IMAGE_CONFIG: BossImageStyleConfig = {
   pc: { },
   mobile: {}
 };
 
+const getBossBackImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProperties => {
+  const config = BOSS_BACK_IMAGE_CONFIGS[stageCycle] || DEFAULT_BOSS_IMAGE_CONFIG;
+  const style = isMobile ? config.mobile : config.pc;
 
+  return {
+    maxWidth: 'none',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+    flexShrink: 0,
+    ...style
+  };
+};
+
+const getBossBattleImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProperties => {
+  const config = BOSS_BATTLE_IMAGE_CONFIGS[stageCycle] || DEFAULT_BOSS_IMAGE_CONFIG;
+  const style = isMobile ? config.mobile : config.pc;
+
+  return {
+    maxWidth: 'none',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+    flexShrink: 0,
+    ...style
+  };
+};
 
 const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProperties => {
   const config = BOSS_IMAGE_CONFIGS[stageCycle] || DEFAULT_BOSS_IMAGE_CONFIG;
@@ -502,8 +639,15 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   }, [ownedSkillAbbrs]);
 
   useEffect(() => {
-    localStorage.setItem('shiden_stage_mode', stageMode);
+    // MID または BOSS の場合のみ永続化する
+    if (stageMode === 'MID' || stageMode === 'BOSS') {
+      localStorage.setItem('shiden_stage_mode', stageMode);
+    }
   }, [stageMode]);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_can_go_to_boss', canGoToBoss.toString());
+  }, [canGoToBoss]);
 
   useEffect(() => {
     localStorage.setItem('shiden_is_title', isTitle.toString());
@@ -596,6 +740,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
       localStorage.removeItem('shiden_owned_skills');
       localStorage.removeItem('shiden_stage_mode');
       localStorage.removeItem('shiden_stage_victory_skills');
+      localStorage.removeItem('shiden_can_go_to_boss');
 
       alert("退会処理が完了しました。ご利用ありがとうございました。");
       setStageMode('MID');
@@ -665,7 +810,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                 const lines = text.split('\n');
                 const data: { [stage: number]: string[] } = {};
                 lines.forEach(line => {
-                    const cols = line.split('\t').map(c => c.trim()).filter(Boolean);
+                    const cols = line.split(',').map(c => c.trim()).filter(Boolean);
                     if (cols.length >= 2) {
                         const stageNo = parseInt(cols[0], 10);
                         if (!isNaN(stageNo)) {
@@ -697,6 +842,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     localStorage.removeItem('shiden_stage_cycle');
     localStorage.removeItem('shiden_owned_skills');
     localStorage.removeItem('shiden_stage_mode');
+    localStorage.removeItem('shiden_can_go_to_boss');
     localStorage.setItem('shiden_is_title', 'false');
     setIsTitle(false);
     setStageMode('MID');
@@ -927,7 +1073,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           const winRateVal = Math.round((winCount / battleCount) * 100);
 
           if (isStage11MID) {
-            setStage10TrialActive(true); // ステート名はそのまま再利用
+            setStage11TrialActive(true); // ステート名はそのまま再利用
             let currentRate = 0;
             const interval = setInterval(() => {
               currentRate += 1;
@@ -944,7 +1090,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                     if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
                       setRewardSelectionMode(true);
                     }
-                    setStage10TrialActive(false);
+                    setStage11TrialActive(false);
                 }, 1000);
               }
             }, 30);
@@ -1277,14 +1423,13 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
       );
     };
 
-    const isLargeScreen = window.innerWidth > 1024;
     const isMobile = window.innerWidth < 768;
 
     return (
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
         {bossImage && (
           <div className="boss-stage-area sticky-boss-area" style={{
-            height: '240px', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+            height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
             backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
@@ -1303,7 +1448,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                   alt={bossName}
                   className={`boss-battle-image boss-anim-${bossAnim}`}
                   style={{
-                      ...getBossImageStyle(stageCycle, isMobile)
+                      ...getBossBattleImageStyle(stageCycle, isMobile)
                   }}
                 />
               </div>
@@ -1430,7 +1575,11 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         onUpdateProfile={handleUpdateProfile}
         onKenjuBattle={handleKenjuBattle}
         onDeleteAccount={handleDeleteAccount}
-        onBack={() => { setIsTitle(true); setStageMode('MID'); }}
+        onBack={() => {
+          setIsTitle(true);
+          // stageMode は変更せず、保存されている MID または BOSS が次に CONTINUE した時に使われるようにする
+          // ただし現在の stageMode が一時的なものの場合は、読み込み時に MID になる
+        }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
         stageMode={stageMode as any}
         setStageMode={setStageMode}
@@ -1542,7 +1691,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageMode === 'KENJU' ? `VS ${kenjuBoss?.name}` : (stageMode === 'MID' ? `${currentStageInfo.no}. ${currentStageInfo.name}` : `VS ${currentStageInfo.bossName}`)}
           </h1>
-          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageMode === 'KENJU' ? '日替わりの強敵に勝利せよ！' : (stageMode === 'MID' ? (stageCycle === 11 ? '100人の敵を倒せ！' : '10戦全勝してボスに挑め！') : '敵の構成を見て対策を練れ！')}</p>
+          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageMode === 'KENJU' ? '日替わりの強敵に勝利せよ！' : (stageMode === 'MID' ? (stageCycle === 11 ? '100人の敵を倒せ！(勝率80%で突破)' : '10戦全勝してボスに挑め！') : '敵の構成を見て対策を練れ！')}</p>
           <div style={{ position: 'absolute', right: '5px', top: '10px', display: 'flex', gap: '5px', zIndex: 11 }}>
             <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '5px' }} title="ルール">📖</button>
             <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '5px' }} title="設定">⚙️</button>
@@ -1555,14 +1704,14 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           )}
 
           {((stageMode === 'BOSS' && !battleResults[0]?.winner) || (stageMode === 'KENJU' && kenjuBoss)) && (
-            <div style={{ width: '100%', height: '320px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '300px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
                   src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)}
                   alt=""
                   className="boss-battle-image"
                   style={{
-                      ...getBossImageStyle(stageCycle, isMobile)
+                      ...getBossBackImageStyle(stageCycle, isMobile)
                   }}
                 />
               </div>
@@ -1618,10 +1767,10 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             {stageCycle === 11 && stageMode === 'MID' && winRateDisplay !== null && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '30px', background: '#000', border: '3px solid #ff5252', borderRadius: '15px', boxShadow: '0 0 20px rgba(255,82,82,0.5)' }}>
                 <h2 style={{ color: '#aaa', margin: '0 0 10px 0', fontSize: '1rem' }}>WIN RATE</h2>
-                <div style={{ fontSize: '5rem', fontWeight: 'bold', color: winRateDisplay >= 70 ? '#66bb6a' : '#ff5252', textShadow: `0 0 15px ${winRateDisplay >= 70 ? '#66bb6a' : '#ff5252'}`, fontFamily: 'monospace' }}>
+                <div style={{ fontSize: '5rem', fontWeight: 'bold', color: winRateDisplay >= 80 ? '#66bb6a' : '#ff5252', textShadow: `0 0 15px ${winRateDisplay >= 80 ? '#66bb6a' : '#ff5252'}`, fontFamily: 'monospace' }}>
                   {winRateDisplay}%
                 </div>
-                {!stage10TrialActive && (
+                {!stage11TrialActive && (
                   <div style={{ marginTop: '10px', fontSize: '1.5rem', fontWeight: 'bold', color: winRateDisplay >= 80 ? '#66bb6a' : '#ff5252' }}>
                     {winRateDisplay >= 80 ? 'SUCCESS - TARGET REACHED' : 'FAILED - 80% REQUIRED'}
                   </div>
@@ -1642,9 +1791,9 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                 <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
               </div>
             )}
-            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (battleResults.some(r => r.winner === 2) || (stageMode === 'MID' && !canGoToBoss)) && (
+            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss)) && (
               <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-                {!stage10TrialActive && (
+                {!stage11TrialActive && (
                   <>
                     <div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div>
                     <button onClick={handleResetGame} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>再挑戦</button>

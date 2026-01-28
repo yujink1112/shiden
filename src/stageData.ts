@@ -115,7 +115,7 @@ export const STAGE_DATA: StageConfig[] = [
     name: "生き残ろう",
     bossName: "アノマ",
     bossImage: "/images/monster/12.png",
-    bossDescription: "「ハハハハハハハハハ！！！」 もう何も感じていないようだ。",
+    bossDescription: "「ハハハハハ！！ハハハハハハハハハ！！！」 ",
     shopSkills: [],
     bossSkillAbbrs: "影影硬逆燐一雷反交怒",
   },
