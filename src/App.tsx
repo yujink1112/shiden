@@ -297,14 +297,17 @@ function App() {
   const [bossClearRewardPending, setBossClearRewardPending] = useState<boolean>(false);
 
   // ステージ管理
-  const [stageMode, setStageMode] = useState<StageMode>(() => {
+  const getStoredStageMode = (): StageMode => {
     const saved = localStorage.getItem('shiden_stage_mode');
-    // LOUNGE などの一時的なモードは保存しないようにしたいため、それらが保存されている場合は MID に戻す
-    if (saved === 'LOUNGE' || saved === 'MYPAGE' || saved === 'PROFILE' || saved === 'RANKING' || saved === 'KENJU' || saved === 'VERIFY_EMAIL' || saved === 'DELETE_ACCOUNT' || saved === 'ADMIN_ANALYTICS') {
-      return 'MID';
-    }
     return (saved as StageMode) || 'MID';
-  });
+  };
+
+  const getLastGameMode = (): StageMode => {
+    const saved = localStorage.getItem('shiden_last_game_mode');
+    return (saved as StageMode) || 'MID';
+  };
+
+  const [stageMode, setStageMode] = useState<StageMode>(getStoredStageMode);
   const [stageCycle, setStageCycle] = useState<number>(() => {
     const saved = localStorage.getItem('shiden_stage_cycle');
     return saved ? parseInt(saved, 10) : 1;
@@ -639,9 +642,10 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   }, [ownedSkillAbbrs]);
 
   useEffect(() => {
-    // MID または BOSS の場合のみ永続化する
+    localStorage.setItem('shiden_stage_mode', stageMode);
+    // ゲーム進行モード（MID/BOSS）の場合は、最後にプレイしたモードとして保存
     if (stageMode === 'MID' || stageMode === 'BOSS') {
-      localStorage.setItem('shiden_stage_mode', stageMode);
+      localStorage.setItem('shiden_last_game_mode', stageMode);
     }
   }, [stageMode]);
 
@@ -709,7 +713,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
 
   const handleDeleteAccount = async () => {
     if (!user) return;
-    if (!window.confirm("本当に退会しますか？この操作は取り消せません。")) return;
+    if (!window.confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) return;
 
     try {
       const uid = user.uid;
@@ -739,10 +743,11 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
       localStorage.removeItem('shiden_stage_cycle');
       localStorage.removeItem('shiden_owned_skills');
       localStorage.removeItem('shiden_stage_mode');
+      localStorage.removeItem('shiden_last_game_mode');
       localStorage.removeItem('shiden_stage_victory_skills');
       localStorage.removeItem('shiden_can_go_to_boss');
 
-      alert("退会処理が完了しました。ご利用ありがとうございました。");
+      alert("アカウント削除が完了しました。ご利用ありがとうございました。");
       setStageMode('MID');
       setIsTitle(true);
     } catch (error: any) {
@@ -842,6 +847,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     localStorage.removeItem('shiden_stage_cycle');
     localStorage.removeItem('shiden_owned_skills');
     localStorage.removeItem('shiden_stage_mode');
+    localStorage.removeItem('shiden_last_game_mode');
     localStorage.removeItem('shiden_can_go_to_boss');
     localStorage.setItem('shiden_is_title', 'false');
     setIsTitle(false);
@@ -852,6 +858,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   };
 
   const handleContinue = () => {
+    setStageMode(getLastGameMode());
     setIsTitle(false);
   };
 
@@ -1577,8 +1584,8 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         onDeleteAccount={handleDeleteAccount}
         onBack={() => {
           setIsTitle(true);
-          // stageMode は変更せず、保存されている MID または BOSS が次に CONTINUE した時に使われるようにする
-          // ただし現在の stageMode が一時的なものの場合は、読み込み時に MID になる
+          // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
+          setStageMode(getLastGameMode());
         }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
         stageMode={stageMode as any}
