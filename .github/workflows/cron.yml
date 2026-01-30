@@ -16,4 +16,4 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           API_KEY: ${{ secrets.API_KEY }}
-        run: node send_count.js
+        run: node send-count.js
