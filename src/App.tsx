@@ -921,9 +921,9 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         } else if (stageMode === 'VERIFY_EMAIL') {
            setStageMode('LOUNGE');
         }
-        if (user.uid === process.env.REACT_APP_ADMIN_UID) {
-          setShowAdmin(true);
-        }
+        // if (user.uid === process.env.REACT_APP_ADMIN_UID) {
+        //   setShowAdmin(true);
+        // }
         const profileRef = ref(database, `profiles/${user.uid}`);
         onValue(profileRef, (snapshot) => {
           if (snapshot.exists()) {
@@ -1550,27 +1550,6 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
               
               return next;
           });
-          if (stageMode === 'BOSS' && logComplete) {
-            setShowBossClearPanel(true);
-            triggerVictoryConfetti();
-            // Stage12のボス勝利で「クリアしたよ！」の称号
-            if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
-              const profileRef = ref(database, `profiles/${user.uid}`);
-              const newMedals = [...(myProfile.medals || []), 'master'];
-              set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-            }
-          }
-          if (stageMode === 'KENJU' && logComplete) {
-              triggerVictoryConfetti();
-              // if (user && myProfile) {
-              //   const profileRef = ref(database, `profiles/${user.uid}`);
-              //   const currentMedals = myProfile.medals || [];
-              //   const newMedals = currentMedals.includes('kenju') ? currentMedals : [...currentMedals, 'kenju'];
-              //   set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-              //   alert("剣獣に勝利しました！「獣殺し」の勲章を授与します。");
-              //   setStageMode('LOUNGE');
-              // }
-          }
       }
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
@@ -1657,14 +1636,14 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           <div className="TitleFooter">
             <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
             <div style={{fontSize: '0.8rem'}}> © 2026 Shiden Games </div>
-            {isAdmin && (
+            {isAdmin && false &&(
               <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
             )}
             <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
           </div>
         </div>
         {showRule && <Rule onClose={() => setShowRule(false)} />}
-        {showAdmin && (
+        {isAdmin && showAdmin && (
           <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000 }}>
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
@@ -1852,7 +1831,35 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => setLogComplete(true)} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
+          (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
+            setLogComplete(true);
+            // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
+            const winCount = battleResults.filter(r => r.winner === 1).length;
+            const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
+            if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU')) {
+                triggerVictoryConfetti();
+                if (stageMode === 'BOSS') {
+                    setShowBossClearPanel(true);
+                    // Stage12のボス勝利で「クリアしたよ！」の称号
+                    if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
+                        const profileRef = ref(database, `profiles/${user.uid}/`);
+                        const newMedals = [...(myProfile.medals || []), 'master'];
+                        set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                    }
+                }
+                if (stageMode === 'KENJU') {
+                    // 剣獣勝利時の処理 (コメントアウトされている部分はそのままにする)
+                    // if (user && myProfile) {
+                    //   const profileRef = ref(database, `profiles/${user.uid}`);
+                    //   const currentMedals = myProfile.medals || [];
+                    //   const newMedals = currentMedals.includes('kenju') ? currentMedals : [...currentMedals, 'kenju'];
+                    //   set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                    //   alert("剣獣に勝利しました！「獣殺し」の勲章を授与します。");
+                    //   setStageMode('LOUNGE');
+                    // }
+                }
+            }
+          }} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
         ) :
         
         (storyContent && !gameStarted ? 

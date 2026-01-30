@@ -251,9 +251,10 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                       <p>qut様</p>
                       <p>化け猫屋様</p>
                       <p>Ｒド様</p>
-                      <p>pngtree
-                        (<a href="https://ja.pngtree.com/freepng/realistic-gorilla-mod-on-transparent-background_15902364.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>静かに座っているオランウータン</a>)
-                        (<a href="https://ja.pngtree.com/freepng/orangutan-sitting-peacefully-isolated-on-transparent-background_23460517.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>リアルなゴリラ</a>)
+                      <p>pngtree<br />
+                        (<a href="https://ja.pngtree.com/freepng/realistic-gorilla-mod-on-transparent-background_15902364.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>静かに座っているオランウータン</a>)<br />
+                        (<a href="https://ja.pngtree.com/freepng/orangutan-sitting-peacefully-isolated-on-transparent-background_23460517.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>リアルなゴリラ</a>)<br />
+                        (<a href="https://ja.pngtree.com/freepng/leaves-big-tree-vine-plant-free-element-decorative-material_14122275.html"  target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>葉大木の蔓植物</a>)<br />
                       </p>
                       <p>友人K</p>
                     </div>
@@ -266,7 +267,6 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                     </div>
                   </div>
                 <p>© 2026 Shiden Games</p>
-                <p>All Rights Reserved.</p>
 
                 <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '30px' }}>本アプリに使用されている画像、音声等の二次配布・AI学習を禁じます。</p>
             </div>
