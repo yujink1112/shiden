@@ -865,10 +865,6 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   };
 
   useEffect(() => {
-    const connectionsRef = ref(database, 'connections');
-    const myConnectionRef = push(connectionsRef);
-    const connectedRef = ref(database, '.info/connected');
-    
     // 同一ブラウザからの接続を1人としてカウントするための識別子
     let visitorId = localStorage.getItem('shiden_visitor_id');
     if (!visitorId) {
@@ -876,29 +872,43 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
       localStorage.setItem('shiden_visitor_id', visitorId);
     }
 
+    const connectedRef = ref(database, '.info/connected');
+    // visitorId の下に、タブごとの接続 ID を作成する
+    // これにより、すべてのタブを閉じない限り visitorId ノードが維持される
+    const myConnectionsRef = ref(database, `activeVisitors/${visitorId}`);
+    const myConnectionRef = push(myConnectionsRef);
+    
     onValue(connectedRef, (snap) => {
       if (snap.val() === true) {
         onDisconnect(myConnectionRef).remove();
-        // visitorIdを保存して、同一ブラウザの複数タブを重複排除できるようにする
-        set(myConnectionRef, { visitorId, lastActive: serverTimestamp() });
+        set(myConnectionRef, {
+          lastActive: serverTimestamp(),
+          uid: auth.currentUser?.uid || null,
+          userAgent: navigator.userAgent // 念のため
+        });
       }
     });
 
-    onValue(connectionsRef, (snapshot) => {
+    const activeVisitorsRef = ref(database, 'activeVisitors');
+    onValue(activeVisitorsRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const uniqueVisitors = new Set();
-        Object.values(data).forEach((conn: any) => {
-          if (conn && conn.visitorId) {
-            uniqueVisitors.add(conn.visitorId);
-          } else {
-            // 下位互換性のため（古い形式のデータやvisitorIdがない場合）
-            uniqueVisitors.add(Math.random());
+        // ノードの直下の数（visitorIdの数）がユニークな接続数になる
+        setActiveUsers(snapshot.size);
+
+        // アクティブなプロフィール（UID）を集計
+        const active: {[uid: string]: number} = {};
+        Object.values(data).forEach((visitorConnections: any) => {
+          if (typeof visitorConnections === 'object') {
+            Object.values(visitorConnections).forEach((conn: any) => {
+              if (conn && conn.uid) active[conn.uid] = conn.lastActive;
+            });
           }
         });
-        setActiveUsers(uniqueVisitors.size);
+        setLastActiveProfiles(active);
       } else {
         setActiveUsers(0);
+        setLastActiveProfiles({});
       }
     });
 
@@ -957,17 +967,6 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         }
       } else {
         setAllProfiles([]);
-      }
-    });
-
-    onValue(connectionsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const active: {[uid: string]: number} = {};
-        Object.values(data).forEach((conn: any) => {
-          if (conn.uid) active[conn.uid] = conn.lastActive;
-        });
-        setLastActiveProfiles(active);
       }
     });
 
