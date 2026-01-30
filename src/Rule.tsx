@@ -246,9 +246,10 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
             <h2>著作権表記</h2>
             <div style={{ textAlign: 'center', marginTop: '50px' }}>
                 <div style={{ marginBottom: '10px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
-                  <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>キャラクター素材</div>
+                  <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>キャラクター・アイコン画像</div>
                     <div style={{ textAlign: 'left', marginTop: '30px', fontSize: '0.9rem', color: '#ccc' }}>
                       <p>qut様</p>
+                      <p>化け猫屋様</p>
                       <p>Ｒド様</p>
                       <p>pngtree
                         (<a href="https://ja.pngtree.com/freepng/realistic-gorilla-mod-on-transparent-background_15902364.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>静かに座っているオランウータン</a>)
@@ -258,7 +259,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                     </div>
                   </div>
                 <div style={{ marginBottom: '10px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
-                  <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>背景素材</div>
+                  <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>背景画像</div>
                     <div style={{ textAlign: 'left', marginTop: '30px', fontSize: '0.9rem', color: '#ccc' }}>
                       <p>ゲームマテリアルズ様</p>
                       <p>illustAC様</p>

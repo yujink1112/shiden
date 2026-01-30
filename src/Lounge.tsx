@@ -261,7 +261,7 @@ export const Lounge: React.FC<LoungeProps> = ({
             
             <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', width: '100%', textAlign: 'center' }}>
               <p style={{ color: '#ff5252', fontSize:
-                 '0.8rem', marginBottom: '10px' }}>ログインできない・データをリセットしたい場合</p>
+                 '0.8rem', margin: '0px 0px 10px 0px' }}>ログインできない・データをリセットしたい場合</p>
               <button 
                 onClick={() => setStageMode('DELETE_ACCOUNT')} 
                 style={{ padding: '8px 15px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}
@@ -330,9 +330,9 @@ export const Lounge: React.FC<LoungeProps> = ({
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // 1MB limit
-      if (file.size > 1024 * 1024) {
-        alert("ファイルサイズは1MB以下にしてください。");
+      // 10KB limit
+      if (file.size > 10 * 1024) {
+        alert("ファイルサイズは10KB以下にしてください。");
         return;
       }
 
@@ -549,16 +549,18 @@ export const Lounge: React.FC<LoungeProps> = ({
   }
 
   if (stageMode === 'ADMIN_ANALYTICS') {
-    if (!isAdmin) {
-      // 管理者でない場合はラウンジにリダイレクト
-      setStageMode('LOUNGE');
-      return null;
-    }
-    return (
-      <AdminAnalytics
-        onBack={() => setStageMode('LOUNGE')}
-      />
-    );
+    setStageMode('LOUNGE');
+    return null;
+    // if (!isAdmin) {
+    //   // 管理者でない場合はラウンジにリダイレクト
+    //   setStageMode('LOUNGE');
+    //   return null;
+    // }
+    // return (
+    //   <AdminAnalytics
+    //     onBack={() => setStageMode('LOUNGE')}
+    //   />
+    // );
   }
 
   return null;
