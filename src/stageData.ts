@@ -41,7 +41,7 @@ export const STAGE_DATA: StageConfig[] = [
   {
     no: 4,
     name: "家を作ろう",
-    bossName: "古古考古香木",
+    bossName: "古々考古硬木",
     bossImage: "/images/monster/4.png",
     bossDescription: "見たこともないが由緒がありそうだ。",
     shopSkills: ["防壁", "＋硬", "＋盾"],

@@ -1747,7 +1747,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                          stageCycle === 12 ? 'A HORRIBLE FIGURE APPEARED' :
                          'BOSS SKILLS DISCLOSED'}
                     </h2>
-                    <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : 'scale(0.8)', transformOrigin: 'center', display: 'flex', flexWrap: isMobile ? 'wrap' : 'nowrap', justifyContent: 'center' }}>{(stageMode === 'KENJU' ? kenjuBoss?.skills : bossSkills)?.map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)}</div>
+                    <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : (stageCycle === 4 ? 'scale(0.8)' : (stageCycle === 9 ? 'scale(0.9)' : (stageCycle === 10 ? 'scale(0.8)' : (stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none')))), transformOrigin: 'center' }}>{(stageMode === 'KENJU' ? kenjuBoss?.skills : bossSkills)?.map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)}</div>
                 </div>
               )}
             </div>
