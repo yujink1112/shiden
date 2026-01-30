@@ -346,6 +346,8 @@ function App() {
 
   const [midEnemyData, setMidEnemyData] = useState<{ [stage: number]: string[] }>({});
 
+  const lastSavedVictoryRef = useRef<string>("");
+
 const PLAYER_SKILL_COUNT = 5;
 
 /**
@@ -867,17 +869,34 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     const myConnectionRef = push(connectionsRef);
     const connectedRef = ref(database, '.info/connected');
     
+    // 同一ブラウザからの接続を1人としてカウントするための識別子
+    let visitorId = localStorage.getItem('shiden_visitor_id');
+    if (!visitorId) {
+      visitorId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      localStorage.setItem('shiden_visitor_id', visitorId);
+    }
+
     onValue(connectedRef, (snap) => {
       if (snap.val() === true) {
         onDisconnect(myConnectionRef).remove();
-        // ストレージ容量を節約するため、単純な boolean 値をセットする
-        set(myConnectionRef, true);
+        // visitorIdを保存して、同一ブラウザの複数タブを重複排除できるようにする
+        set(myConnectionRef, { visitorId, lastActive: serverTimestamp() });
       }
     });
 
     onValue(connectionsRef, (snapshot) => {
       if (snapshot.exists()) {
-        setActiveUsers(snapshot.size);
+        const data = snapshot.val();
+        const uniqueVisitors = new Set();
+        Object.values(data).forEach((conn: any) => {
+          if (conn && conn.visitorId) {
+            uniqueVisitors.add(conn.visitorId);
+          } else {
+            // 下位互換性のため（古い形式のデータやvisitorIdがない場合）
+            uniqueVisitors.add(Math.random());
+          }
+        });
+        setActiveUsers(uniqueVisitors.size);
       } else {
         setActiveUsers(0);
       }
@@ -900,6 +919,10 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           if (snapshot.exists()) {
             const data = snapshot.val();
             setMyProfile(data);
+            if (data.victorySkills) {
+              setStageVictorySkills(data.victorySkills);
+              localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(data.victorySkills));
+            }
           } else {
             const initialProfile: UserProfile = {
               uid: user.uid,
@@ -1510,10 +1533,22 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     if (gameStarted && battleResults.length > 0) {
       const winCount = battleResults.filter(r => r.winner === 1).length;
       const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
-      if (isVictory) {
+      const saveKey = `${stageMode}_${stageCycle}`;
+      const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
+
+      if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
+          lastSavedVictoryRef.current = currentBattleId;
           setStageVictorySkills(prev => {
-              const next = { ...prev, [`${stageMode}_${stageCycle}`]: selectedPlayerSkills };
+              const next = { ...prev, [saveKey]: selectedPlayerSkills };
               localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(next));
+              
+              // Firebase にも保存
+              if (user) {
+                // 個別のステージキーで保存することで、他端末との競合を防ぐ
+                const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey}`);
+                set(specificVictorySkillRef, selectedPlayerSkills);
+              }
+              
               return next;
           });
           if (stageMode === 'BOSS' && logComplete) {
