@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, push, set, serverTimestamp } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -17,3 +17,13 @@ const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+export const recordAccess = () => {
+  const accessRef = ref(database, 'access_counts');
+  const newAccessRef = push(accessRef);
+  set(newAccessRef, {
+    timestamp: serverTimestamp(),
+  })
+  .then(() => console.log("Access recorded successfully to Realtime Database!"))
+  .catch((e) => console.error("Error recording access to Realtime Database: ", e));
+};

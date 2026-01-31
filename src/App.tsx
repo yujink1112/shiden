@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, serverTimestamp } from "firebase/database";
-import { database, auth, googleProvider } from "./firebase";
+import { database, auth, googleProvider, recordAccess } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
@@ -37,6 +37,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
     if (onClick) {
       onClick(skill.abbr);
     }
+
   };
 
   const renderFormattedDescription = (text: string) => {
@@ -1000,6 +1001,10 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   }, []);
 
   useEffect(() => {
+    recordAccess();
+  }, []);
+
+  useEffect(() => {
     const newConnections: { fromId: string; toId: string }[] = [];
     const newDimmedIndices: number[] = [];
     const skillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
@@ -1559,7 +1564,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center' }}>
               <h1 style={{ color: '#4fc3f7' }}>メールアドレスの確認</h1>
               <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #4fc3f7', maxWidth: '500px' }}>
-                  <p>確認メールを送信しました。メール内のリンクをクリックして、アカウントを有効化してください。</p>
+                  <p style={{ color: '#fff'}}>確認メールを送信しました。メール内のリンクをクリックして、アカウントを有効化してください。</p>
                   <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '20px' }}>※認証完了後、再度ログインしてください。</p>
                   <button className="TitleButton neon-blue" onClick={() => handleSignOut()} style={{ marginTop: '20px' }}>タイトルへ戻る</button>
               </div>
