@@ -1,17 +1,14 @@
 import admin from "firebase-admin";
 import axios from "axios";
 
-console.log(process.env.FIREBASE_SERVICE_ACCOUNT_B64);
-console.log(  Buffer.from(
-    process.env.FIREBASE_SERVICE_ACCOUNT_B64,
-    "base64"
-  ).toString("utf8"))
-const serviceAccount = JSON.parse(
-  Buffer.from(
-    process.env.FIREBASE_SERVICE_ACCOUNT_B64,
-    "base64"
-  ).toString("utf8")
-);
+console.log("B64 length:", process.env.FIREBASE_SERVICE_ACCOUNT_B64.length);ｓ
+const decoded = Buffer
+  .from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64")
+  .toString("utf8");
+
+console.log(decoded.slice(0, 100));
+console.log(decoded.slice(-100));
+
 
 if (!admin.apps.length) {
   admin.initializeApp({
