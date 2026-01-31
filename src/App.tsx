@@ -938,7 +938,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             const initialProfile: UserProfile = {
               uid: user.uid,
               displayName: user.displayName || "名無しの剣士",
-              photoURL: user.photoURL || "public/images/icon/mon_215.gif",
+              photoURL: user.photoURL || "/images/icon/mon_215.gif",
               favoriteSkill: "一",
               title: "",
               comment: "よろしく！",
