@@ -160,7 +160,7 @@ const PrivacyPolicyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <p>ユーザーは、本サービス内の「アカウント削除」機能を利用することで、いつでも自身のデータを削除することができます。</p>
 
           <h3 style={{ color: '#ffd700', fontSize: '1rem' }}>6. お問い合わせ</h3>
-          <p>本サービスに関するお問い合わせは、友人K(Xアカウント: @Yujin_K)までご連絡ください。</p>
+          <p>本サービスに関するお問い合わせは、<a href='https://x.com/ShidenGames' target='_blank'>Xアカウント</a>までご連絡ください。</p>
         </div>
         <button onClick={onClose} style={{ width: '100%', marginTop: '20px', padding: '10px', background: '#4fc3f7', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
       </div>

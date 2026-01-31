@@ -372,8 +372,8 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
     mobile: { height: '80%', width: '80%' }
   },
   4: {
-    pc: { height: '80%', width: '80%' },
-    mobile: { height: '80%', width: '80%' }
+    pc: { height: '300%', width: '300%' },
+    mobile: { height: '300%', width: '300%' }
   },
   5: {
     pc: { height: '80%', width: '80%' },
@@ -424,8 +424,8 @@ const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
     mobile: { height: '80%', width: '80%' }
   },
   4: {
-    pc: { height: '80%', width: '80%' },
-    mobile: { height: '80%', width: '80%' }
+    pc: { height: '300%', width: '300%' },
+    mobile: { height: '300%', width: '300%' }
   },
   5: {
     pc: { height: '80%', width: '80%' },
@@ -1799,7 +1799,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             )}
             {rewardSelectionMode && (
               <div className="RewardSelection" style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '10px' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}スキルを1つ選んでください</h2>
+                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{(stageCycle === 11 && stageMode === 'MID' && canGoToBoss) ? '関門を突破！！' : battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}<br />スキルを1つ選んでください</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>{getAvailableSkillsUntilStage(stageCycle).map(skill => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}</div>
                 <button disabled={selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>スキルを獲得する</button>
                 <div style={{ marginTop: '15px' }}><button onClick={() => { setSelectedRewards([]); setRewardSelectionMode(false); if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
