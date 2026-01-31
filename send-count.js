@@ -1,6 +1,8 @@
 import admin from "firebase-admin";
 import axios from "axios";
 
+console.log(process.env.FIREBASE_SERVICE_ACCOUNT);
+
 admin.initializeApp({
   credential: admin.credential.cert(
     JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
