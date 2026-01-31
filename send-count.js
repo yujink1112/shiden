@@ -6,13 +6,9 @@ const decoded = Buffer
   .from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64")
   .toString("utf8");
 
-console.log(decoded.slice(0, 100));
-console.log(decoded.slice(-100));
-
-
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(decoded),
     databaseURL: process.env.FIREBASE_DATABASE_URL,
   });
 }
