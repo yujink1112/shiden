@@ -1,14 +1,19 @@
 import admin from "firebase-admin";
 import axios from "axios";
 
-console.log(process.env.FIREBASE_SERVICE_ACCOUNT);
+const serviceAccount = JSON.parse(
+  Buffer.from(
+    process.env.FIREBASE_SERVICE_ACCOUNT_B64,
+    "base64"
+  ).toString("utf8")
+);
 
-admin.initializeApp({
-  credential: admin.credential.cert(
-    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  ),
-  databaseURL: process.env.FIREBASE_DB_URL
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
+  });
+}
 
 const db = admin.database();
 const statsRef = db.ref("/stats");
