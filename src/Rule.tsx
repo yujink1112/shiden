@@ -256,7 +256,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                         (<a href="https://ja.pngtree.com/freepng/orangutan-sitting-peacefully-isolated-on-transparent-background_23460517.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>リアルなゴリラ</a>)<br />
                         (<a href="https://ja.pngtree.com/freepng/leaves-big-tree-vine-plant-free-element-decorative-material_14122275.html"  target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>葉大木の蔓植物</a>)<br />
                       </p>
-                      <p>友人K</p>
+                      <p>友人K(ボス画像)</p>
                     </div>
                   </div>
                 <div style={{ marginBottom: '10px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
