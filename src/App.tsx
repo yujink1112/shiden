@@ -1001,7 +1001,12 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   }, []);
 
   useEffect(() => {
-    recordAccess();
+    // sessionStorage を使って、タブ/セッションごとに一度だけアクセスを記録
+    const LOCAL_KEY = 'shiden_local_accessed';
+    if (!localStorage.getItem(LOCAL_KEY)) {
+      recordAccess();
+      localStorage.setItem(LOCAL_KEY, 'true');
+    }
   }, []);
 
   useEffect(() => {

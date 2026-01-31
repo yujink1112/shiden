@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, set, serverTimestamp } from "firebase/database";
+import { getDatabase, ref, runTransaction, serverTimestamp } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -19,11 +19,14 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
 export const recordAccess = () => {
-  const accessRef = ref(database, 'access_counts');
-  const newAccessRef = push(accessRef);
-  set(newAccessRef, {
-    timestamp: serverTimestamp(),
+  const totalAccessRef = ref(database, 'totalAccess');
+  runTransaction(totalAccessRef, (currentData) => {
+    if (currentData === null) {
+      return 1;
+    } else {
+      return currentData + 1;
+    }
   })
-  .then(() => console.log("Access recorded successfully to Realtime Database!"))
-  .catch((e) => console.error("Error recording access to Realtime Database: ", e));
+  .then(() => console.log("Total access count incremented successfully!"))
+  .catch((e) => console.error("Error incrementing total access count: ", e));
 };
