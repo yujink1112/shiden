@@ -19,7 +19,7 @@ jobs:
 
       - run: node send-count.js
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}
           FIREBASE_DB_URL: https://shiden-games-default-rtdb.firebaseio.com
           GAME_KEY: ${{ secrets.GAME_KEY }}
           API_KEY: ${{ secrets.API_KEY }}
