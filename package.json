@@ -42,6 +42,7 @@
     ]
   },
   "devDependencies": {
+    "firebase-admin": "^12.x.x",
     "yaml" : "^2.8.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^19.2.8",
