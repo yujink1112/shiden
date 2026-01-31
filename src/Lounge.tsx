@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
 import { AdminAnalytics } from './AdminAnalytics';
@@ -11,6 +11,7 @@ export interface UserProfile {
   title: string;
   comment: string;
   oneThing?: string;
+  isSpoiler?: boolean;
   lastActive: number;
   points?: number;
   lastKenjuDate?: string;
@@ -22,6 +23,7 @@ interface UserListTableProps {
   profiles: UserProfile[];
   lastActiveProfiles: {[uid: string]: number};
   getSkillByAbbr: (abbr: string) => SkillDetail | undefined;
+  allSkills: SkillDetail[];
   onViewProfile: (profile: UserProfile) => void;
   allProfilesCount: number;
   currentPage: number;
@@ -32,11 +34,21 @@ const UserListTable: React.FC<UserListTableProps> = ({
   profiles,
   lastActiveProfiles,
   getSkillByAbbr,
+  allSkills,
   onViewProfile,
   allProfilesCount,
   currentPage,
   onPageChange
 }) => {
+  const [spoilerVisibility, setSpoilerVisibility] = useState<{[uid: string]: boolean}>({});
+
+  const toggleSpoiler = (uid: string) => {
+    setSpoilerVisibility(prev => ({
+      ...prev,
+      [uid]: !prev[uid]
+    }));
+  };
+
   return (
     <>
       <h2 style={{ color: '#ffd700', marginTop: '30px' }}>参加者</h2>
@@ -85,7 +97,16 @@ const UserListTable: React.FC<UserListTableProps> = ({
                     {p.oneThing || '-'}
                   </td>
                   <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
-                    {p.comment}
+                    {p.isSpoiler && !spoilerVisibility[p.uid] ? (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleSpoiler(p.uid); }}
+                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', padding: '5px 10px' }}
+                      >
+                        ネタバレ注意 (クリックで表示)
+                      </button>
+                    ) : (
+                      p.comment
+                    )}
                   </td>
                 </tr>
               );
@@ -178,7 +199,7 @@ interface LoungeProps {
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
-  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string) => void;
+  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: () => void;
   onBack: () => void;
@@ -299,6 +320,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               profiles={allProfiles}
               lastActiveProfiles={lastActiveProfiles}
               getSkillByAbbr={getSkillByAbbr}
+              allSkills={allSkills}
               onViewProfile={onViewProfile}
               allProfilesCount={allProfilesCount}
               currentPage={currentPage}
@@ -316,7 +338,7 @@ export const Lounge: React.FC<LoungeProps> = ({
     if (!myProfile) {
       if (user && !isInitializing.current) {
         isInitializing.current = true;
-        onUpdateProfile("名もなき人", "一", "よろしく！");
+        onUpdateProfile("名もなき人", "一", "よろしく！", undefined, undefined, undefined, false);
       }
       return (
         <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px' }}>
@@ -348,7 +370,7 @@ export const Lounge: React.FC<LoungeProps> = ({
           if (ctx) {
             ctx.drawImage(img, 0, 0, 64, 64);
             const dataUrl = canvas.toDataURL('image/png');
-            onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing);
+            onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler);
           }
         };
         img.src = event.target?.result as string;
@@ -364,7 +386,7 @@ export const Lounge: React.FC<LoungeProps> = ({
 
     const handlePresetIconSelect = (iconName: string) => {
       const iconPath = `/images/icon/${iconName}`;
-      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title, myProfile.oneThing);
+      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title, myProfile.oneThing, myProfile.isSpoiler);
     };
 
     return (
@@ -381,11 +403,11 @@ export const Lounge: React.FC<LoungeProps> = ({
             </div>
             <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>名前(10文字以内)</label>
-                <input 
+                <input
                 type="text"
                 maxLength={10}
                 value={myProfile.displayName}
-                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
+                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
                 style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
             </div>
@@ -410,7 +432,7 @@ export const Lounge: React.FC<LoungeProps> = ({
             <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>称号を選択</label>
             <select
               value={myProfile.title || ""}
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing)}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing, myProfile.isSpoiler)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
             >
               <option value="旅人">旅人</option>
@@ -427,7 +449,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               {allSkills.map(s => (
                 <div
                   key={s.abbr}
-                  onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
+                  onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
                   style={{
                     cursor: 'pointer',
                     border: myProfile.favoriteSkill === s.abbr ? '2px solid #ffd700' : '1px solid #444',
@@ -456,35 +478,32 @@ export const Lounge: React.FC<LoungeProps> = ({
               maxLength={10}
               value={myProfile.oneThing || ''}
               onChange={(e) => {
-                onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value);
+                onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value, myProfile.isSpoiler);
               }}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
           </div>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>一言 (20文字以内)</label>
+            <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>一言 (15文字以内)</label>
+            <p style={{ color: '#aaa', fontSize: '0.75rem', marginBottom: '5px' }}>クリア構成記入OK。「ネタバレ注意」にチェックを入れてください。</p>
             <input
               type="text"
-              maxLength={20}
+              maxLength={15}
               value={myProfile.comment}
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing)}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
-          </div>
-          {/* <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', color: '#aaa' }}>獲得した勲章</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
-              {(myProfile.medals || []).length === 0 && <div style={{ color: '#666', fontSize: '0.8rem' }}>まだ勲章を持っていません</div>}
-              {(myProfile.medals || []).map(mId => {
-                const medal = medals.find(m => m.id === mId);
-                return (
-                  <div key={mId} style={{ background: '#333', border: '1px solid #ffd700', color: '#ffd700', padding: '5px 10px', borderRadius: '15px', fontSize: '0.8rem' }} title={medal?.description}>
-                    {medal?.name}
-                  </div>
-                );
-              })}
+            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#2c1010', padding: '8px', borderRadius: '5px', border: '1px solid #ff5252' }}>
+              <input
+                type="checkbox"
+                id="spoiler-checkbox"
+                checked={myProfile.isSpoiler || false}
+                onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, e.target.checked)}
+                style={{ marginRight: '10px', width: '22px', height: '22px', cursor: 'pointer', accentColor: '#ff5252' }}
+              />
+              <label htmlFor="spoiler-checkbox" style={{ color: '#ff5252', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer', userSelect: 'none' }}>ネタバレ注意 (クリア構成などを書く場合はチェック)</label>
             </div>
-          </div> */}
+          </div>
 
           <p style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>※入力すると自動で保存されます</p>
 

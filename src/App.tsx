@@ -772,22 +772,32 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     }
   };
 
-  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string) => {
+  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean) => {
     if (!user || !myProfile) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
     
-    const filteredName = filterNGWords(displayName);
-    const filteredComment = filterNGWords(comment);
+    const filteredName = filterNGWords(displayName || "");
+    const filteredComment = filterNGWords(comment || "");
 
-    await set(profileRef, {
+    const updatedProfile = {
       ...myProfile,
-      displayName: filteredName,
-      favoriteSkill,
-      comment: filteredComment.substring(0, 10),
+      displayName: filteredName || myProfile.displayName,
+      favoriteSkill: favoriteSkill || myProfile.favoriteSkill,
+      comment: filteredComment.substring(0, 15),
       photoURL: photoURL || myProfile.photoURL,
-      title: title || myProfile.title || "",
-      oneThing: oneThing || myProfile.oneThing || "", // oneThing を追加
+      title: title !== undefined ? title : (myProfile.title || ""),
+      oneThing: oneThing !== undefined ? oneThing : (myProfile.oneThing || ""),
+      isSpoiler: isSpoiler !== undefined ? isSpoiler : !!myProfile.isSpoiler,
       lastActive: Date.now()
+    };
+
+    // 楽観的UI更新
+    setMyProfile(updatedProfile);
+
+    // Firebase更新 (awaitしないことで入力をスムーズにする)
+    set(profileRef, updatedProfile).catch(err => {
+      console.error("Profile update failed:", err);
+      // 失敗した場合は本当のDBの状態に戻るはず（onValue経由で）
     });
   };
 
@@ -932,9 +942,25 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           if (snapshot.exists()) {
             const data = snapshot.val();
             setMyProfile(data);
-            if (data.victorySkills) {
-              setStageVictorySkills(data.victorySkills);
-              localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(data.victorySkills));
+            // Firebaseから取得した勝利スキルをセット
+            const firebaseVictorySkills = data.victorySkills || {};
+            setStageVictorySkills(firebaseVictorySkills);
+            localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(firebaseVictorySkills));
+
+            // ローカルストレージに未アップロードの勝利スキルがあればFirebaseにアップロード
+            const localVictorySkills = JSON.parse(localStorage.getItem('shiden_stage_victory_skills') || '{}');
+            let hasNewLocalSkills = false;
+            for (const key in localVictorySkills) {
+              if (!(firebaseVictorySkills as any)[key]) {
+                const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${key}`);
+                set(specificVictorySkillRef, localVictorySkills[key]);
+                (firebaseVictorySkills as any)[key] = localVictorySkills[key]; // アップロードしたスキルをFirebaseデータにマージ
+                hasNewLocalSkills = true;
+              }
+            }
+            if (hasNewLocalSkills) {
+              setStageVictorySkills(firebaseVictorySkills);
+              localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(firebaseVictorySkills)); // 更新後のFirebaseデータをローカルにも保存
             }
           } else {
             const initialProfile: UserProfile = {
@@ -1549,19 +1575,18 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
 
       if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
           lastSavedVictoryRef.current = currentBattleId;
-          setStageVictorySkills(prev => {
-              const next = { ...prev, [saveKey]: selectedPlayerSkills };
-              localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(next));
-              
-              // Firebase にも保存
-              if (user) {
-                // 個別のステージキーで保存することで、他端末との競合を防ぐ
-                const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey}`);
-                set(specificVictorySkillRef, selectedPlayerSkills);
-              }
-              
-              return next;
-          });
+
+          // まずはローカルストレージに保存
+          const localVictorySkills = JSON.parse(localStorage.getItem('shiden_stage_victory_skills') || '{}');
+          const updatedLocalVictorySkills = { ...localVictorySkills, [saveKey]: selectedPlayerSkills };
+          localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(updatedLocalVictorySkills));
+          setStageVictorySkills(updatedLocalVictorySkills);
+          
+          // ユーザーがログインしている場合はFirebaseにも保存
+          if (user) {
+            const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey}`);
+            set(specificVictorySkillRef, selectedPlayerSkills);
+          }
       }
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
