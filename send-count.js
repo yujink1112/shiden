@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
 import axios from "axios";
 
-console.log("B64 length:", process.env.FIREBASE_SERVICE_ACCOUNT_B64.length);ｓ
+console.log("B64 length:", process.env.FIREBASE_SERVICE_ACCOUNT_B64.length);
 const decoded = Buffer
   .from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64")
   .toString("utf8");
