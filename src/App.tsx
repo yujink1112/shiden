@@ -11,6 +11,8 @@ import type { UserProfile } from './Lounge';
 import { Rule } from './Rule';
 import './App.css';
 
+// 2026/1/31 Ver 1.0リリース　やったー
+
 interface SkillCardProps {
   skill: SkillDetail;
   isSelected?: boolean;
