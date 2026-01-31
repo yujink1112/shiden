@@ -1586,6 +1586,13 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           if (user) {
             const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey}`);
             set(specificVictorySkillRef, selectedPlayerSkills);
+          } else {
+            // 未登録ユーザーの場合は anonymousVictories に記録
+            const visitorId = localStorage.getItem('shiden_visitor_id');
+            if (visitorId) {
+              const anonymousVictoryRef = ref(database, `anonymousVictories/${visitorId}/${saveKey}`);
+              set(anonymousVictoryRef, selectedPlayerSkills);
+            }
           }
       }
     }
