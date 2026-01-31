@@ -32,6 +32,11 @@ await axios.get("https://games-alchemist.com/api/portal/online-count/", {
   }
 });
 
+console.log("sent", peak);
+process.exit(0);
+
+
+
 await statsRef.update({ peak_5min: current });
 
 console.log("sent", peak);
