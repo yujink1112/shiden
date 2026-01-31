@@ -1,0 +1,25 @@
+name: Send Online Count
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: node sendPeak.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_DB_URL: https://shiden-games-default-rtdb.firebaseio.com
+          GAME_KEY: ${{ secrets.GAME_KEY }}
+          API_KEY: ${{ secrets.API_KEY }}
