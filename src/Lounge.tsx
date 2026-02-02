@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
 import { AdminAnalytics } from './AdminAnalytics';
+import { getStorageUrl } from './firebase';
 
 export interface UserProfile {
   uid: string;
@@ -76,7 +77,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
                 >
                   <td style={{ padding: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={((p.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (p.photoURL || 'https://via.placeholder.com/40')} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
+                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <div style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
                         {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
@@ -86,7 +87,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
                   <td style={{ padding: '10px', textAlign: 'center' }}>
                     {favSkill && (
                       <img
-                        src={process.env.PUBLIC_URL + favSkill.icon}
+                        src={getStorageUrl(favSkill.icon)}
                         alt={favSkill.name}
                         title={favSkill.name}
                         style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }}
@@ -257,7 +258,7 @@ export const Lounge: React.FC<LoungeProps> = ({
 
   if (stageMode === 'LOUNGE') {
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         <h1 style={{ color: '#4fc3f7' }}>LOUNGE</h1>
         {!user ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '400px' }}>
@@ -390,12 +391,12 @@ export const Lounge: React.FC<LoungeProps> = ({
     };
 
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         <h1 style={{ color: '#4fc3f7' }}>MY PAGE</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #2196f3', width: '100%', maxWidth: '500px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
             <div style={{ textAlign: 'center' }}>
-              <img src={((myProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (myProfile.photoURL || 'https://via.placeholder.com/80')} alt={myProfile.displayName} style={{ width: '80px', height: '80px', borderRadius: '5%', objectFit: 'cover', display: 'block', marginBottom: '10px', border: '2px solid #2196f3', background: '#222' }} />
+              <img src={((myProfile.photoURL || '').startsWith('/') ? getStorageUrl(myProfile.photoURL) : (myProfile.photoURL || 'https://via.placeholder.com/80'))} alt={myProfile.displayName} style={{ width: '80px', height: '80px', borderRadius: '5%', objectFit: 'cover', display: 'block', marginBottom: '10px', border: '2px solid #2196f3', background: '#222' }} />
               <label style={{ background: '#2196f3', color: '#fff', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem' }}>
                 画像アップ
                 <input type="file" accept="image/*" onChange={handleIconChange} style={{ display: 'none' }} />
@@ -419,7 +420,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               {presetIcons.map(icon => (
                 <img 
                   key={icon} 
-                  src={`${process.env.PUBLIC_URL}/images/icon/${icon}`}
+                  src={getStorageUrl(`/images/icon/${icon}`)}
                   alt=""
                   onClick={() => handlePresetIconSelect(icon)}
                   style={{ width: '100%', cursor: 'pointer', border: (myProfile.photoURL || '').includes(icon) ? '2px solid #ffd700' : '1px solid #444', borderRadius: '4px', padding: '2px', background: '#222' }}
@@ -462,7 +463,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                   }}
                   title={s.name}
                 >
-                  <img src={`${process.env.PUBLIC_URL}${s.icon}`} alt={s.name} style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+                  <img src={getStorageUrl(s.icon)} alt={s.name} style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
                 </div>
               ))}
             </div>
@@ -527,7 +528,7 @@ export const Lounge: React.FC<LoungeProps> = ({
 
   if (stageMode === 'DELETE_ACCOUNT') {
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center' }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         <h1 style={{ color: '#ff5252' }}>ユーザー登録解除</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #ff5252', maxWidth: '500px' }}>
           <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '20px' }}>ユーザー登録を解除しますか？</p>
@@ -544,10 +545,10 @@ export const Lounge: React.FC<LoungeProps> = ({
   if (stageMode === 'PROFILE' && viewingProfile) {
     const favSkill = getSkillByAbbr(viewingProfile.favoriteSkill);
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto' }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         <h1 style={{ color: '#ffd700' }}>PROFILE</h1>
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #ffd700', width: '100%', maxWidth: '500px', textAlign: 'center' }}>
-          <img src={((viewingProfile.photoURL || '').startsWith('/') ? process.env.PUBLIC_URL : '') + (viewingProfile.photoURL || 'https://via.placeholder.com/100')} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '10%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
+          <img src={((viewingProfile.photoURL || '').startsWith('/') ? getStorageUrl(viewingProfile.photoURL) : (viewingProfile.photoURL || 'https://via.placeholder.com/100'))} alt={viewingProfile.displayName} style={{ width: '100px', height: '100px', borderRadius: '10%', marginBottom: '20px', objectFit: 'cover', background: '#222' }} />
           <h2 style={{ color: '#FFFFFF', margin: '0 0 5px 0' }}>{viewingProfile.displayName}</h2>
           {viewingProfile.title && <div style={{ color: '#ffd700', fontSize: '0.9rem', marginBottom: '15px' }}>称号: {viewingProfile.title}</div>}
           <p style={{ color: '#aaa', fontStyle: 'italic', marginBottom: '15px' }}>"{viewingProfile.comment}"</p>
@@ -559,7 +560,7 @@ export const Lounge: React.FC<LoungeProps> = ({
           )}
           <div style={{ textAlign: 'left', background: '#222', padding: '15px', borderRadius: '10px' }}>
             <h3 style={{ fontSize: '1rem', color: '#ffd700', marginTop: 0 }}>お気に入りスキル</h3>
-            {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={(process.env.PUBLIC_URL || '') + favSkill.icon} alt={favSkill.name} style={{ width: '40px' }} /><span ><div style={{ color: '#FFFFFF' }}>{favSkill.name}</div></span></div>}
+            {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={getStorageUrl(favSkill.icon)} alt={favSkill.name} style={{ width: '40px' }} /><span ><div style={{ color: '#FFFFFF' }}>{favSkill.name}</div></span></div>}
           </div>
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>

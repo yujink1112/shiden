@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, serverTimestamp } from "firebase/database";
-import { database, auth, googleProvider, recordAccess } from "./firebase";
+import { database, auth, googleProvider, recordAccess, getStorageUrl } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
@@ -157,7 +157,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
         </div>
       );
     }
-    return <img src={process.env.PUBLIC_URL + skill.icon} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
+    return <img src={getStorageUrl(skill.icon)} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
   };
 
   return (
@@ -813,7 +813,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     const bossNames = ["緋炎の剣獣", "蒼氷の剣獣", "翠風の剣獣", "黄金の剣獣", "漆黒の剣獣", "純白の剣獣", "幻影の剣獣", "雷鳴の剣獣", "剛岩の剣獣", "深海の剣獣", "次元の剣獣", "神代の剣獣"];
     return { 
         name: bossNames[monsterId - 1], 
-        image: `/images/monster/${monsterId}.png`,
+        image: getStorageUrl(`/images/monster/${monsterId}.png`),
         skills: Array.from({length: 5 + rng(3)}, () => ALL_SKILLS.filter(s => s.abbr !== "空")[rng(ALL_SKILLS.filter(s => s.abbr !== "空").length)])
     };
   };
@@ -864,11 +864,13 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     localStorage.removeItem('shiden_stage_mode');
     localStorage.removeItem('shiden_last_game_mode');
     localStorage.removeItem('shiden_can_go_to_boss');
+    localStorage.removeItem('shiden_stage_victory_skills');
     localStorage.setItem('shiden_is_title', 'false');
     setIsTitle(false);
     setStageMode('MID');
     setStageCycle(1);
     setOwnedSkillAbbrs(["一"]);
+    setStageVictorySkills({});
     window.location.reload();
   };
 
@@ -966,7 +968,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             const initialProfile: UserProfile = {
               uid: user.uid,
               displayName: user.displayName || "名無しの剣士",
-              photoURL: user.photoURL || "/images/icon/mon_215.gif",
+              photoURL: user.photoURL || getStorageUrl("/images/icon/mon_215.gif"),
               favoriteSkill: "一",
               title: "",
               comment: "よろしく！",
@@ -1006,8 +1008,8 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     setSelectedPlayerSkills([]);
 
     const imageUrls = [
-      process.env.PUBLIC_URL + '/images/background/background.jpg',
-      process.env.PUBLIC_URL + '/images/title/titlelogo.png'
+      getStorageUrl('/images/background/background.jpg'),
+      getStorageUrl('/images/title/titlelogo.png')
     ];
     let loadedCount = 0;
     imageUrls.forEach(url => {
@@ -1511,7 +1513,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
               
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', zIndex: 5, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
-                  src={(process.env.PUBLIC_URL || '') + bossImage}
+                  src={getStorageUrl(bossImage)}
                   alt={bossName}
                   className={`boss-battle-image boss-anim-${bossAnim}`}
                   style={{
@@ -1665,7 +1667,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
       <div className="TitleScreenContainer">
         <div className="TitleBackgroundEffect"></div>
         <div className="TitleContent">
-          <div className="TitleLogoWrapper"><img src={process.env.PUBLIC_URL + '/images/title/titlelogo.png'} alt="紫電一閃" className="TitleLogo" /></div>
+          <div className="TitleLogoWrapper"><img src={getStorageUrl('/images/title/titlelogo.png')} alt="紫電一閃" className="TitleLogo" /></div>
           {user && (
             <div style={{ marginBottom: '20px', color: '#ffd700', fontSize: '1.1rem', textShadow: '0 0 5px rgba(255, 215, 0, 0.5)' }}>
                 ユーザ名: {myProfile?.displayName || "名もなき人"}
@@ -1704,7 +1706,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
 
 
   return (
-    <div className="AppContainer" style={{ display: 'flex', height: '100vh', color: '#eee' }}>
+    <div className="AppContainer" style={{ display: 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
       {showEpilogue && (
         <div className="EpilogueContainer">
           <div className="EpilogueBackground"></div>
@@ -1764,14 +1766,14 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
 
         <div style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           {(stageMode === 'MID') && (
-            <div style={{ width: '100%', height: '240px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #4fc3f7', boxSizing: 'border-box' }} />
+            <div style={{ width: '100%', height: '240px', backgroundImage: `url(${getStorageUrl(`/images/background/${stageCycle}.jpg`)})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #4fc3f7', boxSizing: 'border-box' }} />
           )}
 
           {((stageMode === 'BOSS' && !battleResults[0]?.winner) || (stageMode === 'KENJU' && kenjuBoss)) && (
-            <div style={{ width: '100%', height: '300px', backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '300px', backgroundImage: `url(${getStorageUrl(`/images/background/${stageCycle}.jpg`)})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
-                  src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)}
+                  src={stageMode === 'KENJU' ? (kenjuBoss?.image || '') : getStorageUrl(currentStageInfo.bossImage)}
                   alt=""
                   className="boss-battle-image"
                   style={{
@@ -1810,7 +1812,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         {(!gameStarted && stageVictorySkills[`${stageMode}_${stageCycle}`]?.length > 0) && (
           <div className="BossSkillPreview" style={{ marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '10px 20px', border: `2px solid ${(stageMode === 'BOSS' || stageMode === 'KENJU') ? '#ff5252' : '#4fc3f7'}`, borderRadius: '10px', background: (stageMode === 'BOSS' || stageMode === 'KENJU') ? '#2c0a0a' : '#0a1a2c', boxSizing: 'border-box' }}>
             <h3 style={{ color: '#ffd700', textAlign: 'center', margin: '5px 0px 10px 0px', fontSize: '1rem' }}>戦いの記憶</h3>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>{getSkillCardsFromAbbrs(stageVictorySkills[`${stageMode}_${stageCycle}`]).map((skill, idx) => <img key={idx} src={process.env.PUBLIC_URL + skill.icon} alt="" style={{ width: '30px', border: '1px solid #ffd700', borderRadius: '4px' }} />)}</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>{getSkillCardsFromAbbrs(stageVictorySkills[`${stageMode}_${stageCycle}`]).map((skill, idx) => <img key={idx} src={getStorageUrl(skill.icon)} alt="" style={{ width: '30px', border: '1px solid #ffd700', borderRadius: '4px' }} />)}</div>
           </div>
         )}
         {!gameStarted && (
@@ -1865,7 +1867,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                 )}
               </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => <div key={index} onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.winner === 1 ? '#66bb6a' : '#ef5350' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((s, si) => <img key={si} src={process.env.PUBLIC_URL + s.icon} alt="" style={{ width: '30px', height: '30px' }} />)}</div></div>)}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => <div key={index} onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.winner === 1 ? '#66bb6a' : '#ef5350' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((s, si) => <img key={si} src={getStorageUrl(s.icon)} alt="" style={{ width: '30px', height: '30px' }} />)}</div></div>)}</div>
           </div>
         )}
       </div>
@@ -1913,7 +1915,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           </div> :
           ((stageMode === 'BOSS' || stageMode === 'KENJU') ?
            <div style={{ textAlign: 'center' }}>
-            <img src={(process.env.PUBLIC_URL || '') + (stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage)} alt="" style={getBossImageStyle(currentStageInfo.no, isMobile)} />
+            <img src={stageMode === 'KENJU' ? (kenjuBoss?.image || '') : getStorageUrl(currentStageInfo.bossImage)} alt="" style={getBossImageStyle(currentStageInfo.no, isMobile)} />
             <h3>{stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName}</h3>
             <p>{stageMode === 'KENJU' ? 'こんにちは。今日の剣獣です。' : currentStageInfo.bossDescription}</p></div> : "ログがありません。"))}
       </div>

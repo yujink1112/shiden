@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, runTransaction, serverTimestamp } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDEOQ0xiSg2MfqmL5qVlm-MP6fRC32OpVQ",
@@ -16,6 +17,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
+export const storageBaseUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/`;
+export const getStorageUrl = (path: string) => {
+  const encodedPath = encodeURIComponent(path.startsWith('/') ? path.substring(1) : path);
+  return `${storageBaseUrl}${encodedPath}?alt=media`;
+};
 export const googleProvider = new GoogleAuthProvider();
 
 export const recordAccess = () => {
