@@ -196,6 +196,7 @@ interface LoungeProps {
   allProfiles: UserProfile[];
   lastActiveProfiles: {[uid: string]: number};
   kenjuBoss: {name: string, image: string, skills: SkillDetail[]} | null;
+  kenjuClears: number;
   onGoogleSignIn: () => void;
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
@@ -223,6 +224,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   allProfiles,
   lastActiveProfiles,
   kenjuBoss,
+  kenjuClears,
   onGoogleSignIn,
   onEmailSignUp,
   onEmailSignIn,
@@ -312,9 +314,24 @@ export const Lounge: React.FC<LoungeProps> = ({
               </div>
             </div>
 
-            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #555', marginBottom: '30px', textAlign: 'center' }}>
-                <h2 style={{ color: '#888', margin: '0 0 10px 0', fontSize: '1.2rem' }}>剣獣戦</h2>
-                <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
+            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
+                <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>今日の剣獣</h2>
+                {kenjuBoss && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
+                      <img src={kenjuBoss.image} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>本日クリア人数: {kenjuClears}人</div>
+                    <button
+                      className="TitleButton neon-red"
+                      onClick={onKenjuBattle}
+                      style={{ padding: '10px 40px', fontSize: '1.1rem' }}
+                    >
+                      挑む
+                    </button>
+                  </div>
+                )}
             </div>
 
             <UserListTable

@@ -121,6 +121,14 @@ export const STAGE_DATA: StageConfig[] = [
   },
 ];
 
+export const KENJU_DATA = [
+  {
+    name: "紅蓮のワダチ",
+    image: "/images/kenju/human55.png",
+    skillAbbrs: "無逆逆逆逆交雷硬",
+  }
+];
+
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {
     const skillNames = new Set<string>();
     // Stage 1のスキルを含めるために、i <= stageNo かつ STAGE_DATAが1-indexedか0-indexedかを確認

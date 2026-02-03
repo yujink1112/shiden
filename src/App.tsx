@@ -5,7 +5,7 @@ import { database, auth, googleProvider, recordAccess, getStorageUrl } from "./f
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
-import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName } from './stageData';
+import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName, KENJU_DATA } from './stageData';
 import { Lounge } from './Lounge';
 import type { UserProfile } from './Lounge';
 import { Rule } from './Rule';
@@ -292,6 +292,7 @@ function App() {
 
   const [lastActiveProfiles, setLastActiveProfiles] = useState<{[uid: string]: number}>({});
   const [kenjuBoss, setKenjuBoss] = useState<{name: string, image: string, skills: SkillDetail[]} | null>(null);
+  const [kenjuClears, setKenjuClears] = useState<number>(0);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -802,24 +803,40 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
   };
 
   const generateDailyKenju = () => {
-    const today = new Date().toLocaleDateString();
+    const today = new Date();
+    const dateStr = today.toLocaleDateString();
     let seed = 0;
-    for(let i=0; i<today.length; i++) seed += today.charCodeAt(i);
+    for(let i=0; i<dateStr.length; i++) seed += dateStr.charCodeAt(i);
     const rng = (max: number) => {
         seed = (seed * 9301 + 49297) % 233280;
         return Math.floor((seed / 233280) * max);
     };
-    const monsterId = rng(12) + 1;
-    const bossNames = ["緋炎の剣獣", "蒼氷の剣獣", "翠風の剣獣", "黄金の剣獣", "漆黒の剣獣", "純白の剣獣", "幻影の剣獣", "雷鳴の剣獣", "剛岩の剣獣", "深海の剣獣", "次元の剣獣", "神代の剣獣"];
-    return { 
-        name: bossNames[monsterId - 1], 
-        image: getStorageUrl(`/images/monster/${monsterId}.png`),
-        skills: Array.from({length: 5 + rng(3)}, () => ALL_SKILLS.filter(s => s.abbr !== "空")[rng(ALL_SKILLS.filter(s => s.abbr !== "空").length)])
+    
+    // KENJU_DATAから1体選ぶ（現在は1体のみだが拡張可能にする）
+    const kenjuBase = KENJU_DATA[rng(KENJU_DATA.length)];
+    const skillAbbrs = kenjuBase.skillAbbrs.split("");
+    const skills = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+
+    return {
+        name: kenjuBase.name,
+        image: getStorageUrl(kenjuBase.image),
+        skills: skills
     };
   };
 
   useEffect(() => {
-    setKenjuBoss(generateDailyKenju());
+    const kenju = generateDailyKenju();
+    setKenjuBoss(kenju);
+
+    // クリア人数をカウント
+    const clearsRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
+    onValue(clearsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setKenjuClears(snapshot.size);
+      } else {
+        setKenjuClears(0);
+      }
+    });
     
     // Fetch midenemy.csv
     const fetchMidEnemyData = async () => {
@@ -1170,16 +1187,20 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
               if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) setRewardSelectionMode(true);
             }
           } else if (stageMode === 'BOSS' || stageMode === 'KENJU') {
-            if (winCount >= 1) { 
+            if (winCount >= 1) {
               setCanGoToBoss(true);
-              if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
+              if (stageMode === 'KENJU') {
+                // 剣獣戦クリア時はリワードなしでLOUNGEへ（後で勲章などを検討）
+                setBossClearRewardPending(false);
+                setShowBossClearPanel(true);
+              } else if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
                 setBossClearRewardPending(true);
               } else {
                 setBossClearRewardPending(false);
                 setShowBossClearPanel(true);
               }
             } else {
-              if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
+              if (stageMode !== 'KENJU' && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
                 setRewardSelectionMode(true);
               }
             }
@@ -1371,6 +1392,11 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
         if (availableRewards.length > 0) { setRewardSelectionMode(true); setBossClearRewardPending(false); return; }
     }
+    if (stageMode === 'KENJU') {
+      setStageMode('LOUNGE');
+      handleResetGame();
+      return;
+    }
     if (stageCycle === 12) {
       setShowEpilogue(true);
       return;
@@ -1388,7 +1414,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     setShowLogForBattleIndex(-1);
   };
 
-  const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance }) => {
+  const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any; battleStageCycle?: number }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
     const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
@@ -1499,7 +1525,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         {bossImage && (
           <div className="boss-stage-area sticky-boss-area" style={{
             height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${stageCycle}.jpg)`,
+            backgroundImage: `url(${process.env.PUBLIC_URL}/images/background/${battleStageCycle || stageCycle}.jpg)`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
             {/* 背景を暗くするオーバーレイ */}
@@ -1572,7 +1598,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
     if (gameStarted && battleResults.length > 0) {
       const winCount = battleResults.filter(r => r.winner === 1).length;
       const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
-      const saveKey = `${stageMode}_${stageCycle}`;
+      const saveKey = stageMode === 'KENJU' ? `KENJU_${kenjuBoss?.name}` : `${stageMode}_${stageCycle}`;
       const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
 
       if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
@@ -1586,8 +1612,14 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           
           // ユーザーがログインしている場合はFirebaseにも保存
           if (user) {
-            const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey}`);
+            const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\./g, '_')}`);
             set(specificVictorySkillRef, selectedPlayerSkills);
+            
+            // 剣獣戦クリア人数カウント用の記録
+            if (stageMode === 'KENJU' && kenjuBoss) {
+              const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
+              set(kenjuClearRef, serverTimestamp());
+            }
           } else {
             // 未登録ユーザーの場合は anonymousVictories に記録
             const visitorId = localStorage.getItem('shiden_visitor_id');
@@ -1634,6 +1666,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
         allProfiles={pagedProfiles}
         lastActiveProfiles={lastActiveProfiles}
         kenjuBoss={kenjuBoss}
+        kenjuClears={kenjuClears}
         onGoogleSignIn={handleGoogleSignIn}
         onEmailSignUp={handleEmailSignUp}
         onEmailSignIn={handleEmailSignIn}
@@ -1770,7 +1803,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
           )}
 
           {((stageMode === 'BOSS' && !battleResults[0]?.winner) || (stageMode === 'KENJU' && kenjuBoss)) && (
-            <div style={{ width: '100%', height: '300px', backgroundImage: `url(${getStorageUrl(`/images/background/${stageCycle}.jpg`)})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '300px', backgroundImage: `url(${getStorageUrl(stageMode === 'KENJU' ? '/images/background/11.jpg' : `/images/background/${stageCycle}.jpg`)})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '10px', border: '2px solid #ff5252', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
                   src={stageMode === 'KENJU' ? (kenjuBoss?.image || '') : getStorageUrl(currentStageInfo.bossImage)}
@@ -1824,7 +1857,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             )}
             <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
               <h2 style={{ padding: '10px', color: '#4fc3f7' }}>所持スキルから編成してください</h2>
-              <div className="skill-card-grid">{availablePlayerCards.map(skill => <SkillCard key={skill.abbr} skill={skill} isSelected={selectedPlayerSkills.includes(skill.abbr)} onClick={handlePlayerSkillSelectionClick} iconMode={iconMode} />)}</div>
+              <div className="skill-card-grid">{(stageMode === 'KENJU' ? ALL_SKILLS.filter(s => s.name !== "空白") : availablePlayerCards).map(skill => <SkillCard key={skill.abbr} skill={skill} isSelected={selectedPlayerSkills.includes(skill.abbr)} onClick={handlePlayerSkillSelectionClick} iconMode={iconMode} />)}</div>
             </div>
           </div>
         )}
@@ -1853,8 +1886,8 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
             )}
             {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
-                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{currentStageInfo.bossName}撃破！<br />素晴らしいです！！</>}</h2>
-                <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む'}</button>
+                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{stageMode === 'KENJU' ? <>{kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{currentStageInfo.bossName}撃破！<br />素晴らしいです！！</>)}</h2>
+                <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{stageMode === 'KENJU' ? 'ラウンジへ戻る' : (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}</button>
               </div>
             )}
             {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss)) && (
@@ -1905,7 +1938,7 @@ const getBossImageStyle = (stageCycle: number, isMobile: boolean): React.CSSProp
                     // }
                 }
             }
-          }} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
+          }} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={stageMode === 'KENJU' ? 11 : stageCycle} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
         ) :
         
         (storyContent && !gameStarted ? 
