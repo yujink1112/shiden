@@ -145,3 +145,27 @@ export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => 
 export const getSkillByName = (name: string): SkillDetail | undefined => {
     return ALL_SKILLS.find(s => s.name === name);
 };
+
+export interface StageContext {
+  stageCycle: number;
+  kenjuBoss?: { name: string; image: string; skills: SkillDetail[] };
+  selectedPlayerSkills: string[];
+  midEnemyData: { [stage: number]: string[] };
+}
+
+export interface StageProcessor {
+  getBattleCount(): number;
+  getEnemyName(index: number, context: StageContext): string;
+  getEnemySkills(index: number, context: StageContext): SkillDetail[];
+  onVictory(context: StageContext): { canGoToNext: boolean; showReward: boolean; pendingClear?: boolean; isVictory?: boolean };
+  onFailure(context: StageContext): { canGoToNext: boolean; showReward: boolean; pendingClear?: boolean; isVictory?: boolean };
+  getStageTitle(context: StageContext): string;
+  getStageDescription(context: StageContext): string;
+  getBackgroundImage(context: StageContext): string;
+  getBossImage(context: StageContext): string | undefined;
+  getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties;
+  getEnemyTitle?(context: StageContext): string;
+  getWinThreshold?(context: StageContext): number;
+  shouldShowWinRate?(context: StageContext): boolean;
+  onVictoryEffect?(context: StageContext, triggerConfetti: () => void): void;
+}

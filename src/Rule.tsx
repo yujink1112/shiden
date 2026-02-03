@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ALL_SKILLS, STATUS_DATA } from './skillsData';
+import { getStorageUrl } from './firebase';
 
 interface RuleProps {
   onClose: () => void;
@@ -26,7 +27,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
         return (
           <div className="rule-content-section">
             <h2>どんなゲーム？</h2>
-            <div className="TitleLogoWrapper"><img src={process.env.PUBLIC_URL + '/images/title/titlelogo.png'} alt="紫電一閃" className="TitleLogo" /></div>
+            <div className="TitleLogoWrapper"><img src={getStorageUrl('/images/title/titlelogo.png')} alt="紫電一閃" className="TitleLogo" /></div>
             <p style={{ fontSize: '1.2rem', color: '#ffeb3b', fontWeight: 'bold' }}>スキルで攻撃！相手のスキルを破壊しろ！</p>
             <p>プレイヤーと敵はそれぞれスキルを編成して戦います。攻撃スキルによって相手のスキルを破壊していきます。</p>
             <p style={{ fontSize: '1.2rem', color: '#ffeb3b', fontWeight: 'bold' }}>遅い攻撃には迎撃スキル！ダメージを軽減できる！</p>
@@ -100,7 +101,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
               {ALL_SKILLS.map(skill => (
                 <div key={skill.abbr} style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
-                    <img src={(process.env.PUBLIC_URL || '') + skill.icon} alt="" style={{ width: '40px', height: '40px' }} />
+                    <img src={getStorageUrl(skill.icon)} alt="" style={{ width: '40px', height: '40px' }} />
                     <div>
                       <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>{skill.name}<span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{skill.kana}</span></div>
                       
@@ -123,7 +124,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                 <div key={status.name} style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
-                    <img src={(process.env.PUBLIC_URL || '') + status.icon} alt="" style={{ width: '40px', height: '40px' }} />
+                    <img src={getStorageUrl(status.icon)} alt="" style={{ width: '40px', height: '40px' }} />
                     <div>
                       <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: status.type == 0 ? '#4fc3f7' : '#ef5350'}}>{status.name}<span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{status.kana}</span></div>
 
@@ -137,7 +138,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
           </div>
         );
      case 4:
-        const slideImages = Array.from({ length: 6 }, (_, i) => `${process.env.PUBLIC_URL}/images/rule/introduction/スライド${i + 1}.PNG`);
+        const slideImages = Array.from({ length: 6 }, (_, i) => getStorageUrl(`/images/rule/introduction/スライド${i + 1}.PNG`));
         return (
           <div className="rule-content-section">
             <h2>戦闘の流れ</h2>

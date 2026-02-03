@@ -314,7 +314,12 @@ export const Lounge: React.FC<LoungeProps> = ({
               </div>
             </div>
 
-            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
+            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #555', marginBottom: '30px', textAlign: 'center' }}>
+                <h2 style={{ color: '#888', margin: '0 0 10px 0', fontSize: '1.2rem' }}>剣獣戦</h2>
+                <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
+            </div>
+
+            <div style={{ display: 'none', background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
                 <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>今日の剣獣</h2>
                 {kenjuBoss && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
