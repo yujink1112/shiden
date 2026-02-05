@@ -55,9 +55,21 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} }
 };
 
+const KENJU_BACK_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
+  "紅蓮のワダチ": { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+};
+
+const KENJU_BATTLE_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
+  "紅蓮のワダチ": { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+};
+
+const KENJU_SIDEBAR_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
+  "紅蓮のワダチ": { pc: { height: '50%', width: '50%' }, mobile: { height: '60%', width: '60%' } },
+};
+
 function getBossImageStyleCommon(stageCycle: number, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
   const configs = type === 'back' ? BOSS_BACK_IMAGE_CONFIGS : (type === 'battle' ? BOSS_BATTLE_IMAGE_CONFIGS : BOSS_SIDEBAR_IMAGE_CONFIGS);
-  const config = configs[stageCycle] || { pc: {}, mobile: {} };
+  const config = configs[stageCycle] || { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } };
   const style = isMobile ? config.mobile : config.pc;
   return {
     maxWidth: 'none',
@@ -329,12 +341,8 @@ export class KenjuStageProcessor implements StageProcessor {
     return `VS ${context.kenjuBoss?.name || "剣獣"}`;
   }
 
-  getStageDescription(context: StageContext): string {
-    return '日替わりの強敵に勝利せよ！';
-  }
-
   getBackgroundImage(context: StageContext): string {
-    return '/images/background/11.jpg';
+    return context.kenjuBoss?.background || "/images/background/11.jpg";
   }
 
   getBossImage(context: StageContext): string | undefined {
@@ -342,10 +350,28 @@ export class KenjuStageProcessor implements StageProcessor {
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
+    if (context.kenjuBoss) {
+      const configs = type === 'back' ? KENJU_BACK_IMAGE_CONFIGS : (type === 'battle' ? KENJU_BATTLE_IMAGE_CONFIGS : KENJU_SIDEBAR_IMAGE_CONFIGS);
+      const config = configs[context.kenjuBoss.name];
+      if (config) {
+        const style = isMobile ? config.mobile : config.pc;
+        return {
+          maxWidth: 'none',
+          objectFit: 'contain',
+          filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+          flexShrink: 0,
+          ...style
+        };
+      }
+    }
     return getBossImageStyleCommon(11, isMobile, type);
   }
 
   getEnemyTitle(context: StageContext): string {
-    return context.kenjuBoss?.name || "剣獣";
+    return context.kenjuBoss?.title || 'BOSS SKILLS DISCLOSED';
+  }
+
+  getStageDescription(context: StageContext): string {
+    return '日替わりの強敵に勝利せよ！';
   }
 }

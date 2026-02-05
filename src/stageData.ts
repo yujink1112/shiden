@@ -27,7 +27,7 @@ export const STAGE_DATA: StageConfig[] = [
     bossImage: "/images/monster/2.png",
     bossDescription: "食べられない……。",
     shopSkills: ["搦手", "果断"],
-    bossSkillAbbrs: "搦崩崩刺果",
+    bossSkillAbbrs: "搦崩搦刺刺",
   },
   {
     no: 3,
@@ -121,12 +121,82 @@ export const STAGE_DATA: StageConfig[] = [
   },
 ];
 
-export const KENJU_DATA = [
+export interface KenjuConfig {
+  name: string;
+  title: string;
+  description: string;
+  background: string,
+  image: string;
+  skillAbbrs: string;
+  medalId?: string; // 称号・メダルのID
+}
+
+export const KENJU_DATA: KenjuConfig[] = [
   {
-    name: "紅蓮のワダチ",
+    name: "王家の冠月 クリムヒルト",
+    title: "LES MISÉRABLES",
+    description: "「私の目に見えてるのは、あなたとの永遠だけ」 ",
+    background: "/images/background/Celtic-Sun-Altar1.jpg",
+    image: "/images/kenju/kriemhild_2.png",
+    skillAbbrs: "先先搦剣反隠果錬",
+    medalId: "kriemhild",
+  },
+  {
+    name: "紅蓮の境界 ワダチ",
+    title: "BLAZE OF GLORY",
+    description: "「俺が先に剣を抜くことはなかった。けど勝つのはいつも俺だったのさ」 ",
+    background: "/images/background/8.jpg",
     image: "/images/kenju/human55.png",
     skillAbbrs: "無逆逆逆逆交雷硬",
+    medalId: "wadachi",
+  },
+  {
+    name: "氷彗の狂咲 シーラン",
+    title: "DON'T STOP ME NOW",
+    description: "「」 ",
+    background: "/images/background/10.jpg",
+    image: "/images/kenju/sword_f_2.png",
+    skillAbbrs: "無呪反待連防呪盾",
+    medalId: "shiran",
+  },
+  {
+    name: "樹上の眠猫 アティヤー",
+    title: "NESSUN DORMA",
+    description: "「誰も寝てはニャらぬ」 ",
+    background: "/images/background/9.jpg",
+    image: "/images/kenju/cat_white.png",
+    skillAbbrs: "先呪逆疫待待刺硬",
+    medalId: "atiyah",
+  },
+
+  {
+    name: "神秘の白金 ヴォマクト",
+    title: "A WHOLE NEW WORLD",
+    description: "「見せてあげよう、華やかな世界を」 ",
+    background: "/images/background/Dream-City1.jpg",
+    image: "/images/kenju/tall_middleeast.png",
+    skillAbbrs: "逆紫反封燐連紫盾",
+    medalId: "vomakt",
+  },
+  {
+    name: "冥土の徘徊 スティーブ",
+    title: "ANOTHER ONE BITES THE DUST",
+    description: "「このひりつきに、いつまで耐えられる？」 ",
+    background: "/images/background/Red-Light-Ceremony-Room1.jpg",
+    image: "/images/kenju/witch.png",
+    skillAbbrs: "疫待崩搦玉影怒反",
+    medalId: "steve",
+  },
+  {
+    name: "果てに視えるもの",
+    title: "FIAT LUX",
+    description: "「…………。」 ",
+    background: "/images/background/fantasy-universe1.jpg",
+    image: "/images/kenju/thor_2.png",
+    skillAbbrs: "燐雷反雷反雷反影",
+    medalId: "fiat_lux",
   }
+
 ];
 
 export const getAvailableSkillsUntilStage = (stageNo: number): SkillDetail[] => {
@@ -148,7 +218,7 @@ export const getSkillByName = (name: string): SkillDetail | undefined => {
 
 export interface StageContext {
   stageCycle: number;
-  kenjuBoss?: { name: string; image: string; skills: SkillDetail[] };
+  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[] };
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
 }

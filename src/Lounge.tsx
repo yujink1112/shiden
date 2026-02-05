@@ -203,7 +203,7 @@ interface LoungeProps {
   onSignOut: () => void;
   onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean) => void;
   onDeleteAccount: () => void;
-  onKenjuBattle: () => void;
+  onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[] }) => void;
   onBack: () => void;
   onViewProfile: (profile: UserProfile) => void;
   stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL' | 'ADMIN_ANALYTICS';
@@ -215,6 +215,8 @@ interface LoungeProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   isAdmin: boolean;
+  kenjuBosses?: { name: string; image: string; skills: SkillDetail[] }[];
+
 }
 
 
@@ -225,6 +227,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   lastActiveProfiles,
   kenjuBoss,
   kenjuClears,
+  kenjuBosses,
   onGoogleSignIn,
   onEmailSignUp,
   onEmailSignIn,
@@ -255,7 +258,14 @@ export const Lounge: React.FC<LoungeProps> = ({
   const medals = [
     { id: 'master', name: 'クリアしたよ！', description: 'Stage12をクリア' },
     { id: 'traveler', name: '旅人', description: '無条件で獲得' },
-    { id: 'monkey', name: 'サルの一味', description: '無条件で獲得' }
+    { id: 'monkey', name: 'サルの一味', description: '無条件で獲得' },
+    { id: 'kriemhild', name: '王家の冠月の友', description: 'クリームヒルトを撃破' },
+    { id: 'wadachi', name: '紅蓮を越えし者', description: 'ワダチを撃破' },
+    { id: 'shiran', name: '氷彗の解凍者', description: 'シーランを撃破' },
+    { id: 'atiyah', name: '眠り猫の遊び相手', description: 'アティヤーを撃破' },
+    { id: 'vomakt', name: '白金の目撃者', description: 'ヴォマクトを撃破' },
+    { id: 'steve', name: '冥土の同伴者', description: 'スティーブを撃破' },
+    { id: 'fiat_lux', name: '光あれ', description: '果てに視えるものを撃破' }
   ];
 
   if (stageMode === 'LOUNGE') {
@@ -314,30 +324,53 @@ export const Lounge: React.FC<LoungeProps> = ({
               </div>
             </div>
 
-            <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #555', marginBottom: '30px', textAlign: 'center' }}>
+            <div style={{ display: 'none', background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #555', marginBottom: '30px', textAlign: 'center' }}>
                 <h2 style={{ color: '#888', margin: '0 0 10px 0', fontSize: '1.2rem' }}>剣獣戦</h2>
                 <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
             </div>
 
-            <div style={{ display: 'none', background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
-                <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>今日の剣獣</h2>
+            <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
+                <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
                 {kenjuBoss && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
-                      <img src={kenjuBoss.image} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
-                    <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>本日クリア人数: {kenjuClears}人</div>
+                    <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア人数: {kenjuClears}人</div>
                     <button
                       className="TitleButton neon-red"
-                      onClick={onKenjuBattle}
-                      style={{ padding: '10px 40px', fontSize: '1.1rem' }}
+                      onClick={() => onKenjuBattle()}
+                      style={{ color: '#ffe600', padding: '10px 40px', fontSize: '1.1rem' }}
                     >
                       挑む
                     </button>
                   </div>
                 )}
             </div>
+
+
+            {isAdmin && kenjuBosses && (
+              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #8e24aa', marginBottom: '30px' }}>
+                <h2 style={{ color: '#8e24aa', margin: '0 0 15px 0', fontSize: '1.2rem', textAlign: 'center' }}>管理者用：全剣獣リスト</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px' }}>
+                  {kenjuBosses.map(boss => (
+                    <div key={boss.name} style={{ background: '#222', padding: '10px', borderRadius: '8px', textAlign: 'center', border: '1px solid #444' }}>
+                      <div style={{ height: '80px', marginBottom: '10px' }}>
+                        <img src={boss.image} alt={boss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#fff', marginBottom: '10px', height: '2.4em', overflow: 'hidden' }}>{boss.name}</div>
+                      <button
+                        onClick={() => onKenjuBattle(boss)}
+                        style={{ padding: '5px 15px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        デバッグ戦闘
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <UserListTable
               profiles={allProfiles}
