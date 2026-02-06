@@ -218,7 +218,7 @@ export const getSkillByName = (name: string): SkillDetail | undefined => {
 
 export interface StageContext {
   stageCycle: number;
-  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[] };
+  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[]; isCustom?: boolean };
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
 }

@@ -18,6 +18,14 @@ export interface UserProfile {
   lastKenjuDate?: string;
   winCount?: number;
   medals?: string[];
+  myKenju?: {
+    name: string;
+    image: string;
+    skills: string[]; // スキル略称
+    description?: string;
+    title?: string; // 対戦時のタイトル
+    background?: string; // 背景画像URL（またはインデックス）
+  };
 }
 
 interface UserListTableProps {
@@ -196,12 +204,13 @@ interface LoungeProps {
   allProfiles: UserProfile[];
   lastActiveProfiles: {[uid: string]: number};
   kenjuBoss: {name: string, image: string, skills: SkillDetail[]} | null;
+  currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
   kenjuClears: number;
   onGoogleSignIn: () => void;
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
-  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean) => void;
+  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju']) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[] }) => void;
   onBack: () => void;
@@ -216,7 +225,7 @@ interface LoungeProps {
   onPageChange: (page: number) => void;
   isAdmin: boolean;
   kenjuBosses?: { name: string; image: string; skills: SkillDetail[] }[];
-
+  SkillCard: React.FC<any>;
 }
 
 
@@ -226,6 +235,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   allProfiles,
   lastActiveProfiles,
   kenjuBoss,
+  currentKenjuBattle,
   kenjuClears,
   kenjuBosses,
   onGoogleSignIn,
@@ -245,7 +255,8 @@ export const Lounge: React.FC<LoungeProps> = ({
   allProfilesCount,
   currentPage,
   onPageChange,
-  isAdmin
+  isAdmin,
+  SkillCard
 }) => {
   const today = new Date().toLocaleDateString();
 
@@ -254,6 +265,8 @@ export const Lounge: React.FC<LoungeProps> = ({
   const [isSignUp, setIsSignUp] = React.useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false);
   const isInitializing = React.useRef(false);
+
+  const presetBackgrounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => `/images/background/${n}.jpg`);
 
   const medals = [
     { id: 'master', name: 'クリアしたよ！', description: 'Stage12をクリア' },
@@ -267,6 +280,11 @@ export const Lounge: React.FC<LoungeProps> = ({
     { id: 'steve', name: '冥土の同伴者', description: 'スティーブを撃破' },
     { id: 'fiat_lux', name: '光あれ', description: '果てに視えるものを撃破' }
   ];
+
+  const randomKenjuPlayers = React.useMemo(() => {
+    const withKenju = allProfiles.filter(p => p.myKenju && p.myKenju.name && p.myKenju.image);
+    return [...withKenju].sort(() => 0.5 - Math.random()).slice(0, 3);
+  }, [allProfiles]);
 
   if (stageMode === 'LOUNGE') {
     return (
@@ -329,24 +347,47 @@ export const Lounge: React.FC<LoungeProps> = ({
                 <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
             </div>
 
-            <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', marginBottom: '30px', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
-                <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
-                {kenjuBoss && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
-                      <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+              <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
+                  <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
+                  {kenjuBoss && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
+                        <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </div>
+                      <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
+                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア人数: {kenjuClears}人</div>
+                      <button
+                        className="TitleButton neon-red"
+                        onClick={() => onKenjuBattle()}
+                        style={{ color: '#ffe600', padding: '10px 40px', fontSize: '1.1rem' }}
+                      >
+                        挑む
+                      </button>
                     </div>
-                    <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
-                    <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア人数: {kenjuClears}人</div>
-                    <button
-                      className="TitleButton neon-red"
-                      onClick={() => onKenjuBattle()}
-                      style={{ color: '#ffe600', padding: '10px 40px', fontSize: '1.1rem' }}
-                    >
-                      挑む
-                    </button>
+                  )}
+              </div>
+
+              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #4fc3f7', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)' }}>
+                <h2 style={{ color: '#4fc3f7', margin: '0 0 10px 0', fontSize: '1.2rem' }}>ピックアップ電影</h2>
+                {randomKenjuPlayers.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {randomKenjuPlayers.map(p => (
+                      <div key={p.uid} onClick={() => onViewProfile(p)} style={{ cursor: 'pointer', background: '#222', padding: '10px', borderRadius: '8px', border: '1px solid #444', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src={p.myKenju?.image} alt="" style={{ width: '50px', height: '50px', borderRadius: '5px', objectFit: 'contain', background: '#000' }} />
+                        <div style={{ flex: 1, textAlign: 'left' }}>
+                          <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{p.myKenju?.name}</div>
+                          <div style={{ color: '#aaa', fontSize: '0.7rem' }}>Master: {p.displayName}</div>
+                        </div>
+                        <div style={{ color: '#4fc3f7' }}>〉</div>
+                      </div>
+                    ))}
+                    <p style={{ margin: 0, fontSize: '0.7rem', color: '#888' }}>プロフィールから対戦できます</p>
                   </div>
+                ) : (
+                  <p style={{ color: '#888', margin: '20px 0' }}>まだ電影を登録しているプレイヤーがいません</p>
                 )}
+              </div>
             </div>
 
 
@@ -404,12 +445,12 @@ export const Lounge: React.FC<LoungeProps> = ({
       );
     }
 
-    const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>, isKenju: boolean = false) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // 10KB limit
-      if (file.size > 10 * 1024) {
+      // 10KB limit (Kenjuの場合は破棄)
+      if (!isKenju && file.size > 10 * 1024) {
         alert("ファイルサイズは10KB以下にしてください。");
         return;
       }
@@ -418,15 +459,53 @@ export const Lounge: React.FC<LoungeProps> = ({
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          // Resize to 64x64 using canvas
+          // Check image dimensions for Kenju (500x500 limit)
+          if (isKenju && (img.width > 500 || img.height > 500)) {
+            alert(`画像のサイズが大きすぎます (${img.width}x${img.height})。電影画像は500x500ピクセル以下にしてください。`);
+            return;
+          }
+
+          // Resize using canvas (Kenjuの場合はリサイズせずそのまま使う可能性もあるが、
+          // RTDBの容量制限を考慮して適度にリサイズするのが一般的。
+          // ただしユーザーの指示に従い「10KB制限破棄」とするため、サイズは維持する方向へ。
+          // でもプレビューを大きく出すなら、ある程度の解像度は必要。
+          // ここでは canvas で 500x500 にリサイズする（アスペクト比維持）)
+          
           const canvas = document.createElement('canvas');
-          canvas.width = 64;
-          canvas.height = 64;
+          const MAX_WIDTH = isKenju ? 500 : 64;
+          const MAX_HEIGHT = isKenju ? 500 : 64;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
           const ctx = canvas.getContext('2d');
           if (ctx) {
-            ctx.drawImage(img, 0, 0, 64, 64);
+            ctx.drawImage(img, 0, 0, width, height);
             const dataUrl = canvas.toDataURL('image/png');
-            onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler);
+            if (isKenju) {
+              onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                name: myProfile.myKenju?.name || 'マイ電影',
+                image: dataUrl,
+                skills: myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
+                description: myProfile.myKenju?.description || '',
+                title: myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
+                background: myProfile.myKenju?.background || '/images/background/11.jpg'
+              });
+            } else {
+              onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju);
+            }
           }
         };
         img.src = event.target?.result as string;
@@ -442,7 +521,25 @@ export const Lounge: React.FC<LoungeProps> = ({
 
     const handlePresetIconSelect = (iconName: string) => {
       const iconPath = `/images/icon/${iconName}`;
-      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title, myProfile.oneThing, myProfile.isSpoiler);
+      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, iconPath, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju);
+    };
+
+    const handleKenjuSkillToggle = (abbr: string) => {
+      const currentSkills = myProfile.myKenju?.skills || [];
+      const newSkills = [...currentSkills];
+      if (newSkills.length >= 8) {
+        alert("剣獣のスキルは最大8つまでです。");
+        return;
+      }
+      newSkills.push(abbr);
+      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+        name: myProfile.myKenju?.name || 'マイ電影',
+        image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+        description: myProfile.myKenju?.description || '',
+        title: myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
+        background: myProfile.myKenju?.background || '/images/background/11.jpg',
+        skills: newSkills
+      });
     };
 
     return (
@@ -463,7 +560,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                 type="text"
                 maxLength={10}
                 value={myProfile.displayName}
-                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
+                onChange={(e) => onUpdateProfile(e.target.value, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
                 style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
             </div>
@@ -488,7 +585,7 @@ export const Lounge: React.FC<LoungeProps> = ({
             <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>称号を選択</label>
             <select
               value={myProfile.title || ""}
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing, myProfile.isSpoiler)}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, e.target.value, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px' }}
             >
               <option value="旅人">旅人</option>
@@ -505,7 +602,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               {allSkills.map(s => (
                 <div
                   key={s.abbr}
-                  onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
+                  onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
                   style={{
                     cursor: 'pointer',
                     border: myProfile.favoriteSkill === s.abbr ? '2px solid #ffd700' : '1px solid #444',
@@ -534,7 +631,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               maxLength={10}
               value={myProfile.oneThing || ''}
               onChange={(e) => {
-                onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value, myProfile.isSpoiler);
+                onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, e.target.value, myProfile.isSpoiler, myProfile.myKenju);
               }}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
@@ -546,7 +643,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               type="text"
               maxLength={15}
               value={myProfile.comment}
-              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler)}
+              onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
             <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#2c1010', padding: '8px', borderRadius: '5px', border: '1px solid #ff5252' }}>
@@ -554,7 +651,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                 type="checkbox"
                 id="spoiler-checkbox"
                 checked={myProfile.isSpoiler || false}
-                onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, e.target.checked)}
+                onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, e.target.checked, myProfile.myKenju)}
                 style={{ marginRight: '10px', width: '22px', height: '22px', cursor: 'pointer', accentColor: '#ff5252' }}
               />
               <label htmlFor="spoiler-checkbox" style={{ color: '#ff5252', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer', userSelect: 'none' }}>ネタバレ注意 (クリア構成などを書く場合はチェック)</label>
@@ -562,6 +659,163 @@ export const Lounge: React.FC<LoungeProps> = ({
           </div>
 
           <p style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>※入力すると自動で保存されます</p>
+
+          <div style={{ borderTop: '2px solid #ff5252', marginTop: '40px', paddingTop: '30px' }}>
+            <h2 style={{ color: '#ff5252', textAlign: 'center', marginBottom: '5px' }}>電影の設定</h2>
+            <p style={{ color: '#aaa', textAlign: 'center', fontSize: '0.9rem', marginBottom: '20px' }}>あなただけのボスを作ろう！</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
+              <div style={{ textAlign: 'center', width: '100%' }}>
+                <img src={myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png')} alt="マイ電影" style={{ width: '250px', height: '250px', borderRadius: '15px', objectFit: 'contain', border: '3px solid #ff5252', background: '#111', marginBottom: '15px', boxShadow: '0 0 15px rgba(255, 82, 82, 0.3)' }} />
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <label style={{ background: '#ff5252', color: '#fff', padding: '8px 25px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.3)' }}>
+                    電影の画像をアップロード
+                    <input type="file" accept="image/*" onChange={(e) => handleIconChange(e, true)} style={{ display: 'none' }} />
+                  </label>
+                </div>
+              </div>
+              <div style={{ width: '100%' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>電影名(10文字以内)</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={myProfile.myKenju?.name || ''}
+                  placeholder="マイ電影"
+                  onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                    name: e.target.value,
+                    image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                    skills: myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
+                    description: myProfile.myKenju?.description || '',
+                    title: myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
+                    background: myProfile.myKenju?.background || '/images/background/11.jpg'
+                  })}
+                  style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>電影の紹介文（400文字以内）</label>
+              <textarea
+                maxLength={400}
+                value={myProfile.myKenju?.description || ''}
+                placeholder="戦闘画面のサイドバーに表示される紹介文です"
+                onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                  name: myProfile.myKenju?.name || 'マイ電影',
+                  image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                  skills: myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
+                  title: myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
+                  background: myProfile.myKenju?.background || '/images/background/11.jpg',
+                  description: e.target.value
+                })}
+                style={{ width: '100%', height: '100px', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box', resize: 'vertical' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+                <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>対戦時タイトル</label>
+                <input
+                  type="text"
+                  maxLength={30}
+                  value={myProfile.myKenju?.title || ''}
+                  placeholder="BOSS SKILLS DISCLOSED"
+                  onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                    name: myProfile.myKenju?.name || 'マイ電影',
+                    image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                    skills: myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
+                    description: myProfile.myKenju?.description || '',
+                    background: myProfile.myKenju?.background || '/images/background/11.jpg',
+                    title: e.target.value
+                  })}
+                  style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
+                />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+                <label style={{ color: '#fff', display: 'block', marginBottom: '10px' }}>対戦背景を選択</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                    {presetBackgrounds.map((bg, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                            name: myProfile.myKenju?.name || 'マイ電影',
+                            image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                            skills: myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
+                            description: myProfile.myKenju?.description || '',
+                            title: myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
+                            background: bg
+                          })}
+                          style={{ cursor: 'pointer', border: (myProfile.myKenju?.background === bg || (!myProfile.myKenju?.background && bg.includes('11.jpg'))) ? '3px solid #ff5252' : '1px solid #444', borderRadius: '8px', overflow: 'hidden', height: '60px', position: 'relative' }}
+                        >
+                            <img src={getStorageUrl(bg)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', bottom: 0, right: 0, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '10px', padding: '2px 4px' }}>Stage {idx+1}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <label style={{ color: '#fff', fontWeight: 'bold' }}>電影スキル編成 (最大8つ / 重複可)</label>
+                <button
+                  onClick={() => {
+                    if (window.confirm('電影のスキルをリセットしますか？')) {
+                      onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                        name: myProfile.myKenju?.name || 'マイ電影',
+                        image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                        description: myProfile.myKenju?.description || '',
+                        skills: []
+                      });
+                    }
+                  }}
+                  style={{ padding: '4px 12px', background: '#444', color: '#fff', border: '1px solid #666', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', transition: 'background 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#555'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#444'}
+                >
+                  スキルリセット
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', maxHeight: '300px', overflowY: 'auto', padding: '15px', background: '#111', borderRadius: '8px', border: '1px solid #444', scrollbarWidth: 'thin' }}>
+                {allSkills.map(s => (
+                  <div key={s.abbr} style={{ display: 'flex', justifyContent: 'center' }}>
+                    <SkillCard
+                      skill={s}
+                      isSelected={false}
+                      onClick={() => handleKenjuSkillToggle(s.abbr)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '10px', color: '#aaa', fontSize: '0.8rem' }}>
+                現在のスキル構成（クリックで削除）:
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '10px' }}>
+                  {(myProfile.myKenju?.skills || []).map((abbr, idx) => {
+                    const s = getSkillByAbbr(abbr);
+                    return s ? (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          const newSkills = [...(myProfile.myKenju?.skills || [])];
+                          newSkills.splice(idx, 1);
+                          onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, {
+                            name: myProfile.myKenju?.name || 'マイ電影',
+                            image: myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
+                            description: myProfile.myKenju?.description || '',
+                            skills: newSkills
+                          });
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        title={`${s.name} (クリックで削除)`}
+                      >
+                        <img src={getStorageUrl(s.icon)} alt={s.name} style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ff5252' }} />
+                      </div>
+                    ) : null;
+                  })}
+                  {(myProfile.myKenju?.skills || []).length === 0 && <span>なし</span>}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div style={{ borderTop: '1px solid #444', marginTop: '30px', paddingTop: '20px', textAlign: 'center' }}>
             <button
@@ -613,10 +867,36 @@ export const Lounge: React.FC<LoungeProps> = ({
                 {viewingProfile.oneThing}
             </div>
           )}
-          <div style={{ textAlign: 'left', background: '#222', padding: '15px', borderRadius: '10px' }}>
+          <div style={{ textAlign: 'left', background: '#222', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1rem', color: '#ffd700', marginTop: 0 }}>お気に入りスキル</h3>
             {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={getStorageUrl(favSkill.icon)} alt={favSkill.name} style={{ width: '40px' }} /><span ><div style={{ color: '#FFFFFF' }}>{favSkill.name}</div></span></div>}
           </div>
+
+          {viewingProfile.myKenju && (
+            <div style={{ textAlign: 'center', background: '#1a1a1a', padding: '20px', borderRadius: '10px', border: '2px solid #ff5252' }}>
+              <h3 style={{ fontSize: '1rem', color: '#ff5252', marginTop: 0 }}>{viewingProfile.displayName}の電影</h3>
+              <div style={{ position: 'relative', width: '100%', maxWidth: '150px', height: '120px', margin: '0 auto 15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
+                <img src={viewingProfile.myKenju.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '15px' }}>{viewingProfile.myKenju.name}</div>
+              <button
+                className="TitleButton neon-red"
+                onClick={() => {
+                  const skills = viewingProfile.myKenju!.skills.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+                  onKenjuBattle({
+                    name: viewingProfile.myKenju!.name,
+                    image: viewingProfile.myKenju!.image,
+                    description: viewingProfile.myKenju!.description || '',
+                    skills: skills.length > 0 ? skills : [getSkillByAbbr('一')!],
+                    isCustom: true
+                  } as any);
+                }}
+                style={{ color: '#ffe600', padding: '8px 30px', fontSize: '1rem', width: '100%' }}
+              >
+                この電影と戦う
+              </button>
+            </div>
+          )}
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
       </div>
