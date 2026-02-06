@@ -609,16 +609,25 @@ const PLAYER_SKILL_COUNT = 5;
 
   const generateDailyKenju = () => {
     const today = new Date();
-    const dateStr = today.toLocaleDateString();
-    let seed = 0;
-    for(let i=0; i<dateStr.length; i++) seed += dateStr.charCodeAt(i);
-    const rng = (max: number) => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return Math.floor((seed / 233280) * max);
-    };
+    // 曜日ベースのインデックス (0: 日曜日, 1: 月曜日, ..., 5: 金曜日, 6: 土曜日)
+    // KENJU_DATAが現在7体なので、曜日にそのまま対応させる
+    // ヴォマクト(index 4)を金曜日(day 5)に、スティーブ(index 5)を土曜日(day 6)にしたい
+    // 現在のデータ順:
+    // 0: クリームヒルト
+    // 1: ワダチ
+    // 2: シーラン
+    // 3: アティヤー
+    // 4: ヴォマクト
+    // 5: スティーブ
+    // 6: 果てに視えるもの
     
-    // KENJU_DATAから1体選ぶ（現在は1体のみだが拡張可能にする）
-    const kenjuBase = KENJU_DATA[rng(KENJU_DATA.length)];
+    // 金曜日(5) -> 4(ヴォマクト), 土曜日(6) -> 5(スティーブ)
+    // 1つずらす (day - 1) % 7
+    // 日曜日(0) -> -1 -> 6 (果てに視えるもの)
+    const day = today.getDay();
+    const index = (day + 6) % 7;
+    
+    const kenjuBase = KENJU_DATA[index] || KENJU_DATA[0];
     const skillAbbrs = kenjuBase.skillAbbrs.split("");
     const skills = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
 
@@ -1425,8 +1434,8 @@ const PLAYER_SKILL_COUNT = 5;
                 {changelogData.length > 0 ? (
                   changelogData.map((item, index) => (
                     <div key={index} className="ChangelogItem">
-                      <div className="ChangelogDate">{item.date}</div>
-                      <div className="ChangelogVersion">{item.version}</div>
+                      <div className="ChangelogVersion" style={{ fontSize: '1.4rem', borderLeft: '4px solid #00d2ff', paddingLeft: '10px', marginBottom: '10px', fontWeight: 'bold', color: '#00d2ff' }}>{item.title}</div>
+                      <div className="ChangelogDate" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>{item.date}</div>
                       <div className="ChangelogText">{item.content}</div>
                     </div>
                   ))

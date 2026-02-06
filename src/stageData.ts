@@ -175,7 +175,7 @@ export const KENJU_DATA: KenjuConfig[] = [
     description: "「見せてあげよう、華やかな世界を」 ",
     background: "/images/background/Dream-City1.jpg",
     image: "/images/kenju/tall_middleeast.png",
-    skillAbbrs: "逆紫反封燐連紫盾",
+    skillAbbrs: "逆紫反封燐連雷紫",
     medalId: "vomakt",
   },
   {
