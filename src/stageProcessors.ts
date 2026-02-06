@@ -279,7 +279,7 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   onFailure(context: StageContext): { canGoToNext: boolean; showReward: boolean } {
-    return { canGoToNext: false, showReward: false };
+    return { canGoToNext: false, showReward: true };
   }
 
   getStageTitle(context: StageContext): string {

@@ -1432,7 +1432,7 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
               <div className="ChangelogContent">
                 {changelogData.length > 0 ? (
-                  changelogData.map((item, index) => (
+                  [...changelogData].reverse().map((item, index) => (
                     <div key={index} className="ChangelogItem">
                       <div className="ChangelogVersion" style={{ fontSize: '1.4rem', borderLeft: '4px solid #00d2ff', paddingLeft: '10px', marginBottom: '10px', fontWeight: 'bold', color: '#00d2ff' }}>{item.title}</div>
                       <div className="ChangelogDate" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>{item.date}</div>
