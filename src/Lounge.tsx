@@ -212,7 +212,7 @@ interface LoungeProps {
   onSignOut: () => void;
   onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju']) => void;
   onDeleteAccount: () => void;
-  onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[] }) => void;
+  onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onBack: () => void;
   onViewProfile: (profile: UserProfile) => void;
   stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL' | 'ADMIN_ANALYTICS';
@@ -904,18 +904,13 @@ export const Lounge: React.FC<LoungeProps> = ({
   }
 
   if (stageMode === 'ADMIN_ANALYTICS') {
-    setStageMode('LOUNGE');
-    return null;
-    // if (!isAdmin) {
-    //   // 管理者でない場合はラウンジにリダイレクト
-    //   setStageMode('LOUNGE');
-    //   return null;
-    // }
-    // return (
-    //   <AdminAnalytics
-    //     onBack={() => setStageMode('LOUNGE')}
-    //   />
-    // );
+    return (
+      <AdminAnalytics
+        onBack={() => setStageMode('LOUNGE')}
+        getSkillByAbbr={getSkillByAbbr}
+        onKenjuBattle={(boss, mode) => onKenjuBattle(boss, mode)}
+      />
+    );
   }
 
   return null;

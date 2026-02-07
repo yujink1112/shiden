@@ -221,6 +221,7 @@ export interface StageContext {
   kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[]; isCustom?: boolean };
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
+  userName?: string;
 }
 
 export interface StageProcessor {

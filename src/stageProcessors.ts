@@ -338,6 +338,9 @@ export class KenjuStageProcessor implements StageProcessor {
   }
 
   getStageTitle(context: StageContext): string {
+    if (context.kenjuBoss?.name && (context.kenjuBoss.name.includes("電影") || context.kenjuBoss.isCustom)) {
+        return context.kenjuBoss.title || `VS ${context.kenjuBoss.name}`;
+    }
     return `VS ${context.kenjuBoss?.name || "剣獣"}`;
   }
 
@@ -372,6 +375,9 @@ export class KenjuStageProcessor implements StageProcessor {
   }
 
   getStageDescription(context: StageContext): string {
+    if (context.kenjuBoss?.name && (context.kenjuBoss.name.includes("電影") || (context.kenjuBoss as any).isCustom)) {
+      return `${context.userName || "あなた"}さんの電影と対峙！`;
+    }
     return '日替わりの強敵に勝利せよ！';
   }
 }
