@@ -1524,7 +1524,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         </div>
 
-        <div style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
+        <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           <div style={{
             width: '100%',
             height: stageProcessor.getBossImage({ stageCycle, kenjuBoss: kenjuBoss || undefined, selectedPlayerSkills, midEnemyData }) ? '300px' : '240px',
