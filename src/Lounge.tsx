@@ -319,7 +319,7 @@ export const Lounge: React.FC<LoungeProps> = ({
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={onSignOut} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>サインアウト</button>
                 {isAdmin && (
-                  <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '10px 20px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Admin Analytics</button>
+                  <button onClick={() => setStageMode('ADMIN_ANALYTICS')} style={{ padding: '10px 20px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Admin Analytics</button>
                 )}
               </div>
             </div>
@@ -624,18 +624,12 @@ export const Lounge: React.FC<LoungeProps> = ({
   }
 
   if (stageMode === 'ADMIN_ANALYTICS') {
-    setStageMode('LOUNGE');
-    return null;
-    // if (!isAdmin) {
-    //   // 管理者でない場合はラウンジにリダイレクト
-    //   setStageMode('LOUNGE');
-    //   return null;
-    // }
-    // return (
-    //   <AdminAnalytics
-    //     onBack={() => setStageMode('LOUNGE')}
-    //   />
-    // );
+    return (
+      <AdminAnalytics
+        onBack={() => setStageMode('LOUNGE')}
+        getSkillByAbbr={getSkillByAbbr}
+      />
+    );
   }
 
   return null;

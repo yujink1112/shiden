@@ -1335,7 +1335,7 @@ const PLAYER_SKILL_COUNT = 5;
       );
   }
 
-  if (['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT'].includes(stageMode) && !isTitle) {
+  if (['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'].includes(stageMode)) {
     const currentUid = auth.currentUser?.uid;
     const sortedProfiles = [...allProfiles].sort((a, b) => {
         if (currentUid) {
@@ -1466,7 +1466,7 @@ const PLAYER_SKILL_COUNT = 5;
 
 
   return (
-    <div className="AppContainer" style={{ display: 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+    <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
       {showEpilogue && (
         <div className="EpilogueContainer">
           <div className="EpilogueBackground"></div>
@@ -1511,7 +1511,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         </div>
       )}
-      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', visibility: (isLoungeMode || showEpilogue) ? 'hidden' : 'visible' }}>
+      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { setIsTitle(true); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
@@ -1631,7 +1631,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
       </div>
-      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'auto', borderLeft: '1px solid #333', visibility: isLoungeMode ? 'hidden' : 'visible', display: 'flex', flexDirection: 'column' }}>
+      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'auto', borderLeft: '1px solid #333', display: isLoungeMode ? 'none' : 'flex', flexDirection: 'column' }}>
         <h2 style={{ color: '#61dafb' }}>
             {storyContent && !gameStarted ? 'ストーリー' :
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
