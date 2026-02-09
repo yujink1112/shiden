@@ -35,6 +35,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   const [showTooltip, setShowTooltip] = useState(false);
   const [isTooltipForceClosed, setIsTooltipForceClosed] = useState(false);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClick = () => {
     if (onClick) {
@@ -169,13 +170,19 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       onClick={handleClick}
       onMouseEnter={() => {
         if (!disableTooltip) {
+          if (tooltipTimeoutRef.current) {
+            clearTimeout(tooltipTimeoutRef.current);
+            tooltipTimeoutRef.current = null;
+          }
           setShowTooltip(true);
           setIsTooltipForceClosed(false);
         }
       }}
       onMouseLeave={() => {
         if (!disableTooltip) {
-          setShowTooltip(false);
+          tooltipTimeoutRef.current = setTimeout(() => {
+            setShowTooltip(false);
+          }, 300); // 300msの猶予を与える
         }
       }}
       style={{
@@ -200,8 +207,19 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       <span className="skill-name">{skill.name}</span>
       {showTooltip && !isTooltipForceClosed && (
         <div 
-          style={getTooltipStyle()} 
+          style={getTooltipStyle()}
           onClick={(e) => e.stopPropagation()}
+          onMouseEnter={() => {
+            if (tooltipTimeoutRef.current) {
+              clearTimeout(tooltipTimeoutRef.current);
+              tooltipTimeoutRef.current = null;
+            }
+          }}
+          onMouseLeave={() => {
+            tooltipTimeoutRef.current = setTimeout(() => {
+              setShowTooltip(false);
+            }, 300);
+          }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', alignItems: 'baseline' }}>
             <div>
@@ -276,6 +294,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showRule, setShowRule] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showRuleHint, setShowRuleHint] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
 
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
@@ -1330,7 +1349,7 @@ const PLAYER_SKILL_COUNT = 5;
       const saveKey = stageMode === 'KENJU' ? `KENJU_${kenjuBoss?.name}` : `${stageMode}_${stageCycle}`;
       const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
 
-      if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
+      if (lastSavedVictoryRef.current !== currentBattleId) {
           lastSavedVictoryRef.current = currentBattleId;
 
           // まずはローカルストレージに保存
@@ -1339,22 +1358,25 @@ const PLAYER_SKILL_COUNT = 5;
           localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(updatedLocalVictorySkills));
           setStageVictorySkills(updatedLocalVictorySkills);
           
-          // ユーザーがログインしている場合はFirebaseにも保存
-          if (user) {
-            const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
-            set(specificVictorySkillRef, selectedPlayerSkills);
-            
-            // 剣獣戦クリア人数カウント用の記録
-            if (stageMode === 'KENJU' && kenjuBoss) {
-              const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
-              set(kenjuClearRef, serverTimestamp());
-            }
-          } else {
-            // 未登録ユーザーの場合は anonymousVictories に記録
-            const visitorId = localStorage.getItem('shiden_visitor_id');
-            if (visitorId) {
-              const anonymousVictoryRef = ref(database, `anonymousVictories/${visitorId}/${saveKey}`);
-              set(anonymousVictoryRef, selectedPlayerSkills);
+          // Firebase/サーバーへの保存は勝利時のみ
+          if (isVictory) {
+            // ユーザーがログインしている場合はFirebaseにも保存
+            if (user) {
+              const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
+              set(specificVictorySkillRef, selectedPlayerSkills);
+              
+              // 剣獣戦クリア人数カウント用の記録
+              if (stageMode === 'KENJU' && kenjuBoss) {
+                const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
+                set(kenjuClearRef, serverTimestamp());
+              }
+            } else {
+              // 未登録ユーザーの場合は anonymousVictories に記録
+              const visitorId = localStorage.getItem('shiden_visitor_id');
+              if (visitorId) {
+                const anonymousVictoryRef = ref(database, `anonymousVictories/${visitorId}/${saveKey}`);
+                set(anonymousVictoryRef, selectedPlayerSkills);
+              }
             }
           }
       }
@@ -1446,7 +1468,19 @@ const PLAYER_SKILL_COUNT = 5;
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
             <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); }} >LOUNGE</button>
-            <button className="TitleButton neon-purple" onClick={() => { setShowRule(true); }} >RULE</button>
+            <button
+              className="TitleButton neon-purple"
+              onClick={() => {
+                if (hasSaveData) {
+                  setShowRule(true);
+                } else {
+                  setShowRuleHint(true);
+                }
+              }}
+              style={{ opacity: hasSaveData ? 1 : 0.5, cursor: 'pointer' }}
+            >
+              RULE
+            </button>
           </div>
           <div className="TitleFooter">
             <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
@@ -1483,6 +1517,24 @@ const PLAYER_SKILL_COUNT = 5;
                 )}
               </div>
               <button className="ChangelogCloseButton" onClick={() => setShowChangelog(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+
+        {showRuleHint && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowRuleHint(false)}>
+            <div className="ChangelogModal" style={{ maxWidth: '440px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader" style={{ background: '#00d2ff' }}>
+                <span style={{ color: '#000', fontWeight: 'bold' }}>ご安心ください</span>
+                <button onClick={() => setShowRuleHint(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
+                <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0 }}>
+                  まずは<strong style={{ color: '#00d2ff' }}>NEW GAME</strong>でプレイしてみましょう！<br />
+                  スキルを<strong style={{ color: '#ffd700' }}>5回ポチポチ</strong>すれば大丈夫です！
+                </p>
+              </div>
+              <button className="ChangelogCloseButton" style={{ background: '#00d2ff', color: '#000', fontWeight: 'bold' }} onClick={() => setShowRuleHint(false)}>閉じる</button>
             </div>
           </div>
         )}

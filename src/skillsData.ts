@@ -27,7 +27,7 @@ export const ALL_SKILLS = [
   { abbr: "錬", name: "＋錬", kana:"プラスれん", icon: "/images/skill/d06.gif", type: "付帯（リミテッド）", speed: "なし", description: "このスキルの直前の攻撃スキルを使用する直前に効果を発揮する。\nそのスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。\nダメージを与えた迎撃スキルが発動条件を満たしていなくても、この効果は適用される。" },
   { abbr: "逆", name: "逆鱗", kana:"げきりん", icon: "/images/skill/d07.gif", type: "付帯", speed: "なし", description: "このスキルが破壊された直後に効果を発揮する。\nあなたに状態「逆鱗」を1つ与える。" },
   { abbr: "無", name: "無想", kana:"むそう", icon: "/images/skill/d08.gif", type: "付帯（リミテッド）", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。\nあなたに状態「無想」を与える。このスキルは1つしか選択できない。" },
-  { abbr: "裏", name: "裏霞", kana:"うらがすみ", icon: "/images/skill/d09.gif", type: "付帯", speed: "なし", description: "あなたが使用する攻撃・補助スキルを選択する直前に効果を発揮する。\nあなたが使用する攻撃・補助スキルは、あなたが所持している最後尾のスキルが選択される。" },
+  { abbr: "裏", name: "裏霞", kana:"うらがすみ", icon: "/images/skill/d09.gif", type: "付帯", speed: "なし", description: "あなたが使用する攻撃・補助スキルを決定する直前に効果を発揮する。\nあなたが使用する攻撃・補助スキルは、あなたが所持している最後尾のスキルが選択される。\n先攻決定フェイズには影響しない。" },
   { abbr: "先", name: "先制", kana:"せんせい", icon: "/images/skill/d10.gif", type: "付帯", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。あなたに状態「先制」を与える。" },
   { abbr: "連", name: "連撃", kana:"れんげき", icon: "/images/skill/d11.gif", type: "付帯（リミテッド）", speed: "なし", description: "各ラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。" },
   { abbr: "燐", name: "燐光", kana:"りんこう", icon: "/images/skill/d12.gif", type: "付帯", speed: "なし", description: "各ラウンドの開始フェイズに効果を発揮する。あなたが受けている悪い状態を全て解除する。" },
@@ -63,6 +63,6 @@ export const STATUS_DATA: StatusDetail[] = [
     { name: "無想", type: 0, kana: "むそう", icon: "/images/skill/d08.gif", description: "攻撃スキルによるダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
     { name: "先制", type: 0, kana: "せんせい", icon: "/images/skill/d10.gif", description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
     { name: "スタン", type: 1, kana: "", icon: "/images/skill/x01.gif", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。" },
-    { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。他のあらゆる速度変化効果に対して優先される。" },
+    { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。先攻決定フェイズには影響しない。他のあらゆる速度変化効果に対して優先される。" },
     { name: "忘却", type: 1, kana: "ぼうきゃく", icon: "/images/skill/x03.gif", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
 ];

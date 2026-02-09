@@ -332,6 +332,7 @@ export class Battle {
                     this.text += "\n";
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}が発動！\n`;
                     rengekiPc1 = 1;
+                    pc1.limited[i] = 2;
                     break;
                 }
             }
@@ -341,6 +342,7 @@ export class Battle {
                     this.text += "\n";
                     this.text += `${pc2.playerName}の【${pc2.name[i]}】${i + 1}が発動！\n`;
                     rengekiPc2 = 1;
+                    pc2.limited[i] = 2;
                     break;
                 }
             }
