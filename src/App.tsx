@@ -286,6 +286,10 @@ function App() {
   const mainGameAreaRef = useRef<HTMLDivElement>(null);
   
   const [logComplete, setLogComplete] = useState(false);
+  const [useRichLog, setUseRichLog] = useState<boolean>(() => {
+    const saved = localStorage.getItem('shiden_use_rich_log');
+    return saved === null ? true : saved === 'true';
+  });
 
   // 所持スキル
   const [ownedSkillAbbrs, setOwnedSkillAbbrs] = useState<string[]>(() => {
@@ -463,6 +467,10 @@ const PLAYER_SKILL_COUNT = 5;
   useEffect(() => {
     localStorage.setItem('shiden_can_go_to_boss', canGoToBoss.toString());
   }, [canGoToBoss]);
+
+  useEffect(() => {
+    localStorage.setItem('shiden_use_rich_log', useRichLog.toString());
+  }, [useRichLog]);
 
   useEffect(() => {
     localStorage.setItem('shiden_is_title', isTitle.toString());
@@ -1104,6 +1112,37 @@ const PLAYER_SKILL_COUNT = 5;
     setShowLogForBattleIndex(-1);
   };
 
+  const handleBattleLogComplete = () => {
+    setLogComplete(true);
+    // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
+    const winCount = battleResults.filter(r => r.winner === 1).length;
+    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
+    if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU')) {
+        triggerVictoryConfetti();
+        if (stageMode === 'BOSS') {
+            setShowBossClearPanel(true);
+            // Stage12のボス勝利で「クリアしたよ！」の称号
+            if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
+                const profileRef = ref(database, `profiles/${user.uid}/`);
+                const newMedals = [...(myProfile.medals || []), 'master'];
+                set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+            }
+        }
+        if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
+            const kenjuConfig = KENJU_DATA.find(k => k.name === kenjuBoss.name);
+            if (kenjuConfig && kenjuConfig.medalId) {
+                const medalId = kenjuConfig.medalId;
+                if (!(myProfile.medals || []).includes(medalId)) {
+                    const profileRef = ref(database, `profiles/${user.uid}/`);
+                    const newMedals = [...(myProfile.medals || []), medalId];
+                    set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                    console.log(`[Medal] Awarded ${medalId} for defeating ${kenjuBoss.name}`);
+                }
+            }
+        }
+    }
+  };
+
   const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any; battleStageCycle?: number; processor: StageProcessor }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
@@ -1513,7 +1552,7 @@ const PLAYER_SKILL_COUNT = 5;
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { setIsTitle(true); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <button onClick={() => { handleResetGame(); setIsTitle(true); setStageMode('MID'); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true'); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle({ stageCycle, kenjuBoss: kenjuBoss || undefined, selectedPlayerSkills, midEnemyData })}
           </h1>
@@ -1636,37 +1675,28 @@ const PLAYER_SKILL_COUNT = 5;
             {storyContent && !gameStarted ? 'ストーリー' :
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
+        {(stageMode === 'BOSS' || stageMode === 'KENJU') && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+            <button
+              onClick={() => setUseRichLog(!useRichLog)}
+              style={{
+                padding: '5px 10px',
+                fontSize: '0.7rem',
+                backgroundColor: useRichLog ? '#2e7d32' : '#333',
+                color: '#fff',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              {useRichLog ? 'アニメーション表示中' : 'テキスト表示中'}
+            </button>
+          </div>
+        )}
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          (stageMode === 'BOSS' || stageMode === 'KENJU') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
-            setLogComplete(true);
-            // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
-            const winCount = battleResults.filter(r => r.winner === 1).length;
-            const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
-            if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU')) {
-                triggerVictoryConfetti();
-                if (stageMode === 'BOSS') {
-                    setShowBossClearPanel(true);
-                    // Stage12のボス勝利で「クリアしたよ！」の称号
-                    if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
-                        const profileRef = ref(database, `profiles/${user.uid}/`);
-                        const newMedals = [...(myProfile.medals || []), 'master'];
-                        set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                    }
-                }
-                if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
-                    const kenjuConfig = KENJU_DATA.find(k => k.name === kenjuBoss.name);
-                    if (kenjuConfig && kenjuConfig.medalId) {
-                        const medalId = kenjuConfig.medalId;
-                        if (!(myProfile.medals || []).includes(medalId)) {
-                            const profileRef = ref(database, `profiles/${user.uid}/`);
-                            const newMedals = [...(myProfile.medals || []), medalId];
-                            set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                            console.log(`[Medal] Awarded ${medalId} for defeating ${kenjuBoss.name}`);
-                        }
-                    }
-                }
-            }
-          }} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={stageMode === 'KENJU' ? 11 : stageCycle} processor={stageProcessor} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre></div>
+          ((stageMode === 'BOSS' || stageMode === 'KENJU') && useRichLog) ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
+            handleBattleLogComplete();
+          }} bossImage={stageMode === 'KENJU' ? kenjuBoss?.image : currentStageInfo.bossImage} bossName={stageMode === 'KENJU' ? kenjuBoss?.name : currentStageInfo.bossName} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={stageMode === 'KENJU' ? 11 : stageCycle} processor={stageProcessor} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(stageMode === 'BOSS' || stageMode === 'KENJU') && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
         ) :
         
         (storyContent && !gameStarted ? 
