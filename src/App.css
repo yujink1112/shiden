@@ -869,8 +869,8 @@
   background-color: #1a1a1a;
   border: 2px solid #00d2ff;
   border-radius: 10px;
-  width: 500px;
-  max-width: 90vw;
+  width: 1000px;
+  max-width: 95vw;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
