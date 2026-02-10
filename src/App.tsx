@@ -653,9 +653,11 @@ const PLAYER_SKILL_COUNT = 5;
     // 1つずらす (day - 1) % 7
     // 日曜日(0) -> -1 -> 6 (果てに視えるもの)
     const day = today.getDay();
+    // 0:日 -> 6, 1:月 -> 0, 2:火 -> 1, 3:水 -> 2, 4:木 -> 3, 5:金 -> 4, 6:土 -> 5
     const index = (day + 6) % 7;
     
-    const kenjuBase = KENJU_DATA[index] || KENJU_DATA[0];
+    // KENJU_DATAの範囲内に収まるように念のため剰余を取る
+    const kenjuBase = KENJU_DATA[index % KENJU_DATA.length] || KENJU_DATA[0];
     const skillAbbrs = kenjuBase.skillAbbrs.split("");
     const skills = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
 

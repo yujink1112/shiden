@@ -22,13 +22,14 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ onBack, getSkill
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const totalAccessRef = ref(database, 'totalAccess');
     const profilesRef = ref(database, 'profiles');
     const anonymousVictoriesRef = ref(database, 'anonymousVictories');
     const kenjuClearsRef = ref(database, 'kenjuClears');
 
     const unsubscribeTotalAccess = onValue(totalAccessRef, (snapshot) => {
-      setTotalAccess(snapshot.val() || 0);
+      if (isMounted) setTotalAccess(snapshot.val() || 0);
     });
 
     const unsubscribeProfiles = onValue(profilesRef, (snapshot) => {
@@ -53,11 +54,12 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ onBack, getSkill
         });
       }
       
-      // 非同期データのマージ
-      setVictories(prev => {
-        const anonymous = prev.filter(v => v.isAnonymous);
-        return [...allVictories, ...anonymous];
-      });
+      if (isMounted) {
+          setVictories(prev => {
+            const anonymous = prev.filter(v => v.isAnonymous);
+            return [...allVictories, ...anonymous];
+          });
+      }
     });
 
     const unsubscribeAnonymous = onValue(anonymousVictoriesRef, (snapshot) => {
@@ -81,18 +83,23 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ onBack, getSkill
         });
       }
 
-      setVictories(prev => {
-        const registered = prev.filter(v => !v.isAnonymous);
-        return [...registered, ...allVictories];
-      });
+      if (isMounted) {
+          setVictories(prev => {
+            const registered = prev.filter(v => !v.isAnonymous);
+            return [...registered, ...allVictories];
+          });
+      }
     });
 
     const unsubscribeKenjuClears = onValue(kenjuClearsRef, (snapshot) => {
-      setKenjuClearData(snapshot.val() || {});
-      setLoading(false);
+      if (isMounted) {
+          setKenjuClearData(snapshot.val() || {});
+          setLoading(false);
+      }
     });
 
     return () => {
+      isMounted = false;
       unsubscribeTotalAccess();
       unsubscribeProfiles();
       unsubscribeAnonymous();

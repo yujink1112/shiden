@@ -152,11 +152,11 @@ export const KENJU_DATA: KenjuConfig[] = [
   },
   {
     name: "氷彗の狂咲 シーラン",
-    title: "DON'T STOP ME NOW",
-    description: "「」 ",
+    title: "Лебединое озеро",
+    description: "「誰かの声がした、薄氷を伝うように」 ",
     background: "/images/background/10.jpg",
     image: "/images/kenju/sword_f_2.png",
-    skillAbbrs: "無呪反待連防呪盾",
+    skillAbbrs: "搦隠反崩連封隠盾",
     medalId: "shiran",
   },
   {
