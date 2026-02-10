@@ -296,6 +296,7 @@ function App() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [showRuleHint, setShowRuleHint] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
+  const [showUpdateNotify, setShowUpdateNotify] = useState(false);
 
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
@@ -708,19 +709,36 @@ const PLAYER_SKILL_COUNT = 5;
     };
     fetchMidEnemyData();
 
-    // Fetch changelog.json
-    const fetchChangelog = async () => {
+    // Fetch changelog.json and check version
+    const fetchChangelogAndCheckVersion = async () => {
       try {
-        const response = await fetch(`${process.env.PUBLIC_URL}/changelog.json`);
+        const response = await fetch(`${process.env.PUBLIC_URL}/changelog.json?t=${Date.now()}`);
         if (response.ok) {
-          const data = await response.text();
-          setChangelogData(JSON.parse(data));
+          const data = await response.json();
+          setChangelogData(data);
+          
+          if (data && data.length > 0) {
+            const latestVersion = data[data.length - 1].date + "_" + data[data.length - 1].title;
+            const savedVersion = localStorage.getItem('shiden_version');
+            
+            if (savedVersion && savedVersion !== latestVersion) {
+              setShowUpdateNotify(true);
+            }
+            // 保存されていない場合は現在のものを保存して、初回は通知しない
+            if (!savedVersion) {
+              localStorage.setItem('shiden_version', latestVersion);
+            }
+          }
         }
       } catch (e) {
         console.error("Changelog fetch error:", e);
       }
     };
-    fetchChangelog();
+    fetchChangelogAndCheckVersion();
+
+    // 1時間おきにチェック
+    const interval = setInterval(fetchChangelogAndCheckVersion, 1000 * 60 * 60);
+    return () => clearInterval(interval);
   }, []);
 
    const handleKenjuBattle = async (selectedBoss?: {name: string, image: string, skills: SkillDetail[]}) => {
@@ -1162,6 +1180,15 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
+  const handleForceUpdate = () => {
+    if (changelogData.length > 0) {
+      const latestVersion = changelogData[changelogData.length - 1].date + "_" + changelogData[changelogData.length - 1].title;
+      localStorage.setItem('shiden_version', latestVersion);
+    }
+    // 強制更新を模倣するためにキャッシュを無視してリロード
+    window.location.reload();
+  };
+
   const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any; battleStageCycle?: number; processor: StageProcessor }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
@@ -1456,6 +1483,55 @@ const PLAYER_SKILL_COUNT = 5;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
       <div className="TitleScreenContainer">
+        {showUpdateNotify && (
+          <div className="UpdateNotification" style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            backgroundColor: 'rgba(0, 210, 255, 0.2)',
+            backdropFilter: 'blur(5px)',
+            color: '#fff',
+            padding: '10px 0',
+            textAlign: 'center',
+            zIndex: 1000,
+            borderBottom: '1px solid #00d2ff',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '15px',
+            animation: 'slideDown 0.5s ease-out'
+          }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
+            <button
+              onClick={handleForceUpdate}
+              style={{
+                padding: '5px 15px',
+                background: '#00d2ff',
+                color: '#000',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 'bold'
+              }}
+            >
+              今すぐ更新
+            </button>
+            <button
+              onClick={() => setShowUpdateNotify(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                cursor: 'pointer',
+                fontSize: '1.2rem'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div className="TitleBackgroundEffect"></div>
         <div className="TitleContent">
           <div className="TitleLogoWrapper"><img src={getStorageUrl('/images/title/titlelogo.png')} alt="紫電一閃" className="TitleLogo" /></div>
