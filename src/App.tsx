@@ -627,14 +627,14 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
-  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean) => {
+  const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => {
     if (!user || !myProfile) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
     
     const filteredName = filterNGWords(displayName || "");
     const filteredComment = filterNGWords(comment || "");
 
-    const updatedProfile = {
+    const updatedProfile: UserProfile = {
       ...myProfile,
       displayName: filteredName || myProfile.displayName,
       favoriteSkill: favoriteSkill || myProfile.favoriteSkill,
@@ -643,6 +643,8 @@ const PLAYER_SKILL_COUNT = 5;
       title: title !== undefined ? title : (myProfile.title || ""),
       oneThing: oneThing !== undefined ? oneThing : (myProfile.oneThing || ""),
       isSpoiler: isSpoiler !== undefined ? isSpoiler : !!myProfile.isSpoiler,
+      myKenju: myKenju !== undefined ? myKenju : myProfile.myKenju,
+      photoUploaderUid: photoUploaderUid !== undefined ? photoUploaderUid : myProfile.photoUploaderUid,
       lastActive: Date.now()
     };
 

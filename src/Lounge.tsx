@@ -25,7 +25,9 @@ export interface UserProfile {
     description?: string;
     title?: string; // 対戦時のタイトル
     background?: string; // 背景画像URL（またはインデックス）
+    uploaderUid?: string; // 画像をアップロードしたユーザのUID
   };
+  photoUploaderUid?: string; // プロフィール画像をアップロードしたユーザのUID
 }
 
 interface UserListTableProps {
@@ -198,6 +200,40 @@ const PrivacyPolicyModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
+const GuidelineModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [content, setContent] = React.useState<string>("読み込み中...");
+
+  React.useEffect(() => {
+    fetch(`${process.env.PUBLIC_URL}/story/guideline.txt`)
+      .then(res => res.text())
+      .then(text => setContent(text))
+      .catch(() => setContent("ガイドラインの読み込みに失敗しました。"));
+  }, []);
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 50000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px', boxSizing: 'border-box'
+    }}>
+      <div style={{
+        width: '100%', maxWidth: '600px', maxHeight: '80vh',
+        backgroundColor: '#1a1a1a', border: '2px solid #4fc3f7',
+        borderRadius: '15px', padding: '30px', overflowY: 'auto',
+        position: 'relative', boxShadow: '0 0 30px rgba(79, 195, 247, 0.3)'
+      }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: '#888', fontSize: '24px', cursor: 'pointer' }}>×</button>
+        <h2 style={{ color: '#4fc3f7', marginTop: 0 }}>投稿ガイドライン</h2>
+        <div style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#ccc', whiteSpace: 'pre-wrap' }}>
+          {content}
+        </div>
+        <button onClick={onClose} style={{ width: '100%', marginTop: '20px', padding: '10px', background: '#4fc3f7', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
+      </div>
+    </div>
+  );
+};
+
 const CustomConfirmModal: React.FC<{
   show: boolean;
   title: string;
@@ -256,7 +292,7 @@ interface LoungeProps {
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
-  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju']) => void;
+  onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => void;
   onSaveKenju: (myKenju: UserProfile['myKenju']) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
@@ -313,6 +349,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   const [pass, setPass] = React.useState("");
   const [isSignUp, setIsSignUp] = React.useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false);
+  const [showGuideline, setShowGuideline] = React.useState(false);
   const isInitializing = React.useRef(false);
 
   // カスタム確認モーダル用のステート
@@ -574,10 +611,12 @@ export const Lounge: React.FC<LoungeProps> = ({
                 skills: tempKenju?.skills || myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
                 description: tempKenju?.description || myProfile.myKenju?.description || '',
                 title: tempKenju?.title || myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
-                background: tempKenju?.background || myProfile.myKenju?.background || '/images/background/11.jpg'
+                background: tempKenju?.background || myProfile.myKenju?.background || '/images/background/11.jpg',
+                uploaderUid: user?.uid // 追跡用にアップロードしたユーザのUIDをセット
               });
             } else {
-              onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju);
+              // プロフィール画像（photoURL）の更新時に追跡用UIDをセット
+              onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju, user?.uid);
             }
           }
         };
@@ -618,6 +657,17 @@ export const Lounge: React.FC<LoungeProps> = ({
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         <h1 style={{ color: '#4fc3f7' }}>MY PAGE</h1>
+
+        <div style={{ marginBottom: '20px', textAlign: 'center', background: 'rgba(255, 82, 82, 0.1)', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', maxWidth: '500px', width: '100%', boxSizing: 'border-box' }}>
+            <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>投稿前に必ずガイドラインを一読してください</p>
+            <button
+              onClick={() => setShowGuideline(true)}
+              style={{ padding: '8px 20px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+            >
+              投稿ガイドラインを確認
+            </button>
+        </div>
+
         <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #2196f3', width: '100%', maxWidth: '500px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
             <div style={{ textAlign: 'center' }}>
@@ -760,6 +810,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                   })}
                   style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
+                <p style={{ color: '#ff5252', fontSize: '0.65rem', margin: '5px 0 0 0' }}>※公序良俗に反する内容を投稿しないでください</p>
               </div>
             </div>
 
@@ -775,6 +826,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                 })}
                 style={{ width: '100%', height: '100px', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box', resize: 'vertical' }}
               />
+              <p style={{ color: '#ff5252', fontSize: '0.65rem', margin: '5px 0 0 0' }}>※公序良俗に反する内容を投稿しないでください</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -790,6 +842,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                   })}
                   style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
+                <p style={{ color: '#ff5252', fontSize: '0.65rem', margin: '5px 0 0 0' }}>※公序良俗に反する内容を投稿しないでください</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -883,7 +936,13 @@ export const Lounge: React.FC<LoungeProps> = ({
                     title: '電影の保存',
                     message: '電影の設定を保存しますか？\n保存すると、現在のクリア人数と挑戦回数がリセットされます。',
                     onConfirm: () => {
-                      if (tempKenju) onSaveKenju(tempKenju);
+                      if (tempKenju) {
+                        const finalKenju = {
+                          ...tempKenju,
+                          uploaderUid: tempKenju.uploaderUid || user?.uid // 保存時にも確実にセット
+                        };
+                        onSaveKenju(finalKenju);
+                      }
                       setConfirmModal(prev => ({ ...prev, show: false }));
                     }
                   });
@@ -935,6 +994,7 @@ export const Lounge: React.FC<LoungeProps> = ({
           onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
           confirmColor={confirmModal.confirmColor}
         />
+        {showGuideline && <GuidelineModal onClose={() => setShowGuideline(false)} />}
       </div>
     );
   }
