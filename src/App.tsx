@@ -331,7 +331,7 @@ function App() {
 
   const [lastActiveProfiles, setLastActiveProfiles] = useState<{[uid: string]: number}>({});
   const [kenjuBoss, setKenjuBoss] = useState<{name: string, title: string, description: string, background: string, image: string, skills: SkillDetail[]} | null>(null);
-  const [currentKenjuBattle, setCurrentKenjuBattle] = useState<{name: string, title: string, description: string, background: string, image: string, skills: SkillDetail[], isCustom?: boolean} | null>(() => {
+  const [currentKenjuBattle, setCurrentKenjuBattle] = useState<{name: string, title: string, description: string, background: string, image: string, skills: SkillDetail[], isCustom?: boolean, userName?: string} | null>(() => {
     const saved = localStorage.getItem('shiden_current_kenju_battle');
     return saved ? JSON.parse(saved) : null;
   });
@@ -494,7 +494,12 @@ const PLAYER_SKILL_COUNT = 5;
   }, [ownedSkillAbbrs]);
 
   useEffect(() => {
-    localStorage.setItem('shiden_stage_mode', stageMode);
+    // ラウンジ系のモードは永続化しない（リロード時はデフォルトの進行モードに戻るようにする）
+    const loungeModes = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'];
+    if (!loungeModes.includes(stageMode)) {
+      localStorage.setItem('shiden_stage_mode', stageMode);
+    }
+    
     // ゲーム進行モード（MID/BOSS）の場合は、最後にプレイしたモードとして保存
     if (stageMode === 'MID' || stageMode === 'BOSS') {
       localStorage.setItem('shiden_last_game_mode', stageMode);
@@ -658,7 +663,7 @@ const PLAYER_SKILL_COUNT = 5;
     });
   };
 
-  const handleSaveKenju = async (myKenju: UserProfile['myKenju']) => {
+  const handleSaveKenju = async (myKenju: UserProfile['myKenju'], shouldResetStats: boolean = true) => {
     if (!user || !myProfile || !myKenju) return;
 
     // 電影情報を更新
@@ -672,15 +677,19 @@ const PLAYER_SKILL_COUNT = 5;
     try {
       await set(profileRef, updatedProfile);
 
-      // クリア人数と挑戦回数をリセット
-      const todayStr = new Date().toLocaleDateString().replace(/\//g, '-');
-      const clearsRef = ref(database, `kenjuClears/${todayStr}/${myKenju.name}`);
-      const trialsRef = ref(database, `kenjuTrials/${todayStr}/${myKenju.name}`);
-      
-      await set(clearsRef, null);
-      await set(trialsRef, null);
+      if (shouldResetStats) {
+        // クリア人数と挑戦回数をリセット
+        const todayStr = new Date().toLocaleDateString().replace(/\//g, '-');
+        const clearsRef = ref(database, `deneiClears/${todayStr}/${myKenju.name}`);
+        const trialsRef = ref(database, `deneiTrials/${todayStr}/${myKenju.name}`);
+        
+        await set(clearsRef, null);
+        await set(trialsRef, null);
 
-      alert("電影の設定を保存しました。クリア人数と挑戦回数がリセットされました。");
+        alert("電影の設定を保存しました。スキル構成が変更されたため、クリア人数と挑戦回数がリセットされました。");
+      } else {
+        alert("電影の設定を保存しました。");
+      }
     } catch (err) {
       console.error("Failed to save Kenju or reset stats:", err);
       alert("保存に失敗しました。");
@@ -1080,17 +1089,23 @@ const PLAYER_SKILL_COUNT = 5;
       const battleCount = stageProcessor.getBattleCount();
       const context = { stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName };
 
-      // 電影戦の挑戦回数をカウント
-      if ((stageMode === 'KENJU' || stageMode === 'DENEI') && (currentKenjuBattle || kenjuBoss)) {
-        const targetBossName = currentKenjuBattle?.name || kenjuBoss?.name;
-        if (targetBossName) {
-          const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${targetBossName}`);
-          const newTrialRef = push(trialsRef);
-          set(newTrialRef, {
-            uid: user?.uid || 'anonymous',
-            timestamp: serverTimestamp()
-          });
-        }
+      // 挑戦回数をカウント
+      if (stageMode === 'KENJU' && kenjuBoss) {
+        const targetBossName = kenjuBoss.name;
+        const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${targetBossName}`);
+        const newTrialRef = push(trialsRef);
+        set(newTrialRef, {
+          uid: user?.uid || 'anonymous',
+          timestamp: serverTimestamp()
+        });
+      } else if (stageMode === 'DENEI' && currentKenjuBattle) {
+        const targetBossName = currentKenjuBattle.name;
+        const trialsRef = ref(database, `deneiTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${targetBossName}`);
+        const newTrialRef = push(trialsRef);
+        set(newTrialRef, {
+          uid: user?.uid || 'anonymous',
+          timestamp: serverTimestamp()
+        });
       }
       
       const processResults = (winCount: number) => {
@@ -1316,7 +1331,7 @@ const PLAYER_SKILL_COUNT = 5;
         {bossImage && (
           <div className="boss-stage-area sticky-boss-area" style={{
             height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${getStorageUrl(currentKenjuBattle?.background || (['KENJU', 'DENEI'] as StageMode[]).includes(stageMode) ? (kenjuBoss?.background || "/images/background/11.jpg") : `/images/background/${battleStageCycle || stageCycle}.jpg`)})`,
+            backgroundImage: `url(${getStorageUrl(processor.getBackgroundImage({ stageCycle: battleStageCycle || stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }))})`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
             {/* 背景を暗くするオーバーレイ */}
@@ -1389,7 +1404,9 @@ const PLAYER_SKILL_COUNT = 5;
     if (gameStarted && battleResults.length > 0) {
       const winCount = battleResults.filter(r => r.winner === 1).length;
       const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) ? winCount >= 1 : winCount === 10;
-      const saveKey = stageMode === 'KENJU' ? `KENJU_${kenjuBoss?.name}` : `${stageMode}_${stageCycle}`;
+      const saveKey = stageMode === 'KENJU' ? `KENJU_${kenjuBoss?.name}` :
+                      stageMode === 'DENEI' ? `DENEI_${currentKenjuBattle?.name}` :
+                      `${stageMode}_${stageCycle}`;
       const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
 
       if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
@@ -1406,10 +1423,13 @@ const PLAYER_SKILL_COUNT = 5;
             const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
             set(specificVictorySkillRef, selectedPlayerSkills);
             
-            // 剣獣戦クリア人数カウント用の記録
+            // クリア人数カウント用の記録
             if (stageMode === 'KENJU' && kenjuBoss) {
               const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
               set(kenjuClearRef, serverTimestamp());
+            } else if (stageMode === 'DENEI' && currentKenjuBattle) {
+              const deneiClearRef = ref(database, `deneiClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${currentKenjuBattle.name}/${user.uid}`);
+              set(deneiClearRef, serverTimestamp());
             }
           } else {
             // 未登録ユーザーの場合は anonymousVictories に記録
@@ -1662,7 +1682,7 @@ const PLAYER_SKILL_COUNT = 5;
             {!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
               <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px' }}>
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
-                      {stageProcessor.getEnemyTitle?.({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}
+                      {stageProcessor.getEnemyTitle?.({ stageCycle, kenjuBoss: (stageMode === 'DENEI' || stageMode === 'KENJU') ? (currentKenjuBattle || kenjuBoss || undefined) : undefined, selectedPlayerSkills, midEnemyData, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
                   </h2>
                   <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : ((currentKenjuBattle || kenjuBoss) || stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
                     {stageProcessor.getEnemySkills(0, { stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }).length > 0 ? (
@@ -1768,9 +1788,12 @@ const PLAYER_SKILL_COUNT = 5;
                         const newMedals = [...(myProfile.medals || []), 'master'];
                         set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
                     }
+                } else if (stageMode === 'DENEI') {
+                    setShowBossClearPanel(true);
                 }
-                if (stageMode === 'KENJU' && (currentKenjuBattle || kenjuBoss) && user && myProfile) {
-                    const targetBossName = currentKenjuBattle?.name || kenjuBoss?.name;
+
+                if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
+                    const targetBossName = kenjuBoss.name;
                     const kenjuConfig = KENJU_DATA.find(k => k.name === targetBossName);
                     if (kenjuConfig && (kenjuConfig as any).medalId) {
                         const medalId = (kenjuConfig as any).medalId;

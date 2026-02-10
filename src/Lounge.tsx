@@ -14,6 +14,7 @@ export interface UserProfile {
   oneThing?: string;
   isSpoiler?: boolean;
   lastActive: number;
+  userName?: string;
   points?: number;
   lastKenjuDate?: string;
   winCount?: number;
@@ -293,7 +294,7 @@ interface LoungeProps {
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
   onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => void;
-  onSaveKenju: (myKenju: UserProfile['myKenju']) => void;
+  onSaveKenju: (myKenju: UserProfile['myKenju'], shouldResetStats?: boolean) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onBack: () => void;
@@ -369,12 +370,21 @@ export const Lounge: React.FC<LoungeProps> = ({
   // 電影編集用の一時ステート
   const [tempKenju, setTempKenju] = React.useState<UserProfile['myKenju'] | null>(null);
 
-  // マイページ表示時に現在の電影情報をセット
+  const isMypageInitialized = React.useRef(false);
+
+  // マイページ表示時に現在の電影情報をセット（初回のみ、またはMYPAGEに切り替わった時のみ）
   React.useEffect(() => {
-    if (stageMode === 'MYPAGE' && myProfile?.myKenju && !tempKenju) {
-      setTempKenju(myProfile.myKenju);
+    if (stageMode === 'MYPAGE') {
+      if (!isMypageInitialized.current && myProfile?.myKenju) {
+        setTempKenju(myProfile.myKenju);
+        isMypageInitialized.current = true;
+      }
+    } else {
+      // MYPAGEを抜ける時にクリアする
+      setTempKenju(null);
+      isMypageInitialized.current = false;
     }
-  }, [stageMode, myProfile]);
+  }, [stageMode]); // myProfile?.myKenju を依存関係から外すことで編集中のリセットを防ぐ
 
   const presetBackgrounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => `/images/background/${n}.jpg`);
 
@@ -543,13 +553,20 @@ export const Lounge: React.FC<LoungeProps> = ({
 
   if (stageMode === 'MYPAGE') {
     if (!myProfile) {
-      if (user && !isInitializing.current) {
-        isInitializing.current = true;
-        onUpdateProfile("名もなき人", "一", "よろしく！", undefined, undefined, undefined, false);
+      // ユーザーがログインしているがプロフィールがまだ読み込まれていない場合、
+      // 画面が真っ白になるのを防ぐため、ローディング表示またはラウンジへの自動遷移を行う
+      if (user) {
+        return (
+          <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px' }}>
+            <div>プロフィールを読み込み中...</div>
+            <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>ラウンジへ戻る</button>
+          </div>
+        );
       }
+
       return (
         <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px' }}>
-          <div>データを取得できませんでした。</div>
+          <div>データを取得できませんでした。ログイン状態を確認してください。</div>
           <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
         </div>
       );
@@ -569,17 +586,10 @@ export const Lounge: React.FC<LoungeProps> = ({
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          // Check image dimensions for Kenju (500x500 limit)
-          if (isKenju && (img.width > 500 || img.height > 500)) {
-            alert(`画像のサイズが大きすぎます (${img.width}x${img.height})。電影画像は500x500ピクセル以下にしてください。`);
+          if (isKenju && (img.width > 600 || img.height > 600)) {
+            alert(`画像のサイズが大きすぎます (${img.width}x${img.height})。電影画像は600x600ピクセル以下にしてください。`);
             return;
           }
-
-          // Resize using canvas (Kenjuの場合はリサイズせずそのまま使う可能性もあるが、
-          // RTDBの容量制限を考慮して適度にリサイズするのが一般的。
-          // ただしユーザーの指示に従い「10KB制限破棄」とするため、サイズは維持する方向へ。
-          // でもプレビューを大きく出すなら、ある程度の解像度は必要。
-          // ここでは canvas で 500x500 にリサイズする（アスペクト比維持）)
           
           const canvas = document.createElement('canvas');
           const MAX_WIDTH = isKenju ? 500 : 64;
@@ -659,7 +669,7 @@ export const Lounge: React.FC<LoungeProps> = ({
         <h1 style={{ color: '#4fc3f7' }}>MY PAGE</h1>
 
         <div style={{ marginBottom: '20px', textAlign: 'center', background: 'rgba(255, 82, 82, 0.1)', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', maxWidth: '500px', width: '100%', boxSizing: 'border-box' }}>
-            <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>投稿前に必ずガイドラインを一読してください</p>
+            <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>電影の投稿前に必ずガイドラインを一読してください</p>
             <button
               onClick={() => setShowGuideline(true)}
               style={{ padding: '8px 20px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
@@ -806,7 +816,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                   placeholder="電影"
                   onChange={(e) => setTempKenju({
                     ...(tempKenju || myProfile.myKenju || { skills: [], image: '', description: '', title: '', background: '' }),
-                    name: e.target.value
+                    name: e.target.value,
+                    uploaderUid: user?.uid
                   })}
                   style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
@@ -822,7 +833,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                 placeholder="戦闘画面のサイドバーに表示される紹介文です"
                 onChange={(e) => setTempKenju({
                   ...(tempKenju || myProfile.myKenju || { name: '', skills: [], image: '', title: '', background: '' }),
-                  description: e.target.value
+                  description: e.target.value,
+                  uploaderUid: user?.uid
                 })}
                 style={{ width: '100%', height: '100px', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box', resize: 'vertical' }}
               />
@@ -838,7 +850,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                   placeholder="BOSS SKILLS DISCLOSED"
                   onChange={(e) => setTempKenju({
                     ...(tempKenju || myProfile.myKenju || { name: '', skills: [], image: '', description: '', background: '' }),
-                    title: e.target.value
+                    title: e.target.value,
+                    uploaderUid: user?.uid
                   })}
                   style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
                 />
@@ -853,7 +866,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                           key={idx}
                           onClick={() => setTempKenju({
                             ...(tempKenju || myProfile.myKenju || { name: '', skills: [], image: '', description: '', title: '' }),
-                            background: bg
+                            background: bg,
+                            uploaderUid: user?.uid
                           })}
                           style={{ cursor: 'pointer', border: ((tempKenju?.background || myProfile.myKenju?.background) === bg || (!(tempKenju?.background || myProfile.myKenju?.background) && bg.includes('11.jpg'))) ? '3px solid #ff5252' : '1px solid #444', borderRadius: '8px', overflow: 'hidden', height: '60px', position: 'relative' }}
                         >
@@ -876,7 +890,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                       onConfirm: () => {
                         setTempKenju({
                           ...(tempKenju || myProfile.myKenju || { name: '', image: '', description: '', title: '', background: '' }),
-                          skills: []
+                          skills: [],
+                          uploaderUid: user?.uid
                         });
                         setConfirmModal(prev => ({ ...prev, show: false }));
                       }
@@ -913,7 +928,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                           newSkills.splice(idx, 1);
                           setTempKenju({
                             ...(tempKenju || myProfile.myKenju || { name: '', image: '', description: '', title: '', background: '' }),
-                            skills: newSkills
+                            skills: newSkills,
+                            uploaderUid: user?.uid
                           });
                         }}
                         style={{ cursor: 'pointer' }}
@@ -931,21 +947,33 @@ export const Lounge: React.FC<LoungeProps> = ({
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button
                 onClick={() => {
-                  setConfirmModal({
-                    show: true,
-                    title: '電影の保存',
-                    message: '電影の設定を保存しますか？\n保存すると、現在のクリア人数と挑戦回数がリセットされます。',
-                    onConfirm: () => {
-                      if (tempKenju) {
-                        const finalKenju = {
-                          ...tempKenju,
-                          uploaderUid: tempKenju.uploaderUid || user?.uid // 保存時にも確実にセット
-                        };
-                        onSaveKenju(finalKenju);
+                  if (!tempKenju) return;
+                  
+                  // スキル構成に変更があるかチェック
+                  const oldSkills = myProfile.myKenju?.skills || [];
+                  const newSkills = tempKenju.skills || [];
+                  const skillsChanged = oldSkills.length !== newSkills.length ||
+                                       oldSkills.some((s, i) => s !== newSkills[i]);
+
+                  const finalKenju = {
+                    ...tempKenju,
+                    uploaderUid: tempKenju.uploaderUid || user?.uid
+                  };
+
+                  if (skillsChanged) {
+                    setConfirmModal({
+                      show: true,
+                      title: '電影の保存',
+                      message: 'スキル構成が変更されています。\n保存すると、現在のクリア人数と挑戦回数がリセットされますが、よろしいですか？',
+                      onConfirm: () => {
+                        onSaveKenju(finalKenju, true);
+                        setConfirmModal(prev => ({ ...prev, show: false }));
                       }
-                      setConfirmModal(prev => ({ ...prev, show: false }));
-                    }
-                  });
+                    });
+                  } else {
+                    // スキル構成に変更がない場合は即時保存（リセットなし）
+                    onSaveKenju(finalKenju, false);
+                  }
                 }}
                 style={{ flex: 1, padding: '12px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
               >
@@ -1015,7 +1043,15 @@ export const Lounge: React.FC<LoungeProps> = ({
     );
   }
 
-  if (stageMode === 'PROFILE' && viewingProfile) {
+  if (stageMode === 'PROFILE') {
+    if (!viewingProfile) {
+      return (
+        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px' }}>
+          <div>プロフィール情報を読み込めませんでした。</div>
+          <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>ラウンジへ戻る</button>
+        </div>
+      );
+    }
     const favSkill = getSkillByAbbr(viewingProfile.favoriteSkill);
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
@@ -1053,6 +1089,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                     image: viewingProfile.myKenju!.image,
                     description: viewingProfile.myKenju!.description || '',
                     skills: skills.length > 0 ? skills : [getSkillByAbbr('一')!],
+                    title: viewingProfile.myKenju!.title,
+                    userName: viewingProfile.displayName,
                     isCustom: true
                   } as any);
                 }}
