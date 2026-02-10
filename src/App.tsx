@@ -90,6 +90,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [tooltipPos, setTooltipPos] = useState<'center' | 'left' | 'right'>('center');
+  const [isTooltipBelow, setIsTooltipBelow] = useState(false);
 
   useEffect(() => {
     if (showTooltip && cardRef.current) {
@@ -97,13 +98,44 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       const screenWidth = window.innerWidth;
       const margin = 20;
       const tooltipWidth = 220;
+      const estimatedTooltipHeight = 150; // およその高さ
 
-      if (rect.left < tooltipWidth / 2 + margin) {
-        setTooltipPos('left');
-      } else if (screenWidth - rect.right < tooltipWidth / 2 + margin) {
-        setTooltipPos('right');
+      // 垂直方向の判定
+      const spaceAbove = rect.top;
+      if (spaceAbove < estimatedTooltipHeight) {
+        setIsTooltipBelow(true);
       } else {
-        setTooltipPos('center');
+        setIsTooltipBelow(false);
+      }
+
+      // 親要素(deneiSkillPanel)がある場合、その範囲内に収める
+      const deneiPanel = document.getElementById('deneiSkillPanel');
+      if (deneiPanel) {
+        const panelRect = deneiPanel.getBoundingClientRect();
+        const relativeLeft = rect.left - panelRect.left;
+        const relativeRight = panelRect.right - rect.right;
+
+        // パネル内での垂直判定を強化
+        const spaceInPanelAbove = rect.top - panelRect.top;
+        if (spaceInPanelAbove < estimatedTooltipHeight) {
+          setIsTooltipBelow(true);
+        }
+
+        if (relativeLeft < tooltipWidth / 2) {
+          setTooltipPos('left');
+        } else if (relativeRight < tooltipWidth / 2) {
+          setTooltipPos('right');
+        } else {
+          setTooltipPos('center');
+        }
+      } else {
+        if (rect.left < tooltipWidth / 2 + margin) {
+          setTooltipPos('left');
+        } else if (screenWidth - rect.right < tooltipWidth / 2 + margin) {
+          setTooltipPos('right');
+        } else {
+          setTooltipPos('center');
+        }
       }
     }
   }, [showTooltip]);
@@ -111,7 +143,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   const getTooltipStyle = (): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'absolute',
-      bottom: '105%',
+      ...(isTooltipBelow ? { top: '105%' } : { bottom: '105%' }),
       backgroundColor: 'rgba(30, 30, 30, 0.95)',
       color: 'white',
       padding: '12px',
@@ -181,8 +213,8 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       style={{
         border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : '1px solid #444')),
         borderRadius: '8px',
-        padding: '10px',
-        margin: '5px',
+        padding: '8px',
+        margin: '2px',
         cursor: onClick ? 'pointer' : 'default',
         backgroundColor: isConnected ? '#4a4a00' : (isSelected ? '#333300' : '#1a1a1a'),
         color: isDimmed ? '#666' : '#eee',
@@ -304,6 +336,7 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [kenjuClears, setKenjuClears] = useState<number>(0);
+  const [kenjuTrials, setKenjuTrials] = useState<number>(0);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -623,6 +656,35 @@ const PLAYER_SKILL_COUNT = 5;
     });
   };
 
+  const handleSaveKenju = async (myKenju: UserProfile['myKenju']) => {
+    if (!user || !myProfile || !myKenju) return;
+
+    // 電影情報を更新
+    const profileRef = ref(database, `profiles/${user.uid}`);
+    const updatedProfile = {
+      ...myProfile,
+      myKenju: myKenju,
+      lastActive: Date.now()
+    };
+    
+    try {
+      await set(profileRef, updatedProfile);
+
+      // クリア人数と挑戦回数をリセット
+      const todayStr = new Date().toLocaleDateString().replace(/\//g, '-');
+      const clearsRef = ref(database, `kenjuClears/${todayStr}/${myKenju.name}`);
+      const trialsRef = ref(database, `kenjuTrials/${todayStr}/${myKenju.name}`);
+      
+      await set(clearsRef, null);
+      await set(trialsRef, null);
+
+      alert("電影の設定を保存しました。クリア人数と挑戦回数がリセットされました。");
+    } catch (err) {
+      console.error("Failed to save Kenju or reset stats:", err);
+      alert("保存に失敗しました。");
+    }
+  };
+
   const generateDailyKenju = () => {
     const today = new Date();
     // 曜日ベースのインデックス (0: 日曜日, 1: 月曜日, ..., 5: 金曜日, 6: 土曜日)
@@ -669,6 +731,15 @@ const PLAYER_SKILL_COUNT = 5;
         setKenjuClears(snapshot.size);
       } else {
         setKenjuClears(0);
+      }
+    });
+
+    const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
+    onValue(trialsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setKenjuTrials(snapshot.size);
+      } else {
+        setKenjuTrials(0);
       }
     });
     
@@ -1006,6 +1077,19 @@ const PLAYER_SKILL_COUNT = 5;
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
       const battleCount = stageProcessor.getBattleCount();
       const context = { stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName };
+
+      // 電影戦の挑戦回数をカウント
+      if ((stageMode === 'KENJU' || stageMode === 'DENEI') && (currentKenjuBattle || kenjuBoss)) {
+        const targetBossName = currentKenjuBattle?.name || kenjuBoss?.name;
+        if (targetBossName) {
+          const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${targetBossName}`);
+          const newTrialRef = push(trialsRef);
+          set(newTrialRef, {
+            uid: user?.uid || 'anonymous',
+            timestamp: serverTimestamp()
+          });
+        }
+      }
       
       const processResults = (winCount: number) => {
           setBattleResults(results);
@@ -1372,11 +1456,13 @@ const PLAYER_SKILL_COUNT = 5;
         lastActiveProfiles={lastActiveProfiles}
         kenjuBoss={kenjuBoss}
         kenjuClears={kenjuClears}
+        kenjuTrials={kenjuTrials}
         onGoogleSignIn={handleGoogleSignIn}
         onEmailSignUp={handleEmailSignUp}
         onEmailSignIn={handleEmailSignIn}
         onSignOut={handleSignOut}
         onUpdateProfile={handleUpdateProfile}
+        onSaveKenju={handleSaveKenju}
         onKenjuBattle={handleKenjuBattle}
 	      kenjuBosses={KENJU_DATA.map(k => ({
           name: k.name,
@@ -1401,6 +1487,8 @@ const PLAYER_SKILL_COUNT = 5;
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         isAdmin={isAdmin}
+        currentKenjuBattle={currentKenjuBattle as any}
+        SkillCard={SkillCard}
       />
     );
   }
