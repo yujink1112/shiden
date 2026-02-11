@@ -29,6 +29,15 @@ export interface UserProfile {
     uploaderUid?: string; // 画像をアップロードしたユーザのUID
   };
   photoUploaderUid?: string; // プロフィール画像をアップロードしたユーザのUID
+  victorySkills?: { [key: string]: string[] };
+  deneiVictories?: {
+    [targetId: string]: {
+      skillAbbrs: string[];
+      timestamp: number;
+      targetName: string;
+      targetMasterUid?: string;
+    }
+  };
 }
 
 interface UserListTableProps {
@@ -289,6 +298,7 @@ interface LoungeProps {
   currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
   kenjuClears: number;
   kenjuTrials: number;
+  allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number } } };
   onGoogleSignIn: () => void;
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
@@ -322,6 +332,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   currentKenjuBattle,
   kenjuClears,
   kenjuTrials,
+  allDeneiStats,
   kenjuBosses,
   onGoogleSignIn,
   onEmailSignUp,
@@ -491,8 +502,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                   )}
               </div>
 
-              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #4fc3f7', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)' }}>
-                <h2 style={{ color: '#4fc3f7', margin: '0 0 10px 0', fontSize: '1.2rem' }}>ピックアップ電影</h2>
+              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ffd700', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)' }}>
+                <h2 style={{ color: '#ffd700', margin: '0 0 10px 0', fontSize: '1.2rem' }}>ピックアップ電影</h2>
                 {randomKenjuPlayers.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     {randomKenjuPlayers.map(p => (
@@ -501,8 +512,13 @@ export const Lounge: React.FC<LoungeProps> = ({
                         <div style={{ flex: 1, textAlign: 'left' }}>
                           <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{p.myKenju?.name}</div>
                           <div style={{ color: '#aaa', fontSize: '0.7rem' }}>Master: {p.displayName}</div>
+                          {p.myKenju?.name && allDeneiStats?.[p.uid]?.[p.myKenju.name] && (
+                            <div style={{ color: '#ff5252', fontSize: '0.65rem', marginTop: '2px' }}>
+                              クリア: {allDeneiStats[p.uid][p.myKenju.name].clears} / 挑戦: {allDeneiStats[p.uid][p.myKenju.name].trials}
+                            </div>
+                          )}
                         </div>
-                        <div style={{ color: '#4fc3f7' }}>〉</div>
+                        <div style={{ color: '#ffd700' }}>〉</div>
                       </div>
                     ))}
                     <p style={{ margin: 0, fontSize: '0.7rem', color: '#888' }}>プロフィールから対戦できます</p>
@@ -514,7 +530,7 @@ export const Lounge: React.FC<LoungeProps> = ({
             </div>
 
 
-            {isAdmin && kenjuBosses && (
+            {/* {isAdmin && kenjuBosses && (
               <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #8e24aa', marginBottom: '30px' }}>
                 <h2 style={{ color: '#8e24aa', margin: '0 0 15px 0', fontSize: '1.2rem', textAlign: 'center' }}>管理者用：全剣獣リスト</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px' }}>
@@ -534,7 +550,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
 
             <UserListTable
               profiles={allProfiles}
@@ -1014,6 +1030,39 @@ export const Lounge: React.FC<LoungeProps> = ({
               アカウント削除
             </button>
           </div>
+
+          {/* 電影クリア履歴の表示 */}
+          {myProfile.deneiVictories && Object.keys(myProfile.deneiVictories).length > 0 && (
+            <div style={{ borderTop: '2px solid #ffd700', marginTop: '40px', paddingTop: '30px', width: '100%' }}>
+              <h2 style={{ color: '#ffd700', textAlign: 'center', marginBottom: '20px' }}>電影撃破の記録</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {Object.entries(myProfile.deneiVictories)
+                  .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                  .map(([id, victory]) => (
+                    <div key={id} style={{ background: '#222', padding: '15px', borderRadius: '10px', border: '1px solid #444' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <div style={{ color: '#fff', fontWeight: 'bold' }}>{victory.targetName}</div>
+                        <div style={{ color: '#888', fontSize: '0.75rem' }}>{new Date(victory.timestamp).toLocaleDateString()}</div>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                        {victory.skillAbbrs.map((abbr, idx) => {
+                          const s = getSkillByAbbr(abbr);
+                          return s ? (
+                            <img
+                              key={idx}
+                              src={getStorageUrl(s.icon)}
+                              alt={s.name}
+                              title={s.name}
+                              style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }}
+                            />
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
 

@@ -306,6 +306,11 @@ function App() {
     const saved = localStorage.getItem('shiden_is_title');
     return saved === null ? true : saved === 'true';
   });
+
+  // 初回レンダリング時に本日の剣獣を初期化
+  useEffect(() => {
+    refreshKenju();
+  }, []);
   const [user, setUser] = useState<User | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
   const [viewingProfile, setViewingProfile] = useState<UserProfile | null>(null);
@@ -361,6 +366,7 @@ function App() {
   });
   const [kenjuClears, setKenjuClears] = useState<number>(0);
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
+  const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number } } }>({});
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -528,11 +534,8 @@ const PLAYER_SKILL_COUNT = 5;
   }, [ownedSkillAbbrs]);
 
   useEffect(() => {
-    // ラウンジ系のモードは永続化しない（リロード時はデフォルトの進行モードに戻るようにする）
-    const loungeModes = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'];
-    if (!loungeModes.includes(stageMode)) {
-      localStorage.setItem('shiden_stage_mode', stageMode);
-    }
+    // 全てのモードを永続化する（リロード時に状態を維持するため）
+    localStorage.setItem('shiden_stage_mode', stageMode);
     
     // ゲーム進行モード（MID/BOSS）の場合は、最後にプレイしたモードとして保存
     if (stageMode === 'MID' || stageMode === 'BOSS') {
@@ -717,9 +720,8 @@ const PLAYER_SKILL_COUNT = 5;
 
       if (shouldResetStats) {
         // クリア人数と挑戦回数をリセット
-        const todayStr = new Date().toLocaleDateString().replace(/\//g, '-');
-        const clearsRef = ref(database, `deneiClears/${todayStr}/${myKenju.name}`);
-        const trialsRef = ref(database, `deneiTrials/${todayStr}/${myKenju.name}`);
+        const clearsRef = ref(database, `deneiClears/${user.uid}/${myKenju.name}`);
+        const trialsRef = ref(database, `deneiTrials/${user.uid}/${myKenju.name}`);
         
         await set(clearsRef, null);
         await set(trialsRef, null);
@@ -1012,37 +1014,49 @@ const PLAYER_SKILL_COUNT = 5;
       }
     });
 
+    // 電影の統計データを購読（ピックアップ表示用）
+    const deneiClearsRootRef = ref(database, 'deneiClears');
+    onValue(deneiClearsRootRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setAllDeneiStats(prev => {
+          const newState = { ...prev };
+          Object.entries(data).forEach(([uid, kenjus]) => {
+            if (!newState[uid]) newState[uid] = {};
+            Object.entries(kenjus as any).forEach(([kenjuName, clears]) => {
+              if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0 };
+              newState[uid][kenjuName].clears = Object.keys(clears as any).length;
+            });
+          });
+          return newState;
+        });
+      }
+    });
+
+    const deneiTrialsRootRef = ref(database, 'deneiTrials');
+    onValue(deneiTrialsRootRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setAllDeneiStats(prev => {
+          const newState = { ...prev };
+          Object.entries(data).forEach(([uid, kenjus]) => {
+            if (!newState[uid]) newState[uid] = {};
+            Object.entries(kenjus as any).forEach(([kenjuName, trials]) => {
+              if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0 };
+              newState[uid][kenjuName].trials = Object.keys(trials as any).length;
+            });
+          });
+          return newState;
+        });
+      }
+    });
+
     setBattleResults([]);
     setLogComplete(false);
     setCanGoToBoss(false);
     setShowBossClearPanel(false);
     setSelectedPlayerSkills([]);
 
-    // 電影のクリア人数・挑戦回数を購読
-    let deneiTrialsRef: any = null;
-    let deneiClearsRef: any = null;
-    if (viewingProfile?.myKenju?.name && viewingProfile.uid) {
-      const masterUid = viewingProfile.uid;
-      const kenjuName = viewingProfile.myKenju.name;
-
-      deneiTrialsRef = ref(database, `deneiTrials/${masterUid}/${kenjuName}`);
-      onValue(deneiTrialsRef, (snapshot) => {
-        if (snapshot.exists()) {
-          setKenjuTrials(snapshot.size);
-        } else {
-          setKenjuTrials(0);
-        }
-      });
-
-      deneiClearsRef = ref(database, `deneiClears/${masterUid}/${kenjuName}`);
-      onValue(deneiClearsRef, (snapshot) => {
-        if (snapshot.exists()) {
-          setKenjuClears(snapshot.size);
-        } else {
-          setKenjuClears(0);
-        }
-      });
-    }
 
     const imageUrls = [
       getStorageUrl('/images/background/background.jpg'),
@@ -1066,6 +1080,40 @@ const PLAYER_SKILL_COUNT = 5;
       unsubscribeAuth();
     };
   }, []);
+
+  useEffect(() => {
+    // 電影のクリア人数・挑戦回数を購読
+    let deneiTrialsUnsubscribe: (() => void) | null = null;
+    let deneiClearsUnsubscribe: (() => void) | null = null;
+
+    if (viewingProfile?.myKenju?.name && viewingProfile.uid) {
+      const masterUid = viewingProfile.uid;
+      const kenjuName = viewingProfile.myKenju.name;
+
+      const deneiTrialsRef = ref(database, `deneiTrials/${masterUid}/${kenjuName}`);
+      deneiTrialsUnsubscribe = onValue(deneiTrialsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setKenjuTrials(snapshot.size);
+        } else {
+          setKenjuTrials(0);
+        }
+      });
+
+      const deneiClearsRef = ref(database, `deneiClears/${masterUid}/${kenjuName}`);
+      deneiClearsUnsubscribe = onValue(deneiClearsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setKenjuClears(snapshot.size);
+        } else {
+          setKenjuClears(0);
+        }
+      });
+    }
+
+    return () => {
+      if (deneiTrialsUnsubscribe) deneiTrialsUnsubscribe();
+      if (deneiClearsUnsubscribe) deneiClearsUnsubscribe();
+    };
+  }, [viewingProfile]);
 
   useEffect(() => {
     // sessionStorage を使って、タブ/セッションごとに一度だけアクセスを記録
@@ -1561,6 +1609,15 @@ const PLAYER_SKILL_COUNT = 5;
                 if (masterUid) {
                   const deneiClearRef = ref(database, `deneiClears/${masterUid}/${currentKenjuBattle.name}/${user.uid}`);
                   set(deneiClearRef, serverTimestamp());
+
+                  // 自分のクリア履歴を保存
+                  const deneiVictoryHistoryRef = ref(database, `profiles/${user.uid}/deneiVictories/${currentKenjuBattle.name.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
+                  set(deneiVictoryHistoryRef, {
+                    skillAbbrs: selectedPlayerSkills,
+                    timestamp: Date.now(),
+                    targetName: currentKenjuBattle.name,
+                    targetMasterUid: masterUid
+                  });
                 }
               }
             } else {
@@ -1644,6 +1701,7 @@ const PLAYER_SKILL_COUNT = 5;
         onPageChange={setCurrentPage}
         isAdmin={isAdmin}
         currentKenjuBattle={currentKenjuBattle as any}
+        allDeneiStats={allDeneiStats}
         SkillCard={SkillCard}
       />
     );
