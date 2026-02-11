@@ -671,7 +671,7 @@ const PLAYER_SKILL_COUNT = 5;
     };
   };
 
-  useEffect(() => {
+  const refreshKenju = React.useCallback(() => {
     const kenju = generateDailyKenju();
     console.log("Daily Kenju Generated:", kenju);
     setKenjuBoss(kenju as any);
@@ -685,6 +685,10 @@ const PLAYER_SKILL_COUNT = 5;
         setKenjuClears(0);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    refreshKenju();
     
     // Fetch midenemy.csv
     const fetchMidEnemyData = async () => {
@@ -1465,6 +1469,7 @@ const PLAYER_SKILL_COUNT = 5;
           setIsTitle(true);
           // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
           setStageMode(getLastGameMode());
+          refreshKenju();
         }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
         stageMode={stageMode as any}
@@ -1545,7 +1550,7 @@ const PLAYER_SKILL_COUNT = 5;
           <div className="TitleMenu">
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); }} >LOUNGE</button>
+            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
             <button
               className="TitleButton neon-purple"
               onClick={() => {
