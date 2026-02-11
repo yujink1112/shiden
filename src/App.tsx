@@ -35,6 +35,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   const [showTooltip, setShowTooltip] = useState(false);
   const [isTooltipForceClosed, setIsTooltipForceClosed] = useState(false);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClick = () => {
     if (onClick) {
@@ -201,13 +202,19 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       onClick={handleClick}
       onMouseEnter={() => {
         if (!disableTooltip) {
+          if (tooltipTimeoutRef.current) {
+            clearTimeout(tooltipTimeoutRef.current);
+            tooltipTimeoutRef.current = null;
+          }
           setShowTooltip(true);
           setIsTooltipForceClosed(false);
         }
       }}
       onMouseLeave={() => {
         if (!disableTooltip) {
-          setShowTooltip(false);
+          tooltipTimeoutRef.current = setTimeout(() => {
+            setShowTooltip(false);
+          }, 300); // 300msの猶予を与える
         }
       }}
       style={{
@@ -232,8 +239,19 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
       <span className="skill-name">{skill.name}</span>
       {showTooltip && !isTooltipForceClosed && (
         <div 
-          style={getTooltipStyle()} 
+          style={getTooltipStyle()}
           onClick={(e) => e.stopPropagation()}
+          onMouseEnter={() => {
+            if (tooltipTimeoutRef.current) {
+              clearTimeout(tooltipTimeoutRef.current);
+              tooltipTimeoutRef.current = null;
+            }
+          }}
+          onMouseLeave={() => {
+            tooltipTimeoutRef.current = setTimeout(() => {
+              setShowTooltip(false);
+            }, 300);
+          }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', alignItems: 'baseline' }}>
             <div>
@@ -312,7 +330,9 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showRule, setShowRule] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showRuleHint, setShowRuleHint] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
+  const [showUpdateNotify, setShowUpdateNotify] = useState(false);
 
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
@@ -322,6 +342,10 @@ function App() {
   const mainGameAreaRef = useRef<HTMLDivElement>(null);
   
   const [logComplete, setLogComplete] = useState(false);
+  const [useRichLog, setUseRichLog] = useState<boolean>(() => {
+    const saved = localStorage.getItem('shiden_use_rich_log');
+    return saved === null ? true : saved === 'true';
+  });
 
   // 所持スキル
   const [ownedSkillAbbrs, setOwnedSkillAbbrs] = useState<string[]>(() => {
@@ -519,6 +543,10 @@ const PLAYER_SKILL_COUNT = 5;
   }, [canGoToBoss]);
 
   useEffect(() => {
+    localStorage.setItem('shiden_use_rich_log', useRichLog.toString());
+  }, [useRichLog]);
+
+  useEffect(() => {
     localStorage.setItem('shiden_is_title', isTitle.toString());
   }, [isTitle]);
 
@@ -714,9 +742,11 @@ const PLAYER_SKILL_COUNT = 5;
     // 1つずらす (day - 1) % 7
     // 日曜日(0) -> -1 -> 6 (果てに視えるもの)
     const day = today.getDay();
+    // 0:日 -> 6, 1:月 -> 0, 2:火 -> 1, 3:水 -> 2, 4:木 -> 3, 5:金 -> 4, 6:土 -> 5
     const index = (day + 6) % 7;
     
-    const kenjuBase = KENJU_DATA[index] || KENJU_DATA[0];
+    // KENJU_DATAの範囲内に収まるように念のため剰余を取る
+    const kenjuBase = KENJU_DATA[index % KENJU_DATA.length] || KENJU_DATA[0];
     const skillAbbrs = kenjuBase.skillAbbrs.split("");
     const skills = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
 
@@ -730,7 +760,7 @@ const PLAYER_SKILL_COUNT = 5;
     };
   };
 
-  useEffect(() => {
+  const refreshKenju = React.useCallback(() => {
     const kenju = generateDailyKenju();
     console.log("Daily Kenju Generated:", kenju);
     setKenjuBoss(kenju as any);
@@ -779,19 +809,36 @@ const PLAYER_SKILL_COUNT = 5;
     };
     fetchMidEnemyData();
 
-    // Fetch changelog.json
-    const fetchChangelog = async () => {
+    // Fetch changelog.json and check version
+    const fetchChangelogAndCheckVersion = async () => {
       try {
-        const response = await fetch(`${process.env.PUBLIC_URL}/changelog.json`);
+        const response = await fetch(`${process.env.PUBLIC_URL}/changelog.json?t=${Date.now()}`);
         if (response.ok) {
-          const data = await response.text();
-          setChangelogData(JSON.parse(data));
+          const data = await response.json();
+          setChangelogData(data);
+          
+          if (data && data.length > 0) {
+            const latestVersion = data[data.length - 1].date + "_" + data[data.length - 1].title;
+            const savedVersion = localStorage.getItem('shiden_version');
+            
+            if (savedVersion && savedVersion !== latestVersion) {
+              setShowUpdateNotify(true);
+            }
+            // 保存されていない場合は現在のものを保存して、初回は通知しない
+            if (!savedVersion) {
+              localStorage.setItem('shiden_version', latestVersion);
+            }
+          }
         }
       } catch (e) {
         console.error("Changelog fetch error:", e);
       }
     };
-    fetchChangelog();
+    fetchChangelogAndCheckVersion();
+
+    // 1時間おきにチェック
+    const interval = setInterval(fetchChangelogAndCheckVersion, 1000 * 60 * 60);
+    return () => clearInterval(interval);
   }, []);
 
    const handleKenjuBattle = async (selectedBoss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode: StageMode = 'KENJU') => {
@@ -1220,6 +1267,46 @@ const PLAYER_SKILL_COUNT = 5;
     setShowLogForBattleIndex(-1);
   };
 
+  const handleBattleLogComplete = () => {
+    setLogComplete(true);
+    // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
+    const winCount = battleResults.filter(r => r.winner === 1).length;
+    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
+    if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU')) {
+        triggerVictoryConfetti();
+        if (stageMode === 'BOSS') {
+            setShowBossClearPanel(true);
+            // Stage12のボス勝利で「クリアしたよ！」の称号
+            if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
+                const profileRef = ref(database, `profiles/${user.uid}/`);
+                const newMedals = [...(myProfile.medals || []), 'master'];
+                set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+            }
+        }
+        if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
+            const kenjuConfig = KENJU_DATA.find(k => k.name === kenjuBoss.name);
+            if (kenjuConfig && kenjuConfig.medalId) {
+                const medalId = kenjuConfig.medalId;
+                if (!(myProfile.medals || []).includes(medalId)) {
+                    const profileRef = ref(database, `profiles/${user.uid}/`);
+                    const newMedals = [...(myProfile.medals || []), medalId];
+                    set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                    console.log(`[Medal] Awarded ${medalId} for defeating ${kenjuBoss.name}`);
+                }
+            }
+        }
+    }
+  };
+
+  const handleForceUpdate = () => {
+    if (changelogData.length > 0) {
+      const latestVersion = changelogData[changelogData.length - 1].date + "_" + changelogData[changelogData.length - 1].title;
+      localStorage.setItem('shiden_version', latestVersion);
+    }
+    // 強制更新を模倣するためにキャッシュを無視してリロード
+    window.location.reload();
+  };
+
   const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any; battleStageCycle?: number; processor: StageProcessor }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
@@ -1409,7 +1496,7 @@ const PLAYER_SKILL_COUNT = 5;
                       `${stageMode}_${stageCycle}`;
       const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
 
-      if (isVictory && lastSavedVictoryRef.current !== currentBattleId) {
+      if (lastSavedVictoryRef.current !== currentBattleId) {
           lastSavedVictoryRef.current = currentBattleId;
 
           // まずはローカルストレージに保存
@@ -1418,25 +1505,29 @@ const PLAYER_SKILL_COUNT = 5;
           localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(updatedLocalVictorySkills));
           setStageVictorySkills(updatedLocalVictorySkills);
           
-          // ユーザーがログインしている場合はFirebaseにも保存
-          if (user) {
-            const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
-            set(specificVictorySkillRef, selectedPlayerSkills);
-            
-            // クリア人数カウント用の記録
-            if (stageMode === 'KENJU' && kenjuBoss) {
-              const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
-              set(kenjuClearRef, serverTimestamp());
-            } else if (stageMode === 'DENEI' && currentKenjuBattle) {
-              const deneiClearRef = ref(database, `deneiClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${currentKenjuBattle.name}/${user.uid}`);
-              set(deneiClearRef, serverTimestamp());
-            }
-          } else {
-            // 未登録ユーザーの場合は anonymousVictories に記録
-            const visitorId = localStorage.getItem('shiden_visitor_id');
-            if (visitorId) {
-              const anonymousVictoryRef = ref(database, `anonymousVictories/${visitorId}/${saveKey}`);
-              set(anonymousVictoryRef, selectedPlayerSkills);
+
+          // Firebase/サーバーへの保存は勝利時のみ
+          if (isVictory) {
+            // ユーザーがログインしている場合はFirebaseにも保存
+            if (user) {
+              const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
+              set(specificVictorySkillRef, selectedPlayerSkills);
+
+              // クリア人数カウント用の記録
+              if (stageMode === 'KENJU' && kenjuBoss) {
+                const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
+                set(kenjuClearRef, serverTimestamp());
+              } else if (stageMode === 'DENEI' && currentKenjuBattle) {
+                const deneiClearRef = ref(database, `deneiClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${currentKenjuBattle.name}/${user.uid}`);
+                set(deneiClearRef, serverTimestamp());
+              }
+            } else {
+              // 未登録ユーザーの場合は anonymousVictories に記録
+              const visitorId = localStorage.getItem('shiden_visitor_id');
+              if (visitorId) {
+                const anonymousVictoryRef = ref(database, `anonymousVictories/${visitorId}/${saveKey}`);
+                set(anonymousVictoryRef, selectedPlayerSkills);
+              }
             }
           }
       }
@@ -1498,6 +1589,7 @@ const PLAYER_SKILL_COUNT = 5;
           setIsTitle(true);
           // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
           setStageMode(getLastGameMode());
+          refreshKenju();
         }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
         stageMode={stageMode as any}
@@ -1520,6 +1612,55 @@ const PLAYER_SKILL_COUNT = 5;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
       <div className="TitleScreenContainer">
+        {showUpdateNotify && (
+          <div className="UpdateNotification" style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            backgroundColor: 'rgba(0, 210, 255, 0.2)',
+            backdropFilter: 'blur(5px)',
+            color: '#fff',
+            padding: '10px 0',
+            textAlign: 'center',
+            zIndex: 1000,
+            borderBottom: '1px solid #00d2ff',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '15px',
+            animation: 'slideDown 0.5s ease-out'
+          }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
+            <button
+              onClick={handleForceUpdate}
+              style={{
+                padding: '5px 15px',
+                background: '#00d2ff',
+                color: '#000',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 'bold'
+              }}
+            >
+              今すぐ更新
+            </button>
+            <button
+              onClick={() => setShowUpdateNotify(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                cursor: 'pointer',
+                fontSize: '1.2rem'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div className="TitleBackgroundEffect"></div>
         <div className="TitleContent">
           <div className="TitleLogoWrapper"><img src={getStorageUrl('/images/title/titlelogo.png')} alt="紫電一閃" className="TitleLogo" /></div>
@@ -1531,8 +1672,20 @@ const PLAYER_SKILL_COUNT = 5;
           <div className="TitleMenu">
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); }} >LOUNGE</button>
-            <button className="TitleButton neon-purple" onClick={() => { setShowRule(true); }} >RULE</button>
+            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
+            <button
+              className="TitleButton neon-purple"
+              onClick={() => {
+                if (hasSaveData) {
+                  setShowRule(true);
+                } else {
+                  setShowRuleHint(true);
+                }
+              }}
+              style={{ opacity: hasSaveData ? 1 : 0.5, cursor: 'pointer' }}
+            >
+              RULE
+            </button>
           </div>
           <div className="TitleFooter">
             <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
@@ -1569,6 +1722,24 @@ const PLAYER_SKILL_COUNT = 5;
                 )}
               </div>
               <button className="ChangelogCloseButton" onClick={() => setShowChangelog(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+
+        {showRuleHint && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowRuleHint(false)}>
+            <div className="ChangelogModal" style={{ maxWidth: '440px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader" style={{ background: '#00d2ff' }}>
+                <span style={{ color: '#000', fontWeight: 'bold' }}>ご安心ください</span>
+                <button onClick={() => setShowRuleHint(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
+                <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0 }}>
+                  まずは<strong style={{ color: '#00d2ff' }}>NEW GAME</strong>でプレイしてみましょう！<br />
+                  スキルを<strong style={{ color: '#ffd700' }}>5回ポチポチ</strong>すれば大丈夫です！
+                </p>
+              </div>
+              <button className="ChangelogCloseButton" style={{ background: '#00d2ff', color: '#000', fontWeight: 'bold' }} onClick={() => setShowRuleHint(false)}>閉じる</button>
             </div>
           </div>
         )}
@@ -1638,7 +1809,7 @@ const PLAYER_SKILL_COUNT = 5;
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { setIsTitle(true); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}
           </h1>
@@ -1649,7 +1820,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         </div>
 
-        <div style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
+        <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           <div style={{
             width: '100%',
             height: stageProcessor.getBossImage({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData }) ? '300px' : '240px',
@@ -1772,9 +1943,28 @@ const PLAYER_SKILL_COUNT = 5;
             {storyContent && !gameStarted ? 'ストーリー' :
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
+        {(stageMode === 'BOSS' || stageMode === 'KENJU') && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+            <button
+              onClick={() => setUseRichLog(!useRichLog)}
+              style={{
+                padding: '5px 10px',
+                fontSize: '0.7rem',
+                backgroundColor: useRichLog ? '#2e7d32' : '#333',
+                color: '#fff',
+                border: '1px solid #555',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              {useRichLog ? 'アニメーション表示中' : 'テキスト表示中'}
+            </button>
+          </div>
+        )}
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
-            setLogComplete(true);
+          ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')  && useRichLog) ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
+            //setLogComplete(true);
+            handleBattleLogComplete();
             // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
             const winCount = battleResults.filter(r => r.winner === 1).length;
             const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;

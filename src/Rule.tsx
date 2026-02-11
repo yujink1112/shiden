@@ -63,7 +63,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                     <p>攻撃スキルによってダメージが与えられた時に、自動的に発動するスキルです。</p>
                     <p>あなたの迎撃スキルの速度が、<span style={{ color: '#ffeb3b', fontWeight: 'bold' }}>相手の攻撃スキルの速度以上</span>である場合に発動します。</p>
                     <p>迎撃スキルが発動した時、<span style={{ color: '#ffeb3b', fontWeight: 'bold' }}>攻撃スキルによるダメージの処理を強制的に中断します。</span></p>
-                    <p>迎撃スキルによってダメージを与えられたスキルは、迎撃スキルを発動させた攻撃スキルによってダメージを与えられたスキルと同時に破壊されます。</p>
+                    <p>迎撃スキルは破壊されてしまいますが、相手にダメージや悪い状態などを与える効果があります。</p>
                     <p>詳しい処理は、「ダメージの処理」を参照してください。</p>
 
             </div>
@@ -252,12 +252,13 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                       <p>qut様</p>
                       <p>化け猫屋様</p>
                       <p>Ｒド様</p>
+                      <p>GAME*様</p>
                       <p>pngtree<br />
                         (<a href="https://ja.pngtree.com/freepng/realistic-gorilla-mod-on-transparent-background_15902364.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>静かに座っているオランウータン</a>)<br />
                         (<a href="https://ja.pngtree.com/freepng/orangutan-sitting-peacefully-isolated-on-transparent-background_23460517.html" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>リアルなゴリラ</a>)<br />
                         (<a href="https://ja.pngtree.com/freepng/leaves-big-tree-vine-plant-free-element-decorative-material_14122275.html"  target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>葉大木の蔓植物</a>)<br />
                       </p>
-                      <p>友人K(ボス画像)</p>
+                      <p>友人K(一部ボス画像)</p>
                     </div>
                   </div>
                 <div style={{ marginBottom: '10px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>

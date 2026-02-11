@@ -253,7 +253,6 @@ export class Player {
                     this.name[i] = "連撃";
                     this.type[i] = Player.ENCHANT;
                     this.speed[i] = 0;
-                    this.limited[i] = 1;
                     break;
                 case "燐":
                     this.name[i] = "燐光";

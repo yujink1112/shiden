@@ -55,16 +55,16 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} }
 };
 
-const KENJU_BACK_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
-  "紅蓮のワダチ": { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+const KENJU_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
 };
 
-const KENJU_BATTLE_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
-  "紅蓮のワダチ": { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+const KENJU_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
 };
 
-const KENJU_SIDEBAR_IMAGE_CONFIGS: Record<string, BossImageStyleConfig> = {
-  "紅蓮のワダチ": { pc: { height: '50%', width: '50%' }, mobile: { height: '60%', width: '60%' } },
+const KENJU_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
+  11: { pc: { height: '50%', width: '50%' }, mobile: { height: '60%', width: '60%' } },
 };
 
 function getBossImageStyleCommon(stageCycle: number, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
@@ -279,7 +279,7 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   onFailure(context: StageContext): { canGoToNext: boolean; showReward: boolean } {
-    return { canGoToNext: false, showReward: false };
+    return { canGoToNext: false, showReward: true };
   }
 
   getStageTitle(context: StageContext): string {
@@ -353,21 +353,17 @@ export class KenjuStageProcessor implements StageProcessor {
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
-    if (context.kenjuBoss) {
-      const configs = type === 'back' ? KENJU_BACK_IMAGE_CONFIGS : (type === 'battle' ? KENJU_BATTLE_IMAGE_CONFIGS : KENJU_SIDEBAR_IMAGE_CONFIGS);
-      const config = configs[context.kenjuBoss.name];
-      if (config) {
-        const style = isMobile ? config.mobile : config.pc;
-        return {
-          maxWidth: 'none',
-          objectFit: 'contain',
-          filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
-          flexShrink: 0,
-          ...style
-        };
-      }
-    }
-    return getBossImageStyleCommon(11, isMobile, type);
+    const configs = type === 'back' ? KENJU_BACK_IMAGE_CONFIGS : (type === 'battle' ? KENJU_BATTLE_IMAGE_CONFIGS : KENJU_SIDEBAR_IMAGE_CONFIGS);
+    // 全ての剣獣（管理者用、日替わり、電影）で11番（剣獣用）の設定を適用
+    const config = configs[11] || { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } };
+    const style = isMobile ? config.mobile : config.pc;
+    return {
+      maxWidth: 'none',
+      objectFit: 'contain',
+      filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.9)) drop-shadow(0 0 5px rgba(255,255,255,0.2))',
+      flexShrink: 0,
+      ...style
+    };
   }
 
   getEnemyTitle(context: StageContext): string {
