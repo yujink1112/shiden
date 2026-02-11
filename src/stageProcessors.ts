@@ -1,6 +1,7 @@
 import React from 'react';
 import { SkillDetail, getSkillByAbbr } from './skillsData';
 import { STAGE_DATA, StageContext, StageProcessor, getAvailableSkillsUntilStage } from './stageData';
+import { getStorageUrl } from './firebase';
 
 /**
  * stageCycleに応じたボス画像の表示サイズ設定
@@ -224,11 +225,15 @@ export class MidStageProcessor implements StageProcessor {
   }
 
   getBackgroundImage(context: StageContext): string {
-    return `/images/background/${context.stageCycle}.jpg`;
+    return getStorageUrl(`/images/background/${context.stageCycle}.jpg`);
   }
 
   getBossImage(context: StageContext): string | undefined {
     return undefined;
+  }
+
+  getBossDescription(context: StageContext): string {
+    return "";
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
@@ -292,12 +297,17 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getBackgroundImage(context: StageContext): string {
-    return `/images/background/${context.stageCycle}.jpg`;
+    return getStorageUrl(`/images/background/${context.stageCycle}.jpg`);
   }
 
   getBossImage(context: StageContext): string | undefined {
     const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return info.bossImage;
+    return getStorageUrl(info.bossImage);
+  }
+
+  getBossDescription(context: StageContext): string {
+    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+    return info.bossDescription;
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
@@ -345,11 +355,22 @@ export class KenjuStageProcessor implements StageProcessor {
   }
 
   getBackgroundImage(context: StageContext): string {
-    return context.kenjuBoss?.background || "/images/background/11.jpg";
+    let path = "/images/background/11.jpg";
+    if (context.kenjuBoss?.background && (context.kenjuBoss.name.includes("電影") || (context.kenjuBoss as any).isCustom)) {
+      path = context.kenjuBoss.background;
+    } else if (context.kenjuBoss?.background) {
+      
+    }
+    return getStorageUrl(path);
   }
 
   getBossImage(context: StageContext): string | undefined {
-    return context.kenjuBoss?.image;
+    if (!context.kenjuBoss?.image) return undefined;
+    return getStorageUrl(context.kenjuBoss.image);
+  }
+
+  getBossDescription(context: StageContext): string {
+    return context.kenjuBoss?.description || "今日の強敵です。";
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {

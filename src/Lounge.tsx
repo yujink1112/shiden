@@ -453,6 +453,9 @@ export const Lounge: React.FC<LoungeProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => setStageMode('MYPAGE')} style={{ padding: '10px 20px', background: '#2196f3', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>マイページ</button>
+                {myProfile && (
+                  <button onClick={() => onViewProfile(myProfile)} style={{ padding: '10px 20px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>自分のプロフィール</button>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={onSignOut} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>サインアウト</button>
@@ -476,7 +479,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                         <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
                       <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
-                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア: {kenjuClears}人 / 挑戦: {kenjuTrials}回</div>
+                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア人数: {kenjuClears}人</div>
                       <button
                         className="TitleButton neon-red"
                         onClick={() => onKenjuBattle()}
@@ -1091,6 +1094,8 @@ export const Lounge: React.FC<LoungeProps> = ({
                     skills: skills.length > 0 ? skills : [getSkillByAbbr('一')!],
                     title: viewingProfile.myKenju!.title,
                     userName: viewingProfile.displayName,
+                    background: viewingProfile.myKenju!.background,
+                    masterUid: viewingProfile.uid,
                     isCustom: true
                   } as any);
                 }}

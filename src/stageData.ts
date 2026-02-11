@@ -218,7 +218,7 @@ export const getSkillByName = (name: string): SkillDetail | undefined => {
 
 export interface StageContext {
   stageCycle: number;
-  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[]; isCustom?: boolean };
+  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[]; isCustom?: boolean; masterUid?: string };
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
   userName?: string;
@@ -234,6 +234,7 @@ export interface StageProcessor {
   getStageDescription(context: StageContext): string;
   getBackgroundImage(context: StageContext): string;
   getBossImage(context: StageContext): string | undefined;
+  getBossDescription(context: StageContext): string;
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties;
   getEnemyTitle?(context: StageContext): string;
   getWinThreshold?(context: StageContext): number;
