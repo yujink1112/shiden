@@ -57,15 +57,15 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
 };
 
 const KENJU_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
-  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  11: { pc: { height: '90%', width: '90%' }, mobile: { height: '80%', width: '80%' } },
 };
 
 const KENJU_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
-  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  11: { pc: { height: '90%', width: '90%' }, mobile: { height: '80%', width: '80%' } },
 };
 
 const KENJU_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
-  11: { pc: { height: '50%', width: '50%' }, mobile: { height: '60%', width: '60%' } },
+  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '70%', width: '70%' } },
 };
 
 function getBossImageStyleCommon(stageCycle: number, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
@@ -394,7 +394,8 @@ export class KenjuStageProcessor implements StageProcessor {
 
   getStageDescription(context: StageContext): string {
     if (context.kenjuBoss?.name && (context.kenjuBoss.name.includes("電影") || (context.kenjuBoss as any).isCustom)) {
-      return `${context.userName || "あなた"}さんの電影と対峙！`;
+      const bossUserName = context.kenjuBoss.userName || "未知のプレイヤー";
+      return `${bossUserName}さんの電影と対峙！`;
     }
     return '日替わりの強敵に勝利せよ！';
   }

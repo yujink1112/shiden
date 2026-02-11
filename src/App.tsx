@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { ref, onValue, push, onDisconnect, set, serverTimestamp } from "firebase/database";
+import { ref, onValue, push, onDisconnect, set, serverTimestamp, query, limitToLast, get } from "firebase/database";
 import { database, auth, googleProvider, recordAccess, getStorageUrl } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
@@ -366,7 +366,8 @@ function App() {
   });
   const [kenjuClears, setKenjuClears] = useState<number>(0);
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
-  const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number } } }>({});
+  const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } }>({});
+  const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -673,6 +674,12 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
+  const handleLikeDenei = async (masterUid: string, deneiName: string) => {
+    if (!user) return;
+    const likeRef = ref(database, `deneiLikes/${masterUid}/${deneiName}/${user.uid}`);
+    set(likeRef, serverTimestamp()).catch(err => console.error("Failed to like:", err));
+  };
+
   const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => {
     if (!user || !myProfile) return;
     const profileRef = ref(database, `profiles/${user.uid}`);
@@ -689,22 +696,25 @@ const PLAYER_SKILL_COUNT = 5;
       title: title !== undefined ? title : (myProfile.title || ""),
       oneThing: oneThing !== undefined ? oneThing : (myProfile.oneThing || ""),
       isSpoiler: isSpoiler !== undefined ? isSpoiler : !!myProfile.isSpoiler,
-      myKenju: myKenju !== undefined ? myKenju : myProfile.myKenju,
-      photoUploaderUid: photoUploaderUid !== undefined ? photoUploaderUid : myProfile.photoUploaderUid,
+      myKenju: myKenju !== undefined ? myKenju : (myProfile.myKenju || undefined),
+      photoUploaderUid: photoUploaderUid !== undefined ? photoUploaderUid : (myProfile.photoUploaderUid || ""),
       lastActive: Date.now()
     };
+
+    // Firebase cannot handle undefined. Remove undefined properties.
+    const cleanProfile = JSON.parse(JSON.stringify(updatedProfile));
 
     // 楽観的UI更新
     setMyProfile(updatedProfile);
 
     // Firebase更新 (awaitしないことで入力をスムーズにする)
-    set(profileRef, updatedProfile).catch(err => {
+    set(profileRef, cleanProfile).catch(err => {
       console.error("Profile update failed:", err);
       // 失敗した場合は本当のDBの状態に戻るはず（onValue経由で）
     });
   };
 
-  const handleSaveKenju = async (myKenju: UserProfile['myKenju'], shouldResetStats: boolean = true) => {
+  const handleSaveKenju = async (myKenju: UserProfile['myKenju'], shouldResetStats: boolean = true, onComplete?: (success: boolean, message: string) => void) => {
     if (!user || !myProfile || !myKenju) return;
 
     // 電影情報を更新
@@ -726,13 +736,13 @@ const PLAYER_SKILL_COUNT = 5;
         await set(clearsRef, null);
         await set(trialsRef, null);
 
-        alert("電影の設定を保存しました。スキル構成が変更されたため、クリア人数と挑戦回数がリセットされました。");
+        onComplete?.(true, "電影の設定を保存しました。\nスキル構成が変更されたため、クリア人数と挑戦回数がリセットされました。");
       } else {
-        alert("電影の設定を保存しました。");
+        onComplete?.(true, "電影の設定を保存しました。");
       }
     } catch (err) {
       console.error("Failed to save Kenju or reset stats:", err);
-      alert("保存に失敗しました。");
+      onComplete?.(false, "保存に失敗しました。");
     }
   };
 
@@ -997,58 +1007,78 @@ const PLAYER_SKILL_COUNT = 5;
       }
     });
 
-    const profilesRef = ref(database, 'profiles');
-    onValue(profilesRef, (snapshot) => {
+    const profilesQuery = query(ref(database, 'profiles'), limitToLast(100));
+    get(profilesQuery).then((snapshot) => {
       if (snapshot.exists()) {
         try {
           const data = snapshot.val();
           const profilesList = Object.values(data) as UserProfile[];
-          // displayName が存在し、空でないユーザーのみを表示
           const filteredList = profilesList.filter(p => p && p.displayName && p.displayName.trim() !== "");
           setAllProfiles(filteredList);
         } catch (err) {
           console.error("Error processing profiles:", err);
         }
-      } else {
-        setAllProfiles([]);
       }
     });
 
-    // 電影の統計データを購読（ピックアップ表示用）
+    // 統計データはピックアップ表示に必要な分だけ、あるいは初回のみ取得するなどの工夫が必要だが、
+    // まずは onValue をやめて get にすることで毎回の同期を避ける
     const deneiClearsRootRef = ref(database, 'deneiClears');
-    onValue(deneiClearsRootRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setAllDeneiStats(prev => {
-          const newState = { ...prev };
-          Object.entries(data).forEach(([uid, kenjus]) => {
-            if (!newState[uid]) newState[uid] = {};
-            Object.entries(kenjus as any).forEach(([kenjuName, clears]) => {
-              if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0 };
-              newState[uid][kenjuName].clears = Object.keys(clears as any).length;
-            });
-          });
-          return newState;
-        });
-      }
-    });
-
     const deneiTrialsRootRef = ref(database, 'deneiTrials');
-    onValue(deneiTrialsRootRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setAllDeneiStats(prev => {
-          const newState = { ...prev };
-          Object.entries(data).forEach(([uid, kenjus]) => {
-            if (!newState[uid]) newState[uid] = {};
-            Object.entries(kenjus as any).forEach(([kenjuName, trials]) => {
-              if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0 };
-              newState[uid][kenjuName].trials = Object.keys(trials as any).length;
-            });
+    const deneiLikesRootRef = ref(database, 'deneiLikes');
+
+    const updateDeneiStats = (clearsData: any, trialsData: any, likesData: any) => {
+      const newState: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } } = {};
+      
+      const ensureStats = (uid: string, kenjuName: string) => {
+        if (!newState[uid]) newState[uid] = {};
+        if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0, likes: 0 };
+      };
+
+      if (clearsData) {
+        Object.entries(clearsData).forEach(([uid, kenjus]) => {
+          if (typeof kenjus !== 'object' || kenjus === null) return;
+          Object.entries(kenjus).forEach(([kenjuName, clears]) => {
+            if (typeof clears !== 'object' || clears === null) return;
+            ensureStats(uid, kenjuName);
+            newState[uid][kenjuName].clears = Object.keys(clears).length;
           });
-          return newState;
         });
       }
+      
+      if (trialsData) {
+        Object.entries(trialsData).forEach(([uid, kenjus]) => {
+          if (typeof kenjus !== 'object' || kenjus === null) return;
+          Object.entries(kenjus).forEach(([kenjuName, trials]) => {
+            if (typeof trials !== 'object' || trials === null) return;
+            ensureStats(uid, kenjuName);
+            newState[uid][kenjuName].trials = Object.keys(trials).length;
+          });
+        });
+      }
+
+      if (likesData) {
+        Object.entries(likesData).forEach(([uid, kenjus]) => {
+          if (typeof kenjus !== 'object' || kenjus === null) return;
+          Object.entries(kenjus).forEach(([kenjuName, likes]) => {
+            if (typeof likes !== 'object' || likes === null) return;
+            ensureStats(uid, kenjuName);
+            newState[uid][kenjuName].likes = Object.keys(likes).length;
+          });
+        });
+      }
+      
+      setAllDeneiStats(newState);
+      setIsDeneiStatsLoaded(true);
+    };
+
+    // get で一回だけ取得するように変更
+    Promise.all([
+      get(deneiClearsRootRef),
+      get(deneiTrialsRootRef),
+      get(deneiLikesRootRef)
+    ]).then(([clearsSnap, trialsSnap, likesSnap]) => {
+      updateDeneiStats(clearsSnap.val(), trialsSnap.val(), likesSnap.val());
     });
 
     setBattleResults([]);
@@ -1239,6 +1269,13 @@ const PLAYER_SKILL_COUNT = 5;
             uid: user?.uid || 'anonymous',
             timestamp: serverTimestamp()
           });
+
+          // マスターにポイントを加算
+          const masterPointsRef = ref(database, `profiles/${masterUid}/points`);
+          onValue(masterPointsRef, (snapshot) => {
+            const currentPoints = snapshot.val() || 0;
+            set(masterPointsRef, currentPoints + 10);
+          }, { onlyOnce: true });
         }
       }
       
@@ -1356,10 +1393,10 @@ const PLAYER_SKILL_COUNT = 5;
 
   const handleBattleLogComplete = () => {
     setLogComplete(true);
-    // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
+    // ボス戦、剣獣戦、または電影戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
     const winCount = battleResults.filter(r => r.winner === 1).length;
-    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU') ? winCount >= 1 : winCount === 10;
-    if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU')) {
+    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;
+    if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) {
         triggerVictoryConfetti();
         if (stageMode === 'BOSS') {
             setShowBossClearPanel(true);
@@ -1547,10 +1584,10 @@ const PLAYER_SKILL_COUNT = 5;
                 return (
                   <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'nowrap' }}>
-                      <span className="battle-start-player-name" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{p1.trim()}</span>
-                      <span className="battle-start-vs" style={{ fontSize: '2.5rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
-                      <span className="battle-start-enemy-name" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{p2.trim()}</span>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '0 10px' }}>
+                      <span className="battle-start-player-name" style={{ fontSize: p1.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p1.trim()}</span>
+                      <span className="battle-start-vs" style={{ fontSize: '2.2rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
+                      <span className="battle-start-enemy-name" style={{ fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p2.trim()}</span>
                     </div>
                   </div>
                 );
@@ -1676,6 +1713,7 @@ const PLAYER_SKILL_COUNT = 5;
         onUpdateProfile={handleUpdateProfile}
         onSaveKenju={handleSaveKenju}
         onKenjuBattle={handleKenjuBattle}
+        onLikeDenei={handleLikeDenei}
 	      kenjuBosses={KENJU_DATA.map(k => ({
           name: k.name,
           image: getStorageUrl(k.image),
@@ -1702,6 +1740,7 @@ const PLAYER_SKILL_COUNT = 5;
         isAdmin={isAdmin}
         currentKenjuBattle={currentKenjuBattle as any}
         allDeneiStats={allDeneiStats}
+        isDeneiStatsLoaded={isDeneiStatsLoaded}
         SkillCard={SkillCard}
       />
     );
@@ -1814,7 +1853,9 @@ const PLAYER_SKILL_COUNT = 5;
                     <div key={index} className="ChangelogItem">
                       <div className="ChangelogVersion" style={{ fontSize: '1.4rem', borderLeft: '4px solid #00d2ff', paddingLeft: '10px', marginBottom: '10px', fontWeight: 'bold', color: '#00d2ff' }}>{item.title}</div>
                       <div className="ChangelogDate" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>{item.date}</div>
-                      <div className="ChangelogText">{item.content}</div>
+                      <div className="ChangelogText" style={{ whiteSpace: 'pre-wrap' }}>
+                        {Array.isArray(item.content) ? item.content.join('\n') : item.content}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -2038,7 +2079,7 @@ const PLAYER_SKILL_COUNT = 5;
             {storyContent && !gameStarted ? 'ストーリー' :
              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
         </h2>
-        {(stageMode === 'BOSS' || stageMode === 'KENJU') && (
+        {(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
             <button
               onClick={() => setUseRichLog(!useRichLog)}

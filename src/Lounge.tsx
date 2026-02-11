@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
 import { AdminAnalytics } from './AdminAnalytics';
-import { getStorageUrl } from './firebase';
+import { getStorageUrl, uploadDeneiImage } from './firebase';
 
 export interface UserProfile {
   uid: string;
@@ -289,6 +289,40 @@ const CustomConfirmModal: React.FC<{
   );
 };
 
+const CustomAlertModal: React.FC<{
+  show: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+  buttonColor?: string;
+}> = ({ show, title, message, onClose, buttonColor = "#2196f3" }) => {
+  if (!show) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 45000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px', boxSizing: 'border-box'
+    }}>
+      <div style={{
+        width: '100%', maxWidth: '400px',
+        backgroundColor: '#1a1a1a', border: `2px solid ${buttonColor}`,
+        borderRadius: '15px', padding: '30px', textAlign: 'center',
+        boxShadow: `0 0 20px ${buttonColor}33`
+      }}>
+        <h2 style={{ color: buttonColor, marginTop: 0, fontSize: '1.2rem' }}>{title}</h2>
+        <p style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '25px', whiteSpace: 'pre-wrap' }}>{message}</p>
+        <button
+          onClick={onClose}
+          style={{ width: '100%', padding: '10px', background: buttonColor, color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}
+        >
+          閉じる
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface LoungeProps {
   user: User | null;
   myProfile: UserProfile | null;
@@ -298,15 +332,17 @@ interface LoungeProps {
   currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
   kenjuClears: number;
   kenjuTrials: number;
-  allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number } } };
+  allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } };
+  isDeneiStatsLoaded: boolean;
   onGoogleSignIn: () => void;
   onEmailSignUp: (email: string, pass: string) => void;
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
   onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => void;
-  onSaveKenju: (myKenju: UserProfile['myKenju'], shouldResetStats?: boolean) => void;
+  onSaveKenju: (myKenju: UserProfile['myKenju'], shouldResetStats?: boolean, onComplete?: (success: boolean, message: string) => void) => void;
   onDeleteAccount: () => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
+  onLikeDenei: (masterUid: string, deneiName: string) => void;
   onBack: () => void;
   onViewProfile: (profile: UserProfile) => void;
   stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL' | 'ADMIN_ANALYTICS';
@@ -319,9 +355,12 @@ interface LoungeProps {
   onPageChange: (page: number) => void;
   isAdmin: boolean;
   kenjuBosses?: { name: string; image: string; skills: SkillDetail[] }[];
-  SkillCard: React.FC<any>;
+SkillCard: React.FC<any>;
+  showUpdateNotify: boolean;
+  changelogData: any[];
+  setShowUpdateNotify: (show: boolean) => void;
+  handleForceUpdate: () => void;
 }
-
 
 export const Lounge: React.FC<LoungeProps> = ({
   user,
@@ -333,6 +372,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   kenjuClears,
   kenjuTrials,
   allDeneiStats,
+  isDeneiStatsLoaded,
   kenjuBosses,
   onGoogleSignIn,
   onEmailSignUp,
@@ -342,6 +382,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   onSaveKenju,
   onDeleteAccount,
   onKenjuBattle,
+  onLikeDenei,
   onBack,
   onViewProfile,
   stageMode,
@@ -351,17 +392,23 @@ export const Lounge: React.FC<LoungeProps> = ({
   getSkillByAbbr,
   allProfilesCount,
   currentPage,
-  onPageChange,
+onPageChange,
   isAdmin,
-  SkillCard
+  SkillCard,
+  showUpdateNotify,
+  changelogData,
+  setShowUpdateNotify,
+  handleForceUpdate
 }) => {
   const today = new Date().toLocaleDateString();
 
   const [email, setEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
   const [isSignUp, setIsSignUp] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false);
   const [showGuideline, setShowGuideline] = React.useState(false);
+  const [isBattleLoading, setIsBattleLoading] = React.useState(false);
   const isInitializing = React.useRef(false);
 
   // カスタム確認モーダル用のステート
@@ -378,8 +425,42 @@ export const Lounge: React.FC<LoungeProps> = ({
     onConfirm: () => {},
   });
 
+  // カスタムアラートモーダル用のステート
+  const [alertModal, setAlertModal] = React.useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    buttonColor?: string;
+  }>({
+    show: false,
+    title: '',
+    message: '',
+  });
+
   // 電影編集用の一時ステート
   const [tempKenju, setTempKenju] = React.useState<UserProfile['myKenju'] | null>(null);
+
+  // ミュート中のユーザUIDリスト
+  const [mutedUids, setMutedUids] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem('mutedDeneiUids');
+    if (stored) {
+      try {
+        setMutedUids(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to parse mutedDeneiUids', e);
+      }
+    }
+  }, []);
+
+  const toggleMute = (uid: string) => {
+    const newMuted = mutedUids.includes(uid)
+      ? mutedUids.filter(id => id !== uid)
+      : [...mutedUids, uid];
+    setMutedUids(newMuted);
+    localStorage.setItem('mutedDeneiUids', JSON.stringify(newMuted));
+  };
 
   const isMypageInitialized = React.useRef(false);
 
@@ -387,7 +468,15 @@ export const Lounge: React.FC<LoungeProps> = ({
   React.useEffect(() => {
     if (stageMode === 'MYPAGE') {
       if (!isMypageInitialized.current && myProfile?.myKenju) {
-        setTempKenju(myProfile.myKenju);
+        setTempKenju({
+          name: myProfile.myKenju.name || '',
+          description: myProfile.myKenju.description || '',
+          title: myProfile.myKenju.title || '',
+          image: myProfile.myKenju.image || '',
+          skills: myProfile.myKenju.skills || [],
+          background: myProfile.myKenju.background || '',
+          uploaderUid: myProfile.myKenju.uploaderUid
+        });
         isMypageInitialized.current = true;
       }
     } else {
@@ -395,7 +484,7 @@ export const Lounge: React.FC<LoungeProps> = ({
       setTempKenju(null);
       isMypageInitialized.current = false;
     }
-  }, [stageMode]); // myProfile?.myKenju を依存関係から外すことで編集中のリセットを防ぐ
+  }, [stageMode, myProfile]); // myProfileがロードされたタイミングでも発火するように変更
 
   const presetBackgrounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => `/images/background/${n}.jpg`);
 
@@ -406,21 +495,76 @@ export const Lounge: React.FC<LoungeProps> = ({
     { id: 'kriemhild', name: '王家の冠月の友', description: 'クリームヒルトを撃破' },
     { id: 'wadachi', name: '紅蓮を越えし者', description: 'ワダチを撃破' },
     { id: 'shiran', name: '氷彗の解凍者', description: 'シーランを撃破' },
-    { id: 'atiyah', name: '眠り猫の遊び相手', description: 'アティヤーを撃破' },
+    { id: 'atiyah', name: '猫の遊び相手', description: 'アティヤーを撃破' },
     { id: 'vomakt', name: '白金の目撃者', description: 'ヴォマクトを撃破' },
     { id: 'steve', name: '冥土の同伴者', description: 'スティーブを撃破' },
     { id: 'fiat_lux', name: '光あれ', description: '果てに視えるものを撃破' }
   ];
 
   const randomKenjuPlayers = React.useMemo(() => {
-    const withKenju = allProfiles.filter(p => p.myKenju && p.myKenju.name && p.myKenju.image);
+    const withKenju = allProfiles.filter(p =>
+      p.myKenju && p.myKenju.name && p.myKenju.image && !mutedUids.includes(p.uid)
+    );
     return [...withKenju].sort(() => 0.5 - Math.random()).slice(0, 3);
-  }, [allProfiles]);
+  }, [allProfiles, mutedUids]);
 
   if (stageMode === 'LOUNGE') {
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
-        <h1 style={{ color: '#4fc3f7' }}>LOUNGE</h1>
+        {showUpdateNotify && (
+          <div className="UpdateNotification" style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            backgroundColor: 'rgba(0, 210, 255, 0.2)',
+            backdropFilter: 'blur(5px)',
+            color: '#fff',
+            padding: '10px 0',
+            textAlign: 'center',
+            zIndex: 1000,
+            borderBottom: '1px solid #00d2ff',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '15px',
+            animation: 'slideDown 0.5s ease-out'
+          }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
+            <button
+              onClick={handleForceUpdate}
+              style={{
+                padding: '5px 15px',
+                background: '#00d2ff',
+                color: '#000',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 'bold'
+              }}
+            >
+              今すぐ更新
+            </button>
+            <button
+              onClick={() => setShowUpdateNotify(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                cursor: 'pointer',
+                fontSize: '1.2rem'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '60px' : '0'  }}>
+          <button onClick={onBack} style={{ padding: '8px 15px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>戻る</button>
+          <h1 style={{ color: '#4fc3f7', margin: 0 }}>LOUNGE</h1>
+          <div style={{ width: '60px' }}></div>
+        </div>
         {!user ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '400px' }}>
             <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #4fc3f7', textAlign: 'center', width: '100%' }}>
@@ -445,8 +589,8 @@ export const Lounge: React.FC<LoungeProps> = ({
             <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', width: '100%', textAlign: 'center' }}>
               <p style={{ color: '#ff5252', fontSize:
                  '0.8rem', margin: '0px 0px 10px 0px' }}>ログインできない・データをリセットしたい場合</p>
-              <button 
-                onClick={() => setStageMode('DELETE_ACCOUNT')} 
+              <button
+                onClick={() => setStageMode('DELETE_ACCOUNT')}
                 style={{ padding: '8px 15px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}
               >
                 アカウント削除・データ初期化
@@ -461,17 +605,17 @@ export const Lounge: React.FC<LoungeProps> = ({
           </div>
         ) : (
           <div style={{ width: '100%', maxWidth: '800px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setStageMode('MYPAGE')} style={{ padding: '10px 20px', background: '#2196f3', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>マイページ</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '5px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '5px' }}>
+              <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }}>
+                <button onClick={() => setStageMode('MYPAGE')} style={{ padding: '8px 12px', background: '#2196f3', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>マイページ</button>
                 {myProfile && (
-                  <button onClick={() => onViewProfile(myProfile)} style={{ padding: '10px 20px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>自分のプロフィール</button>
+                  <button onClick={() => onViewProfile(myProfile)} style={{ padding: '8px 12px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>プロフィール</button>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={onSignOut} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer' }}>サインアウト</button>
+              <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }}>
+                <button onClick={onSignOut} style={{ padding: '8px 12px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>サインアウト</button>
                 {isAdmin && (
-                  <button onClick={() => setStageMode('ADMIN_ANALYTICS')} style={{ padding: '10px 20px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Admin Analytics</button>
+                  <button onClick={() => setStageMode('ADMIN_ANALYTICS')} style={{ padding: '8px 12px', background: '#8e24aa', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Ad</button>
                 )}
               </div>
             </div>
@@ -482,10 +626,10 @@ export const Lounge: React.FC<LoungeProps> = ({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-              <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)' }}>
+              <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)', display: 'flex', flexDirection: 'column' }}>
                   <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
                   {kenjuBoss && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'flex-start' }}>
                       <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
                         <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
@@ -502,19 +646,30 @@ export const Lounge: React.FC<LoungeProps> = ({
                   )}
               </div>
 
-              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ffd700', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 10px 0', fontSize: '1.2rem' }}>ピックアップ電影</h2>
-                {randomKenjuPlayers.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ffd700', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)', display: 'flex', flexDirection: 'column' }}>
+                <h2 style={{ color: '#ffd700', margin: '0 0 10px 0', fontSize: '1.2rem' }}>電影 Pick up!</h2>
+                {!isDeneiStatsLoaded ? (
+                  <p style={{ color: '#888', margin: '20px 0' }}>読み込み中...</p>
+                ) : randomKenjuPlayers.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', flex: 1, justifyContent: 'flex-start' }}>
                     {randomKenjuPlayers.map(p => (
                       <div key={p.uid} onClick={() => onViewProfile(p)} style={{ cursor: 'pointer', background: '#222', padding: '10px', borderRadius: '8px', border: '1px solid #444', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <img src={p.myKenju?.image} alt="" style={{ width: '50px', height: '50px', borderRadius: '5px', objectFit: 'contain', background: '#000' }} />
                         <div style={{ flex: 1, textAlign: 'left' }}>
-                          <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{p.myKenju?.name}</div>
+                          <div style={{ color: '#fff', fontWeight: 'bold', fontSize: (p.myKenju?.name || '').length > 14 ? '0.75rem' : '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.myKenju?.name}</div>
                           <div style={{ color: '#aaa', fontSize: '0.7rem' }}>Master: {p.displayName}</div>
                           {p.myKenju?.name && allDeneiStats?.[p.uid]?.[p.myKenju.name] && (
                             <div style={{ color: '#ff5252', fontSize: '0.65rem', marginTop: '2px' }}>
                               クリア: {allDeneiStats[p.uid][p.myKenju.name].clears} / 挑戦: {allDeneiStats[p.uid][p.myKenju.name].trials}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '3px' }}>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onLikeDenei(p.uid, p.myKenju!.name); }}
+                                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '2px' }}
+                                >
+                                  <span style={{ color: '#ff5252' }}>❤️</span>
+                                  <span style={{ color: '#ffd700' }}>{allDeneiStats[p.uid][p.myKenju.name].likes || 0}</span>
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -634,15 +789,28 @@ export const Lounge: React.FC<LoungeProps> = ({
             ctx.drawImage(img, 0, 0, width, height);
             const dataUrl = canvas.toDataURL('image/png');
             if (isKenju) {
-              setTempKenju({
-                name: tempKenju?.name || myProfile.myKenju?.name || 'マイ電影',
-                image: dataUrl,
-                skills: tempKenju?.skills || myProfile.myKenju?.skills || ['一', '刺', '崩', '待', '果'],
-                description: tempKenju?.description || myProfile.myKenju?.description || '',
-                title: tempKenju?.title || myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
-                background: tempKenju?.background || myProfile.myKenju?.background || '/images/background/11.jpg',
-                uploaderUid: user?.uid // 追跡用にアップロードしたユーザのUIDをセット
-              });
+              // アップロードは保存ボタン押下時ではなく、選択した瞬間に行う（プレビュー表示のため）
+              if (user) {
+                setIsSaving(true);
+                uploadDeneiImage(user.uid, dataUrl).then(url => {
+                  setTempKenju(prev => ({
+                    ...(prev || myProfile.myKenju || {
+                      name: '',
+                      skills: ['一', '刺', '崩', '待', '果'],
+                      description: '',
+                      title: 'BOSS SKILLS DISCLOSED',
+                      background: '/images/background/11.jpg'
+                    }),
+                    image: url,
+                    uploaderUid: user.uid
+                  }));
+                })
+                .catch(err => {
+                  console.error("Storage upload failed:", err);
+                  alert("画像のアップロードに失敗しました。");
+                })
+                .finally(() => setIsSaving(false));
+              }
             } else {
               // プロフィール画像（photoURL）の更新時に追跡用UIDをセット
               onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, myProfile.comment, dataUrl, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju, user?.uid);
@@ -674,7 +842,7 @@ export const Lounge: React.FC<LoungeProps> = ({
       }
       newSkills.push(abbr);
       setTempKenju({
-        name: tempKenju?.name || myProfile.myKenju?.name || 'マイ電影',
+        name: tempKenju?.name || myProfile.myKenju?.name || '',
         image: tempKenju?.image || myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png'),
         description: tempKenju?.description || myProfile.myKenju?.description || '',
         title: tempKenju?.title || myProfile.myKenju?.title || 'BOSS SKILLS DISCLOSED',
@@ -685,7 +853,11 @@ export const Lounge: React.FC<LoungeProps> = ({
 
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
-        <h1 style={{ color: '#4fc3f7' }}>MY PAGE</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '500px', marginBottom: '10px' }}>
+          <button onClick={() => setStageMode('LOUNGE')} style={{ padding: '8px 15px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>戻る</button>
+          <h1 style={{ color: '#4fc3f7', margin: 0, fontSize: '1.5rem' }}>MY PAGE</h1>
+          <div style={{ width: '60px' }}></div> {/* バランス調整用のダミー */}
+        </div>
 
         <div style={{ marginBottom: '20px', textAlign: 'center', background: 'rgba(255, 82, 82, 0.1)', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', maxWidth: '500px', width: '100%', boxSizing: 'border-box' }}>
             <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>電影の投稿前に必ずガイドラインを一読してください</p>
@@ -821,17 +993,19 @@ export const Lounge: React.FC<LoungeProps> = ({
                 <img src={tempKenju?.image || myProfile.myKenju?.image || getStorageUrl('/images/monster/11.png')} alt="電影" style={{ width: '250px', height: '250px', borderRadius: '15px', objectFit: 'contain', border: '3px solid #ff5252', background: '#111', marginBottom: '15px', boxShadow: '0 0 15px rgba(255, 82, 82, 0.3)' }} />
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <label style={{ background: '#ff5252', color: '#fff', padding: '8px 25px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.3)' }}>
-                    電影の画像をアップロード
+                    電影の画像をアップロード (600px×600pxまで)
                     <input type="file" accept="image/*" onChange={(e) => handleIconChange(e, true)} style={{ display: 'none' }} />
                   </label>
                 </div>
               </div>
               <div style={{ width: '100%' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: '#aaa' }}>電影名(10文字以内)</label>
+                <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>
+                  電影名(15文字以内) <span style={{ color: '#ff5252', fontSize: '0.7rem' }}>※必須項目</span>
+                </label>
                 <input
                   type="text"
-                  maxLength={10}
-                  value={tempKenju?.name || myProfile.myKenju?.name || ''}
+                  maxLength={15}
+                  value={tempKenju?.name || ''}
                   placeholder="電影"
                   onChange={(e) => setTempKenju({
                     ...(tempKenju || myProfile.myKenju || { skills: [], image: '', description: '', title: '', background: '' }),
@@ -845,10 +1019,12 @@ export const Lounge: React.FC<LoungeProps> = ({
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>電影の紹介文（400文字以内）</label>
+              <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>
+                電影の紹介文（200文字以内） <span style={{ color: '#ff5252', fontSize: '0.7rem' }}>※必須項目</span>
+              </label>
               <textarea
-                maxLength={400}
-                value={tempKenju?.description || myProfile.myKenju?.description || ''}
+                maxLength={200}
+                value={tempKenju?.description || ''}
                 placeholder="戦闘画面のサイドバーに表示される紹介文です"
                 onChange={(e) => setTempKenju({
                   ...(tempKenju || myProfile.myKenju || { name: '', skills: [], image: '', title: '', background: '' }),
@@ -861,11 +1037,11 @@ export const Lounge: React.FC<LoungeProps> = ({
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-                <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>対戦時タイトル</label>
+                <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>対戦時タイトル（20文字以内）</label>
                 <input
                   type="text"
-                  maxLength={30}
-                  value={tempKenju?.title || myProfile.myKenju?.title || ''}
+                  maxLength={20}
+                  value={tempKenju?.title || ''}
                   placeholder="BOSS SKILLS DISCLOSED"
                   onChange={(e) => setTempKenju({
                     ...(tempKenju || myProfile.myKenju || { name: '', skills: [], image: '', description: '', background: '' }),
@@ -899,7 +1075,7 @@ export const Lounge: React.FC<LoungeProps> = ({
 
             <div style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <label style={{ color: '#fff', fontWeight: 'bold' }}>電影スキル編成 (最大8つ / 重複可)</label>
+                <label style={{ color: '#fff', fontWeight: 'bold' }}>電影スキル編成 (1～8個 / 重複可)</label>
                 <button
                   onClick={() => {
                     setConfirmModal({
@@ -966,32 +1142,76 @@ export const Lounge: React.FC<LoungeProps> = ({
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button
                 onClick={() => {
-                  if (!tempKenju) return;
+                  const currentKenju = tempKenju || myProfile.myKenju;
+                  if (!currentKenju) return;
+
+                  // 必須チェック
+                  const errors = [];
+                  if (!currentKenju.name || currentKenju.name.trim() === '') {
+                    errors.push('・電影名');
+                  }
+                  if (!currentKenju.description || currentKenju.description.trim() === '') {
+                    errors.push('・電影の紹介文');
+                  }
+                  if (!currentKenju.skills || currentKenju.skills.length === 0) {
+                    errors.push('・スキル（1つ以上設定してください）');
+                  }
+
+                  if (errors.length > 0) {
+                    setAlertModal({
+                      show: true,
+                      title: '入力エラー',
+                      message: `以下の項目は必須です：\n${errors.join('\n')}`,
+                      buttonColor: '#ff5252'
+                    });
+                    return;
+                  }
                   
                   // スキル構成に変更があるかチェック
                   const oldSkills = myProfile.myKenju?.skills || [];
-                  const newSkills = tempKenju.skills || [];
+                  const newSkills = currentKenju.skills || [];
                   const skillsChanged = oldSkills.length !== newSkills.length ||
                                        oldSkills.some((s, i) => s !== newSkills[i]);
 
                   const finalKenju = {
-                    ...tempKenju,
-                    uploaderUid: tempKenju.uploaderUid || user?.uid
+                    ...currentKenju,
+                    name: currentKenju.name, // Ensure required fields
+                    image: currentKenju.image,
+                    skills: currentKenju.skills,
+                    uploaderUid: currentKenju.uploaderUid || user?.uid
                   };
 
                   if (skillsChanged) {
                     setConfirmModal({
                       show: true,
                       title: '電影の保存',
-                      message: 'スキル構成が変更されています。\n保存すると、現在のクリア人数と挑戦回数がリセットされますが、よろしいですか？',
+                      message: 'スキル構成が変更されています。\n保存すると、現在のクリア人数と挑戦回数が\nリセットされますが、よろしいですか？\n(❤️の数はリセットされません)',
                       onConfirm: () => {
-                        onSaveKenju(finalKenju, true);
+                        setIsSaving(true);
+                        onSaveKenju(finalKenju, true, (success, message) => {
+                          setIsSaving(false);
+                          setAlertModal({
+                            show: true,
+                            title: '保存しました',
+                            message: success ? "電影を保存しました。\nスキル構成が変更されたため、\nクリア人数と挑戦回数がリセットされました。" : message,
+                            buttonColor: success ? '#2196f3' : '#ff5252'
+                          });
+                        });
                         setConfirmModal(prev => ({ ...prev, show: false }));
                       }
                     });
                   } else {
                     // スキル構成に変更がない場合は即時保存（リセットなし）
-                    onSaveKenju(finalKenju, false);
+                    setIsSaving(true);
+                    onSaveKenju(finalKenju, false, (success, message) => {
+                      setIsSaving(false);
+                      setAlertModal({
+                        show: true,
+                        title: '保存しました',
+                        message: success ? '電影を保存しました。' : message,
+                        buttonColor: success ? '#2196f3' : '#ff5252'
+                      });
+                    });
                   }
                 }}
                 style={{ flex: 1, padding: '12px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -1066,6 +1286,13 @@ export const Lounge: React.FC<LoungeProps> = ({
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
 
+        <CustomAlertModal
+          show={alertModal.show}
+          title={alertModal.title}
+          message={alertModal.message}
+          onClose={() => setAlertModal(prev => ({ ...prev, show: false }))}
+          buttonColor={alertModal.buttonColor}
+        />
         <CustomConfirmModal
           show={confirmModal.show}
           title={confirmModal.title}
@@ -1074,6 +1301,26 @@ export const Lounge: React.FC<LoungeProps> = ({
           onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
           confirmColor={confirmModal.confirmColor}
         />
+        {isSaving && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 60000,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'
+          }}>
+            <div className="loading-spinner" style={{
+              width: '50px', height: '50px', border: '5px solid rgba(79, 195, 247, 0.3)',
+              borderTop: '5px solid #4fc3f7', borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <div style={{ color: '#4fc3f7', fontWeight: 'bold', fontSize: '1.1rem', textShadow: '0 0 10px rgba(79, 195, 247, 0.5)' }}>保存中...</div>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+          </div>
+        )}
         {showGuideline && <GuidelineModal onClose={() => setShowGuideline(false)} />}
       </div>
     );
@@ -1126,36 +1373,94 @@ export const Lounge: React.FC<LoungeProps> = ({
 
           {viewingProfile.myKenju && (
             <div style={{ textAlign: 'center', background: '#1a1a1a', padding: '20px', borderRadius: '10px', border: '2px solid #ff5252' }}>
-              <h3 style={{ fontSize: '1rem', color: '#ff5252', marginTop: 0 }}>{viewingProfile.displayName}の電影</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <h3 style={{ fontSize: '1rem', color: '#ff5252', marginTop: 0, textAlign: 'left' }}>{viewingProfile.displayName}の電影</h3>
+                {user?.uid !== viewingProfile.uid && (
+                  <button
+                    onClick={() => toggleMute(viewingProfile.uid)}
+                    style={{
+                      padding: '4px 8px',
+                      background: mutedUids.includes(viewingProfile.uid) ? '#ff5252' : '#444',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontSize: '0.7rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {mutedUids.includes(viewingProfile.uid) ? 'ミュート解除' : 'ミュートする'}
+                  </button>
+                )}
+              </div>
               <div style={{ position: 'relative', width: '100%', maxWidth: '150px', height: '120px', margin: '0 auto 15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
                 <img src={viewingProfile.myKenju.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{viewingProfile.myKenju.name}</div>
-              <div style={{ fontSize: '0.8rem', color: '#ff5252', marginBottom: '15px' }}>クリア: {kenjuClears}人 / 挑戦: {kenjuTrials}回</div>
+              <div style={{ fontSize: '0.8rem', color: '#ff5252', marginBottom: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+                <span>クリア: {kenjuClears}人 / 挑戦: {kenjuTrials}回</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onLikeDenei(viewingProfile.uid, viewingProfile.myKenju!.name); }}
+                  style={{ background: 'none', border: '1px solid #ff5252', borderRadius: '15px', padding: '2px 10px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', color: '#fff' }}
+                >
+                  <span style={{ color: '#ff5252' }}>❤️</span>
+                  <span>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.likes || 0}</span>
+                </button>
+              </div>
               <button
                 className="TitleButton neon-red"
-                onClick={() => {
-                  const skills = viewingProfile.myKenju!.skills.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
-                  onKenjuBattle({
-                    name: viewingProfile.myKenju!.name,
-                    image: viewingProfile.myKenju!.image,
-                    description: viewingProfile.myKenju!.description || '',
-                    skills: skills.length > 0 ? skills : [getSkillByAbbr('一')!],
-                    title: viewingProfile.myKenju!.title,
-                    userName: viewingProfile.displayName,
-                    background: viewingProfile.myKenju!.background,
-                    masterUid: viewingProfile.uid,
-                    isCustom: true
-                  } as any, 'DENEI');
+                onClick={async () => {
+                  setIsBattleLoading(true);
+                  try {
+                    const skills = viewingProfile.myKenju!.skills.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+                    await onKenjuBattle({
+                      name: viewingProfile.myKenju!.name,
+                      image: viewingProfile.myKenju!.image,
+                      description: viewingProfile.myKenju!.description || '',
+                      skills: skills.length > 0 ? skills : [getSkillByAbbr('一')!],
+                      title: viewingProfile.myKenju!.title,
+                      userName: viewingProfile.displayName,
+                      background: viewingProfile.myKenju!.background,
+                      masterUid: viewingProfile.uid,
+                      isCustom: true
+                    } as any, 'DENEI');
+                  } finally {
+                    setIsBattleLoading(false);
+                  }
                 }}
                 style={{ color: '#ffe600', padding: '8px 30px', fontSize: '1rem', width: '100%' }}
               >
                 この電影と戦う
               </button>
+              {user?.uid !== viewingProfile.uid && (
+                <p style={{ color: '#888', fontSize: '0.65rem', marginTop: '10px', textAlign: 'left' }}>
+                  ※ミュートすると、この電影はラウンジのピックアップに表示されなくなります（設定はブラウザに保存されます）。
+                </p>
+              )}
             </div>
           )}
         </div>
         <button onClick={() => setStageMode('LOUNGE')} style={{ marginTop: '30px', padding: '10px 30px', background: '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>戻る</button>
+
+        {isBattleLoading && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 70000,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'
+          }}>
+            <div className="loading-spinner" style={{
+              width: '60px', height: '60px', border: '6px solid rgba(255, 82, 82, 0.2)',
+              borderTop: '6px solid #ff5252', borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <div style={{ color: '#ff5252', fontWeight: 'bold', fontSize: '1.2rem', textShadow: '0 0 10px rgba(255, 82, 82, 0.5)' }}>電影戦の準備中...</div>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+          </div>
+        )}
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, runTransaction, serverTimestamp } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDEOQ0xiSg2MfqmL5qVlm-MP6fRC32OpVQ",
@@ -36,4 +36,11 @@ export const recordAccess = () => {
   })
   .then(() => console.log("Total access count incremented successfully!"))
   .catch((e) => console.error("Error incrementing total access count: ", e));
+};
+
+export const uploadDeneiImage = async (uid: string, dataUrl: string) => {
+  const imageRef = storageRef(storage, `images/denei/${uid}.png`);
+  // dataUrl は "data:image/png;base64,xxxx" という形式なので uploadString の data_url 形式でアップロード可能
+  await uploadString(imageRef, dataUrl, 'data_url');
+  return await getDownloadURL(imageRef);
 };

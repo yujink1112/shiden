@@ -160,7 +160,7 @@ export const KENJU_DATA: KenjuConfig[] = [
     medalId: "shiran",
   },
   {
-    name: "樹上の眠猫 アティヤー",
+    name: "樹上の銀猫 アティヤー",
     title: "NESSUN DORMA",
     description: "「誰も寝てはニャらぬ」 ",
     background: "/images/background/10.jpg",
@@ -218,7 +218,17 @@ export const getSkillByName = (name: string): SkillDetail | undefined => {
 
 export interface StageContext {
   stageCycle: number;
-  kenjuBoss?: { name: string; title: string; description: string; background: string, image: string; skills: SkillDetail[]; isCustom?: boolean; masterUid?: string };
+  kenjuBoss?: {
+    name: string;
+    title: string;
+    description: string;
+    background: string;
+    image: string;
+    skills: SkillDetail[];
+    isCustom?: boolean;
+    masterUid?: string;
+    userName?: string;
+  };
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
   userName?: string;
