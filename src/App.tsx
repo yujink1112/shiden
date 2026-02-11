@@ -394,6 +394,8 @@ function App() {
     }
     return new MidStageProcessor();
   }, [stageMode, stageCycle]);
+
+
   const [bossSkills, setBossSkills] = useState<SkillDetail[]>([]);
   const [canGoToBoss, setCanGoToBoss] = useState<boolean>(() => {
     const saved = localStorage.getItem('shiden_can_go_to_boss');
@@ -427,6 +429,14 @@ function App() {
   });
 
   const [midEnemyData, setMidEnemyData] = useState<{ [stage: number]: string[] }>({});
+
+  const stageContext = React.useMemo<import('./stageData').StageContext>(() => ({
+    stageCycle,
+    kenjuBoss: (stageMode === 'DENEI' || stageMode === 'KENJU') ? (currentKenjuBattle || kenjuBoss || undefined) : undefined,
+    selectedPlayerSkills,
+    midEnemyData,
+    userName: myProfile?.displayName
+  }), [stageCycle, stageMode, currentKenjuBattle, kenjuBoss, selectedPlayerSkills, midEnemyData, myProfile]);
 
   const lastSavedVictoryRef = useRef<string>("");
 
@@ -1160,7 +1170,7 @@ const PLAYER_SKILL_COUNT = 5;
       const results: BattleResult[] = [];
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
       const battleCount = stageProcessor.getBattleCount();
-      const context = { stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName };
+      const context = stageContext;
 
       // 挑戦回数をカウント
       if (stageMode === 'KENJU' && kenjuBoss) {
@@ -1447,7 +1457,7 @@ const PLAYER_SKILL_COUNT = 5;
         {bossImage && (
           <div className="boss-stage-area sticky-boss-area" style={{
             height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${getStorageUrl(processor.getBackgroundImage({ stageCycle: battleStageCycle || stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }))})`,
+            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(currentKenjuBattle?.background || '') : (stageProcessor.getBackgroundImage(stageContext)) || '')})`,
             paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
           }}>
             {/* 背景を暗くするオーバーレイ */}
@@ -1465,7 +1475,7 @@ const PLAYER_SKILL_COUNT = 5;
                   alt={bossName}
                   className={`boss-battle-image boss-anim-${bossAnim}`}
                   style={{
-                      ...processor.getBossImageStyle({ stageCycle: battleStageCycle || stageCycle, selectedPlayerSkills, midEnemyData, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, userName: myProfile?.displayName }, isMobile, 'battle')
+                      ...processor.getBossImageStyle({ ...stageContext, stageCycle: battleStageCycle || stageCycle }, isMobile, 'battle')
                   }}
                 />
               </div>
@@ -1843,9 +1853,9 @@ const PLAYER_SKILL_COUNT = 5;
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
-              {stageProcessor.getStageTitle({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}
+              {stageProcessor.getStageTitle(stageContext)}
           </h1>
-          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageProcessor.getStageDescription({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}</p>
+          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageProcessor.getStageDescription(stageContext)}</p>
           <div style={{ position: 'absolute', right: '5px', top: '10px', display: 'flex', gap: '5px', zIndex: 11 }}>
             <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
             <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '2px' }} title="設定">⚙️</button>
@@ -1855,8 +1865,8 @@ const PLAYER_SKILL_COUNT = 5;
         <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           <div style={{
             width: '100%',
-            height: stageProcessor.getBossImage({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData }) ? '300px' : '240px',
-            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(currentKenjuBattle?.background || '') : (stageProcessor.getBackgroundImage({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })) || '')})`,
+            height: stageProcessor.getBossImage(stageContext) ? '300px' : '240px',
+            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(currentKenjuBattle?.background || '') : (stageProcessor.getBackgroundImage(stageContext)) || '')})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             borderRadius: '10px',
@@ -1865,14 +1875,14 @@ const PLAYER_SKILL_COUNT = 5;
             position: 'relative',
             overflow: 'hidden'
           }}>
-            {stageProcessor.getBossImage({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData }) && (!gameStarted || (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) && (
+            {stageProcessor.getBossImage(stageContext) && (!gameStarted || (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) && (
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
                 <img
-                  src={stageProcessor.getBossImage({ stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData }) || ""}
+                  src={stageProcessor.getBossImage(stageContext) || ""}
                   alt=""
                   className="boss-battle-image"
                   style={{
-                      ...stageProcessor.getBossImageStyle({ stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }, isMobile, 'back')
+                      ...stageProcessor.getBossImageStyle(stageContext, isMobile, 'back')
                   }}
                 />
               </div>
@@ -1880,11 +1890,11 @@ const PLAYER_SKILL_COUNT = 5;
             {!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
               <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px' }}>
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
-                      {stageProcessor.getEnemyTitle?.({ stageCycle, kenjuBoss: (stageMode === 'DENEI' || stageMode === 'KENJU') ? (currentKenjuBattle || kenjuBoss || undefined) : undefined, selectedPlayerSkills, midEnemyData, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
+                      {stageProcessor.getEnemyTitle?.({ ...stageContext, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
                   </h2>
-                  <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : ((stageMode === 'DENEI' && currentKenjuBattle || stageMode === 'KENJU' && kenjuBoss) || stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
-                    {stageProcessor.getEnemySkills(0, { stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }).length > 0 ? (
-                      stageProcessor.getEnemySkills(0, { stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }).map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)
+                  <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : ((stageMode === 'DENEI' || stageMode === 'KENJU' && kenjuBoss) || stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
+                    {stageProcessor.getEnemySkills(0, stageContext).length > 0 ? (
+                      stageProcessor.getEnemySkills(0, stageContext).map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)
                     ) : (
                       <div style={{ color: '#ff5252', padding: '20px' }}>スキル未設定</div>
                     )}
@@ -1947,7 +1957,7 @@ const PLAYER_SKILL_COUNT = 5;
             )}
             {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
-                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{ (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, { stageCycle, kenjuBoss: currentKenjuBattle || kenjuBoss || undefined, selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}撃破！<br />素晴らしいです！！</>)}</h2>
+                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{ (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</>)}</h2>
                 <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}</button>
               </div>
             )}
@@ -2024,10 +2034,9 @@ const PLAYER_SKILL_COUNT = 5;
                 }
             }
           }} bossImage={(() => {
-            const contextBoss = (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined));
-            const bossImage = stageProcessor.getBossImage({ stageCycle, kenjuBoss: contextBoss, selectedPlayerSkills, midEnemyData });
+            const bossImage = stageProcessor.getBossImage(stageContext);
             return bossImage || "";
-          })()} bossName={stageProcessor.getEnemyName(0, { stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData })} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={(stageMode === 'KENJU' || stageMode === 'DENEI') ? 11 : stageCycle} processor={stageProcessor} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
+          })()} bossName={stageProcessor.getEnemyName(0, stageContext)} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={(stageMode === 'KENJU' || stageMode === 'DENEI') ? 11 : stageCycle} processor={stageProcessor} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
         ) :
         
         (storyContent && !gameStarted ? 
@@ -2038,12 +2047,11 @@ const PLAYER_SKILL_COUNT = 5;
           ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ?
            <div style={{ textAlign: 'center' }}>
             <img src={(() => {
-              const contextBoss = (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined));
-              const bossImage = stageProcessor.getBossImage({ stageCycle, kenjuBoss: contextBoss, selectedPlayerSkills, midEnemyData });
+              const bossImage = stageProcessor.getBossImage(stageContext);
               return bossImage || "";
-            })()} alt="" style={stageProcessor.getBossImageStyle({ stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName }, isMobile, 'sidebar')} />
-            <h3>{stageProcessor.getEnemyName(0, { stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}</h3>
-            <p>{stageProcessor.getBossDescription({ stageCycle, kenjuBoss: (stageMode === 'DENEI' ? (kenjuBoss || undefined) : (stageMode === 'KENJU' ? (kenjuBoss || undefined) : undefined)), selectedPlayerSkills, midEnemyData, userName: myProfile?.displayName })}</p></div> : "ログがありません。"))}
+            })()} alt="" style={stageProcessor.getBossImageStyle(stageContext, isMobile, 'sidebar')} />
+            <h3>{stageProcessor.getEnemyName(0, stageContext)}</h3>
+            <p>{stageProcessor.getBossDescription(stageContext)}</p></div> : "ログがありません。"))}
       </div>
       {showRule && <Rule onClose={() => setShowRule(false)} />}
       {showSettings && (

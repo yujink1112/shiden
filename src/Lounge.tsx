@@ -1097,7 +1097,7 @@ export const Lounge: React.FC<LoungeProps> = ({
                     background: viewingProfile.myKenju!.background,
                     masterUid: viewingProfile.uid,
                     isCustom: true
-                  } as any);
+                  } as any, 'DENEI');
                 }}
                 style={{ color: '#ffe600', padding: '8px 30px', fontSize: '1rem', width: '100%' }}
               >

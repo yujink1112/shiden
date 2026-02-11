@@ -366,7 +366,7 @@ export class KenjuStageProcessor implements StageProcessor {
 
   getBossImage(context: StageContext): string | undefined {
     if (!context.kenjuBoss?.image) return undefined;
-    return getStorageUrl(context.kenjuBoss.image);
+    return context.kenjuBoss.image.startsWith('/') ? getStorageUrl(context.kenjuBoss.image) : context.kenjuBoss.image;
   }
 
   getBossDescription(context: StageContext): string {
