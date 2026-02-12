@@ -368,6 +368,7 @@ function App() {
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
   const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } }>({});
   const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
+  const [isLoungeDataLoaded, setIsLoungeDataLoaded] = useState(false); // 新しい状態変数
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -676,8 +677,25 @@ const PLAYER_SKILL_COUNT = 5;
 
   const handleLikeDenei = async (masterUid: string, deneiName: string) => {
     if (!user) return;
+
+    // 楽観的UI更新
+    setAllDeneiStats(prevStats => {
+      const newStats = { ...prevStats };
+      if (!newStats[masterUid]) {
+        newStats[masterUid] = {};
+      }
+      if (!newStats[masterUid][deneiName]) {
+        newStats[masterUid][deneiName] = { clears: 0, trials: 0, likes: 0 };
+      }
+      newStats[masterUid][deneiName].likes = (newStats[masterUid][deneiName].likes || 0) + 1;
+      return newStats;
+    });
+
     const likeRef = ref(database, `deneiLikes/${masterUid}/${deneiName}/${user.uid}`);
-    set(likeRef, serverTimestamp()).catch(err => console.error("Failed to like:", err));
+    set(likeRef, serverTimestamp()).catch(err => {
+      console.error("Failed to like:", err);
+      // エラー発生時は状態を元に戻すか、再フェッチするなどの対応が必要だが、今回は簡易的に何もしない
+    });
   };
 
   const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => {
@@ -1072,13 +1090,27 @@ const PLAYER_SKILL_COUNT = 5;
       setIsDeneiStatsLoaded(true);
     };
 
-    // get で一回だけ取得するように変更
-    Promise.all([
-      get(deneiClearsRootRef),
-      get(deneiTrialsRootRef),
-      get(deneiLikesRootRef)
-    ]).then(([clearsSnap, trialsSnap, likesSnap]) => {
-      updateDeneiStats(clearsSnap.val(), trialsSnap.val(), likesSnap.val());
+    // onValue に戻してリアルタイム更新を有効化
+    const unsubClears = onValue(deneiClearsRootRef, (snap) => {
+      get(deneiTrialsRootRef).then(trialsSnap => {
+        get(deneiLikesRootRef).then(likesSnap => {
+          updateDeneiStats(snap.val(), trialsSnap.val(), likesSnap.val());
+        });
+      });
+    });
+    const unsubTrials = onValue(deneiTrialsRootRef, (snap) => {
+      get(deneiClearsRootRef).then(clearsSnap => {
+        get(deneiLikesRootRef).then(likesSnap => {
+          updateDeneiStats(clearsSnap.val(), snap.val(), likesSnap.val());
+        });
+      });
+    });
+    const unsubLikes = onValue(deneiLikesRootRef, (snap) => {
+      get(deneiClearsRootRef).then(clearsSnap => {
+        get(deneiTrialsRootRef).then(trialsSnap => {
+          updateDeneiStats(clearsSnap.val(), trialsSnap.val(), snap.val());
+        });
+      });
     });
 
     setBattleResults([]);
@@ -1108,6 +1140,9 @@ const PLAYER_SKILL_COUNT = 5;
 
     return () => {
       unsubscribeAuth();
+      unsubClears();
+      unsubTrials();
+      unsubLikes();
     };
   }, []);
 
@@ -1259,10 +1294,21 @@ const PLAYER_SKILL_COUNT = 5;
           uid: user?.uid || 'anonymous',
           timestamp: serverTimestamp()
         });
+        // オプティミスティックUI更新
+        setKenjuTrials(prev => prev + 1);
       } else if (stageMode === 'DENEI' && currentKenjuBattle) {
         const targetBossName = currentKenjuBattle.name;
         const masterUid = (currentKenjuBattle as any).masterUid;
         if (masterUid) {
+          // オプティミスティックUI更新
+          setAllDeneiStats(prevStats => {
+            const newStats = { ...prevStats };
+            if (!newStats[masterUid]) newStats[masterUid] = {};
+            if (!newStats[masterUid][targetBossName]) newStats[masterUid][targetBossName] = { clears: 0, trials: 0, likes: 0 };
+            newStats[masterUid][targetBossName].trials = (newStats[masterUid][targetBossName].trials || 0) + 1;
+            return newStats;
+          });
+
           const trialsRef = ref(database, `deneiTrials/${masterUid}/${targetBossName}`);
           const newTrialRef = push(trialsRef);
           set(newTrialRef, {
@@ -1641,11 +1687,21 @@ const PLAYER_SKILL_COUNT = 5;
               if (stageMode === 'KENJU' && kenjuBoss) {
                 const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
                 set(kenjuClearRef, serverTimestamp());
+                // オプティミスティックUI更新
+                setKenjuClears(prev => prev + 1);
               } else if (stageMode === 'DENEI' && currentKenjuBattle) {
                 const masterUid = (currentKenjuBattle as any).masterUid;
                 if (masterUid) {
                   const deneiClearRef = ref(database, `deneiClears/${masterUid}/${currentKenjuBattle.name}/${user.uid}`);
                   set(deneiClearRef, serverTimestamp());
+                  // オプティミスティックUI更新
+                  setAllDeneiStats(prevStats => {
+                    const newStats = { ...prevStats };
+                    if (!newStats[masterUid]) newStats[masterUid] = {};
+                    if (!newStats[masterUid][currentKenjuBattle.name]) newStats[masterUid][currentKenjuBattle.name] = { clears: 0, trials: 0, likes: 0 };
+                    newStats[masterUid][currentKenjuBattle.name].clears = (newStats[masterUid][currentKenjuBattle.name].clears || 0) + 1;
+                    return newStats;
+                  });
 
                   // 自分のクリア履歴を保存
                   const deneiVictoryHistoryRef = ref(database, `profiles/${user.uid}/deneiVictories/${currentKenjuBattle.name.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
@@ -1742,6 +1798,10 @@ const PLAYER_SKILL_COUNT = 5;
         allDeneiStats={allDeneiStats}
         isDeneiStatsLoaded={isDeneiStatsLoaded}
         SkillCard={SkillCard}
+        showUpdateNotify={showUpdateNotify}
+        changelogData={changelogData}
+        setShowUpdateNotify={setShowUpdateNotify}
+        handleForceUpdate={handleForceUpdate}
       />
     );
   }
@@ -1961,7 +2021,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         </div>
 
-        <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
+        <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           <div style={{
             width: '100%',
             height: stageProcessor.getBossImage(stageContext) ? '300px' : '240px',

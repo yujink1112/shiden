@@ -78,6 +78,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
           <thead>
             <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
               <th style={{ padding: '12px', textAlign: 'left' }}>名前</th>
+              <th style={{ padding: '12px', textAlign: 'center' }}>電影</th>
               <th style={{ padding: '12px', textAlign: 'center' }}>好き</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていきたい</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
@@ -103,6 +104,13 @@ const UserListTable: React.FC<UserListTableProps> = ({
                         {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
                       </div>
                     </div>
+                  </td>
+                  <td style={{ padding: '10px', textAlign: 'center' }}>
+                    {p.myKenju?.name ? (
+                      <span title={p.myKenju.name} style={{ cursor: 'help' }}>✅</span>
+                    ) : (
+                      <span style={{ color: '#444' }}>-</span>
+                    )}
                   </td>
                   <td style={{ padding: '10px', textAlign: 'center' }}>
                     {favSkill && (
@@ -501,12 +509,13 @@ onPageChange,
     { id: 'fiat_lux', name: '光あれ', description: '果てに視えるものを撃破' }
   ];
 
+  const [refreshSeed, setRefreshSeed] = React.useState(0);
   const randomKenjuPlayers = React.useMemo(() => {
     const withKenju = allProfiles.filter(p =>
       p.myKenju && p.myKenju.name && p.myKenju.image && !mutedUids.includes(p.uid)
     );
     return [...withKenju].sort(() => 0.5 - Math.random()).slice(0, 3);
-  }, [allProfiles, mutedUids]);
+  }, [allProfiles, mutedUids, refreshSeed]);
 
   if (stageMode === 'LOUNGE') {
     return (
@@ -647,7 +656,29 @@ onPageChange,
               </div>
 
               <div style={{ background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ffd700', textAlign: 'center', boxShadow: '0 0 15px rgba(79, 195, 247, 0.2)', display: 'flex', flexDirection: 'column' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 10px 0', fontSize: '1.2rem' }}>電影 Pick up!</h2>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <h2 style={{ color: '#ffd700', margin: 0, fontSize: '1.2rem' }}>電影 Pick up!</h2>
+                  <button
+                    onClick={() => setRefreshSeed(s => s + 1)}
+                    style={{
+                      background: 'none',
+                      border: '1px solid #ffd700',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: '#ffd700',
+                      fontSize: '0.8rem',
+                      padding: 0
+                    }}
+                    title="更新"
+                  >
+                    ↻
+                  </button>
+                </div>
                 {!isDeneiStatsLoaded ? (
                   <p style={{ color: '#888', margin: '20px 0' }}>読み込み中...</p>
                 ) : randomKenjuPlayers.length > 0 ? (
