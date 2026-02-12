@@ -340,7 +340,7 @@ interface LoungeProps {
   currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
   kenjuClears: number;
   kenjuTrials: number;
-  allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } };
+  allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } };
   isDeneiStatsLoaded: boolean;
   onGoogleSignIn: () => void;
   onEmailSignUp: (email: string, pass: string) => void;
@@ -515,7 +515,7 @@ onPageChange,
       p.myKenju && p.myKenju.name && p.myKenju.image && !mutedUids.includes(p.uid)
     );
     return [...withKenju].sort(() => 0.5 - Math.random()).slice(0, 3);
-  }, [allProfiles, mutedUids, refreshSeed]);
+  }, [allProfiles.length, mutedUids, refreshSeed]); // allProfiles全体ではなくlengthを監視して、いいね更新で走らないようにする
 
   if (stageMode === 'LOUNGE') {
     return (
@@ -697,8 +697,8 @@ onPageChange,
                                   onClick={(e) => { e.stopPropagation(); onLikeDenei(p.uid, p.myKenju!.name); }}
                                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '2px' }}
                                 >
-                                  <span style={{ color: '#ff5252' }}>❤️</span>
-                                  <span style={{ color: '#ffd700' }}>{allDeneiStats[p.uid][p.myKenju.name].likes || 0}</span>
+                                  <span style={{ color: '#ff5252' }}>{allDeneiStats?.[p.uid]?.[p.myKenju.name]?.isLiked ? '❤️' : '🤍'}</span>
+                                  <span style={{ color: '#ffd700' }}>{allDeneiStats?.[p.uid]?.[p.myKenju.name]?.likes || 0}</span>
                                 </button>
                               </div>
                             </div>
@@ -1433,7 +1433,7 @@ onPageChange,
                   onClick={(e) => { e.stopPropagation(); onLikeDenei(viewingProfile.uid, viewingProfile.myKenju!.name); }}
                   style={{ background: 'none', border: '1px solid #ff5252', borderRadius: '15px', padding: '2px 10px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', color: '#fff' }}
                 >
-                  <span style={{ color: '#ff5252' }}>❤️</span>
+                  <span style={{ color: '#ff5252' }}>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.isLiked ? '❤️' : '🤍'}</span>
                   <span>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.likes || 0}</span>
                 </button>
               </div>

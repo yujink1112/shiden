@@ -366,7 +366,7 @@ function App() {
   });
   const [kenjuClears, setKenjuClears] = useState<number>(0);
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
-  const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } }>({});
+  const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } }>({});
   const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
   const [isLoungeDataLoaded, setIsLoungeDataLoaded] = useState(false); // 新しい状態変数
 
@@ -678,6 +678,8 @@ const PLAYER_SKILL_COUNT = 5;
   const handleLikeDenei = async (masterUid: string, deneiName: string) => {
     if (!user) return;
 
+    const isCurrentlyLiked = allDeneiStats[masterUid]?.[deneiName]?.isLiked;
+    
     // 楽観的UI更新
     setAllDeneiStats(prevStats => {
       const newStats = { ...prevStats };
@@ -687,15 +689,18 @@ const PLAYER_SKILL_COUNT = 5;
       if (!newStats[masterUid][deneiName]) {
         newStats[masterUid][deneiName] = { clears: 0, trials: 0, likes: 0 };
       }
-      newStats[masterUid][deneiName].likes = (newStats[masterUid][deneiName].likes || 0) + 1;
+      const currentLikes = newStats[masterUid][deneiName].likes || 0;
+      newStats[masterUid][deneiName].likes = isCurrentlyLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1;
+      newStats[masterUid][deneiName].isLiked = !isCurrentlyLiked;
       return newStats;
     });
 
     const likeRef = ref(database, `deneiLikes/${masterUid}/${deneiName}/${user.uid}`);
-    set(likeRef, serverTimestamp()).catch(err => {
-      console.error("Failed to like:", err);
-      // エラー発生時は状態を元に戻すか、再フェッチするなどの対応が必要だが、今回は簡易的に何もしない
-    });
+    if (isCurrentlyLiked) {
+      set(likeRef, null).catch(err => console.error("Failed to unlike:", err));
+    } else {
+      set(likeRef, serverTimestamp()).catch(err => console.error("Failed to like:", err));
+    }
   };
 
   const handleUpdateProfile = async (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => {
@@ -1046,7 +1051,7 @@ const PLAYER_SKILL_COUNT = 5;
     const deneiLikesRootRef = ref(database, 'deneiLikes');
 
     const updateDeneiStats = (clearsData: any, trialsData: any, likesData: any) => {
-      const newState: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number } } } = {};
+      const newState: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } } = {};
       
       const ensureStats = (uid: string, kenjuName: string) => {
         if (!newState[uid]) newState[uid] = {};
@@ -1082,6 +1087,9 @@ const PLAYER_SKILL_COUNT = 5;
             if (typeof likes !== 'object' || likes === null) return;
             ensureStats(uid, kenjuName);
             newState[uid][kenjuName].likes = Object.keys(likes).length;
+            if (auth.currentUser && likes[auth.currentUser.uid]) {
+              newState[uid][kenjuName].isLiked = true;
+            }
           });
         });
       }
