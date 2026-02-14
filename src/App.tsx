@@ -10,6 +10,7 @@ import { Lounge } from './Lounge';
 import type { UserProfile } from './Lounge';
 import { Rule } from './Rule';
 import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidStageProcessor } from './stageProcessors';
+import Lifuku from './Lifuku';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
@@ -550,7 +551,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
   );
 };
 
-type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'DENEI' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT' | 'ADMIN_ANALYTICS';
+type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'DENEI' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT' | 'ADMIN_ANALYTICS' | 'LIFUKU';
 type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
 function App() {
@@ -795,7 +796,10 @@ const PLAYER_SKILL_COUNT = 5;
 
   useEffect(() => {
     // 全てのモードを永続化する（リロード時に状態を維持するため）
-    localStorage.setItem('shiden_stage_mode', stageMode);
+    // LIFUKU モードの場合はリロード時にタイトルに戻るように保存しない
+    if (stageMode !== 'LIFUKU') {
+      localStorage.setItem('shiden_stage_mode', stageMode);
+    }
     
     // ゲーム進行モード（MID/BOSS）の場合は、最後にプレイしたモードとして保存
     if (stageMode === 'MID' || stageMode === 'BOSS') {
@@ -1159,6 +1163,20 @@ const PLAYER_SKILL_COUNT = 5;
 
     setStageMode(mode);
     handleResetGame();
+  };
+
+  const handleLifukuScore = async (score: number) => {
+    if (!user || !myProfile) return;
+    
+    const currentHighscore = myProfile.lifukuHighscore || 0;
+    if (score > currentHighscore) {
+      const profileRef = ref(database, `profiles/${user.uid}`);
+      await set(profileRef, {
+        ...myProfile,
+        lifukuHighscore: score,
+        lastActive: Date.now()
+      });
+    }
   };
 
   const handleNewGame = () => {
@@ -1818,6 +1836,18 @@ const PLAYER_SKILL_COUNT = 5;
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
 
+  if (stageMode === 'LIFUKU') {
+    return (
+      <Lifuku
+        onBack={() => { setStageMode('MID'); setIsTitle(true); }}
+        getStorageUrl={getStorageUrl}
+        user={user}
+        onSaveScore={handleLifukuScore}
+        onShowLounge={() => { setStageMode('LOUNGE'); setIsTitle(false); }}
+      />
+    );
+  }
+
   if (stageMode === 'VERIFY_EMAIL') {
       return (
           <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center' }}>
@@ -1989,6 +2019,57 @@ const PLAYER_SKILL_COUNT = 5;
                 setShowClearStats(true);
               });
             }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
+          </div>
+          <div
+            className="LifukuTab"
+            onClick={() => { setStageMode('LIFUKU'); setIsTitle(false); }}
+            style={{
+              position: 'absolute',
+              bottom: '40px', // 右下（更新履歴の近く）
+              right: '0px',
+              backgroundColor: '#f06292',
+              padding: '8px 25px 8px 15px',
+              borderRadius: '20px 0 0 20px',
+              cursor: 'pointer',
+              boxShadow: '-2px 2px 10px rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'transform 0.3s ease, background-color 0.3s',
+              zIndex: 100,
+              border: '2px solid #fff',
+              borderRight: 'none',
+              animation: 'tabSlideIn 0.8s ease-out'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-15px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+          >
+            {/* 実際のらいふくに近い形状の小さな個体 */}
+            <div style={{
+              width: '28px',
+              height: '24px',
+              backgroundColor: 'white',
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', // 饅頭フォルム
+              position: 'relative',
+              border: '1px solid #333', // 少し細く
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              boxSizing: 'border-box'
+            }}>
+              {/* 目 - 位置とサイズを調整 */}
+              <div style={{ position: 'absolute', top: '10px', left: '6px', width: '2px', height: '2px', backgroundColor: 'black', borderRadius: '50%' }} />
+              <div style={{ position: 'absolute', top: '10px', right: '6px', width: '2px', height: '2px', backgroundColor: 'black', borderRadius: '50%' }} />
+              {/* 口 (ωを疑似再現) - 左右の曲線を隙間なく配置 */}
+              <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '9px', height: '3.5px', display: 'flex' }}>
+                <div style={{ flex: 1, border: '0.8px solid black', borderTop: 'none', borderRadius: '0 0 4.5px 4.5px', boxSizing: 'border-box' }} />
+                <div style={{ flex: 1, border: '0.8px solid black', borderTop: 'none', borderLeft: 'none', borderRadius: '0 0 4.5px 4.5px', boxSizing: 'border-box' }} />
+              </div>
+              {/* ほっぺ */}
+              <div style={{ position: 'absolute', bottom: '5px', left: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
+              <div style={{ position: 'absolute', bottom: '5px', right: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
+            </div>
+            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.8rem' }}>らいふく</span>
           </div>
           <div className="TitleFooter">
             <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
