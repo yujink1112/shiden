@@ -14,6 +14,262 @@ import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
 
+interface AnimatedRichLogProps {
+  log: string;
+  onComplete: () => void;
+  immediate?: boolean;
+  bossImage?: string;
+  bossName?: string;
+  battleInstance?: any;
+  battleStageCycle?: number;
+  processor: StageProcessor;
+  stageMode: StageMode;
+  stageContext: any;
+  getStorageUrl: (path: string) => string;
+}
+
+const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor, stageMode, stageContext, getStorageUrl }) => {
+    const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
+    const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
+    const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
+    const [roundFinished, setRoundFinished] = useState<boolean[]>(new Array(rounds.length).fill(false));
+    const [bossAnim, setBossAnim] = useState<'idle' | 'attack' | 'damage' | 'counter' | 'defeat'>('idle');
+    const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
+    const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
+    useEffect(() => {
+        if (!roundFinished[currentRoundIdx]) {
+            const currentLineIdx = roundVisibleCounts[currentRoundIdx];
+            if (currentLineIdx < currentRoundLines.length) {
+                const line = currentRoundLines[currentLineIdx];
+                if (line.includes('破壊された')) {
+                    if (line.includes('あなたの')) {
+                      const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
+                      if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    } else if (bossName && line.includes(`${bossName}の`)) {
+                      // 特殊文字をエスケープして正規表現を作成
+                      const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                      const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
+                      if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    }
+                }
+                if (line.includes('リミテッド') && line.includes('破壊された')) {
+                    if (line.includes('あなたの')) {
+                        const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
+                        if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    } else if (bossName && line.includes(`${bossName}の`)) {
+                        const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
+                        if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    }
+                }
+                if (bossName) {
+                    if (line.includes(`${bossName}の勝利`) || line.includes(`${bossName}が破壊された`)) setBossAnim('defeat');
+                    else if (line.includes(`${bossName}の【`) && line.includes('が発動')) { setBossAnim('counter'); setTimeout(() => setBossAnim('idle'), 800); }
+                    else if (line.includes(`${bossName}の攻撃フェイズ`)) { setBossAnim('attack'); setTimeout(() => setBossAnim('idle'), 800); }
+                    else if (line.includes(`${bossName}に`) && line.includes('のダメージ')) { setBossAnim('damage'); setTimeout(() => setBossAnim('idle'), 800); }
+                }
+            }
+        }
+    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished]);
+    useEffect(() => {
+      if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
+      if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
+          const nc = [...roundVisibleCounts];
+          if (nc[currentRoundIdx] !== currentRoundLines.length) {
+            nc[currentRoundIdx] = currentRoundLines.length;
+            setRoundVisibleCounts(nc);
+          }
+          if (!roundFinished[currentRoundIdx]) {
+            const nf = [...roundFinished];
+            nf[currentRoundIdx] = true;
+            setRoundFinished(nf);
+          }
+          onComplete();
+          return;
+      }
+      if (!roundFinished[currentRoundIdx]) {
+        if (roundVisibleCounts[currentRoundIdx] < currentRoundLines.length) {
+          const timer = setTimeout(() => { const nc = [...roundVisibleCounts]; nc[currentRoundIdx]++; setRoundVisibleCounts(nc); }, 400);
+          return () => clearTimeout(timer);
+        } else {
+          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
+          if (currentRoundIdx === rounds.length - 1) onComplete();
+        }
+      }
+    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds, onComplete]);
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [roundVisibleCounts]);
+    const goNext = () => {
+      if (!roundFinished[currentRoundIdx]) {
+        const fullLines = currentRoundLines;
+        let newPc1Scar = [...currentPc1Scar], newPc2Scar = [...currentPc2Scar];
+        fullLines.forEach(line => {
+            if (line.includes('破壊された')) {
+                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
+                else if (bossName && line.includes(`${bossName}の`)) {
+                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
+                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
+                }
+            }
+            if (line.includes('リミテッド') && line.includes('破壊された')) {
+                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
+                else if (bossName && line.includes(`${bossName}の`)) {
+                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
+                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
+                }
+            }
+        });
+        setCurrentPc1Scar(newPc1Scar); setCurrentPc2Scar(newPc2Scar);
+        const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
+        const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
+        if (currentRoundIdx === rounds.length - 1) {
+          onComplete();
+        }
+      } else if (currentRoundIdx < rounds.length - 1) {
+        setCurrentRoundIdx(prev => prev + 1);
+      } else {
+        // すでに最終ラウンドが終了している場合でも確実に onComplete を呼ぶ
+        onComplete();
+      }
+    };
+    const goBack = () => { if (currentRoundIdx > 0) setCurrentRoundIdx(prev => prev - 1); };
+    
+    // PC1 (プレイヤー) と PC2 (ボス) のゲージを個別に管理
+    const renderGauge = (player: any, scars: number[], color: string) => {
+      if (!player) return null;
+      const totalSkills = player.getSkillsLength();
+      const brokenSkills = scars.filter((s: number) => s === 1).length;
+      const percentage = Math.max(0, ((totalSkills - brokenSkills) / totalSkills) * 100);
+      
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.8))', width: '80px' }}>
+          <div style={{ fontSize: player.playerName.length >= 9 ? '8px' : '10px', fontWeight: 'bold', marginBottom: '6px', color: '#fff', textShadow: '0 0 4px #000, 1px 1px 2px #000', textAlign: 'center', width: '100%', wordBreak: 'break-all', height: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1.2' }}>
+            {player.playerName}
+          </div>
+          <div style={{ height: '140px', width: '16px', backgroundColor: 'rgba(20,20,20,0.8)', border: '2px solid #fff', borderRadius: '4px', boxSizing: 'border-box', boxShadow: '0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`,
+              background: `linear-gradient(to top, ${color}, ${color}dd)`,
+              transition: 'height 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+              boxShadow: `0 0 15px ${color}`
+            }} />
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`,
+              backgroundColor: '#fff', opacity: 0.3, filter: 'blur(2px)', mixBlendMode: 'overlay'
+            }} />
+          </div>
+        </div>
+      );
+    };
+
+    const isMobile = window.innerWidth < 768;
+
+    return (
+      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
+        {bossImage && (
+          <div className="boss-stage-area sticky-boss-area" style={{
+            height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(stageContext.kenjuBoss?.background || '') : (processor.getBackgroundImage(stageContext)) || '')})`,
+            paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
+          }}>
+            {/* 背景を暗くするオーバーレイ */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
+            
+            <div style={{ zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
+              <div style={{ zIndex: 10, position: 'relative' }}>
+                {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
+              </div>
+              
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (battleStageCycle === 8 || battleStageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 5, overflow: battleStageCycle === 4 ? 'visible' : 'hidden' }}>
+                <img
+                  src={bossImage}
+                  alt={bossName}
+                  className={`boss-battle-image boss-anim-${bossAnim}`}
+                  style={{
+                      ...processor.getBossImageStyle({ ...stageContext, stageCycle: battleStageCycle }, isMobile, 'battle')
+                  }}
+                />
+              </div>
+              
+              <div style={{ zIndex: 10, position: 'relative' }}>
+                {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
+              </div>
+            </div>
+            <style>{`
+              @keyframes slideUp {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              @-webkit-keyframes slideUp {
+                from { opacity: 0; -webkit-transform: translateY(10px); }
+                to { opacity: 1; -webkit-transform: translateY(0); }
+              }
+              .rich-log-modern div {
+                will-change: transform, opacity;
+              }
+            `}</style>
+          </div>
+        )}
+        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 'auto', height: isMobile ? '400px' : 0, boxSizing: 'border-box', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
+            <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
+            <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
+          </div>
+          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', minHeight: 0, boxSizing: 'border-box' }}>
+            {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
+              let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards', WebkitTransform: 'translateY(10px)', WebkitAnimation: 'slideUp 0.3s forwards' };
+              if (line.includes('VS')) {
+                const [p1, p2] = line.split('VS');
+                return (
+                  <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '0 10px' }}>
+                      <span className="battle-start-player-name" style={{ fontSize: p1.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p1.trim()}</span>
+                      <span className="battle-start-vs" style={{ fontSize: '2.2rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
+                      <span className="battle-start-enemy-name" style={{ fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p2.trim()}</span>
+                    </div>
+                  </div>
+                );
+              }
+              if (line.includes('戦闘開始')) return <div key={i} style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#ffd54f', margin: '20px 0' }}>{line.replace(/[-―=]/g, '').trim()}</div>;
+              if (line.includes('ラウンド') || line.includes('勝敗判定')) style = { ...style, color: '#61dafb', fontSize: '1.2em', borderBottom: '1px solid #333' };
+              else if (line.includes('フェイズ')) style = { ...style, color: '#81c784', fontWeight: 'bold' };
+              else if (line.includes('ダメージ') || line.includes('破壊')) style = { ...style, color: '#ff5252', paddingLeft: '10px', borderLeft: '2px solid #ff5252' };
+              else if (line.includes('発動') || line.includes('効果')) style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
+              return <div key={i} className="log-line" style={style}>{line}</div>;
+            })}
+            
+          </div>
+        </div>
+        <style>{`
+          @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @-webkit-keyframes slideUp {
+            from { opacity: 0; -webkit-transform: translateY(10px); }
+            to { opacity: 1; -webkit-transform: translateY(0); }
+          }
+          .rich-log-modern div {
+            will-change: transform, opacity;
+          }
+        `}</style>
+      </div>
+    );
+  }, (prevProps, nextProps) => {
+    return prevProps.log === nextProps.log &&
+           prevProps.immediate === nextProps.immediate &&
+           prevProps.bossName === nextProps.bossName;
+  });
+
 interface SkillCardProps {
   skill: SkillDetail;
   isSelected?: boolean;
@@ -336,6 +592,7 @@ function App() {
   const [showRule, setShowRule] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showRuleHint, setShowRuleHint] = useState(false);
+  const [showClearStats, setShowClearStats] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
 
@@ -367,6 +624,7 @@ function App() {
   const [kenjuClears, setKenjuClears] = useState<number>(0);
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
   const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } }>({});
+  const [anonymousVictories, setAnonymousVictories] = useState<{[visitorId: string]: {[stageKey: string]: string[]}}>({});
   const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
   const [isLoungeDataLoaded, setIsLoungeDataLoaded] = useState(false); // 新しい状態変数
 
@@ -1485,180 +1743,6 @@ const PLAYER_SKILL_COUNT = 5;
     window.location.reload();
   };
 
-  const AnimatedRichLog: React.FC<{ log: string; onComplete: () => void; immediate?: boolean; bossImage?: string; bossName?: string; battleInstance?: any; battleStageCycle?: number; processor: StageProcessor }> = ({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor }) => {
-    const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
-    const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
-    const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
-    const [roundFinished, setRoundFinished] = useState<boolean[]>(new Array(rounds.length).fill(false));
-    const [bossAnim, setBossAnim] = useState<'idle' | 'attack' | 'damage' | 'counter' | 'defeat'>('idle');
-    const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
-    const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
-    useEffect(() => {
-        if (!roundFinished[currentRoundIdx]) {
-            const currentLineIdx = roundVisibleCounts[currentRoundIdx];
-            if (currentLineIdx < currentRoundLines.length) {
-                const line = currentRoundLines[currentLineIdx];
-                if (line.includes('破壊された')) {
-                    if (line.includes('あなたの')) {
-                      const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
-                      if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    } else if (line.includes(`${bossName}の`)) {
-                      const m = line.match(new RegExp(`${bossName}の【.*?】(\\d+)が破壊された`));
-                      if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    }
-                }
-                if (bossName) {
-                    if (line.includes(`${bossName}の勝利`) || line.includes(`${bossName}が破壊された`)) setBossAnim('defeat');
-                    else if (line.includes(`${bossName}の【`) && line.includes('が発動')) { setBossAnim('counter'); setTimeout(() => setBossAnim('idle'), 800); }
-                    else if (line.includes(`${bossName}の攻撃フェイズ`)) { setBossAnim('attack'); setTimeout(() => setBossAnim('idle'), 800); }
-                    else if (line.includes(`${bossName}に`) && line.includes('のダメージ')) { setBossAnim('damage'); setTimeout(() => setBossAnim('idle'), 800); }
-                }
-            }
-        }
-    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished]);
-    useEffect(() => {
-      if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
-      if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
-          const nc = [...roundVisibleCounts];
-          if (nc[currentRoundIdx] !== currentRoundLines.length) {
-            nc[currentRoundIdx] = currentRoundLines.length;
-            setRoundVisibleCounts(nc);
-          }
-          if (!roundFinished[currentRoundIdx]) {
-            const nf = [...roundFinished];
-            nf[currentRoundIdx] = true;
-            setRoundFinished(nf);
-          }
-          onComplete();
-          return;
-      }
-      if (!roundFinished[currentRoundIdx]) {
-        if (roundVisibleCounts[currentRoundIdx] < currentRoundLines.length) {
-          const timer = setTimeout(() => { const nc = [...roundVisibleCounts]; nc[currentRoundIdx]++; setRoundVisibleCounts(nc); }, 400);
-          return () => clearTimeout(timer);
-        } else {
-          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
-          if (currentRoundIdx === rounds.length - 1) onComplete();
-        }
-      }
-    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds, onComplete]);
-    useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }); }, [roundVisibleCounts]);
-    const goNext = () => {
-      if (!roundFinished[currentRoundIdx]) {
-        const fullLines = currentRoundLines;
-        let newPc1Scar = [...currentPc1Scar], newPc2Scar = [...currentPc2Scar];
-        fullLines.forEach(line => {
-            if (line.includes('破壊された')) {
-                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
-                else if (line.includes(`${bossName}の`)) { const m = line.match(new RegExp(`${bossName}の【.*?】(\\d+)が破壊された`)); if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1; }
-            }
-        });
-        setCurrentPc1Scar(newPc1Scar); setCurrentPc2Scar(newPc2Scar);
-        const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
-        const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
-        if (currentRoundIdx === rounds.length - 1) onComplete();
-      } else if (currentRoundIdx < rounds.length - 1) setCurrentRoundIdx(prev => prev + 1);
-    };
-    const goBack = () => { if (currentRoundIdx > 0) setCurrentRoundIdx(prev => prev - 1); };
-    const renderGauge = (player: any, scars: number[], color: string) => {
-      if (!player) return null;
-      const totalSkills = player.getSkillsLength();
-      const brokenSkills = scars.filter((s: number) => s === 1).length;
-      const percentage = Math.max(0, ((totalSkills - brokenSkills) / totalSkills) * 100);
-      
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.8))', width: '80px' }}>
-          <div style={{ fontSize: player.playerName.length >= 9 ? '8px' : '10px', fontWeight: 'bold', marginBottom: '6px', color: '#fff', textShadow: '0 0 4px #000, 1px 1px 2px #000', textAlign: 'center', width: '100%', wordBreak: 'break-all', height: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1.2' }}>
-            {player.playerName}
-          </div>
-          <div style={{ height: '140px', width: '16px', backgroundColor: 'rgba(20,20,20,0.8)', border: '2px solid #fff', borderRadius: '4px', boxSizing: 'border-box', boxShadow: '0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ 
-              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`, 
-              background: `linear-gradient(to top, ${color}, ${color}dd)`, 
-              transition: 'height 0.6s cubic-bezier(0.22, 1, 0.36, 1)', 
-              boxShadow: `0 0 15px ${color}` 
-            }} />
-            <div style={{ 
-              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`, 
-              backgroundColor: '#fff', opacity: 0.3, filter: 'blur(2px)', mixBlendMode: 'overlay'
-            }} />
-          </div>
-        </div>
-      );
-    };
-
-    const isMobile = window.innerWidth < 768;
-
-    return (
-      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
-        {bossImage && (
-          <div className="boss-stage-area sticky-boss-area" style={{
-            height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(currentKenjuBattle?.background || '') : (stageProcessor.getBackgroundImage(stageContext)) || '')})`,
-            paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
-          }}>
-            {/* 背景を暗くするオーバーレイ */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1 }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
-            
-            <div style={{ zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
-              <div style={{ zIndex: 10, position: 'relative' }}>
-                {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
-              </div>
-              
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (battleStageCycle === 8 || battleStageCycle === 12 || (!battleStageCycle && (stageCycle === 8 || stageCycle === 12))) ? 'flex-start' : 'flex-end', zIndex: 5, overflow: (battleStageCycle || stageCycle) === 4 ? 'visible' : 'hidden' }}>
-                <img
-                  src={bossImage}
-                  alt={bossName}
-                  className={`boss-battle-image boss-anim-${bossAnim}`}
-                  style={{
-                      ...processor.getBossImageStyle({ ...stageContext, stageCycle: battleStageCycle || stageCycle }, isMobile, 'battle')
-                  }}
-                />
-              </div>
-              
-              <div style={{ zIndex: 10, position: 'relative' }}>
-                {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
-              </div>
-            </div>
-          </div>
-        )}
-        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', height: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
-            <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
-          </div>
-          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none' }}>
-            {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
-              let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards' };
-              if (line.includes('VS')) {
-                const [p1, p2] = line.split('VS');
-                return (
-                  <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '0 10px' }}>
-                      <span className="battle-start-player-name" style={{ fontSize: p1.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p1.trim()}</span>
-                      <span className="battle-start-vs" style={{ fontSize: '2.2rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
-                      <span className="battle-start-enemy-name" style={{ fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p2.trim()}</span>
-                    </div>
-                  </div>
-                );
-              }
-              if (line.includes('戦闘開始')) return <div key={i} style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#ffd54f', margin: '20px 0' }}>{line.replace(/[-―=]/g, '').trim()}</div>;
-              if (line.includes('ラウンド') || line.includes('勝敗判定')) style = { ...style, color: '#61dafb', fontSize: '1.2em', borderBottom: '1px solid #333' };
-              else if (line.includes('フェイズ')) style = { ...style, color: '#81c784', fontWeight: 'bold' };
-              else if (line.includes('ダメージ') || line.includes('破壊')) style = { ...style, color: '#ff5252', paddingLeft: '10px', borderLeft: '2px solid #ff5252' };
-              else if (line.includes('発動') || line.includes('効果')) style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
-              return <div key={i} className="log-line" style={style}>{line}</div>;
-            })}
-            
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
   const isMobile = window.innerWidth < 768;
@@ -1818,7 +1902,7 @@ const PLAYER_SKILL_COUNT = 5;
     if (!isAssetsLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000' }} />;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
-      <div className="TitleScreenContainer">
+      <div className="TitleScreenContainer" style={{ position: 'fixed', overflow: 'hidden' }}>
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',
@@ -1893,6 +1977,18 @@ const PLAYER_SKILL_COUNT = 5;
             >
               RULE
             </button>
+            <button className="TitleButton neon-blue" onClick={() => {
+              const anonymousVictoriesRef = ref(database, 'anonymousVictories');
+              get(anonymousVictoriesRef).then((snap) => {
+                if (snap.exists()) {
+                  setAnonymousVictories(snap.val());
+                }
+                setShowClearStats(true);
+              }).catch(err => {
+                console.warn("Anonymous victories fetch failed (possibly permission denied):", err);
+                setShowClearStats(true);
+              });
+            }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
           </div>
           <div className="TitleFooter">
             <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
@@ -1949,6 +2045,62 @@ const PLAYER_SKILL_COUNT = 5;
                 </p>
               </div>
               <button className="ChangelogCloseButton" style={{ background: '#00d2ff', color: '#000', fontWeight: 'bold' }} onClick={() => setShowRuleHint(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+
+        {showClearStats && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowClearStats(false)}>
+            <div className="ChangelogModal" style={{ maxWidth: '600px', border: '2px solid #ffd700' }} onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader" style={{ background: '#ffd700' }}>
+                <span style={{ color: '#000', fontWeight: 'bold' }}>BATTLE STATS</span>
+                <button onClick={() => setShowClearStats(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(stageNum => {
+                    const bossKey = `BOSS_${stageNum}`;
+                    // BOSSのみを集計
+                    const registeredClears = allProfiles.filter(p => p.victorySkills && p.victorySkills[bossKey]).length;
+                    const anonClears = Object.values(anonymousVictories).filter(v => v && v[bossKey]).length;
+                    const totalClears = registeredClears + anonClears;
+
+                    const allStageCounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => {
+                      const bk = `BOSS_${n}`;
+                      return allProfiles.filter(p => p.victorySkills && p.victorySkills[bk]).length +
+                             Object.values(anonymousVictories).filter(v => v && v[bk]).length;
+                    });
+                    const maxClears = Math.max(...allStageCounts, 1);
+                    const percentage = (totalClears / maxClears) * 100;
+
+                    // 虹色の計算 (Stage 12: 赤(0), Stage 1: 紫(270))
+                    const hue = (12 - stageNum) * (270 / 11);
+                    const barColor = `hsl(${hue}, 80%, 60%)`;
+                    
+                    return (
+                      <div key={stageNum} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '70px', textAlign: 'right', fontSize: '0.8rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Stage {stageNum}</div>
+                        <div style={{ flex: 1, height: '20px', backgroundColor: '#333', borderRadius: '10px', overflow: 'hidden', position: 'relative' }}>
+                          <div style={{
+                            width: `${percentage}%`,
+                            height: '100%',
+                            backgroundColor: barColor,
+                            transition: 'width 1s ease-out',
+                            boxShadow: stageNum === 12 ? `0 0 10px ${barColor}` : 'none'
+                          }} />
+                          <div style={{ position: 'absolute', right: '10px', top: 0, height: '100%', display: 'flex', alignItems: 'center', fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', textShadow: '1px 1px 2px #000' }}>
+                            {totalClears}人
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#888', textAlign: 'center' }}>
+                  ※各ステージのBOSSを撃破した人数です
+                </div>
+              </div>
+              <button className="ChangelogCloseButton" style={{ background: '#ffd700', color: '#000', fontWeight: 'bold' }} onClick={() => setShowClearStats(false)}>閉じる</button>
             </div>
           </div>
         )}
@@ -2128,7 +2280,9 @@ const PLAYER_SKILL_COUNT = 5;
                 <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}</button>
               </div>
             )}
-            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel && (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss)) && (
+            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel &&
+              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? (battleResults[0]?.winner === 2 && logComplete) :
+               (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss))) && (
               <div style={{ marginBottom: '20px', textAlign: 'center' }}>
                 {!stage11TrialActive && (
                   <>
@@ -2166,44 +2320,56 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
         {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')  && useRichLog) ? <AnimatedRichLog log={battleResults[showLogForBattleIndex].gameLog} onComplete={() => {
-            //setLogComplete(true);
-            handleBattleLogComplete();
-            // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
-            const winCount = battleResults.filter(r => r.winner === 1).length;
-            const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;
-            if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) {
-                triggerVictoryConfetti();
-                if (stageMode === 'BOSS') {
-                    setShowBossClearPanel(true);
-                    // Stage12のボス勝利で「クリアしたよ！」の称号
-                    if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
-                        const profileRef = ref(database, `profiles/${user.uid}/`);
-                        const newMedals = [...(myProfile.medals || []), 'master'];
-                        set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                    }
-                } else if (stageMode === 'DENEI') {
-                    setShowBossClearPanel(true);
-                }
+          ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')  && useRichLog) ? <AnimatedRichLog
+            log={battleResults[showLogForBattleIndex].gameLog}
+            onComplete={() => {
+              //setLogComplete(true);
+              handleBattleLogComplete();
+              // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
+              const winCount = battleResults.filter(r => r.winner === 1).length;
+              const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;
+              if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) {
+                  triggerVictoryConfetti();
+                  if (stageMode === 'BOSS') {
+                      setShowBossClearPanel(true);
+                      // Stage12のボス勝利で「クリアしたよ！」の称号
+                      if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
+                          const profileRef = ref(database, `profiles/${user.uid}/`);
+                          const newMedals = [...(myProfile.medals || []), 'master'];
+                          set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                      }
+                  } else if (stageMode === 'DENEI') {
+                      setShowBossClearPanel(true);
+                  }
 
-                if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
-                    const targetBossName = kenjuBoss.name;
-                    const kenjuConfig = KENJU_DATA.find(k => k.name === targetBossName);
-                    if (kenjuConfig && (kenjuConfig as any).medalId) {
-                        const medalId = (kenjuConfig as any).medalId;
-                        if (!(myProfile.medals || []).includes(medalId)) {
-                            const profileRef = ref(database, `profiles/${user.uid}/`);
-                            const newMedals = [...(myProfile.medals || []), medalId];
-                            set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                            console.log(`[Medal] Awarded ${medalId} for defeating ${targetBossName}`);
-                        }
-                    }
-                }
-            }
-          }} bossImage={(() => {
-            const bossImage = stageProcessor.getBossImage(stageContext);
-            return bossImage || "";
-          })()} bossName={stageProcessor.getEnemyName(0, stageContext)} battleInstance={battleResults[showLogForBattleIndex].battleInstance} battleStageCycle={(stageMode === 'KENJU' || stageMode === 'DENEI') ? 11 : stageCycle} processor={stageProcessor} /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
+                  if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
+                      const targetBossName = kenjuBoss.name;
+                      const kenjuConfig = KENJU_DATA.find(k => k.name === targetBossName);
+                      if (kenjuConfig && (kenjuConfig as any).medalId) {
+                          const medalId = (kenjuConfig as any).medalId;
+                          if (!(myProfile.medals || []).includes(medalId)) {
+                              const profileRef = ref(database, `profiles/${user.uid}/`);
+                              const newMedals = [...(myProfile.medals || []), medalId];
+                              set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+                              console.log(`[Medal] Awarded ${medalId} for defeating ${targetBossName}`);
+                          }
+                      }
+                  }
+              }
+            }}
+            bossImage={(() => {
+              const bossImage = stageProcessor.getBossImage(stageContext);
+              return bossImage || "";
+            })()}
+            bossName={stageProcessor.getEnemyName(0, stageContext)}
+            battleInstance={battleResults[showLogForBattleIndex].battleInstance}
+            key={`animated-log-${showLogForBattleIndex}-${battleResults[showLogForBattleIndex].gameLog.length}`}
+            battleStageCycle={(stageMode === 'KENJU' || stageMode === 'DENEI') ? 11 : stageCycle}
+            processor={stageProcessor}
+            stageMode={stageMode}
+            stageContext={stageContext}
+            getStorageUrl={getStorageUrl}
+          /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
         ) :
         
         (storyContent && !gameStarted ? 

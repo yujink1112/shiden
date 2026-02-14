@@ -204,8 +204,8 @@
     flex: none !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 400px;
-    max-height: 80vh; /* ログが長すぎても画面を覆い尽くさないように */
+    min-height: 100% !important; /* スマホ版での高さ問題を修正 */
+    max-height: 100vh; /* ログが長すぎても画面を覆い尽くさないように */
     border-left: none !important;
     border-top: 1px solid #333;
     box-sizing: border-box;

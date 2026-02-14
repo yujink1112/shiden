@@ -1287,8 +1287,8 @@ export class Battle {
         }
 
         if (result === 3) {
-            if (prior === 1) result = 2; // 攻撃フェイズ終了時、両者のスキルが全て破壊されているなら攻撃側の敗北（PC1の攻撃中ならPC1敗北=result2）
-            else if (prior === 2) result = 1; // 攻撃フェイズ終了時、両者のスキルが全て破壊されているなら攻撃側の敗北（PC2の攻撃中ならPC2敗北=result1）
+            if (prior === 1) result = 1; // 攻撃フェイズ終了時、両者のスキルが全て破壊されているなら攻撃側の敗北（PC1の攻撃中ならPC1敗北=result2）
+            else if (prior === 2) result = 2; // 攻撃フェイズ終了時、両者のスキルが全て破壊されているなら攻撃側の敗北（PC2の攻撃中ならPC2敗北=result1）
             else result = 3; // フェイズ情報がない（同時・終了フェイズ）なら引き分け
         }
 
