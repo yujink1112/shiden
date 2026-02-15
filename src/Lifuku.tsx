@@ -25,7 +25,10 @@ class LifukuEntity {
     this.y = y;
     this.id = id;
     this.isBig = isBig;
-    this.radius = isBig ? 72 : 36; // 巨大個体は2倍のサイズ
+    // モバイル端末判定
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const baseRadius = isMobile ? 48 : 36; // モバイルなら33%大きく
+    this.radius = isBig ? baseRadius * 2 : baseRadius;
     
     const initialAngle = Math.random() * Math.PI * 2;
     const speed = Math.random() * 5 + 2;
@@ -185,15 +188,16 @@ interface LifukuProps {
   user?: any;
   onSaveScore?: (score: number) => void;
   onShowLounge?: () => void;
+  allProfiles?: any[];
 }
 
-const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScore, onShowLounge }) => {
+const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScore, onShowLounge, allProfiles = [] }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const [volume, setVolume] = useState(0);
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'paused' | 'result'>('start');
+  const [gameState, setGameState] = useState<'start' | 'playing' | 'paused' | 'result' | 'ranking'>('start');
   const [bonusEffect, setBonusEffect] = useState<{ show: boolean; text: string; subText?: string; color?: string }>({ show: false, text: '' });
   const [gravityInverted, setGravityInverted] = useState(false);
   const [zeroGravity, setZeroGravity] = useState(false);
@@ -273,6 +277,36 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     setGameState(skipStart ? 'playing' : 'start');
   };
 
+  const spawnGlider = () => {
+    if (gameState !== 'playing') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const centerX = Math.random() * (canvas.width - 200) + 100;
+    const centerY = Math.random() * (canvas.height - 200) + 100;
+    const gap = 80;
+
+    const pattern = [
+      { dx: 0, dy: -gap },
+      { dx: gap, dy: 0 },
+      { dx: -gap, dy: gap },
+      { dx: 0, dy: gap },
+      { dx: gap, dy: gap },
+    ];
+
+    const newEntities = pattern.map(p => {
+      const ent = new LifukuEntity(centerX + p.dx, centerY + p.dy, nextIdRef.current++, false);
+      ent.vx = 0; ent.vy = 0; ent.va = 0;
+      return ent;
+    });
+
+    entitiesRef.current = [...entitiesRef.current, ...newEntities];
+    setScore(entitiesRef.current.length);
+    
+    setBonusEffect({ show: true, text: 'GLIDER DEPLOYED!', color: '#4fc3f7' });
+    setTimeout(() => setBonusEffect({ show: false, text: '' }), 1500);
+  };
+
   // 初期化
   useEffect(() => {
     resetGame();
@@ -320,9 +354,12 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     const clickX = (clientX - rect.left) * scaleX;
     const clickY = (clientY - rect.top) * scaleY;
 
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const clickedIdx = entitiesRef.current.findIndex(ent => {
       const dist = Math.sqrt((ent.x - clickX) ** 2 + (ent.y - clickY) ** 2);
-      return dist < ent.radius * 1.5; // 少し判定を広く
+      // モバイルの場合はさらに判定を広げる (1.5 -> 2.0)
+      const hitRadius = isMobile ? ent.radius * 2.0 : ent.radius * 1.5;
+      return dist < hitRadius;
     });
 
     if (clickedIdx !== -1) {
@@ -348,8 +385,9 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
         newEnt.vy = Math.sin(angle) * speed;
         
         if (zeroGravityRef.current) {
-          ent.vx -= Math.cos(angle) * 2;
-          ent.vy -= Math.sin(angle) * 2;
+          // 反作用を大幅に緩和 (2 -> 0.5) し、スコアを稼ぎやすく調整
+          ent.vx -= Math.cos(angle) * 0.5;
+          ent.vy -= Math.sin(angle) * 0.5;
         }
 
         entitiesRef.current = [...entitiesRef.current, newEnt];
@@ -383,12 +421,19 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
       const newScore = entitiesRef.current.length;
       setScore(newScore);
 
+      // 0個になったらゲームオーバー
+      if (newScore === 0) {
+        setGameState('result');
+        if (onSaveScore) onSaveScore(0);
+        return;
+      }
+
       // 10個ごとのボーナス判定 (20, 30, 40...)
       if (newScore >= lastMilestoneRef.current + 10) {
         const is50Milestone = lastMilestoneRef.current < 50 && newScore >= 50;
         const is100Milestone = lastMilestoneRef.current < 100 && newScore >= 100;
         lastMilestoneRef.current += 10;
-        setTimeLeft(prev => prev + 5); // 5秒延長
+        setTimeLeft(prev => prev + 10); // 10秒延長
         
         if (is100Milestone) {
           setZeroGravity(true);
@@ -420,7 +465,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             color: '#ff1744' 
           });
         } else {
-          setBonusEffect({ show: true, text: `LIFUKU x ${newScore}!! TIME +5s` });
+          setBonusEffect({ show: true, text: `LIFUKU x ${newScore}!! TIME +10s` });
         }
         
         // 豪華な演出：画面中にキラキラパーティクルを散らす
@@ -501,7 +546,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   }, [gameState]);
 
   const tweetResult = () => {
-    const message = `【・ω・】＜大福を${score}個つくりました！ #Lifuku #紫電一閃`;
+    const message = `【・ω・】＜「らいふく」を${score}個つくりました！ #紫電一閃 https://shiden-issen.com/`;
     const url = `http://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -560,6 +605,22 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             style={{ width: '80px', cursor: 'pointer', accentColor: '#ff80ab' }}
           />
         </div>
+      </div>
+
+      <div style={{ marginBottom: '15px', display: 'none' }}>
+        <button 
+          onClick={(e) => { e.stopPropagation(); spawnGlider(); }}
+          style={{ 
+            background: '#0288d1', color: 'white', border: 'none',
+            padding: '12px 40px', borderRadius: '30px', fontWeight: 'bold', cursor: 'pointer',
+            boxShadow: '0 5px 0 #01579b', fontSize: '1.2rem',
+            transition: 'transform 0.1s'
+          }}
+          onMouseDown={(e) => e.currentTarget.style.transform = 'translateY(2px)'}
+          onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          GLIDER! (ライフゲーム召喚)
+        </button>
       </div>
       
       <canvas
@@ -623,13 +684,24 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.5s'
         }} onClick={(e) => e.stopPropagation()}>
           <h3 style={{ fontSize: '2rem', marginBottom: '10px' }}>おわり！</h3>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#f06292', marginBottom: '10px' }}>{score}個</div>
+          <div style={{
+            fontSize: '4.5rem',
+            fontWeight: 'bold',
+            marginBottom: '10px',
+            color: score >= 100 ? 'transparent' : (score >= 50 ? '#ffd700' : '#f06292'),
+            backgroundImage: score >= 100 ? 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)' : 'none',
+            WebkitBackgroundClip: score >= 100 ? 'text' : 'none',
+            textShadow: score >= 100 ? '0 0 10px rgba(255,255,255,0.5)' : (score >= 50 ? '0 0 20px #ffd700, 0 0 40px #fff' : 'none'),
+            animation: score >= 100 ? 'rainbowAnim 2s linear infinite, bounceIn 0.8s' : (score >= 50 ? 'goldAnim 2s ease-in-out infinite, bounceIn 0.8s' : 'bounceIn 0.8s')
+          }}>
+            {score}<span style={{ fontSize: '1.5rem', marginLeft: '5px' }}>個</span>
+          </div>
           
           {user ? (
             <p style={{ color: '#ffd700', fontWeight: 'bold', marginBottom: '20px' }}>ランキングにスコアを登録しました！</p>
           ) : (
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '15px', marginBottom: '20px', maxWidth: '300px' }}>
-              <p style={{ fontSize: '0.9rem', margin: '0 0 10px 0' }}>ユーザ登録すると、このスコアをランキングに登録できます！</p>
+              <p style={{ fontSize: '0.9rem', margin: '0 0 10px 0' }}>ユーザ登録すると、このスコアを<br/>ランキングに登録できます！</p>
               <button onClick={onShowLounge} style={{ padding: '8px 15px', borderRadius: '15px', border: 'none', backgroundColor: '#ffd700', color: '#333', fontWeight: 'bold', fontSize: '0.8rem' }}>
                 ユーザ登録/ログインへ
               </button>
@@ -643,7 +715,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             }}>
               リトライ！
             </button>
-            <button onClick={onShowLounge} style={{ 
+            <button onClick={() => setGameState('ranking')} style={{
               padding: '15px 40px', fontSize: '1.2rem', borderRadius: '30px',
               border: 'none', backgroundColor: '#ffd700', color: '#333', fontWeight: 'bold'
             }}>
@@ -677,14 +749,15 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           }}>
             <h3 style={{ fontSize: '2rem', margin: '0 0 20px 0' }}>遊び方</h3>
             <div style={{ textAlign: 'left', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '30px' }}>
-              <p>【・ω・】をつついて増やそう！</p>
+              <p>「らいふく」をつついて増やそう！</p>
               <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li>❤️ <b>増える:</b> 周りに仲間が1〜2個いる時</li>
-                <li>💥 <b>爆発:</b> 孤立している、または密集しすぎている時</li>
-                <li>✨ <b>タイムボーナス:</b> 10個増えるごとに+5秒</li>
-                <li>🆙 <b>50個到達:</b> 重力が反転！？</li>
+                <li>❤️ <b>増える:</b> 赤い時 (周りに仲間が1〜2個いる時)</li>
+                <li>💥 <b>爆発:</b> 白い時 (孤立している、または密集しすぎている時)</li>
+                <li>✨ <b>タイムボーナス:</b> +10個を初達成で+10秒</li>
+                <li>🌎 <b>50個到達:</b> 重力が反転！？</li>
                 <li>🌈 <b>100個到達:</b> 究極の無重力モード！</li>
               </ul>
+              <p>※紫電一閃とは一切関係がありません。</p>
             </div>
             <button onClick={() => setGameState('playing')} style={{
               padding: '15px 60px', fontSize: '1.5rem', borderRadius: '40px',
@@ -693,6 +766,74 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             }}>
               はじめる！
             </button>
+          </div>
+        </div>
+      )}
+
+      {gameState === 'ranking' && (
+        <div style={{
+          position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'center', zIndex: 1300, animation: 'fadeIn 0.5s'
+        }} onClick={(e) => e.stopPropagation()}>
+          <div style={{
+            background: '#ad1457', padding: '20px', borderRadius: '25px', border: '4px solid white',
+            maxWidth: '500px', width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column'
+          }}>
+            <h3 style={{ fontSize: '1.8rem', margin: '0 0 15px 0' }}>ランキング</h3>
+            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '20px', width: '100%' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.3)', color: '#ffd700' }}>
+                    <th style={{ padding: '8px', textAlign: 'center' }}>順位</th>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>プレイヤー</th>
+                    <th style={{ padding: '8px', textAlign: 'right' }}>スコア</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.values(allProfiles.reduce((acc: any, p: any) => {
+                    if (p.lifukuHighscore !== undefined) {
+                      if (!acc[p.uid] || acc[p.uid].lifukuHighscore < p.lifukuHighscore) {
+                        acc[p.uid] = p;
+                      }
+                    }
+                    return acc;
+                  }, {}))
+                    .sort((a: any, b: any) => (b.lifukuHighscore || 0) - (a.lifukuHighscore || 0))
+                    .slice(0, 50)
+                    .map((p: any, idx) => (
+                      <tr key={p.uid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', backgroundColor: p.uid === user?.uid ? 'rgba(255, 215, 0, 0.2)' : 'transparent' }}>
+                        <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: idx < 3 ? '#ffd700' : 'white' }}>
+                          {idx + 1}
+                        </td>
+                        <td style={{ padding: '8px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <img src={(p.photoURL || '').startsWith('/') && getStorageUrl ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/24')} alt="" style={{ width: '24px', height: '24px', borderRadius: '4px' }} />
+                          <span style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{p.displayName}</span>
+                        </td>
+                        <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'monospace', fontSize: '1.1rem' }}>
+                          {p.lifukuHighscore}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button onClick={() => setGameState('result')} style={{
+                padding: '10px 30px', fontSize: '1rem', borderRadius: '30px',
+                border: 'none', backgroundColor: 'white', color: '#ad1457', fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>
+                戻る
+              </button>
+              <button onClick={onShowLounge} style={{
+                padding: '10px 30px', fontSize: '1rem', borderRadius: '30px',
+                border: 'none', backgroundColor: '#ffd700', color: '#333', fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>
+                ラウンジへ
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -731,6 +872,20 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           20% { transform: scale(1.2); opacity: 1; }
           40% { transform: scale(1); opacity: 1; }
           100% { transform: translateY(-100px) scale(1.1); opacity: 0; }
+        }
+        @keyframes rainbowAnim {
+          0% { filter: hue-rotate(0deg); }
+          100% { filter: hue-rotate(360deg); }
+        }
+        @keyframes goldAnim {
+          0%, 100% { filter: brightness(1) drop-shadow(0 0 5px #ffd700); }
+          50% { filter: brightness(1.5) drop-shadow(0 0 15px #ffd700); }
+        }
+        @keyframes bounceIn {
+          0% { transform: scale(0.3); opacity: 0; }
+          50% { transform: scale(1.1); opacity: 1; }
+          70% { transform: scale(0.9); }
+          100% { transform: scale(1); }
         }
       `}</style>
     </div>

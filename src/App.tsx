@@ -824,8 +824,11 @@ const PLAYER_SKILL_COUNT = 5;
   }, [useRichLog]);
 
   useEffect(() => {
-    localStorage.setItem('shiden_is_title', isTitle.toString());
-  }, [isTitle]);
+    // LIFUKUモード中はタイトル復帰フラグを上書きしない（リロード時にタイトルに戻るようにする）
+    if (stageMode !== 'LIFUKU') {
+      localStorage.setItem('shiden_is_title', isTitle.toString());
+    }
+  }, [isTitle, stageMode]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -1844,6 +1847,7 @@ const PLAYER_SKILL_COUNT = 5;
         user={user}
         onSaveScore={handleLifukuScore}
         onShowLounge={() => { setStageMode('LOUNGE'); setIsTitle(false); }}
+        allProfiles={allProfiles}
       />
     );
   }
@@ -2020,15 +2024,30 @@ const PLAYER_SKILL_COUNT = 5;
               });
             }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
           </div>
-          <div
+          
+          <div className="TitleFooter">
+            <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
+            <div style={{fontSize: '0.8rem'}}> © 2026 Shiden Games </div>
+            {isAdmin && false &&(
+              <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
+            )}
+            <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
+          </div>
+        </div>
+        
+        <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
+          <span>更新履歴</span>
+        </div>
+
+        <div
             className="LifukuTab"
             onClick={() => { setStageMode('LIFUKU'); setIsTitle(false); }}
             style={{
               position: 'absolute',
-              bottom: '40px', // 右下（更新履歴の近く）
-              right: '0px',
+              bottom: '70px', // 右下（更新履歴の近く）
+              right: '-15px',
               backgroundColor: '#f06292',
-              padding: '8px 25px 8px 15px',
+              padding: '8px 35px 8px 15px',
               borderRadius: '20px 0 0 20px',
               cursor: 'pointer',
               boxShadow: '-2px 2px 10px rgba(0,0,0,0.3)',
@@ -2069,21 +2088,7 @@ const PLAYER_SKILL_COUNT = 5;
               <div style={{ position: 'absolute', bottom: '5px', left: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
               <div style={{ position: 'absolute', bottom: '5px', right: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
             </div>
-            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.8rem' }}>らいふく</span>
           </div>
-          <div className="TitleFooter">
-            <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
-            <div style={{fontSize: '0.8rem'}}> © 2026 Shiden Games </div>
-            {isAdmin && false &&(
-              <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
-            )}
-            <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
-          </div>
-        </div>
-        
-        <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
-          <span>更新履歴</span>
-        </div>
 
         {showChangelog && (
           <div className="ChangelogModalOverlay" onClick={() => setShowChangelog(false)}>
