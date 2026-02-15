@@ -1,5 +1,27 @@
 import React, { useRef, useEffect, useState } from 'react';
 
+// AdSense広告を表示するためのコンポーネント
+const AdSenseAd: React.FC = () => {
+  useEffect(() => {
+    try {
+      // 広告の初期化
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (e) {
+      console.error("AdSense initialization error:", e);
+    }
+  }, []);
+
+  return (
+    <div style={{ width: '100%', minHeight: '250px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <ins className="adsbygoogle"
+           style={{ display: 'block', width: '300px', height: '250px' }}
+           data-ad-client="ca-pub-8240576937185379"
+           data-ad-slot="8240576937" // ダミーの広告スロットID（実際のものに差し替えが必要）
+           data-ad-format="rectangle"></ins>
+    </div>
+  );
+};
+
 interface Point {
   x: number;
   y: number;
@@ -201,6 +223,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   const [bonusEffect, setBonusEffect] = useState<{ show: boolean; text: string; subText?: string; color?: string }>({ show: false, text: '' });
   const [gravityInverted, setGravityInverted] = useState(false);
   const [zeroGravity, setZeroGravity] = useState(false);
+  const [isShowingAd, setIsShowingAd] = useState(false);
   
   const entitiesRef = useRef<LifukuEntity[]>([]);
   const lastMilestoneRef = useRef<number>(10);
@@ -709,7 +732,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           )}
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button onClick={() => resetGame(true)} style={{
+            <button onClick={() => setIsShowingAd(true)} style={{
               padding: '15px 40px', fontSize: '1.2rem', borderRadius: '30px',
               border: 'none', backgroundColor: '#ad1457', color: 'white', fontWeight: 'bold'
             }}>
@@ -835,6 +858,42 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isShowingAd && (
+        <div style={{
+          position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+          backgroundColor: '#000', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'center', zIndex: 2000, animation: 'fadeIn 0.3s'
+        }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ color: '#aaa', fontSize: '0.8rem', marginBottom: '20px' }}>ADVERTISEMENT</div>
+          <div style={{
+            width: '300px', minHeight: '250px', backgroundColor: '#111', border: '1px solid #333',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+            borderRadius: '10px', marginBottom: '30px', position: 'relative', overflow: 'hidden'
+          }}>
+            {/* 実際の広告コンポーネント */}
+            <AdSenseAd />
+          </div>
+
+          <button
+            onClick={() => {
+              setIsShowingAd(false);
+              resetGame(true);
+            }}
+            style={{
+              padding: '12px 40px', borderRadius: '30px', border: '2px solid white',
+              backgroundColor: 'transparent', color: 'white', fontWeight: 'bold', cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            広告を閉じてリトライ
+          </button>
+          
+          <p style={{ color: '#666', fontSize: '0.7rem', marginTop: '20px' }}>
+            ※実際の実装ではここにAdMob等のインタースティシャル広告が表示されます。
+          </p>
         </div>
       )}
 

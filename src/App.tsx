@@ -1169,13 +1169,18 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleLifukuScore = async (score: number) => {
-    if (!user || !myProfile) return;
+    if (!user) return;
     
-    const currentHighscore = myProfile.lifukuHighscore || 0;
+    // DBから最新のプロフィールを一度取得して、確実に今のUIDに対して上書きする
+    const profileRef = ref(database, `profiles/${user.uid}`);
+    const snapshot = await get(profileRef);
+    const currentProfile = snapshot.val() || myProfile || {};
+    
+    const currentHighscore = currentProfile.lifukuHighscore || 0;
     if (score > currentHighscore) {
-      const profileRef = ref(database, `profiles/${user.uid}`);
       await set(profileRef, {
-        ...myProfile,
+        ...currentProfile,
+        uid: user.uid, // UIDの整合性を強制
         lifukuHighscore: score,
         lastActive: Date.now()
       });
@@ -1839,7 +1844,7 @@ const PLAYER_SKILL_COUNT = 5;
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
 
-  if (stageMode === 'LIFUKU') {
+  if (stageMode === 'LIFUKU' && isAdmin) {
     return (
       <Lifuku
         onBack={() => { setStageMode('MID'); setIsTitle(true); }}
@@ -2051,7 +2056,7 @@ const PLAYER_SKILL_COUNT = 5;
               borderRadius: '20px 0 0 20px',
               cursor: 'pointer',
               boxShadow: '-2px 2px 10px rgba(0,0,0,0.3)',
-              display: 'flex',
+              display: 'none',
               alignItems: 'center',
               gap: '8px',
               transition: 'transform 0.3s ease, background-color 0.3s',
