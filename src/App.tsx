@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { ref, onValue, push, onDisconnect, set, serverTimestamp, query, limitToLast, get } from "firebase/database";
+import { ref, onValue, push, onDisconnect, set, serverTimestamp, query, limitToLast, get, orderByChild } from "firebase/database";
 import { database, auth, googleProvider, recordAccess, getStorageUrl } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
@@ -11,6 +11,7 @@ import type { UserProfile } from './Lounge';
 import { Rule } from './Rule';
 import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidStageProcessor } from './stageProcessors';
 import Lifuku from './Lifuku';
+import LegalInfo from './LegalInfo';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
@@ -594,6 +595,7 @@ function App() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [showRuleHint, setShowRuleHint] = useState(false);
   const [showClearStats, setShowClearStats] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
 
@@ -1171,18 +1173,39 @@ const PLAYER_SKILL_COUNT = 5;
   const handleLifukuScore = async (score: number) => {
     if (!user) return;
     
-    // DBから最新のプロフィールを一度取得して、確実に今のUIDに対して上書きする
+    // 1. まず現在のプロフィールを特定 (myProfileがあればそれを使う、なければ取得)
     const profileRef = ref(database, `profiles/${user.uid}`);
-    const snapshot = await get(profileRef);
-    const currentProfile = snapshot.val() || myProfile || {};
+    let currentProfile = myProfile;
+    if (!currentProfile || currentProfile.uid !== user.uid) {
+      const snapshot = await get(profileRef);
+      currentProfile = snapshot.val();
+    }
     
+    if (!currentProfile) return;
+
     const currentHighscore = currentProfile.lifukuHighscore || 0;
     if (score > currentHighscore) {
-      await set(profileRef, {
+      const updatedProfile = {
         ...currentProfile,
-        uid: user.uid, // UIDの整合性を強制
+        uid: user.uid,
         lifukuHighscore: score,
         lastActive: Date.now()
+      };
+
+      // 2. 楽観的UI更新: allProfiles を即座に更新してランキングに反映させる
+      setAllProfiles(prev => {
+        const index = prev.findIndex(p => p.uid === user.uid);
+        if (index !== -1) {
+          const next = [...prev];
+          next[index] = updatedProfile;
+          return next;
+        }
+        return [...prev, updatedProfile];
+      });
+
+      // 3. 非同期でDBに保存 (awaitせずにUIを優先させる)
+      set(profileRef, updatedProfile).catch(err => {
+        console.error("Failed to save highscore:", err);
       });
     }
   };
@@ -1314,8 +1337,9 @@ const PLAYER_SKILL_COUNT = 5;
       }
     });
 
-    const profilesQuery = query(ref(database, 'profiles'), limitToLast(100));
-    get(profilesQuery).then((snapshot) => {
+    // 最近アクティブなユーザー100人を取得（これにより自分が更新された際もリストに含まれやすくなる）
+    const profilesQuery = query(ref(database, 'profiles'), orderByChild('lastActive'), limitToLast(100));
+    const unsubProfiles = onValue(profilesQuery, (snapshot) => {
       if (snapshot.exists()) {
         try {
           const data = snapshot.val();
@@ -1435,6 +1459,7 @@ const PLAYER_SKILL_COUNT = 5;
       unsubClears();
       unsubTrials();
       unsubLikes();
+      unsubProfiles();
     };
   }, []);
 
@@ -1844,7 +1869,7 @@ const PLAYER_SKILL_COUNT = 5;
     }
   }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
 
-  if (stageMode === 'LIFUKU' && isAdmin) {
+  if (stageMode === 'LIFUKU') {
     return (
       <Lifuku
         onBack={() => { setStageMode('MID'); setIsTitle(true); }}
@@ -1853,6 +1878,7 @@ const PLAYER_SKILL_COUNT = 5;
         onSaveScore={handleLifukuScore}
         onShowLounge={() => { setStageMode('LOUNGE'); setIsTitle(false); }}
         allProfiles={allProfiles}
+        myProfile={myProfile}
       />
     );
   }
@@ -1941,7 +1967,20 @@ const PLAYER_SKILL_COUNT = 5;
     if (!isAssetsLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000' }} />;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
-      <div className="TitleScreenContainer" style={{ position: 'fixed', overflow: 'hidden' }}>
+      <div className="TitleScreenContainer" style={{
+        height: '100dvh', // 動的ビューポート単位を使用
+        overflow: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'hidden' : 'auto',
+        padding: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '40px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'flex-start' : 'center',
+        boxSizing: 'border-box',
+        position: 'fixed', // スクロールを物理的に抑制
+        top: 0,
+        left: 0,
+        width: '100vw'
+      }}>
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',
@@ -1992,14 +2031,31 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
         <div className="TitleBackgroundEffect"></div>
-        <div className="TitleContent">
-          <div className="TitleLogoWrapper"><img src={getStorageUrl('/images/title/titlelogo.png')} alt="紫電一閃" className="TitleLogo" /></div>
+        <div className="TitleContent" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '20px' : '10px', // スマホ版でも間隔を確保
+          width: '100%',
+          marginTop: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '5dvh' : '0'
+        }}>
+          <div className="TitleLogoWrapper" style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px' : '20px' }}>
+            <img
+              src={getStorageUrl('/images/title/titlelogo.png')}
+              alt="紫電一閃"
+              className="TitleLogo"
+              style={{ maxHeight: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '25vh' : 'auto' }} // ロゴを少し小さくして間隔を稼ぐ
+            />
+          </div>
           {user && (
-            <div style={{ marginBottom: '20px', color: '#ffd700', fontSize: '1.1rem', textShadow: '0 0 5px rgba(255, 215, 0, 0.5)' }}>
+            <div style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '5px' : '10px', color: '#ffd700', fontSize: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '1.1rem' : '1.0rem', textShadow: '0 0 5px rgba(255, 215, 0, 0.5)', fontWeight: 'bold' }}>
                 ユーザ名: {myProfile?.displayName || "名もなき人"}
             </div>
           )}
-          <div className="TitleMenu">
+          <div className="TitleMenu" style={{
+            gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '15px'
+          }}>
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
             <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
@@ -2029,10 +2085,23 @@ const PLAYER_SKILL_COUNT = 5;
               });
             }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
           </div>
-          
+
+          <div style={{ margin: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px auto' : '40px auto 20px', display: 'none', maxWidth: '600px', background: 'rgba(0,0,0,0.7)', padding: '25px', borderRadius: '15px', border: '1px solid #444', textAlign: 'left', position: 'relative', zIndex: 1, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+            <h3 style={{ color: '#ffd700', fontSize: '1.2rem', marginTop: 0, marginBottom: '15px', borderLeft: '4px solid #ffd700', paddingLeft: '12px' }}>ゲーム紹介</h3>
+            <p style={{ color: '#eee', fontSize: '0.95rem', lineHeight: '1.8', margin: 0 }}>
+              「紫電一閃」は、スキルを組み合わせて戦う本格ターン制バトルゲームです。<br />
+              全12ステージに立ちはだかる個性豊かなボスを撃破し、世界の果てに待つ真のエンディングを目指しましょう。<br /><br />
+              オンライン要素も充実しており、「LOUNGE」では他のプレイヤーのプロフィールを閲覧したり、ユーザー自身が作成した強力なオリジナルボス「電影（でんえい）」に挑戦して腕を競い合うことができます。
+            </p>
+          </div>
+
           <div className="TitleFooter">
-            <div style={{ padding: '0px 0px 0px 15px', marginBottom: '5px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
-            <div style={{fontSize: '0.8rem'}}> © 2026 Shiden Games </div>
+            <div style={{ textAlign: 'center', padding: '0px 0px 0px 10px', marginBottom: '20px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
+            <div style={{ textAlign: 'center', fontSize: '0.8rem', marginLeft: '5px', marginBottom: '10px' }}> © 2026 Shiden Games </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', fontSize: '0.75rem', color: '#888', marginBottom: '10px' }}>
+              <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={() => setShowLegal(true)}>規約・運営情報</span>
+              <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" style={{ color: '#888' }}>お問い合わせ</a>
+            </div>
             {isAdmin && false &&(
               <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
             )}
@@ -2049,14 +2118,14 @@ const PLAYER_SKILL_COUNT = 5;
             onClick={() => { setStageMode('LIFUKU'); setIsTitle(false); }}
             style={{
               position: 'absolute',
-              bottom: '70px', // 右下（更新履歴の近く）
+              bottom: '100px', // 右下（更新履歴の近く）
               right: '-15px',
               backgroundColor: '#f06292',
               padding: '8px 35px 8px 15px',
               borderRadius: '20px 0 0 20px',
               cursor: 'pointer',
               boxShadow: '-2px 2px 10px rgba(0,0,0,0.3)',
-              display: 'none',
+              display: 'flex',
               alignItems: 'center',
               gap: '8px',
               transition: 'transform 0.3s ease, background-color 0.3s',
@@ -2208,6 +2277,9 @@ const PLAYER_SKILL_COUNT = 5;
             <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '10px' }}>閉じる</button>
           </div>
         )}
+
+        {showLegal && <LegalInfo onClose={() => setShowLegal(false)} />}
+
       </div>
     );
   }
@@ -2259,7 +2331,20 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         </div>
       )}
-      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)' }}>
+      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative' }}>
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '20px',
+          width: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '100%' : 'auto',
+          textAlign: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'center' : 'left',
+          color: '#666',
+          fontSize: '0.8rem',
+          zIndex: 1,
+          pointerEvents: 'none'
+        }}>
+          &copy; 2026 Shiden Games
+        </div>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
