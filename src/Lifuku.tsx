@@ -616,7 +616,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           });
         } else {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          setBonusEffect({ show: true, text: `LIFUKU x ${newScore}!! TIME +${isMobile ? 15 : 10}s` });
+          setBonusEffect({ show: true, text: `LIFUKU x ${newScore}!! TIME +15s` });
         }
         
         // 豪華な演出：画面中にキラキラパーティクルを散らす
@@ -946,7 +946,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           height: 'auto',
           boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
           backgroundColor: 'white',
-          margin: '0 auto',
+          margin: '10px auto',
           display: 'block'
         }}
       />
@@ -1088,30 +1088,38 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(allProfiles.reduce((acc: any, p: any) => {
-                    if (p.lifukuHighscore !== undefined) {
-                      if (!acc[p.uid] || acc[p.uid].lifukuHighscore < p.lifukuHighscore) {
-                        acc[p.uid] = p;
+                  {(() => {
+                    const profilesMap = allProfiles.reduce((acc: any, p: any) => {
+                      if (p.lifukuHighscore !== undefined) {
+                        if (!acc[p.uid] || acc[p.uid].lifukuHighscore < p.lifukuHighscore) {
+                          acc[p.uid] = p;
+                        }
                       }
+                      return acc;
+                    }, {});
+                    
+                    if (myProfile && myProfile.lifukuHighscore !== undefined && !profilesMap[myProfile.uid]) {
+                      profilesMap[myProfile.uid] = myProfile;
                     }
-                    return acc;
-                  }, {}))
-                    .sort((a: any, b: any) => (b.lifukuHighscore || 0) - (a.lifukuHighscore || 0))
-                    .slice(0, 50)
-                    .map((p: any, idx) => (
-                      <tr key={p.uid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', backgroundColor: p.uid === user?.uid ? 'rgba(255, 215, 0, 0.2)' : 'transparent' }}>
-                        <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: idx < 3 ? '#ffd700' : 'white' }}>
-                          {idx + 1}
-                        </td>
-                        <td style={{ padding: '8px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <img src={(p.photoURL || '').startsWith('/') && getStorageUrl ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/24')} alt="" style={{ width: '24px', height: '24px', borderRadius: '4px' }} />
-                          <span style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{p.displayName}</span>
-                        </td>
-                        <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'monospace', fontSize: '1.1rem' }}>
-                          {p.lifukuHighscore}
-                        </td>
-                      </tr>
-                    ))}
+                    
+                    return Object.values(profilesMap)
+                      .sort((a: any, b: any) => (b.lifukuHighscore || 0) - (a.lifukuHighscore || 0))
+                      .slice(0, 50)
+                      .map((p: any, idx) => (
+                        <tr key={p.uid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', backgroundColor: p.uid === user?.uid ? 'rgba(255, 215, 0, 0.2)' : 'transparent' }}>
+                          <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: idx < 3 ? '#ffd700' : 'white' }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ padding: '8px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <img src={(p.photoURL || '').startsWith('/') && getStorageUrl ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/24')} alt="" style={{ width: '24px', height: '24px', borderRadius: '4px' }} />
+                            <span style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>{p.displayName}</span>
+                          </td>
+                          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'monospace', fontSize: '1.1rem' }}>
+                            {p.lifukuHighscore}
+                          </td>
+                        </tr>
+                      ));
+                  })()}
                 </tbody>
               </table>
             </div>
