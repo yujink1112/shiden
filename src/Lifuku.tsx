@@ -1,13 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { STAGE_DATA } from './stageData';
+import { STAGE_DATA, KENJU_DATA } from './stageData';
 
-// ボスの情報を表示するコンポーネント
-const BossAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getStorageUrl }) => {
-  // 現在のステージに合わせたボスを表示（ここでは例として stageCycle 1 のボスを表示、あるいはランダム）
-  // localStorage から現在の進捗を取得して表示するのが自然
-  const savedCycle = localStorage.getItem('shiden_stage_cycle');
-  const stageCycle = savedCycle ? parseInt(savedCycle, 10) : 1;
-  const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[0];
+// 剣獣の情報を表示するコンポーネント
+const KenjuAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getStorageUrl }) => {
+  // 本日の剣獣を生成（App.tsxと同じロジック）
+  const generateDailyKenju = () => {
+    const today = new Date();
+    const day = today.getDay();
+    const index = (day + 6) % 7;
+    return KENJU_DATA[index % KENJU_DATA.length] || KENJU_DATA[0];
+  };
+
+  const currentKenju = generateDailyKenju();
 
   return (
     <div style={{
@@ -31,24 +35,22 @@ const BossAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getSto
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url(${getStorageUrl ? getStorageUrl('/images/background/background.jpg') : ''})`,
+        backgroundImage: `url(${getStorageUrl ? getStorageUrl(currentKenju.background) : ''})`,
         backgroundSize: 'cover',
         opacity: 0.3,
         zIndex: 0
       }} />
       
       <div style={{ zIndex: 1, textAlign: 'center' }}>
-        <div style={{ color: '#ff80ab', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>NEXT DESTINY...</div>
+        <div style={{ color: '#ff80ab', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>本日の剣獣はこちら！</div>
+        <div style={{ color: '#aaa', fontSize: '0.6rem', marginBottom: '10px' }}>※遊ぶにはユーザ登録が必要です。</div>
         <img
-          src={getStorageUrl ? getStorageUrl(currentStage.bossImage) : currentStage.bossImage}
-          alt={currentStage.bossName}
+          src={getStorageUrl ? getStorageUrl(currentKenju.image) : currentKenju.image}
+          alt={currentKenju.name}
           style={{ width: '120px', height: '120px', objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))' }}
         />
         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', textShadow: '0 0 5px #000' }}>
-          {currentStage.bossName}
-        </div>
-        <div style={{ fontSize: '0.9rem', color: '#ffd700', marginTop: '5px' }}>
-          が待っています……
+          {currentKenju.name}
         </div>
       </div>
     </div>
@@ -80,9 +82,8 @@ class LifukuEntity {
     this.y = y;
     this.id = id;
     this.isBig = isBig;
-    // モバイル端末判定
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const baseRadius = isMobile ? 48 : 36; // モバイルなら33%大きく
+    // PC版もモバイル版のサイズ（48）に統一し、不公平感を解消
+    const baseRadius = 48;
     this.radius = isBig ? baseRadius * 2 : baseRadius;
     
     const initialAngle = Math.random() * Math.PI * 2;
@@ -251,8 +252,11 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [volume, setVolume] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(90);
+  const [volume, setVolume] = useState(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    return isMobile ? 0 : 0.5;
+  });
   const [gameState, setGameState] = useState<'start' | 'playing' | 'paused' | 'result' | 'ranking'>('start');
   const [vScore, setVScore] = useState({ v: 0, s: 0 }); // 不正対策用の検証済みスコア
   const [bonusEffect, setBonusEffect] = useState<{ show: boolean; text: string; subText?: string; color?: string }>({ show: false, text: '' });
@@ -261,6 +265,9 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   const [isShowingAd, setIsShowingAd] = useState(false);
   const [showResultButtons, setShowResultButtons] = useState(false);
   const [isNewHighscore, setIsNewHighscore] = useState(false);
+  const [hasStartedOnce, setHasStartedOnce] = useState(false);
+  const [bgUrls, setBgUrls] = useState<{[key: string]: string}>({});
+  const [bgImages, setBgImages] = useState<{[key: string]: HTMLImageElement}>({});
   const entitiesRef = useRef<LifukuEntity[]>([]);
   const lastMilestoneRef = useRef<number>(10);
   const gravityInvertedRef = useRef(false);
@@ -268,14 +275,68 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   const particlesRef = useRef<Particle[]>([]);
   const nextIdRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [backHoldTimer, setBackHoldTimer] = useState<NodeJS.Timeout | null>(null);
+  const [backHoldProgress, setBackHoldProgress] = useState(0);
+
+  // 背景画像のプリロード
+  useEffect(() => {
+    let isCancelled = false;
+    const loadBgs = async () => {
+      if (!getStorageUrl) return;
+      try {
+        const [url1, url2, url3] = await Promise.all([
+          getStorageUrl('background/Lifuku1.jpg'),
+          getStorageUrl('background/Lifuku2.jpg'),
+          getStorageUrl('background/Lifuku3.jpg')
+        ]);
+        if (isCancelled) return;
+        setBgUrls({
+          level1: url1,
+          level2: url2,
+          level3: url3
+        });
+
+        // HTMLImageElementとしてプリロード
+        const loadImage = (url: string) => {
+          return new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
+        const [img1, img2, img3] = await Promise.all([
+          loadImage(url1),
+          loadImage(url2),
+          loadImage(url3)
+        ]);
+
+        if (isCancelled) return;
+        setBgImages({
+          level1: img1,
+          level2: img2,
+          level3: img3
+        });
+      } catch (e) {
+        console.warn("Failed to load background images:", e);
+      }
+    };
+    loadBgs();
+    return () => { isCancelled = true; };
+  }, [getStorageUrl]);
 
   // BGM
   useEffect(() => {
+    let isCancelled = false;
     const initAudio = async () => {
       const bgmPath = getStorageUrl ? await getStorageUrl('audio/ahiru.ogg') : `${process.env.PUBLIC_URL}/audio/ahiru.ogg`;
+      if (isCancelled) return;
+      
       const audio = new Audio(bgmPath);
       audio.loop = true;
       audio.volume = volume;
+      audio.muted = volume === 0;
       audioRef.current = audio;
       
       audio.play().catch(e => console.warn("BGM auto-play blocked, waiting for interaction:", e));
@@ -283,18 +344,22 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     initAudio();
 
     return () => {
+      isCancelled = true;
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
         audioRef.current = null;
       }
     };
-  }, [getStorageUrl]);
+  }, []); // 初回のみ実行するように空配列に変更（getStorageUrlが変わることは稀であるため）
+
 
   // 音量変更
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
+      // 音量が0ならミュート属性をON、それ以外ならOFFにする（確実な消音のため）
+      audioRef.current.muted = volume === 0;
     }
   }, [volume]);
 
@@ -305,6 +370,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
       audioRef.current.pause();
     } else if (gameState === 'playing' && audioRef.current.paused) {
       // プレイ中にポーズから戻った場合のみ再開
+      // 音量が0より大きい場合のみ再生を試みる（0の場合はmutedで制御されるが、不要な再生を避ける）
       audioRef.current.play().catch(e => console.warn("BGM resume failed:", e));
     }
   }, [gameState]);
@@ -329,13 +395,13 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     gravityInvertedRef.current = false;
     zeroGravityRef.current = false;
     particlesRef.current = [];
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     setScore(initialEntities.length);
-    setTimeLeft(isMobile ? 80 : 60); // モバイルは初期時間+20秒
+    setTimeLeft(90); // 制限時間を 90秒 に統一
     setGravityInverted(false);
     setZeroGravity(false);
     setBonusEffect({ show: false, text: '' });
     setGameState(skipStart ? 'playing' : 'start');
+    setHasStartedOnce(false);
     const initialScore = initialEntities.length;
     setVScore({ v: initialScore, s: initialScore ^ 0x55 });
   };
@@ -432,11 +498,10 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     const clickX = (clientX - rect.left) * scaleX;
     const clickY = (clientY - rect.top) * scaleY;
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // 判定範囲もスマホ版基準 (2.0) に統一
     const clickedIdx = entitiesRef.current.findIndex(ent => {
       const dist = Math.sqrt((ent.x - clickX) ** 2 + (ent.y - clickY) ** 2);
-      // モバイルの場合はさらに判定を広げる (1.5 -> 2.0)
-      const hitRadius = isMobile ? ent.radius * 2.0 : ent.radius * 1.5;
+      const hitRadius = ent.radius * 2.0;
       return dist < hitRadius;
     });
 
@@ -516,9 +581,8 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
       if (newScore >= lastMilestoneRef.current + 10) {
         const is50Milestone = lastMilestoneRef.current < 50 && newScore >= 50;
         const is100Milestone = lastMilestoneRef.current < 100 && newScore >= 100;
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         lastMilestoneRef.current += 10;
-        const bonusTime = isMobile ? 15 : 10; // モバイルは+15秒、PCは+10秒
+        const bonusTime = 15; // ボーナス時間も 15秒 に統一
         setTimeLeft(prev => prev + bonusTime);
         
         if (is100Milestone) {
@@ -579,6 +643,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     const render = () => {
       if (!canvas || !ctx) return;
 
+      // gameState が 'playing' の時のみエンティティを更新（start, paused, result の時は描画のみ行う）
       if (gameState === 'playing') {
         entitiesRef.current.forEach(ent => {
           ent.update(canvas.width, canvas.height, gravityInvertedRef.current, zeroGravityRef.current);
@@ -597,8 +662,35 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#fce4ec';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Canvas内の背景画像描画
+      const currentBgImg = zeroGravity ? bgImages.level3 : (gravityInverted ? bgImages.level2 : bgImages.level1);
+      if (currentBgImg) {
+        // 画像をアスペクト比を維持してカバーするように描画
+        const canvasAspect = canvas.width / canvas.height;
+        const imgAspect = currentBgImg.width / currentBgImg.height;
+        let drawW, drawH, drawX, drawY;
+
+        if (imgAspect > canvasAspect) {
+          drawH = canvas.height;
+          drawW = canvas.height * imgAspect;
+          drawX = (canvas.width - drawW) / 2;
+          drawY = 0;
+        } else {
+          drawW = canvas.width;
+          drawH = canvas.width / imgAspect;
+          drawX = 0;
+          drawY = (canvas.height - drawH) / 2;
+        }
+        ctx.drawImage(currentBgImg, drawX, drawY, drawW, drawH);
+        
+        // 背景画像の上に少し明るいレイヤーを重ねる（グリッドやキャラクターを見やすくするため）
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = '#fce4ec';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
       // グリッド線
       ctx.strokeStyle = '#f8bbd0';
@@ -639,8 +731,8 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   };
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       onMouseDown={(e) => {
         // pointer-events: none を設定した子要素以外からのクリック（枠外）のみを拾う
         if (gameState === 'playing') {
@@ -649,49 +741,147 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           setGameState('playing');
         }
       }}
-      style={{ 
-        textAlign: 'center', 
-        backgroundColor: '#f06292', 
-        padding: '10px', 
-        minHeight: '100vh', 
+      style={{
+        textAlign: 'center',
+        backgroundColor: '#f06292',
+        padding: '10px 0',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
         color: 'white',
         fontFamily: '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-        touchAction: 'pan-y', // スクロールを許可
+        touchAction: 'none', // スクロールを無効化
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent', // スマホのタップハイライトを消去
         position: 'relative'
       }}
     >
-      <h2 style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)', margin: '10px 0' }}>らいふく</h2>
+
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '0 10px' }}>
+        <button
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            const timer = setInterval(() => {
+              setBackHoldProgress(prev => {
+                if (prev >= 100) {
+                  clearInterval(timer);
+                  onBack();
+                  return 100;
+                }
+                return prev + 10;
+              });
+            }, 50);
+            setBackHoldTimer(timer);
+          }}
+          onMouseUp={(e) => {
+            e.stopPropagation();
+            if (backHoldTimer) clearInterval(backHoldTimer);
+            setBackHoldTimer(null);
+            setBackHoldProgress(0);
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            if (backHoldTimer) clearInterval(backHoldTimer);
+            setBackHoldTimer(null);
+            setBackHoldProgress(0);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            const timer = setInterval(() => {
+              setBackHoldProgress(prev => {
+                if (prev >= 100) {
+                  clearInterval(timer);
+                  onBack();
+                  return 100;
+                }
+                return prev + 10;
+              });
+            }, 50);
+            setBackHoldTimer(timer);
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            if (backHoldTimer) clearInterval(backHoldTimer);
+            setBackHoldTimer(null);
+            setBackHoldProgress(0);
+          }}
+          style={{
+            padding: '8px 15px',
+            fontSize: '0.8rem',
+            borderRadius: '20px',
+            border: 'none',
+            backgroundColor: '#ad1457',
+            color: 'white',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            position: 'relative',
+            overflow: 'hidden',
+            width: '80px'
+          }}
+        >
+          <div style={{
+            position: 'absolute', top: 0, left: 0, height: '100%',
+            backgroundColor: 'rgba(255,255,255,0.3)', width: `${backHoldProgress}%`,
+            transition: 'width 0.05s linear'
+          }} />
+          <span style={{ position: 'relative', zIndex: 1 }}>TITLE</span>
+        </button>
+        <h2 style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)', margin: '0 5px', flex: 1, fontSize: '1.2rem', whiteSpace: 'nowrap' }}>らいふく</h2>
+        <div style={{ width: '80px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setHasStartedOnce(true);
+              setGameState('start');
+            }}
+            style={{
+              padding: '4px 8px',
+              fontSize: '0.6rem',
+              borderRadius: '10px',
+              border: '1px solid white',
+              backgroundColor: 'transparent',
+              color: 'white',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              opacity: 0.8,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            遊び方
+          </button>
+        </div>
+      </div>
+
       <div
-        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '15px', fontSize: '1.2rem', fontWeight: 'bold', flexWrap: 'wrap' }}
+        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '8px', fontSize: '1.2rem', fontWeight: 'bold', flexWrap: 'wrap' }}
       >
-        <div style={{ 
-          background: 'rgba(0,0,0,0.6)', padding: '8px 0', borderRadius: '12px', width: '130px', 
-          border: '2px solid #ad1457', boxShadow: '0 4px 0 #880e4f', display: 'flex', flexDirection: 'column' 
+        <div style={{
+          background: 'rgba(0,0,0,0.6)', padding: '4px 0', borderRadius: '10px', width: '110px',
+          border: '2px solid #ad1457', boxShadow: '0 3px 0 #880e4f', display: 'flex', flexDirection: 'column'
         }}>
-          <span style={{ fontSize: '0.7rem', color: '#ff80ab' }}>SCORE</span>
-          <span style={{ fontSize: '1.5rem', fontFamily: 'monospace' }}>{score.toString().padStart(3, '0')}</span>
+          <span style={{ fontSize: '0.6rem', color: '#ff80ab' }}>SCORE</span>
+          <span style={{ fontSize: '1.2rem', fontFamily: 'monospace' }}>{score.toString().padStart(3, '0')}</span>
         </div>
         
-        <div style={{ 
-          background: 'rgba(0,0,0,0.6)', padding: '8px 0', borderRadius: '12px', width: '130px', 
-          border: '2px solid #ad1457', boxShadow: '0 4px 0 #880e4f', display: 'flex', flexDirection: 'column'
+        <div style={{
+          background: 'rgba(0,0,0,0.6)', padding: '4px 0', borderRadius: '10px', width: '110px',
+          border: '2px solid #ad1457', boxShadow: '0 3px 0 #880e4f', display: 'flex', flexDirection: 'column'
         }}>
-          <span style={{ fontSize: '0.7rem', color: '#ff80ab' }}>TIME LEFT</span>
-          <span style={{ fontSize: '1.5rem', fontFamily: 'monospace' }}>{timeLeft}<span style={{ fontSize: '0.9rem', marginLeft: '2px' }}>秒</span></span>
+          <span style={{ fontSize: '0.6rem', color: '#ff80ab' }}>TIME LEFT</span>
+          <span style={{ fontSize: '1.2rem', fontFamily: 'monospace' }}>{timeLeft}<span style={{ fontSize: '0.8rem', marginLeft: '2px' }}>秒</span></span>
         </div>
 
         <div
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           style={{
-            background: 'rgba(0,0,0,0.4)', padding: '10px 15px', borderRadius: '12px',
-            display: 'flex', alignItems: 'center', gap: '10px', height: '44px',
-            width: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '200px' : 'auto'
+            background: 'rgba(0,0,0,0.4)', padding: '4px 12px', borderRadius: '10px',
+            display: 'flex', alignItems: 'center', gap: '8px', height: '32px',
+            width: '180px'
           }}
         >
-          <span style={{ fontSize: '0.8rem', color: '#ff80ab', fontWeight: 'bold' }}>音量</span>
+          <span style={{ fontSize: '0.7rem', color: '#ff80ab', fontWeight: 'bold' }}>音量</span>
           <input
             type="range" min="0" max="1" step="0.01"
             value={volume}
@@ -699,7 +889,8 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             onMouseDown={(e) => e.stopPropagation()}
             style={{
               flex: 1,
-              minWidth: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '120px' : '80px',
+              minWidth: '100px',
+              height: '4px',
               cursor: 'pointer',
               accentColor: '#ff80ab'
             }}
@@ -733,7 +924,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
       <canvas
         ref={canvasRef}
         width={600}
-        height={800}
+        height={900}
         onMouseDown={(e) => {
           e.stopPropagation();
           handleAction(e.clientX, e.clientY);
@@ -745,53 +936,22 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           const touch = e.touches[0];
           handleAction(touch.clientX, touch.clientY);
         }}
-        style={{ 
-          border: '6px solid #ad1457', 
-          borderRadius: '16px', 
-          cursor: 'pointer', 
-          maxWidth: '90vw',
-          maxHeight: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '55vh' : '70vh',
+        style={{
+          border: '6px solid #ad1457',
+          borderRadius: '16px',
+          cursor: 'pointer',
+          maxWidth: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '90vw' : '600px',
+          maxHeight: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '70vh' : '75vh',
           width: 'auto',
           height: 'auto',
           boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
-          backgroundColor: 'white'
+          backgroundColor: 'white',
+          margin: '0 auto',
+          display: 'block'
         }}
       />
 
-      <div
-        onClick={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        style={{
-          marginTop: '15px',
-          fontSize: '0.9rem',
-          background: 'rgba(255,255,255,0.2)',
-          padding: '10px',
-          borderRadius: '10px',
-          lineHeight: '1.4'
-        }}
-      >
-        <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>【遊び方】</p>
-        <p style={{ margin: 0 }}>赤くなっている「らいふく」をつつくと増えるよ！</p>
-        <p style={{ margin: 0 }}>白いのを無理につつくと爆発しちゃうから注意！</p>
-      </div>
 
-      <button
-        onMouseDown={(e) => { e.stopPropagation(); onBack(); }}
-        onClick={(e) => e.stopPropagation()}
-        style={{
-        marginTop: '20px', 
-        padding: '12px 30px', 
-        fontSize: '1rem',
-        borderRadius: '25px',
-        border: 'none',
-        backgroundColor: '#ad1457',
-        color: 'white',
-        fontWeight: 'bold',
-        boxShadow: '0 4px #880e4f',
-        cursor: 'pointer'
-      }}>
-        タイトルに戻る
-      </button>
 
       {gameState === 'result' && (
         <div style={{
@@ -821,7 +981,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             )
           ) : (
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '15px', marginBottom: '20px', maxWidth: '300px' }}>
-              <p style={{ fontSize: '0.9rem', margin: '0 0 10px 0' }}>ユーザ登録すると、このスコアを<br/>ランキングに登録できます！</p>
+              <p style={{ fontSize: '0.9rem', margin: '0 0 0 0' }}>ユーザ登録すると、このスコアを<br/>ランキングに登録できます！</p>
             </div>
           )}
 
@@ -888,10 +1048,10 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             <div style={{ textAlign: 'left', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '30px' }}>
               <p>「らいふく」をつついて増やそう！</p>
               <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li>❤️ <b>増える:</b> 赤い時 (周りに仲間が1〜2個いる時)</li>
+                <li>❤️ <b>増える:</b> 赤い時 (周りに仲間が 1〜2個いる時)</li>
                 <li>💥 <b>爆発:</b> 白い時 (孤立している、または密集しすぎている時)</li>
-                <li>⏱️ <b>初期タイム:</b> PC版 60秒 / スマホ版 80秒</li>
-                <li>✨ <b>タイムボーナス:</b> +10個初達成で PC版 +10秒 / スマホ版 +15秒</li>
+                <li>⏱️ <b>制限時間:</b> 90秒</li>
+                <li>✨ <b>タイムボーナス:</b> +10個初達成で +15秒</li>
                 <li>🌎 <b>50個、100個到達で何かが起こる！？</b></li>
               </ul>
               <p>※紫電一閃とは一切関係がありません。</p>
@@ -901,7 +1061,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
               border: 'none', backgroundColor: 'white', color: '#ad1457', fontWeight: 'bold',
               cursor: 'pointer', boxShadow: '0 5px 0 #eee'
             }}>
-              はじめる！
+              {hasStartedOnce ? 'ゲームに戻る' : 'はじめる！'}
             </button>
           </div>
         </div>
@@ -983,7 +1143,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
             borderRadius: '10px', marginBottom: '30px', position: 'relative', overflow: 'hidden'
           }}>
-            <BossAd getStorageUrl={getStorageUrl} />
+            <KenjuAd getStorageUrl={getStorageUrl} />
           </div>
 
           <button
@@ -998,7 +1158,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
               fontSize: '1rem'
             }}
           >
-            広告を閉じてリトライ
+            閉じてリトライ
           </button>
 
         </div>
@@ -1054,6 +1214,7 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
           100% { transform: scale(1); }
         }
       `}</style>
+        </div>
     </div>
   );
 };

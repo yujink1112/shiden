@@ -1969,7 +1969,8 @@ const PLAYER_SKILL_COUNT = 5;
     return (
       <div className="TitleScreenContainer" style={{
         height: '100dvh', // 動的ビューポート単位を使用
-        overflow: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'hidden' : 'auto',
+        overflowX: 'hidden',
+        overflowY: 'hidden',
         padding: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '40px 0',
         display: 'flex',
         flexDirection: 'column',
@@ -1979,7 +1980,7 @@ const PLAYER_SKILL_COUNT = 5;
         position: 'fixed', // スクロールを物理的に抑制
         top: 0,
         left: 0,
-        width: '100vw'
+        width: '100%'
       }}>
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
@@ -2054,7 +2055,7 @@ const PLAYER_SKILL_COUNT = 5;
             </div>
           )}
           <div className="TitleMenu" style={{
-            gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '15px'
+            gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '12px'
           }}>
             <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
             <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
@@ -2096,7 +2097,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
 
           <div className="TitleFooter">
-            <div style={{ textAlign: 'center', padding: '0px 0px 0px 10px', marginBottom: '20px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
+            <div style={{ textAlign: 'center', padding: '0px 0px 0px 10px', marginBottom: '10px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
             <div style={{ textAlign: 'center', fontSize: '0.8rem', marginLeft: '5px', marginBottom: '10px' }}> © 2026 Shiden Games </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', fontSize: '0.75rem', color: '#888', marginBottom: '10px' }}>
               <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={() => setShowLegal(true)}>規約・運営情報</span>
@@ -2332,19 +2333,6 @@ const PLAYER_SKILL_COUNT = 5;
         </div>
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative' }}>
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '20px',
-          width: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '100%' : 'auto',
-          textAlign: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'center' : 'left',
-          color: '#666',
-          fontSize: '0.8rem',
-          zIndex: 1,
-          pointerEvents: 'none'
-        }}>
-          &copy; 2026 Shiden Games
-        </div>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
