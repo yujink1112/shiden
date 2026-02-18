@@ -29,7 +29,7 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
 const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   1: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   2: { pc: { height: '50%', width: '50%' }, mobile: { height: '50%', width: '50%' } },
-  3: { pc: { height: '60%', width: '60%' }, mobile: { height: '80%', width: '80%' } },
+  3: { pc: { height: '70%', width: '70%' }, mobile: { height: '80%', width: '80%' } },
   4: { pc: { height: '300%', width: '300%' }, mobile: { height: '300%', width: '300%' } },
   5: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
   6: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
@@ -42,7 +42,7 @@ const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
 };
 
 const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
-  1: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  1: { pc: { height: '70%', width: '70%' }, mobile: { height: '60%', width: '60%' } },
   2: { pc: { height: '50%', width: '50%' }, mobile: { height: '50%', width: '50%' } },
   3: { pc: { height: '60%', width: '60%' }, mobile: { height: '40%', width: '40%' } },
   4: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },

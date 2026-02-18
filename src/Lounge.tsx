@@ -892,7 +892,7 @@ onPageChange,
         </div>
 
         <div style={{ marginBottom: '20px', textAlign: 'center', background: 'rgba(255, 82, 82, 0.1)', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', maxWidth: '500px', width: '100%', boxSizing: 'border-box' }}>
-            <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>電影の投稿前に必ずガイドラインを一読してください</p>
+            <p style={{ color: '#ff5252', fontSize: '0.85rem', margin: '0 0 10px 0', fontWeight: 'bold' }}>電影の投稿前に必ずガイドラインを一読ください</p>
             <button
               onClick={() => setShowGuideline(true)}
               style={{ padding: '8px 20px', background: '#ff5252', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
