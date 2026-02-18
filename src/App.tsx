@@ -367,10 +367,13 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
         setIsTooltipBelow(false);
       }
 
-      // 親要素(deneiSkillPanel)がある場合、その範囲内に収める
+      // 親要素(deneiSkillPanel または bossSkillGrid)がある場合、その範囲内に収める
       const deneiPanel = document.getElementById('deneiSkillPanel');
-      if (deneiPanel) {
-        const panelRect = deneiPanel.getBoundingClientRect();
+      const bossPanel = document.querySelector('.BossSkillPreview');
+      const containerPanel = deneiPanel || bossPanel;
+
+      if (containerPanel) {
+        const panelRect = containerPanel.getBoundingClientRect();
         const relativeLeft = rect.left - panelRect.left;
         const relativeRight = panelRect.right - rect.right;
 
@@ -472,7 +475,7 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
         if (!disableTooltip) {
           tooltipTimeoutRef.current = setTimeout(() => {
             setShowTooltip(false);
-          }, 300); // 300msの猶予を与える
+          }, 200); // 200msの猶予を与える
         }
       }}
       style={{
@@ -1395,7 +1398,7 @@ const PLAYER_SKILL_COUNT = 5;
             if (typeof likes !== 'object' || likes === null) return;
             ensureStats(uid, kenjuName);
             newState[uid][kenjuName].likes = Object.keys(likes).length;
-            if (auth.currentUser && likes[auth.currentUser.uid]) {
+            if (user && likes[user.uid]) {
               newState[uid][kenjuName].isLiked = true;
             }
           });
@@ -1646,6 +1649,12 @@ const PLAYER_SKILL_COUNT = 5;
           setBattleResults(results);
           setGameStarted(true);
           setShowLogForBattleIndex(0);
+          
+          if (isMobile) {
+            window.scrollTo({ top: 0 });
+            if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+          }
+
           const winRateVal = Math.round((winCount / battleCount) * 100);
 
           if (stageProcessor.shouldShowWinRate?.(context)) {
@@ -1756,6 +1765,10 @@ const PLAYER_SKILL_COUNT = 5;
 
   const handleBattleLogComplete = () => {
     setLogComplete(true);
+    if (isMobile) {
+      window.scrollTo({ top: 0 });
+      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+    }
     // ボス戦、剣獣戦、または電影戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
     const winCount = battleResults.filter(r => r.winner === 1).length;
     const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;
@@ -2371,13 +2384,13 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
             )}
             {!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
-              <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px' }}>
+              <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
                       {stageProcessor.getEnemyTitle?.({ ...stageContext, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
                   </h2>
                   <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : ((stageMode === 'DENEI' || stageMode === 'KENJU' && kenjuBoss) || stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
                     {stageProcessor.getEnemySkills(0, stageContext).length > 0 ? (
-                      stageProcessor.getEnemySkills(0, stageContext).map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={true} /></div>)
+                      stageProcessor.getEnemySkills(0, stageContext).map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={false} /></div>)
                     ) : (
                       <div style={{ color: '#ff5252', padding: '20px' }}>スキル未設定</div>
                     )}
@@ -2387,7 +2400,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
 
           {selectedPlayerSkills.length > 0 && (
-            <div className="SelectedSkillsPanel" ref={panelRef} style={{ position: (stageMode === 'MID' || (!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI'))) ? 'absolute' : 'relative', bottom: 0, left: 0, width: '100%', padding: '15px', background: (stageMode === 'MID' || !gameStarted) ? 'rgba(0, 0, 0, 0.5)' : '#121212', borderRadius: '10px', boxSizing: 'border-box', zIndex: 10, backdropFilter: (stageMode === 'MID' || !gameStarted) ? 'blur(5px)' : 'none' }}>
+            <div className="SelectedSkillsPanel" ref={panelRef} style={{ position: (stageMode === 'MID' || (!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI'))) ? 'absolute' : 'relative', bottom: 0, left: 0, width: '100%', padding: '15px', background: (stageMode === 'MID' || !gameStarted) ? 'rgba(0, 0, 0, 0.5)' : '#121212', borderRadius: '10px', boxSizing: 'border-box', zIndex: 5, backdropFilter: (stageMode === 'MID' || !gameStarted) ? 'blur(5px)' : 'none' }}>
               <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
                 {lineCoords.map((coord, idx) => <line key={idx} x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2} stroke="#ffeb3b" strokeWidth="4" />)}
               </svg>
