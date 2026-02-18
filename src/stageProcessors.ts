@@ -65,7 +65,7 @@ const KENJU_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
 };
 
 const KENJU_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
-  11: { pc: { height: '80%', width: '80%' }, mobile: { height: '70%', width: '70%' } },
+  11: { pc: { height: '70%', width: '70%' }, mobile: { height: '70%', width: '70%' } },
 };
 
 function getBossImageStyleCommon(stageCycle: number, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {

@@ -38,6 +38,7 @@ export interface UserProfile {
       targetMasterUid?: string;
     }
   };
+  lifukuHighscore?: number;
 }
 
 interface UserListTableProps {
@@ -79,8 +80,8 @@ const UserListTable: React.FC<UserListTableProps> = ({
             <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
               <th style={{ padding: '12px', textAlign: 'left' }}>名前</th>
               <th style={{ padding: '12px', textAlign: 'center' }}>電影</th>
-              <th style={{ padding: '12px', textAlign: 'center' }}>好き</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていきたい</th>
+              <th style={{ padding: '12px', textAlign: 'center' }}>💖</th>
+              <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていく</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
             </tr>
           </thead>
@@ -636,14 +637,14 @@ onPageChange,
 
             <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
               <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)', display: 'flex', flexDirection: 'column' }}>
-                  <h2 style={{ color: '#ff5252', margin: '0 0 10px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
+                  <h2 style={{ color: '#ff5252', margin: '0 0 20px 0', fontSize: '1.2rem' }}>本日の剣獣</h2>
                   {kenjuBoss && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'flex-start' }}>
                       <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
                         <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
-                      <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{kenjuBoss.name}</div>
-                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '15px' }}>クリア人数: {kenjuClears}人</div>
+                      <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '10px' }}>{kenjuBoss.name}</div>
+                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '45px' }}>クリア人数: {kenjuClears}人</div>
                       <button
                         className="TitleButton neon-red"
                         onClick={() => onKenjuBattle()}
