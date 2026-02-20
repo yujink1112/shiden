@@ -662,6 +662,10 @@ function App() {
     if (stageMode === 'BOSS') return new BossStageProcessor();
     if (stageMode === 'MID') {
       if (stageCycle === 11) return new Stage11MidStageProcessor();
+      const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+      if (currentStage?.chapter && currentStage.chapter >= 2) {
+        return new BossStageProcessor(); // 第2章は中間ステージもボス戦の挙動にする
+      }
       return new MidStageProcessor();
     }
     return new MidStageProcessor();
@@ -678,6 +682,8 @@ function App() {
   const [battleResults, setBattleResults] = useState<BattleResult[]>([]);
   const [showLogForBattleIndex, setShowLogForBattleIndex] = useState<number>(-1);
   const [storyContent, setStoryContent] = useState<string | null>(null);
+  const [storyContentV2, setStoryContentV2] = useState<any[] | null>(null);
+  const [showStoryModal, setShowStoryModal] = useState(false);
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [winRateDisplay, setWinRateDisplay] = useState<number | null>(null);
@@ -721,11 +727,31 @@ const PLAYER_SKILL_COUNT = 5;
   useEffect(() => {
     const fetchStory = async () => {
       if (stageMode === 'MID' && !gameStarted) {
+        const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+        // 第2章（ステージ13以降）は管理者のみ読み込み可能
+        if (stageCycle >= 13 && !isAdmin) {
+          setStoryContent(null);
+          setStoryContentV2(null);
+          return;
+        }
         try {
-          const response = await fetch(`${process.env.PUBLIC_URL}/story/${stageCycle}.txt`);
-          if (response.ok) {
-            const text = await response.text();
-            setStoryContent(text);
+          if (currentStage?.chapter) {
+            const filename = `${currentStage.chapter}-${currentStage.stageInChapter}.json`;
+            const response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filename}`);
+            if (response.ok) {
+              const data = await response.json();
+              setStoryContentV2(data);
+              setStoryContent(null);
+            } else {
+              setStoryContentV2(null);
+            }
+          } else {
+            const response = await fetch(`${process.env.PUBLIC_URL}/story/${stageCycle}.txt`);
+            if (response.ok) {
+              const text = await response.text();
+              setStoryContent(text);
+              setStoryContentV2(null);
+            }
           }
         } catch (e) {
           console.error("Story fetch error:", e);
@@ -734,7 +760,13 @@ const PLAYER_SKILL_COUNT = 5;
         setStoryContent(null);
       }
     };
-    fetchStory();
+    fetchStory().then(() => {
+      // ストーリーが読み込まれ、かつ第2章のステージであればモーダルを表示
+      const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+      if (currentStage?.chapter && !gameStarted) {
+        setShowStoryModal(true);
+      }
+    });
 
     const fetchEpilogue = async () => {
       try {
@@ -2284,8 +2316,10 @@ const PLAYER_SKILL_COUNT = 5;
           <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000 }}>
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
-                <button key={n} onClick={() => { setStageCycle(n); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', n.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '10px' }}>Stage {n}</button>
+              {STAGE_DATA.map(s => (
+                <button key={s.no} onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '10px' }}>
+                  {s.chapter ? `${s.chapter}-${s.stageInChapter}` : `Stage ${s.no}`}
+                </button>
               ))}
             </div>
             <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '10px' }}>閉じる</button>
@@ -2301,6 +2335,13 @@ const PLAYER_SKILL_COUNT = 5;
 
   return (
     <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+      {showStoryModal && storyContentV2 && (
+        <StoryModal
+          content={storyContentV2}
+          onClose={() => setShowStoryModal(false)}
+          getStorageUrl={getStorageUrl}
+        />
+      )}
       {showEpilogue && (
         <div className="EpilogueContainer">
           <div className="EpilogueBackground"></div>
@@ -2454,7 +2495,21 @@ const PLAYER_SKILL_COUNT = 5;
             {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
                 <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{ (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</>)}</h2>
-                <button onClick={stageMode === 'MID' ? goToBossStage : clearBossAndNextCycle} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>{(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}</button>
+                <button onClick={() => {
+                  if (stageMode === 'MID') {
+                    const nextStage = STAGE_DATA.find(s => s.no === stageCycle);
+                    if (nextStage?.chapter && nextStage.chapter >= 2) {
+                      // 第2章の中間ステージクリア後は、ボス戦をスキップして（というかMID=BOSSなので）次のステージへ
+                      clearBossAndNextCycle();
+                    } else {
+                      goToBossStage();
+                    }
+                  } else {
+                    clearBossAndNextCycle();
+                  }
+                }} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  {(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? (STAGE_DATA.find(s => s.no === stageCycle)?.chapter ? '次のステージへ進む' : 'ボスステージへ進む') : '次のステージへ進む')}
+                </button>
               </div>
             )}
             {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel &&
@@ -2549,10 +2604,10 @@ const PLAYER_SKILL_COUNT = 5;
           /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
         ) :
         
-        (storyContent && !gameStarted ? 
+        ((storyContent || (storyContentV2 && !STAGE_DATA.find(s => s.no === stageCycle)?.chapter)) && !gameStarted ?
         
         <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
-          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre>
+          {storyContent && <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre>}
           </div> :
           ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ?
            <div style={{ textAlign: 'center' }}>
@@ -2583,5 +2638,65 @@ const PLAYER_SKILL_COUNT = 5;
     </div>
   );
 }
+
+const StoryModal: React.FC<{
+  content: any[];
+  onClose: () => void;
+  getStorageUrl: (path: string) => string;
+}> = ({ content, onClose, getStorageUrl }) => {
+  const [index, setIndex] = useState(0);
+  const current = content[index];
+
+  const next = () => {
+    if (index < content.length - 1) {
+      setIndex(index + 1);
+    } else {
+      onClose();
+    }
+  };
+
+  if (!current) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 11000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px', boxSizing: 'border-box'
+    }} onClick={next}>
+      <div style={{
+        width: '100%', maxWidth: '600px', background: '#1a1a1a',
+        border: '2px solid #4fc3f7', borderRadius: '15px',
+        padding: '30px', position: 'relative', boxShadow: '0 0 30px rgba(79,195,247,0.3)',
+        minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center'
+      }} onClick={e => e.stopPropagation()}>
+        {current.type === 'dialogue' && (
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            {current.icon && <img src={getStorageUrl(`/images/icon/${current.icon}`)} alt="" style={{ width: '60px', height: '60px', borderRadius: '10px', border: '2px solid #4fc3f7' }} />}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '1rem', color: '#4fc3f7', fontWeight: 'bold', marginBottom: '10px' }}>{current.name}</div>
+              <div style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#fff', whiteSpace: 'pre-wrap' }}>{current.text}</div>
+            </div>
+          </div>
+        )}
+        {current.type === 'monologue' && (
+          <div style={{ textAlign: 'center', fontStyle: 'italic', color: '#aaa', fontSize: '1.2rem', lineHeight: '1.8' }}>
+            {current.text}
+          </div>
+        )}
+        {current.type === 'direction' && (
+          <div style={{ borderLeft: '4px solid #4fc3f7', paddingLeft: '20px', color: '#eee', fontSize: '1.1rem', backgroundColor: 'rgba(79,195,247,0.1)', padding: '20px' }}>
+            {current.text}
+          </div>
+        )}
+        <div style={{ position: 'absolute', bottom: '15px', right: '20px', color: '#4fc3f7', fontSize: '0.8rem', animation: 'blink 1.5s infinite' }}>▼ NEXT</div>
+        <button onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>SKIP</button>
+      </div>
+      <style>{`
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+      `}</style>
+    </div>
+  );
+};
 
 export default App;
