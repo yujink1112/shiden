@@ -104,6 +104,10 @@
   }
 }
 
+.image-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

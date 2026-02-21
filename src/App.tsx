@@ -242,6 +242,10 @@ function App() {
   });
   const [kenjuClears, setKenjuClears] = useState<number>(0);
   const [kenjuTrials, setKenjuTrials] = useState<number>(0);
+  const [deneiClears, setDeneiClears] = useState<number>(0);
+  const [deneiTrials, setDeneiTrials] = useState<number>(0);
+  const [isKenjuClearedEver, setIsKenjuClearedEver] = useState<boolean>(false);
+  const [allKenjuClearsData, setAllKenjuClearsData] = useState<any>(null);
   const [allDeneiStats, setAllDeneiStats] = useState<{ [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } }>({});
   const [anonymousVictories, setAnonymousVictories] = useState<{[visitorId: string]: {[stageKey: string]: string[]}}>({});
   const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
@@ -878,14 +882,10 @@ const PLAYER_SKILL_COUNT = 5;
     console.log("Daily Kenju Generated:", kenju);
     setKenjuBoss(kenju as any);
 
-    // クリア人数をカウント
-    const clearsRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
-    const unsubClears = onValue(clearsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setKenjuClears(snapshot.size);
-      } else {
-        setKenjuClears(0);
-      }
+    // クリア人数データを購読
+    const kenjuClearsRootRef = ref(database, `kenjuClears`);
+    const unsubClears = onValue(kenjuClearsRootRef, (snapshot) => {
+      setAllKenjuClearsData(snapshot.val());
     });
 
     const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
@@ -1177,6 +1177,31 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   useEffect(() => {
+    if (allKenjuClearsData && kenjuBoss) {
+      const uniqueUids = new Set<string>();
+      let isClearedEver = false;
+      const currentUid = user?.uid;
+
+      // allKenjuClearsData は { [date]: { [kenjuName]: { [uid]: timestamp } } } という構造
+      Object.values(allKenjuClearsData).forEach((dateData: any) => {
+        if (dateData && (dateData as any)[kenjuBoss.name]) {
+          Object.keys((dateData as any)[kenjuBoss.name]).forEach(uid => {
+            uniqueUids.add(uid);
+            if (currentUid && uid === currentUid) {
+              isClearedEver = true;
+            }
+          });
+        }
+      });
+      setKenjuClears(uniqueUids.size);
+      setIsKenjuClearedEver(isClearedEver);
+    } else {
+      setKenjuClears(0);
+      setIsKenjuClearedEver(false);
+    }
+  }, [allKenjuClearsData, kenjuBoss, user]);
+
+  useEffect(() => {
     // 同一ブラウザからの接続を1人としてカウントするための識別子
     let visitorId = localStorage.getItem('shiden_visitor_id');
     if (!visitorId) {
@@ -1224,10 +1249,10 @@ const PLAYER_SKILL_COUNT = 5;
       }
     });
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        if (!user.emailVerified && user.providerData.some(p => p.providerId === 'password')) {
+    const unsubscribeAuth = onAuthStateChanged(auth, (authenticatedUser) => {
+      setUser(authenticatedUser);
+      if (authenticatedUser) {
+        if (!authenticatedUser.emailVerified && authenticatedUser.providerData.some(p => p.providerId === 'password')) {
            setStageMode('VERIFY_EMAIL');
            setIsTitle(false);
         } else if (stageMode === 'VERIFY_EMAIL') {
@@ -1236,7 +1261,7 @@ const PLAYER_SKILL_COUNT = 5;
 
         // 第2章の進捗をFirebaseからロード
         const loadChapter2Data = async () => {
-          const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+          const chapter2Ref = ref(database, `profiles/${authenticatedUser.uid}/chapter2`);
           const snapshot = await get(chapter2Ref);
           if (snapshot.exists()) {
             const data = snapshot.val();
@@ -1248,14 +1273,14 @@ const PLAYER_SKILL_COUNT = 5;
             if (isTargetChapter2) {
               if (data.stageCycle) setStageCycle(data.stageCycle);
               if (data.flowIndex !== undefined) setChapter2FlowIndex(data.flowIndex);
-        const dbSkills = await loadUserSkills(user.uid);
-        if (dbSkills) {
-          setOwnedSkillAbbrs(dbSkills);
-        } else if (data.ownedSkills) {
-          setOwnedSkillAbbrs(data.ownedSkills);
-        } else {
-          setOwnedSkillAbbrs(CHAPTER2_INITIAL_SKILLS);
-        }
+              const dbSkills = await loadUserSkills(authenticatedUser.uid);
+              if (dbSkills) {
+                setOwnedSkillAbbrs(dbSkills);
+              } else if (data.ownedSkills) {
+                setOwnedSkillAbbrs(data.ownedSkills);
+              } else {
+                setOwnedSkillAbbrs(CHAPTER2_INITIAL_SKILLS);
+              }
               if (data.canGoToBoss !== undefined) setCanGoToBoss(data.canGoToBoss);
               
               // 章別進捗も更新
@@ -1267,10 +1292,10 @@ const PLAYER_SKILL_COUNT = 5;
         };
         loadChapter2Data();
 
-        // if (user.uid === process.env.REACT_APP_ADMIN_UID) {
+        // if (authenticatedUser.uid === process.env.REACT_APP_ADMIN_UID) {
         //   setShowAdmin(true);
         // }
-        const profileRef = ref(database, `profiles/${user.uid}`);
+        const profileRef = ref(database, `profiles/${authenticatedUser.uid}`);
         onValue(profileRef, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
@@ -1285,7 +1310,7 @@ const PLAYER_SKILL_COUNT = 5;
             let hasNewLocalSkills = false;
             for (const key in localVictorySkills) {
               if (!(firebaseVictorySkills as any)[key]) {
-                const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${key}`);
+                const specificVictorySkillRef = ref(database, `profiles/${authenticatedUser.uid}/victorySkills/${key}`);
                 set(specificVictorySkillRef, localVictorySkills[key]);
                 (firebaseVictorySkills as any)[key] = localVictorySkills[key]; // アップロードしたスキルをFirebaseデータにマージ
                 hasNewLocalSkills = true;
@@ -1297,9 +1322,9 @@ const PLAYER_SKILL_COUNT = 5;
             }
           } else {
             const initialProfile: UserProfile = {
-              uid: user.uid,
-              displayName: user.displayName || "名無しの剣士",
-              photoURL: user.photoURL || getStorageUrl("/images/icon/mon_215.gif"),
+              uid: authenticatedUser.uid,
+              displayName: authenticatedUser.displayName || "名無しの剣士",
+              photoURL: authenticatedUser.photoURL || getStorageUrl("/images/icon/mon_215.gif"),
               favoriteSkill: "一",
               title: "",
               comment: "よろしく！",
@@ -1346,7 +1371,7 @@ const PLAYER_SKILL_COUNT = 5;
     const deneiTrialsRootRef = ref(database, 'deneiTrials');
     const deneiLikesRootRef = ref(database, 'deneiLikes');
 
-    const updateDeneiStats = (clearsData: any, trialsData: any, likesData: any) => {
+    const updateDeneiStats = (clearsData: any, trialsData: any, likesData: any, currentUid: string | null) => {
       const newState: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } } = {};
       
       const ensureStats = (uid: string, kenjuName: string) => {
@@ -1383,7 +1408,7 @@ const PLAYER_SKILL_COUNT = 5;
             if (typeof likes !== 'object' || likes === null) return;
             ensureStats(uid, kenjuName);
             newState[uid][kenjuName].likes = Object.keys(likes).length;
-            if (user && likes[user.uid]) {
+            if (currentUid && likes[currentUid]) {
               newState[uid][kenjuName].isLiked = true;
             }
           });
@@ -1398,21 +1423,21 @@ const PLAYER_SKILL_COUNT = 5;
     const unsubClears = onValue(deneiClearsRootRef, (snap) => {
       get(deneiTrialsRootRef).then(trialsSnap => {
         get(deneiLikesRootRef).then(likesSnap => {
-          updateDeneiStats(snap.val(), trialsSnap.val(), likesSnap.val());
+          updateDeneiStats(snap.val(), trialsSnap.val(), likesSnap.val(), auth.currentUser?.uid || null);
         });
       });
     });
     const unsubTrials = onValue(deneiTrialsRootRef, (snap) => {
       get(deneiClearsRootRef).then(clearsSnap => {
         get(deneiLikesRootRef).then(likesSnap => {
-          updateDeneiStats(clearsSnap.val(), snap.val(), likesSnap.val());
+          updateDeneiStats(clearsSnap.val(), snap.val(), likesSnap.val(), auth.currentUser?.uid || null);
         });
       });
     });
     const unsubLikes = onValue(deneiLikesRootRef, (snap) => {
       get(deneiClearsRootRef).then(clearsSnap => {
         get(deneiTrialsRootRef).then(trialsSnap => {
-          updateDeneiStats(clearsSnap.val(), trialsSnap.val(), snap.val());
+          updateDeneiStats(clearsSnap.val(), trialsSnap.val(), snap.val(), auth.currentUser?.uid || null);
         });
       });
     });
@@ -1464,20 +1489,23 @@ const PLAYER_SKILL_COUNT = 5;
       const deneiTrialsRef = ref(database, `deneiTrials/${masterUid}/${kenjuName}`);
       deneiTrialsUnsubscribe = onValue(deneiTrialsRef, (snapshot) => {
         if (snapshot.exists()) {
-          setKenjuTrials(snapshot.size);
+          setDeneiTrials(snapshot.size);
         } else {
-          setKenjuTrials(0);
+          setDeneiTrials(0);
         }
       });
 
       const deneiClearsRef = ref(database, `deneiClears/${masterUid}/${kenjuName}`);
       deneiClearsUnsubscribe = onValue(deneiClearsRef, (snapshot) => {
         if (snapshot.exists()) {
-          setKenjuClears(snapshot.size);
+          setDeneiClears(snapshot.size);
         } else {
-          setKenjuClears(0);
+          setDeneiClears(0);
         }
       });
+    } else {
+      setDeneiTrials(0);
+      setDeneiClears(0);
     }
 
     return () => {
@@ -2055,8 +2083,9 @@ const PLAYER_SKILL_COUNT = 5;
               if (stageMode === 'KENJU' && kenjuBoss) {
                 const kenjuClearRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenjuBoss.name}/${user.uid}`);
                 set(kenjuClearRef, serverTimestamp());
-                // オプティミスティックUI更新
-                setKenjuClears(prev => prev + 1);
+                
+                // オプティミスティックUI更新 (人数は全体集計に任せるのが安全だが、即座の反映のため)
+                setIsKenjuClearedEver(true);
               } else if (stageMode === 'DENEI' && currentKenjuBattle) {
                 const masterUid = (currentKenjuBattle as any).masterUid;
                 if (masterUid) {
@@ -2144,6 +2173,9 @@ const PLAYER_SKILL_COUNT = 5;
         kenjuBoss={kenjuBoss}
         kenjuClears={kenjuClears}
         kenjuTrials={kenjuTrials}
+        isKenjuClearedEver={isKenjuClearedEver}
+        deneiClears={deneiClears}
+        deneiTrials={deneiTrials}
         onGoogleSignIn={handleGoogleSignIn}
         onEmailSignUp={handleEmailSignUp}
         onEmailSignIn={handleEmailSignIn}
