@@ -77,14 +77,14 @@ const UserListTable: React.FC<UserListTableProps> = ({
     <>
       <h2 style={{ color: '#ffd700', marginTop: '30px' }}>参加者</h2>
       <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px', tableLayout: 'fixed' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
-              <th style={{ padding: '12px', textAlign: 'left', width: '25%' }}>名前</th>
-              <th style={{ padding: '12px', textAlign: 'center', width: '60px' }}>電影</th>
-              <th style={{ padding: '12px', textAlign: 'center', width: '60px' }}>💖</th>
-              <th style={{ padding: '12px', textAlign: 'left', width: '25%' }}>無人島に持っていく</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
+            <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.75rem' }}>
+              <th style={{ padding: '12px 5px', textAlign: 'left', width: '22%' }}>名前</th>
+              <th style={{ padding: '12px 2px', textAlign: 'center', width: '45px' }}>電影</th>
+              <th style={{ padding: '12px 2px', textAlign: 'center', width: '45px' }}>💖</th>
+              <th style={{ padding: '12px 5px', textAlign: 'left', width: '22%', whiteSpace: 'nowrap' }}>無人島に持ってく</th>
+              <th style={{ padding: '12px 5px', textAlign: 'left' }}>ひとこと</th>
             </tr>
           </thead>
           <tbody>
@@ -106,43 +106,43 @@ const UserListTable: React.FC<UserListTableProps> = ({
                   onMouseEnter={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.25)' : '#222'}
                   onMouseLeave={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent'}
                 >
-                  <td style={{ padding: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: isMe ? '2px solid #4fc3f7' : '1px solid #444' }} />
+                  <td style={{ padding: '8px 5px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '32px', height: '32px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: isMe ? '2px solid #4fc3f7' : '1px solid #444' }} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ color: isMe ? '#4fc3f7' : '#FFFFFF', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '5px', overflow: 'hidden' }}>
-                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.displayName}</span>
+                        <div style={{ color: isMe ? '#4fc3f7' : '#FFFFFF', fontWeight: 'bold', fontSize: p.displayName.length > 9 ? '0.65rem' : (p.displayName.length > 7 ? '0.75rem' : '0.85rem'), display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ whiteSpace: 'nowrap' }}>{p.displayName}</span>
                           {isMe && <span style={{ fontSize: '0.65rem', background: '#4fc3f7', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: 'bold', flexShrink: 0 }}>YOU</span>}
                         </div>
-                        {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
+                        {p.title && <div style={{ fontSize: '0.6rem', color: '#ffd700', whiteSpace: 'nowrap' }}>{p.title}</div>}
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
+                  <td style={{ padding: '8px 2px', textAlign: 'center' }}>
                     {p.myKenju?.name ? (
                       <span title={p.myKenju.name} style={{ cursor: 'help' }}>✅</span>
                     ) : (
                       <span style={{ color: '#444' }}>-</span>
                     )}
                   </td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
+                  <td style={{ padding: '8px 2px', textAlign: 'center' }}>
                     {favSkill && (
                       <img
                         src={getStorageUrl(favSkill.icon)}
                         alt={favSkill.name}
                         title={favSkill.name}
-                        style={{ width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #ffd700' }}
+                        style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #ffd700' }}
                       />
                     )}
                   </td>
-                  <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
-                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.oneThing || '-'}</div>
+                  <td style={{ padding: '8px 5px', fontSize: (p.oneThing || '').length > 10 ? '0.55rem' : ((p.oneThing || '').length > 7 ? '0.65rem' : '0.85rem'), color: '#ccc' }}>
+                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>{p.oneThing || '-'}</div>
                   </td>
-                  <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
+                  <td style={{ padding: '8px 5px', fontSize: '0.8rem', color: '#ccc' }}>
                     {p.isSpoiler && !spoilerVisibility[p.uid] ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleSpoiler(p.uid); }}
-                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', padding: '5px 10px', lineHeight: '1.4', width: '100%' }}
+                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.65rem', padding: '4px 8px', lineHeight: '1.2', width: '100%' }}
                       >
                         ネタバレ注意<br/>(クリックで表示)
                       </button>
@@ -151,7 +151,6 @@ const UserListTable: React.FC<UserListTableProps> = ({
                         display: '-webkit-box',
                         WebkitBoxOrient: 'vertical',
                         WebkitLineClamp: 2,
-                        overflow: 'hidden',
                         wordBreak: 'break-all',
                         lineHeight: '1.2'
                       }}>
