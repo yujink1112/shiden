@@ -2223,8 +2223,22 @@ const PLAYER_SKILL_COUNT = 5;
                     <div key={index} className="ChangelogItem">
                       <div className="ChangelogVersion" style={{ fontSize: '1.4rem', borderLeft: '4px solid #00d2ff', paddingLeft: '10px', marginBottom: '10px', fontWeight: 'bold', color: '#00d2ff' }}>{item.title}</div>
                       <div className="ChangelogDate" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>{item.date}</div>
+                      {item.image && (
+                        <div style={{ marginBottom: '15px', textAlign: 'center' }}>
+                          <img
+                            src={getStorageUrl(item.image)}
+                            alt=""
+                            style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #444' }}
+                          />
+                        </div>
+                      )}
                       <div className="ChangelogText" style={{ whiteSpace: 'pre-wrap' }}>
-                        {Array.isArray(item.content) ? item.content.join('\n') : item.content}
+                        {(Array.isArray(item.content) ? item.content.join('\n') : (item.content as string)).split(/(\*.*?\*)/g).map((part: string, i: number) => {
+                          if (part.startsWith('*') && part.endsWith('*')) {
+                            return <i key={i}>{part.slice(1, -1)}</i>;
+                          }
+                          return part;
+                        })}
                       </div>
                     </div>
                   ))
