@@ -47,6 +47,7 @@ interface UserListTableProps {
   getSkillByAbbr: (abbr: string) => SkillDetail | undefined;
   allSkills: SkillDetail[];
   onViewProfile: (profile: UserProfile) => void;
+  currentUserUid?: string;
   allProfilesCount: number;
   currentPage: number;
   onPageChange: (page: number) => void;
@@ -58,6 +59,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
   getSkillByAbbr,
   allSkills,
   onViewProfile,
+  currentUserUid,
   allProfilesCount,
   currentPage,
   onPageChange
@@ -75,13 +77,13 @@ const UserListTable: React.FC<UserListTableProps> = ({
     <>
       <h2 style={{ color: '#ffd700', marginTop: '30px' }}>参加者</h2>
       <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px', tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.9rem' }}>
-              <th style={{ padding: '12px', textAlign: 'left' }}>名前</th>
-              <th style={{ padding: '12px', textAlign: 'center' }}>電影</th>
-              <th style={{ padding: '12px', textAlign: 'center' }}>💖</th>
-              <th style={{ padding: '12px', textAlign: 'left' }}>無人島に持っていく</th>
+              <th style={{ padding: '12px', textAlign: 'left', width: '25%' }}>名前</th>
+              <th style={{ padding: '12px', textAlign: 'center', width: '60px' }}>電影</th>
+              <th style={{ padding: '12px', textAlign: 'center', width: '60px' }}>💖</th>
+              <th style={{ padding: '12px', textAlign: 'left', width: '25%' }}>無人島に持っていく</th>
               <th style={{ padding: '12px', textAlign: 'left' }}>ひとこと</th>
             </tr>
           </thead>
@@ -89,19 +91,29 @@ const UserListTable: React.FC<UserListTableProps> = ({
             {profiles.map(p => {
               const isActive = !!lastActiveProfiles[p.uid];
               const favSkill = getSkillByAbbr(p.favoriteSkill);
+              const isMe = p.uid === currentUserUid;
               return (
                 <tr
                   key={p.uid}
                   onClick={() => onViewProfile(p)}
-                  style={{ borderBottom: '1px solid #333', cursor: 'pointer', transition: 'background 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#222'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  style={{
+                    borderBottom: '1px solid #333',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                    background: isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent',
+                    borderLeft: isMe ? '4px solid #4fc3f7' : 'none'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.25)' : '#222'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent'}
                 >
                   <td style={{ padding: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: '1px solid #444' }} />
+                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '40px', height: '40px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: isMe ? '2px solid #4fc3f7' : '1px solid #444' }} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: '0.95rem' }}>{p.displayName}</div>
+                        <div style={{ color: isMe ? '#4fc3f7' : '#FFFFFF', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '5px', overflow: 'hidden' }}>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.displayName}</span>
+                          {isMe && <span style={{ fontSize: '0.65rem', background: '#4fc3f7', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: 'bold', flexShrink: 0 }}>YOU</span>}
+                        </div>
                         {p.title && <div style={{ fontSize: '0.7rem', color: '#ffd700' }}>{p.title}</div>}
                       </div>
                     </div>
@@ -124,18 +136,27 @@ const UserListTable: React.FC<UserListTableProps> = ({
                     )}
                   </td>
                   <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
-                    {p.oneThing || '-'}
+                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.oneThing || '-'}</div>
                   </td>
                   <td style={{ padding: '10px', fontSize: '0.85rem', color: '#ccc' }}>
                     {p.isSpoiler && !spoilerVisibility[p.uid] ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleSpoiler(p.uid); }}
-                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', padding: '5px 10px' }}
+                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', padding: '5px 10px', lineHeight: '1.4', width: '100%' }}
                       >
-                        ネタバレ注意 (クリックで表示)
+                        ネタバレ注意<br/>(クリックで表示)
                       </button>
                     ) : (
-                      p.comment
+                      <div style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2,
+                        overflow: 'hidden',
+                        wordBreak: 'break-all',
+                        lineHeight: '1.2'
+                      }}>
+                        {p.comment}
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -341,6 +362,9 @@ interface LoungeProps {
   currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
   kenjuClears: number;
   kenjuTrials: number;
+  deneiClears: number;
+  deneiTrials: number;
+  isKenjuClearedEver: boolean;
   allDeneiStats?: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } };
   isDeneiStatsLoaded: boolean;
   onGoogleSignIn: () => void;
@@ -380,6 +404,9 @@ export const Lounge: React.FC<LoungeProps> = ({
   currentKenjuBattle,
   kenjuClears,
   kenjuTrials,
+  deneiClears,
+  deneiTrials,
+  isKenjuClearedEver,
   allDeneiStats,
   isDeneiStatsLoaded,
   kenjuBosses,
@@ -519,6 +546,25 @@ onPageChange,
   }, [allProfiles.length, mutedUids, refreshSeed]); // allProfiles全体ではなくlengthを監視して、いいね更新で走らないようにする
 
   if (stageMode === 'LOUNGE') {
+    if (!isDeneiStatsLoaded) {
+      return (
+        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+          <div className="loading-spinner" style={{
+            width: '50px', height: '50px', border: '5px solid rgba(79, 195, 247, 0.3)',
+            borderTop: '5px solid #4fc3f7', borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <div style={{ color: '#4fc3f7', fontWeight: 'bold' }}>データを読み込み中...</div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      );
+    }
+
     return (
       <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
         {showUpdateNotify && (
@@ -643,14 +689,25 @@ onPageChange,
                       <div style={{ position: 'relative', width: '100%', maxWidth: '200px', height: '150px', marginBottom: '15px', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ff5252' }}>
                         <img src={getStorageUrl(kenjuBoss.image)} alt={kenjuBoss.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       </div>
-                      <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '10px' }}>{kenjuBoss.name}</div>
-                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '45px' }}>クリア人数: {kenjuClears}人</div>
+                      <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '10px' }}>
+                        {kenjuBoss.name}
+                      </div>
+                      <div style={{ fontSize: '0.9rem', color: '#ff5252', marginBottom: '5px' }}>クリア人数: {kenjuClears}人</div>
+                      <div style={{ fontSize: '0.8rem', color: isKenjuClearedEver ? '#4caf50' : '#888', fontWeight: 'bold', marginBottom: '32px' }}>
+                        {isKenjuClearedEver ? 'クリア済み' : '未クリア'}
+                      </div>
                       <button
-                        className="TitleButton neon-red"
-                        onClick={() => onKenjuBattle()}
-                        style={{ color: '#ffe600', padding: '10px 40px', fontSize: '1.1rem' }}
+                        className={"TitleButton " + (isKenjuClearedEver ? "neon-gold" : "neon-red")}
+                        onClick={async () => {
+                          try {
+                            await onKenjuBattle();
+                          } catch (error) {
+                            console.error("Battle start error:", error);
+                          }
+                        }}
+                        style={{ color: isKenjuClearedEver ? '#fff' : '#ffe600', padding: '10px 40px', fontSize: '1.1rem' }}
                       >
-                        挑む
+                        {isKenjuClearedEver ? "再戦する" : "挑む"}
                       </button>
                     </div>
                   )}
@@ -748,6 +805,7 @@ onPageChange,
               allProfilesCount={allProfilesCount}
               currentPage={currentPage}
               onPageChange={onPageChange}
+              currentUserUid={user?.uid}
             />
           </div>
         )}
@@ -1428,14 +1486,14 @@ onPageChange,
                 <img src={viewingProfile.myKenju.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div style={{ fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', marginBottom: '5px' }}>{viewingProfile.myKenju.name}</div>
-              <div style={{ fontSize: '0.8rem', color: '#ff5252', marginBottom: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
-                <span>クリア: {kenjuClears}人 / 挑戦: {kenjuTrials}回</span>
+              <div style={{ fontSize: '0.8rem', color: '#ff5252', marginBottom: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                <div>クリア: {deneiClears}人 / 挑戦: {deneiTrials}回</div>
                 <button
                   onClick={(e) => { e.stopPropagation(); onLikeDenei(viewingProfile.uid, viewingProfile.myKenju!.name); }}
-                  style={{ background: 'none', border: '1px solid #ff5252', borderRadius: '15px', padding: '2px 10px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', color: '#fff' }}
+                  style={{ background: 'none', border: '1px solid #ff5252', borderRadius: '15px', padding: '4px 15px', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', color: '#fff' }}
                 >
-                  <span style={{ color: '#ff5252' }}>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.isLiked ? '❤️' : '🤍'}</span>
-                  <span>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.likes || 0}</span>
+                  <span style={{ fontSize: '1.1rem' }}>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.isLiked ? '❤️' : '🤍'}</span>
+                  <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{allDeneiStats?.[viewingProfile.uid]?.[viewingProfile.myKenju.name]?.likes || 0}</span>
                 </button>
               </div>
               <button
