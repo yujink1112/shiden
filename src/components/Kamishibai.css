@@ -1,0 +1,103 @@
+.kamishibai-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: black;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  font-family: sans-serif;
+  z-index: 1000;
+}
+
+.kamishibai-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.kamishibai-characters {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 80%; /* キャラクター表示エリア */
+  display: flex;
+  justify-content: center; /* 中央に配置 */
+  align-items: flex-end;
+  padding: 0 2%; /* 左右の余白を減らす */
+  box-sizing: border-box;
+  pointer-events: none; /* クリックイベントがキャラクターに吸われないようにする */
+}
+
+.kamishibai-character {
+  height: 100%; /* 親要素の高さに合わせる */
+  object-fit: contain;
+  position: absolute;
+  bottom: 0; /* 下揃え */
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  z-index: 10; /* テキストボックスより手前に */
+  pointer-events: none;
+}
+
+.kamishibai-character-left {
+  left: 0%;
+  transform: translateX(-50%);
+  margin-left: 20%; /* 画面端からの距離を調整 */
+}
+
+.kamishibai-character-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.kamishibai-character-right {
+  right: 0%;
+  transform: translateX(50%);
+  margin-right: 20%; /* 画面端からの距離を調整 */
+}
+
+.kamishibai-character.focused {
+  transform: scale(1.05);
+  filter: brightness(1);
+  z-index: 11; /* フォーカスされたキャラを少し手前に */
+}
+
+.kamishibai-character:not(.focused) {
+  filter: brightness(0.6) grayscale(50%); /* 非フォーカス時は暗く、彩度を下げる */
+  transform: scale(0.95);
+}
+
+
+.kamishibai-textbox {
+  width: 90%;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.kamishibai-name {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #add8e6; /* ライトブルー */
+}
+
+.kamishibai-text {
+  font-size: 1.1em;
+  line-height: 1.5;
+}

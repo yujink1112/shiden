@@ -5,13 +5,14 @@ import { database, auth, googleProvider, recordAccess, getStorageUrl } from "./f
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
-import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName, KENJU_DATA, StageProcessor } from './stageData';
+import { STAGE_DATA, setStageData, getAvailableSkillsUntilStage, getSkillByName, KENJU_DATA, setKenjuData, StageProcessor } from './stageData';
 import { Lounge } from './Lounge';
 import type { UserProfile } from './Lounge';
 import { Rule } from './Rule';
 import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidStageProcessor } from './stageProcessors';
 import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
+import Kamishibai from './components/Kamishibai';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
@@ -558,7 +559,95 @@ const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean;
 type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'DENEI' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT' | 'ADMIN_ANALYTICS' | 'LIFUKU';
 type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
+const parseV2TextStory = (text: string): any[] => {
+  const lines = text.split('\n');
+  const script: any[] = [];
+  script.push({ type: "background", background: "images/background/v2/pirate-ship-deck1" });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const directionMatch = line.match(/^【(.*)】$/);
+    if (directionMatch) { script.push({ type: "direction", text: directionMatch[1] }); continue; }
+    if (i + 1 < lines.length && lines[i + 1].trim().startsWith('「')) {
+      const name = line;
+      const dialogueText = lines[i + 1].trim().replace(/^「/, '').replace(/」$/, '');
+      let position: "left" | "center" | "right" = "center";
+      let icon = "";
+      if (name.includes("レミエル")) { position = "left"; icon = "f_1"; }
+      else if (name.includes("ルーサー")) { position = "right"; icon = "f_2"; }
+      else if (name.includes("アダム")) { position = "center"; icon = "f_3"; }
+      script.push({ type: "dialogue", name, text: dialogueText, position, focus: position, icon });
+      i++; continue;
+    }
+    if (line.startsWith('（') && line.endsWith('）')) { script.push({ type: "monologue", text: line }); continue; }
+    if (!line.includes('第') && !line.includes('「')) { script.push({ type: "direction", text: line }); }
+  }
+  return script;
+};
+
 function App() {
+  const [stagesLoaded, setStagesLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [stagesRes, kenjuRes] = await Promise.all([
+          fetch(`${process.env.PUBLIC_URL}/data/stages.json`),
+          fetch(`${process.env.PUBLIC_URL}/data/kenju.json`)
+        ]);
+
+        let stagesData: any[] = [];
+        let kenjuData: any[] = [];
+
+        if (stagesRes.ok) {
+          stagesData = await stagesRes.json();
+          setStageData(stagesData);
+        }
+
+        if (kenjuRes.ok) {
+          kenjuData = await kenjuRes.json();
+          setKenjuData(kenjuData);
+        }
+
+        // プリロード対象の画像URLを収集
+        const imageUrls = new Set<string>();
+        
+        // ステージ背景とボス画像
+        stagesData.forEach(s => {
+          if (s.no) imageUrls.add(getStorageUrl(`/images/background/${s.no}.jpg`));
+          if (s.bossImage) imageUrls.add(getStorageUrl(s.bossImage));
+        });
+
+        // 剣獣背景とボス画像
+        kenjuData.forEach(k => {
+          if (k.background) imageUrls.add(getStorageUrl(k.background));
+          if (k.image) imageUrls.add(k.image.startsWith('/') ? getStorageUrl(k.image) : k.image);
+        });
+
+        // 共通リソース
+        imageUrls.add(getStorageUrl('/images/background/background.jpg'));
+        imageUrls.add(getStorageUrl('/images/title/titlelogo.png'));
+
+        // 画像のプリロード
+        const preloadImage = (url: string) => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(url);
+            img.onerror = () => resolve(url); // エラーでも続行
+          });
+        };
+
+        await Promise.all(Array.from(imageUrls).map(url => preloadImage(url)));
+
+        setStagesLoaded(true);
+      } catch (e) {
+        console.error("Failed to load game data:", e);
+      }
+    };
+    loadData();
+  }, []);
+
   const [isTitle, setIsTitle] = useState(() => {
     const savedMode = localStorage.getItem('shiden_stage_mode');
     const loungeModes = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'];
@@ -568,10 +657,6 @@ function App() {
     return saved === null ? true : saved === 'true';
   });
 
-  // 初回レンダリング時に本日の剣獣を初期化
-  useEffect(() => {
-    refreshKenju();
-  }, []);
   const [user, setUser] = useState<User | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
   const [viewingProfile, setViewingProfile] = useState<UserProfile | null>(null);
@@ -662,14 +747,14 @@ function App() {
     if (stageMode === 'BOSS') return new BossStageProcessor();
     if (stageMode === 'MID') {
       if (stageCycle === 11) return new Stage11MidStageProcessor();
-      const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+      const currentStage = (STAGE_DATA || []).find(s => s.no === stageCycle);
       if (currentStage?.chapter && currentStage.chapter >= 2) {
         return new BossStageProcessor(); // 第2章は中間ステージもボス戦の挙動にする
       }
       return new MidStageProcessor();
     }
     return new MidStageProcessor();
-  }, [stageMode, stageCycle]);
+  }, [stageMode, stageCycle, stagesLoaded]);
 
 
   const [bossSkills, setBossSkills] = useState<SkillDetail[]>([]);
@@ -724,22 +809,37 @@ const PLAYER_SKILL_COUNT = 5;
     return abbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
   };
 
+  const loadV2Story = async (filenameBase: string) => {
+    try {
+      let response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filenameBase}.json`);
+      if (response.ok) {
+        return await response.json();
+      }
+      response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filenameBase}.txt`);
+      if (response.ok) {
+        const text = await response.text();
+        return parseV2TextStory(text);
+      }
+    } catch (e) {
+      console.error("Story load error:", e);
+    }
+    return null;
+  };
+
   useEffect(() => {
     const fetchStory = async () => {
       if (stageMode === 'MID' && !gameStarted) {
         const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-        // 第2章（ステージ13以降）は管理者のみ読み込み可能
         if (stageCycle >= 13 && !isAdmin) {
           setStoryContent(null);
           setStoryContentV2(null);
           return;
         }
         try {
-          if (currentStage?.chapter) {
-            const filename = `${currentStage.chapter}-${currentStage.stageInChapter}.json`;
-            const response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filename}`);
-            if (response.ok) {
-              const data = await response.json();
+          if (currentStage?.chapter || stageCycle === 1) {
+            const filenameBase = currentStage?.chapter ? `${currentStage.chapter}-${currentStage.stageInChapter}` : "1-1";
+            const data = await loadV2Story(filenameBase);
+            if (data) {
               setStoryContentV2(data);
               setStoryContent(null);
             } else {
@@ -758,12 +858,13 @@ const PLAYER_SKILL_COUNT = 5;
         }
       } else {
         setStoryContent(null);
+        setStoryContentV2(null);
       }
     };
     fetchStory().then(() => {
-      // ストーリーが読み込まれ、かつ第2章のステージであればモーダルを表示
+      // ストーリーが読み込まれ、かつ第2章のステージ、またはStage1であればモーダルを表示
       const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-      if (currentStage?.chapter && !gameStarted) {
+      if (((currentStage?.chapter && currentStage.chapter >= 2) || stageCycle === 1) && !gameStarted && storyContentV2) { // 第2章のステージまたはStage1で、かつstoryContentV2がセットされた場合のみ表示
         setShowStoryModal(true);
       }
     });
@@ -802,8 +903,9 @@ const PLAYER_SKILL_COUNT = 5;
   }, [gameStarted, ownedSkillAbbrs, stageCycle, stageMode]);
 
   useEffect(() => {
-    if (stageMode === 'BOSS') {
-      const currentStage = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+    if (stageMode === 'BOSS' && stagesLoaded) {
+      const currentStage = (STAGE_DATA || []).find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+      if (!currentStage) return;
       if (stageCycle === 10) {
         const gekirin = getSkillByAbbr("逆")!;
         const playerDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
@@ -1093,7 +1195,8 @@ const PLAYER_SKILL_COUNT = 5;
     const index = (day + 6) % 7;
     
     // KENJU_DATAの範囲内に収まるように念のため剰余を取る
-    const kenjuBase = KENJU_DATA[index % KENJU_DATA.length] || KENJU_DATA[0];
+    const kenjuBase = (KENJU_DATA || [])[index % KENJU_DATA.length] || (KENJU_DATA || [])[0];
+    if (!kenjuBase) return null;
     const skillAbbrs = kenjuBase.skillAbbrs.split("");
     const skills = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
 
@@ -1109,12 +1212,13 @@ const PLAYER_SKILL_COUNT = 5;
 
   const refreshKenju = React.useCallback(() => {
     const kenju = generateDailyKenju();
+    if (!kenju) return;
     console.log("Daily Kenju Generated:", kenju);
     setKenjuBoss(kenju as any);
 
     // クリア人数をカウント
     const clearsRef = ref(database, `kenjuClears/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
-    onValue(clearsRef, (snapshot) => {
+    const unsubClears = onValue(clearsRef, (snapshot) => {
       if (snapshot.exists()) {
         setKenjuClears(snapshot.size);
       } else {
@@ -1123,36 +1227,36 @@ const PLAYER_SKILL_COUNT = 5;
     });
 
     const trialsRef = ref(database, `kenjuTrials/${new Date().toLocaleDateString().replace(/\//g, '-')}/${kenju.name}`);
-    onValue(trialsRef, (snapshot) => {
+    const unsubTrials = onValue(trialsRef, (snapshot) => {
       if (snapshot.exists()) {
         setKenjuTrials(snapshot.size);
       } else {
         setKenjuTrials(0);
       }
     });
-    
+
     // Fetch midenemy.csv
     const fetchMidEnemyData = async () => {
-        try {
-            const response = await fetch(`${process.env.PUBLIC_URL}/enemy/midenemy.csv`);
-            if (response.ok) {
-                const text = await response.text();
-                const lines = text.split('\n');
-                const data: { [stage: number]: string[] } = {};
-                lines.forEach(line => {
-                    const cols = line.split(',').map(c => c.trim()).filter(Boolean);
-                    if (cols.length >= 2) {
-                        const stageNo = parseInt(cols[0], 10);
-                        if (!isNaN(stageNo)) {
-                            data[stageNo] = cols.slice(1);
-                        }
-                    }
-                });
-                setMidEnemyData(data);
+      try {
+        const response = await fetch(`${process.env.PUBLIC_URL}/enemy/midenemy.csv`);
+        if (response.ok) {
+          const text = await response.text();
+          const lines = text.split('\n');
+          const data: { [stage: number]: string[] } = {};
+          lines.forEach(line => {
+            const cols = line.split(',').map(c => c.trim()).filter(Boolean);
+            if (cols.length >= 2) {
+              const stageNo = parseInt(cols[0], 10);
+              if (!isNaN(stageNo)) {
+                data[stageNo] = cols.slice(1);
+              }
             }
-        } catch (e) {
-            console.error("Midenemy fetch error:", e);
+          });
+          setMidEnemyData(data);
         }
+      } catch (e) {
+        console.error("Midenemy fetch error:", e);
+      }
     };
     fetchMidEnemyData();
 
@@ -1163,15 +1267,14 @@ const PLAYER_SKILL_COUNT = 5;
         if (response.ok) {
           const data = await response.json();
           setChangelogData(data);
-          
+
           if (data && data.length > 0) {
             const latestVersion = data[data.length - 1].date + "_" + data[data.length - 1].title;
             const savedVersion = localStorage.getItem('shiden_version');
-            
+
             if (savedVersion && savedVersion !== latestVersion) {
               setShowUpdateNotify(true);
             }
-            // 保存されていない場合は現在のものを保存して、初回は通知しない
             if (!savedVersion) {
               localStorage.setItem('shiden_version', latestVersion);
             }
@@ -1183,10 +1286,22 @@ const PLAYER_SKILL_COUNT = 5;
     };
     fetchChangelogAndCheckVersion();
 
-    // 1時間おきにチェック
     const interval = setInterval(fetchChangelogAndCheckVersion, 1000 * 60 * 60);
-    return () => clearInterval(interval);
+
+    return () => {
+      unsubClears();
+      unsubTrials();
+      clearInterval(interval);
+    };
   }, []);
+
+  // ロード完了後に本日の剣獣を初期化
+  useEffect(() => {
+    if (stagesLoaded) {
+      const cleanup = refreshKenju();
+      return cleanup;
+    }
+  }, [stagesLoaded, refreshKenju]);
 
    const handleKenjuBattle = async (selectedBoss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode: StageMode = 'KENJU') => {
     if (!user || !myProfile) return;
@@ -1500,6 +1615,7 @@ const PLAYER_SKILL_COUNT = 5;
 
   useEffect(() => {
     // 電影のクリア人数・挑戦回数を購読
+    if (!stagesLoaded) return;
     let deneiTrialsUnsubscribe: (() => void) | null = null;
     let deneiClearsUnsubscribe: (() => void) | null = null;
 
@@ -1754,7 +1870,18 @@ const PLAYER_SKILL_COUNT = 5;
     setLogComplete(false);
   };
 
-  const goToBossStage = () => { setStageMode('BOSS'); handleResetGame(); };
+  const goToBossStage = async () => {
+    const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+    if (currentStage?.chapter && currentStage.chapter >= 2) {
+      const data = await loadV2Story(`${currentStage.chapter}-${currentStage.stageInChapter}-boss`);
+      if (data) {
+        setStoryContentV2(data);
+        setShowStoryModal(true);
+      }
+    }
+    setStageMode('BOSS');
+    handleResetGame();
+  };
 
   const handleRewardSelection = (abbr: string) => {
     if (selectedRewards.includes(abbr)) setSelectedRewards([]);
@@ -1768,11 +1895,21 @@ const PLAYER_SKILL_COUNT = 5;
     if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle();
   };
 
-  const clearBossAndNextCycle = () => {
+  const clearBossAndNextCycle = async () => {
     if (bossClearRewardPending) {
         const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
         if (availableRewards.length > 0) { setRewardSelectionMode(true); setBossClearRewardPending(false); return; }
     }
+    
+    const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+    if (currentStage?.chapter && currentStage.chapter >= 2 && stageMode === 'BOSS') {
+      const data = await loadV2Story(`${currentStage.chapter}-${currentStage.stageInChapter}-clear`);
+      if (data) {
+        setStoryContentV2(data);
+        setShowStoryModal(true);
+      }
+    }
+
     if (stageMode === 'KENJU' || stageMode === 'DENEI') {
       setStageMode('LOUNGE');
       handleResetGame();
@@ -2008,8 +2145,12 @@ const PLAYER_SKILL_COUNT = 5;
     );
   }
 
+  if (!stagesLoaded) {
+    return <div style={{ backgroundColor: '#000', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Loading...</div>;
+  }
+
   if (isTitle) {
-    if (!isAssetsLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000' }} />;
+    if (!isAssetsLoaded || !stagesLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000' }} />;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
       <div className="TitleScreenContainer" style={{
@@ -2027,6 +2168,15 @@ const PLAYER_SKILL_COUNT = 5;
         left: 0,
         width: '100%'
       }}>
+        {showStoryModal && storyContentV2 && (
+          <Kamishibai
+            script={storyContentV2}
+            onEnd={() => {
+              setShowStoryModal(false);
+              setGameStarted(false);
+            }}
+          />
+        )}
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',
@@ -2313,16 +2463,43 @@ const PLAYER_SKILL_COUNT = 5;
 
         {showRule && <Rule onClose={() => setShowRule(false)} />}
         {isAdmin && showAdmin && (
-          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000 }}>
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, maxHeight: '80vh', overflowY: 'auto', width: '90%', maxWidth: '800px' }}>
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '15px' }}>
               {STAGE_DATA.map(s => (
-                <button key={s.no} onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '10px' }}>
-                  {s.chapter ? `${s.chapter}-${s.stageInChapter}` : `Stage ${s.no}`}
-                </button>
+                <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                  <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', minWidth: '100px' }}>
+                    {s.chapter ? `${s.chapter}-${s.stageInChapter}` : `Stage ${s.no}`}
+                  </button>
+                  {/* ストーリープレビューボタン */}
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {s.no === 1 && (
+                      <button onClick={async () => {
+                        const data = await loadV2Story("1-1");
+                        if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                      }} style={{ fontSize: '10px', background: '#444' }}>Story 1-1</button>
+                    )}
+                    {s.chapter && (
+                      <>
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}`);
+                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                        }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start</button>
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-boss`);
+                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                        }} style={{ fontSize: '10px', background: '#c62828' }}>Boss</button>
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-clear`);
+                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                        }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear</button>
+                      </>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
-            <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '10px' }}>閉じる</button>
+            <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '20px', padding: '10px' }}>閉じる</button>
           </div>
         )}
 
@@ -2336,10 +2513,12 @@ const PLAYER_SKILL_COUNT = 5;
   return (
     <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
       {showStoryModal && storyContentV2 && (
-        <StoryModal
-          content={storyContentV2}
-          onClose={() => setShowStoryModal(false)}
-          getStorageUrl={getStorageUrl}
+        <Kamishibai
+          script={storyContentV2}
+          onEnd={() => {
+            setShowStoryModal(false);
+            setGameStarted(false); // ストーリー終了後、ゲームを開始
+          }}
         />
       )}
       {showEpilogue && (
@@ -2639,64 +2818,5 @@ const PLAYER_SKILL_COUNT = 5;
   );
 }
 
-const StoryModal: React.FC<{
-  content: any[];
-  onClose: () => void;
-  getStorageUrl: (path: string) => string;
-}> = ({ content, onClose, getStorageUrl }) => {
-  const [index, setIndex] = useState(0);
-  const current = content[index];
-
-  const next = () => {
-    if (index < content.length - 1) {
-      setIndex(index + 1);
-    } else {
-      onClose();
-    }
-  };
-
-  if (!current) return null;
-
-  return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 11000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px', boxSizing: 'border-box'
-    }} onClick={next}>
-      <div style={{
-        width: '100%', maxWidth: '600px', background: '#1a1a1a',
-        border: '2px solid #4fc3f7', borderRadius: '15px',
-        padding: '30px', position: 'relative', boxShadow: '0 0 30px rgba(79,195,247,0.3)',
-        minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center'
-      }} onClick={e => e.stopPropagation()}>
-        {current.type === 'dialogue' && (
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            {current.icon && <img src={getStorageUrl(`/images/icon/${current.icon}`)} alt="" style={{ width: '60px', height: '60px', borderRadius: '10px', border: '2px solid #4fc3f7' }} />}
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '1rem', color: '#4fc3f7', fontWeight: 'bold', marginBottom: '10px' }}>{current.name}</div>
-              <div style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#fff', whiteSpace: 'pre-wrap' }}>{current.text}</div>
-            </div>
-          </div>
-        )}
-        {current.type === 'monologue' && (
-          <div style={{ textAlign: 'center', fontStyle: 'italic', color: '#aaa', fontSize: '1.2rem', lineHeight: '1.8' }}>
-            {current.text}
-          </div>
-        )}
-        {current.type === 'direction' && (
-          <div style={{ borderLeft: '4px solid #4fc3f7', paddingLeft: '20px', color: '#eee', fontSize: '1.1rem', backgroundColor: 'rgba(79,195,247,0.1)', padding: '20px' }}>
-            {current.text}
-          </div>
-        )}
-        <div style={{ position: 'absolute', bottom: '15px', right: '20px', color: '#4fc3f7', fontSize: '0.8rem', animation: 'blink 1.5s infinite' }}>▼ NEXT</div>
-        <button onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>SKIP</button>
-      </div>
-      <style>{`
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-      `}</style>
-    </div>
-  );
-};
 
 export default App;

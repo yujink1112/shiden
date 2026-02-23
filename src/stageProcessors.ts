@@ -23,7 +23,7 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   10: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   11: { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } },
-  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, mobile: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } }
+  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, mobile: { height: '170%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } }
 };
 
 const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -52,7 +52,7 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   8: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
   9: { pc: { height: '50%', width: '50%' }, mobile: { height: '40%', width: '40%' } },
   10: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
-  11: { pc: { height: '70%', width: '70%' }, mobile: { height: '60%', width: '60%' } },
+  11: { pc: { height: '60%', width: '60%' }, mobile: { height: '60%', width: '60%' } },
   12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} }
 };
 
@@ -217,6 +217,7 @@ export class MidStageProcessor implements StageProcessor {
 
   getStageTitle(context: StageContext): string {
     const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+    if (!info) return "Loading...";
     return `${info.no}. ${info.name}`;
   }
 
@@ -265,8 +266,8 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getEnemyName(index: number, context: StageContext): string {
-    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return info.bossName;
+    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    return info?.bossName || "BOSS";
   }
 
   getEnemySkills(index: number, context: StageContext): SkillDetail[] {
@@ -275,8 +276,8 @@ export class BossStageProcessor implements StageProcessor {
       const playerSkills = context.selectedPlayerSkills.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
       return [gekirin, gekirin, gekirin, ...playerSkills];
     }
-    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return info.bossSkillAbbrs.split("").map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    return info?.bossSkillAbbrs.split("").map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[] || [];
   }
 
   onVictory(context: StageContext): { canGoToNext: boolean; showReward: boolean; pendingClear: boolean } {
@@ -288,8 +289,8 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getStageTitle(context: StageContext): string {
-    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return `VS ${info.bossName}`;
+    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    return info ? `VS ${info.bossName}` : "VS BOSS";
   }
 
   getStageDescription(context: StageContext): string {
@@ -301,13 +302,13 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getBossImage(context: StageContext): string | undefined {
-    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return getStorageUrl(info.bossImage);
+    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    return info ? getStorageUrl(info.bossImage) : undefined;
   }
 
   getBossDescription(context: StageContext): string {
-    const info = STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
-    return info.bossDescription;
+    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    return info?.bossDescription || "";
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
