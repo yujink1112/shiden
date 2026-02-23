@@ -23,7 +23,7 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   10: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   11: { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } },
-  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, mobile: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } }
+  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, mobile: { height: '170%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } }
 };
 
 const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -38,7 +38,7 @@ const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '60%', width: '60%' }, mobile: { height: '60%', width: '60%' } },
   10: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   11: { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } },
-  12: { pc: { height: '150%', width: '150%' }, mobile: { height: '150%', width: '150%' } }
+  12: { pc: { height: '150%', width: '150%' }, mobile: { height: '150%', width: '150%', position: 'absolute', top: '-50%', left: '-25%', transform: 'translate(-50%,-50%);' } }
 };
 
 const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -52,7 +52,7 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   8: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
   9: { pc: { height: '50%', width: '50%' }, mobile: { height: '40%', width: '40%' } },
   10: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
-  11: { pc: { height: '70%', width: '70%' }, mobile: { height: '60%', width: '60%' } },
+  11: { pc: { height: '60%', width: '60%' }, mobile: { height: '60%', width: '60%' } },
   12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} }
 };
 
