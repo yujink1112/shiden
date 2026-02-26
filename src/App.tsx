@@ -13,6 +13,7 @@ import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidS
 import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
 import Kamishibai from './components/Kamishibai';
+import StoryCanvas from './components/StoryCanvas';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
@@ -562,7 +563,7 @@ type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 const parseV2TextStory = (text: string): any[] => {
   const lines = text.split('\n');
   const script: any[] = [];
-  script.push({ type: "background", background: "images/background/v2/pirate-ship-deck1" });
+  script.push({ type: "background", background: "images/background/v2/pirate-ship-deck1.jpg" });
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -573,9 +574,10 @@ const parseV2TextStory = (text: string): any[] => {
       const dialogueText = lines[i + 1].trim().replace(/^「/, '').replace(/」$/, '');
       let position: "left" | "center" | "right" = "center";
       let icon = "";
-      if (name.includes("レミエル")) { position = "left"; icon = "f_1"; }
-      else if (name.includes("ルーサー")) { position = "right"; icon = "f_2"; }
-      else if (name.includes("アダム")) { position = "center"; icon = "f_3"; }
+      if (name.includes("レミエル")) { position = "left"; icon = "images/character/レミエル.png"; }
+      else if (name.includes("ルーサー")) { position = "right"; icon = "images/character/ルーサー.png"; }
+      else if (name.includes("アダム")) { position = "center"; icon = "images/character/アダム.png"; }
+      else if (name.includes("ラストウィッチ号")) { position = "center"; icon = "images/character/ラストウィッチ号.png"; }
       script.push({ type: "dialogue", name, text: dialogueText, position, focus: position, icon });
       i++; continue;
     }
@@ -811,11 +813,7 @@ const PLAYER_SKILL_COUNT = 5;
 
   const loadV2Story = async (filenameBase: string) => {
     try {
-      let response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filenameBase}.json`);
-      if (response.ok) {
-        return await response.json();
-      }
-      response = await fetch(`${process.env.PUBLIC_URL}/story/v2/${filenameBase}.txt`);
+      let response = await fetch(`story/v2/${filenameBase}.txt`);
       if (response.ok) {
         const text = await response.text();
         return parseV2TextStory(text);
@@ -864,7 +862,7 @@ const PLAYER_SKILL_COUNT = 5;
     fetchStory().then(() => {
       // ストーリーが読み込まれ、かつ第2章のステージ、またはStage1であればモーダルを表示
       const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-      if (((currentStage?.chapter && currentStage.chapter >= 2) || stageCycle === 1) && !gameStarted && storyContentV2) { // 第2章のステージまたはStage1で、かつstoryContentV2がセットされた場合のみ表示
+      if (((currentStage?.chapter && currentStage.chapter >= 2)) && !gameStarted && storyContentV2) { // 第2章のステージまたはStage1で、かつstoryContentV2がセットされた場合のみ表示
         setShowStoryModal(true);
       }
     });
@@ -2169,13 +2167,23 @@ const PLAYER_SKILL_COUNT = 5;
         width: '100%'
       }}>
         {showStoryModal && storyContentV2 && (
-          <Kamishibai
-            script={storyContentV2}
-            onEnd={() => {
-              setShowStoryModal(false);
-              setGameStarted(false);
-            }}
-          />
+          (stageCycle >= 13 || stageCycle === 1 || (isAdmin && showAdmin === false)) ? (
+            <StoryCanvas
+              script={storyContentV2}
+              onEnd={() => {
+                setShowStoryModal(false);
+                setGameStarted(false);
+              }}
+            />
+          ) : (
+            <Kamishibai
+              script={storyContentV2}
+              onEnd={() => {
+                setShowStoryModal(false);
+                setGameStarted(false);
+              }}
+            />
+          )
         )}
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
@@ -2473,25 +2481,31 @@ const PLAYER_SKILL_COUNT = 5;
                   </button>
                   {/* ストーリープレビューボタン */}
                   <div style={{ display: 'flex', gap: '5px' }}>
-                    {s.no === 1 && (
-                      <button onClick={async () => {
-                        const data = await loadV2Story("1-1");
-                        if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
-                      }} style={{ fontSize: '10px', background: '#444' }}>Story 1-1</button>
-                    )}
                     {s.chapter && (
                       <>
                         <button onClick={async () => {
                           const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}`);
-                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                          if (data) { 
+                          setStoryContentV2(data); 
+                          setShowAdmin(false); 
+                          setTimeout(() => setShowStoryModal(true), 50);
+                        }
                         }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start</button>
                         <button onClick={async () => {
                           const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-boss`);
-                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                          if (data) { 
+                          setStoryContentV2(data); 
+                          setShowAdmin(false); 
+                          setTimeout(() => setShowStoryModal(true), 50);
+                        }
                         }} style={{ fontSize: '10px', background: '#c62828' }}>Boss</button>
                         <button onClick={async () => {
                           const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-clear`);
-                          if (data) { setStoryContentV2(data); setShowStoryModal(true); setShowAdmin(false); }
+                          if (data) { 
+                          setStoryContentV2(data); 
+                          setShowAdmin(false); 
+                          setTimeout(() => setShowStoryModal(true), 50);
+                        }
                         }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear</button>
                       </>
                     )}
@@ -2513,13 +2527,23 @@ const PLAYER_SKILL_COUNT = 5;
   return (
     <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
       {showStoryModal && storyContentV2 && (
-        <Kamishibai
-          script={storyContentV2}
-          onEnd={() => {
-            setShowStoryModal(false);
-            setGameStarted(false); // ストーリー終了後、ゲームを開始
-          }}
-        />
+        (stageCycle >= 13 || stageCycle === 1 || (isAdmin && showAdmin === false)) ? (
+          <StoryCanvas
+            script={storyContentV2}
+            onEnd={() => {
+              setShowStoryModal(false);
+              setGameStarted(false);
+            }}
+          />
+        ) : (
+          <Kamishibai
+            script={storyContentV2}
+            onEnd={() => {
+              setShowStoryModal(false);
+              setGameStarted(false);
+            }}
+          />
+        )
       )}
       {showEpilogue && (
         <div className="EpilogueContainer">
