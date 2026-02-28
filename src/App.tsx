@@ -601,6 +601,7 @@ function App() {
   const [showLegal, setShowLegal] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
+  const [showStage1Tutorial, setShowStage1Tutorial] = useState(false);
 
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
@@ -1174,8 +1175,9 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleLifukuScore = async (score: number) => {
-    if (!user) return;
-    
+    if (!user) {
+      return;
+    }
     // 1. まず現在のプロフィールを特定 (myProfileがあればそれを使う、なければ取得)
     const profileRef = ref(database, `profiles/${user.uid}`);
     let currentProfile = myProfile;
@@ -1184,16 +1186,18 @@ const PLAYER_SKILL_COUNT = 5;
       currentProfile = snapshot.val();
     }
     
-    if (!currentProfile) return;
-
+    if (!currentProfile) {
+      return;
+    }
     const currentHighscore = currentProfile.lifukuHighscore || 0;
-    if (score > currentHighscore) {
+    if (score > currentHighscore || (currentHighscore === 0 && score > 0)) {
       const updatedProfile = {
         ...currentProfile,
         uid: user.uid,
         lifukuHighscore: score,
         lastActive: Date.now()
       };
+
 
       // 2. 楽観的UI更新: allProfiles を即座に更新してランキングに反映させる
       setAllProfiles(prev => {
@@ -1548,10 +1552,16 @@ const PLAYER_SKILL_COUNT = 5;
         if (i > 0) {
           const prev = skillDetails[i - 1];
           let hasSynergy = false;
-          if (current.name === "＋硬" || current.name === "＋速") {
+          if (current.name === "＋硬" || current.name === "＋速" || current.name === "＋盾") {
             hasSynergy = prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃");
+          } else if (current.name === "＋反") {
+            hasSynergy = prev.type.includes("攻撃"); // +反は攻撃スキルのみに反応
+          } else if (current.name === "＋錬") {
+            hasSynergy = prev.type.includes("攻撃"); // +錬は攻撃スキルのみに反応
+          } else if (current.name === "＋強") {
+            hasSynergy = prev.type.includes("攻撃"); // +強は攻撃スキルのみに反応
           } else {
-            hasSynergy = prev.type.includes("攻撃");
+            hasSynergy = false; // その他の＋スキルはデフォルトでシナジーなし
           }
           if (hasSynergy) {
             newConnections.push({ fromId: `selected-skill-${i - 1}`, toId: `selected-skill-${i}` });
@@ -1714,7 +1724,12 @@ const PLAYER_SKILL_COUNT = 5;
             
             if (isVictory) {
               setCanGoToBoss(true);
-              if (stageMode === 'MID') triggerVictoryConfetti();
+              if (stageMode === 'MID') {
+                triggerVictoryConfetti();
+                if (stageCycle === 1) {
+                  setShowStage1Tutorial(true);
+                }
+              }
             }
 
             if (result.showReward && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
@@ -1921,6 +1936,11 @@ const PLAYER_SKILL_COUNT = 5;
         onShowLounge={() => { setStageMode('LOUNGE'); setIsTitle(false); }}
         allProfiles={allProfiles}
         myProfile={myProfile}
+        currentBoss={{ 
+          name: currentStageInfo.bossName, 
+          image: currentStageInfo.bossImage, 
+          background: `/images/background/${currentStageInfo.no}.jpg` 
+        }}
       />
     );
   }
@@ -2339,7 +2359,6 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showLegal && <LegalInfo onClose={() => setShowLegal(false)} />}
-
       </div>
     );
   }
@@ -2347,6 +2366,27 @@ const PLAYER_SKILL_COUNT = 5;
 
   return (
     <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+      {showStage1Tutorial && (
+        <div className="ChangelogModalOverlay" style={{ zIndex: 20000 }} onClick={() => setShowStage1Tutorial(false)}>
+          <div className="ChangelogModal" style={{ maxWidth: '480px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
+            <div className="ChangelogHeader" style={{ background: '#00d2ff' }}>
+              <span style={{ color: '#000', fontWeight: 'bold' }}>おめでとうございます！</span>
+              <button onClick={() => setShowStage1Tutorial(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
+              <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0, textAlign: 'left' }}>
+                このゲームは、こんな風にスキルを5つ編成して相手のスキルを全て破壊するゲームです。<br /><br />
+                左上の📖のアイコンから、ルールを確認することができます。<br /><br />
+                ゲームログをじっくり読むと、何かが掴めるかも？<br /><br />
+                ステージに勝っても負けても、報酬としてスキルを得ることができます。<br />
+                （過去のステージのスキルももらえるので安心！）<br /><br />
+                それでは、『紫電一閃』の世界をお楽しみください。
+              </p>
+            </div>
+            <button className="ChangelogCloseButton" style={{ background: '#00d2ff', color: '#000', fontWeight: 'bold' }} onClick={() => setShowStage1Tutorial(false)}>閉じる</button>
+          </div>
+        </div>
+      )}
       {showEpilogue && (
         <div className="EpilogueContainer">
           <div className="EpilogueBackground"></div>
@@ -2494,7 +2534,11 @@ const PLAYER_SKILL_COUNT = 5;
                 <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{(stageCycle === 11 && stageMode === 'MID' && canGoToBoss) ? '関門を突破！！' : battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}<br />スキルを1つ選んでください</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>{getAvailableSkillsUntilStage(stageCycle).map(skill => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}</div>
                 <button disabled={selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>スキルを獲得する</button>
-                <div style={{ marginTop: '15px' }}><button onClick={() => { setSelectedRewards([]); setRewardSelectionMode(false); if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
+                <div style={{ marginTop: '15px' }}><button onClick={() => { 
+                  setSelectedRewards([]); 
+                  setRewardSelectionMode(false); 
+                  if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); 
+                }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
               </div>
             )}
             {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
