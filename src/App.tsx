@@ -219,6 +219,7 @@ function App() {
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
   const [hasChapter2Save, setHasChapter2Save] = useState(false);
+  const [showStage1Tutorial, setShowStage1Tutorial] = useState(false);
 
   useEffect(() => {
     const loadChapter2Data = async () => {
@@ -1020,8 +1021,9 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleLifukuScore = async (score: number) => {
-    if (!user) return;
-    
+    if (!user) {
+      return;
+    }
     // 1. まず現在のプロフィールを特定 (myProfileがあればそれを使う、なければ取得)
     const profileRef = ref(database, `profiles/${user.uid}`);
     let currentProfile = myProfile;
@@ -1030,16 +1032,18 @@ const PLAYER_SKILL_COUNT = 5;
       currentProfile = snapshot.val();
     }
     
-    if (!currentProfile) return;
-
+    if (!currentProfile) {
+      return;
+    }
     const currentHighscore = currentProfile.lifukuHighscore || 0;
-    if (score > currentHighscore) {
+    if (score > currentHighscore || (currentHighscore === 0 && score > 0)) {
       const updatedProfile = {
         ...currentProfile,
         uid: user.uid,
         lifukuHighscore: score,
         lastActive: Date.now()
       };
+
 
       // 2. 楽観的UI更新: allProfiles を即座に更新してランキングに反映させる
       setAllProfiles(prev => {
@@ -1654,10 +1658,16 @@ const PLAYER_SKILL_COUNT = 5;
         if (i > 0) {
           const prev = skillDetails[i - 1];
           let hasSynergy = false;
-          if (current.name === "＋硬" || current.name === "＋速") {
+          if (current.name === "＋硬" || current.name === "＋速" || current.name === "＋盾") {
             hasSynergy = prev.type.includes("攻撃") || prev.type.includes("補助") || prev.type.includes("迎撃");
+          } else if (current.name === "＋反") {
+            hasSynergy = prev.type.includes("攻撃"); // +反は攻撃スキルのみに反応
+          } else if (current.name === "＋錬") {
+            hasSynergy = prev.type.includes("攻撃"); // +錬は攻撃スキルのみに反応
+          } else if (current.name === "＋強") {
+            hasSynergy = prev.type.includes("攻撃"); // +強は攻撃スキルのみに反応
           } else {
-            hasSynergy = prev.type.includes("攻撃");
+            hasSynergy = false; // その他の＋スキルはデフォルトでシナジーなし
           }
           if (hasSynergy) {
             newConnections.push({ fromId: `selected-skill-${i - 1}`, toId: `selected-skill-${i}` });
@@ -1833,7 +1843,12 @@ const PLAYER_SKILL_COUNT = 5;
               } else {
                 setCanGoToBoss(true);
                 localStorage.setItem('shiden_can_go_to_boss', 'true');
-                if (stageMode === 'MID') triggerVictoryConfetti();
+                if (stageMode === 'MID') {
+                  triggerVictoryConfetti();
+                  if (stageCycle === 1) {
+                    setShowStage1Tutorial(true);
+                  }
+                }
               }
             }
 
@@ -2298,6 +2313,11 @@ const PLAYER_SKILL_COUNT = 5;
         onShowLounge={() => { setStageMode('LOUNGE'); setIsTitle(false); }}
         allProfiles={allProfiles}
         myProfile={myProfile}
+        currentBoss={{ 
+          name: currentStageInfo.bossName, 
+          image: currentStageInfo.bossImage, 
+          background: `/images/background/${currentStageInfo.no}.jpg` 
+        }}
       />
     );
   }
@@ -3104,7 +3124,6 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showLegal && <LegalInfo onClose={() => setShowLegal(false)} />}
-
       </div>
     );
   }
