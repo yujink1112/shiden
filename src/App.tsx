@@ -1246,7 +1246,7 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
     if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
     
     const now = Date.now();
@@ -1262,14 +1262,15 @@ const PLAYER_SKILL_COUNT = 5;
     
     // Firebaseの進捗もリセット
     if (user) {
-      set(ref(database, `profiles/${user.uid}/stageCycle`), 1);
-      set(ref(database, `profiles/${user.uid}/ownedSkills`), ["一"]);
-      set(ref(database, `profiles/${user.uid}/lastGameMode`), 'MID');
-      set(ref(database, `profiles/${user.uid}/canGoToBoss`), false);
-      set(ref(database, `profiles/${user.uid}/victorySkills`), null);
-      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+      await set(ref(database, `profiles/${user.uid}/stageCycle`), 1);
+      await set(ref(database, `profiles/${user.uid}/ownedSkills`), ["一"]);
+      await set(ref(database, `profiles/${user.uid}/lastGameMode`), 'MID');
+      await set(ref(database, `profiles/${user.uid}/canGoToBoss`), false);
+      await set(ref(database, `profiles/${user.uid}/victorySkills`), null);
+      await set(ref(database, `profiles/${user.uid}/updatedAt`), now);
     }
 
+    // 状態を直接更新して強制リロードなしで反映させやすくする
     setIsTitle(false);
     setStageMode('MID');
     setStageCycle(1);
@@ -1277,12 +1278,27 @@ const PLAYER_SKILL_COUNT = 5;
     setStageVictorySkills({});
     // LocalStorage にも初期化した所持スキルを保存
     localStorage.setItem('shiden_owned_skills', JSON.stringify(["一"]));
-    window.location.reload();
+    
+    // しばらく待ってからリロード（Firebaseへの保存を確実にするため）
+    setTimeout(() => {
+        window.location.reload();
+    }, 100);
   };
 
   const handleContinue = () => {
     setStageMode(getLastGameMode());
     setIsTitle(false);
+  };
+
+  const backToTitle = () => {
+    // タイトルに戻る際に最新の状態を同期するためにUpdatedAtを更新
+    if (user) {
+      const now = Date.now();
+      localStorage.setItem('shiden_updated_at', now.toString());
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
+    setIsTitle(true);
+    setStageMode(getLastGameMode());
   };
 
   useEffect(() => {
@@ -1424,27 +1440,12 @@ const PLAYER_SKILL_COUNT = 5;
             const firebaseOwnedSkills = data.ownedSkills || ["一"];
             const localOwnedSkills = JSON.parse(localStorage.getItem('shiden_owned_skills') || '["一"]');
             
-            // 日時が同じか、どちらも0（初回など）の場合は和集合を取るが、
-            // Firebaseの方が新しい場合はFirebaseのスキルセットで上書きする
+            // 基本は日時の新しい方を優先
             if (firebaseUpdatedAt > localUpdatedAt) {
               setOwnedSkillAbbrs(firebaseOwnedSkills);
               localStorage.setItem('shiden_owned_skills', JSON.stringify(firebaseOwnedSkills));
             } else if (localUpdatedAt > firebaseUpdatedAt) {
-              // ローカルの方が新しい場合はFirebaseを更新
-              const mergedSkills = Array.from(new Set([...firebaseOwnedSkills, ...localOwnedSkills]));
-              if (mergedSkills.length > firebaseOwnedSkills.length) {
-                set(ref(database, `profiles/${authenticatedUser.uid}/ownedSkills`), mergedSkills);
-              }
-            } else {
-              // 日時が同じ場合は和集合
-              const mergedSkills = Array.from(new Set([...firebaseOwnedSkills, ...localOwnedSkills]));
-              if (mergedSkills.length > firebaseOwnedSkills.length) {
-                set(ref(database, `profiles/${authenticatedUser.uid}/ownedSkills`), mergedSkills);
-              }
-              if (mergedSkills.length > localOwnedSkills.length) {
-                setOwnedSkillAbbrs(mergedSkills);
-                localStorage.setItem('shiden_owned_skills', JSON.stringify(mergedSkills));
-              }
+              set(ref(database, `profiles/${authenticatedUser.uid}/ownedSkills`), localOwnedSkills);
             }
 
             // 称号(medals)の同期
@@ -2159,40 +2160,7 @@ const PLAYER_SKILL_COUNT = 5;
 
         onDeleteAccount={handleDeleteAccount}
         onBack={() => {
-          setIsTitle(true);
-          // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
-          const lastMode = getLastGameMode();
-          setStageMode(lastMode);
-          
-          // 最新の進行状況を Firebase から再取得して同期
-          if (user) {
-            const profileRef = ref(database, `profiles/${user.uid}`);
-            get(profileRef).then((snapshot) => {
-              if (snapshot.exists()) {
-                const data = snapshot.val();
-                const firebaseUpdatedAt = data.updatedAt || 0;
-                const localUpdatedAt = parseInt(localStorage.getItem('shiden_updated_at') || '0', 10);
-                
-                if (firebaseUpdatedAt > localUpdatedAt) {
-                  let firebaseStageCycle = data.stageCycle || 1;
-                  if (firebaseStageCycle >= 13) firebaseStageCycle = 12;
-                  const firebaseStageMode = data.lastGameMode as StageMode;
-                  const firebaseCanGoToBoss = data.canGoToBoss || false;
-                  
-                  setStageCycle(firebaseStageCycle);
-                  localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
-                  if (firebaseStageMode) {
-                    localStorage.setItem('shiden_last_game_mode', firebaseStageMode);
-                    localStorage.setItem('shiden_stage_mode', firebaseStageMode);
-                    setStageMode(firebaseStageMode);
-                  }
-                  setCanGoToBoss(firebaseCanGoToBoss);
-                  localStorage.setItem('shiden_can_go_to_boss', firebaseCanGoToBoss.toString());
-                  localStorage.setItem('shiden_updated_at', firebaseUpdatedAt.toString());
-                }
-              }
-            });
-          }
+          backToTitle();
           
           refreshKenju();
         }}
@@ -2596,14 +2564,14 @@ const PLAYER_SKILL_COUNT = 5;
               animation: 'epilogueFadeIn 2s forwards',
               animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
             }}>
-              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); setIsTitle(true); setStageMode('MID'); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
+              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); backToTitle(); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
             </div>
           </div>
         </div>
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <button onClick={() => { handleResetGame(); backToTitle(); setKenjuBoss(null); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle(stageContext)}
           </h1>
