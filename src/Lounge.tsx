@@ -582,42 +582,48 @@ onPageChange,
             zIndex: 1000,
             borderBottom: '1px solid #00d2ff',
             display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '15px',
+            gap: '5px',
             animation: 'slideDown 0.5s ease-out'
           }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
-            <button
-              onClick={handleForceUpdate}
-              style={{
-                padding: '5px 15px',
-                background: '#00d2ff',
-                color: '#000',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 'bold'
-              }}
-            >
-              今すぐ更新
-            </button>
-            <button
-              onClick={() => setShowUpdateNotify(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#888',
-                cursor: 'pointer',
-                fontSize: '1.2rem'
-              }}
-            >
-              ×
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
+              <button
+                onClick={handleForceUpdate}
+                style={{
+                  padding: '5px 15px',
+                  background: '#00d2ff',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                今すぐ更新
+              </button>
+              <button
+                onClick={() => setShowUpdateNotify(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#888',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
+              【重要】複数の端末でゲームをする場合、最新の進捗状況を全ての端末で共有するように改善しました。よりクリアしたStageの多い端末で「今すぐ更新」ボタンを押すことを推奨します。
+            </div>
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '60px' : '0'  }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '100px' : '0'  }}>
           <button onClick={onBack} style={{ padding: '8px 15px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>戻る</button>
           <h1 style={{ color: '#4fc3f7', margin: 0 }}>LOUNGE</h1>
           <div style={{ width: '60px' }}></div>

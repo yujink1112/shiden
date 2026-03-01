@@ -174,7 +174,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
         </div>
       );
     }
-    return <img src={getStorageUrl(skill.icon)} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
+    return <img src={getStorageUrl(skill.icon)} alt={skill.name} className="skill-icon image-fade-in" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
   };
 
   return (

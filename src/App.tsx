@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { ref, onValue, push, onDisconnect, set, serverTimestamp, query, limitToLast, get, orderByChild } from "firebase/database";
+import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, query, limitToLast, get, orderByChild } from "firebase/database";
 import { database, auth, googleProvider, recordAccess, getStorageUrl, saveUserSkills, loadUserSkills, resetUserSkills } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
@@ -216,6 +216,7 @@ function App() {
   const [showRuleHint, setShowRuleHint] = useState(false);
   const [showClearStats, setShowClearStats] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
+  const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
   const [hasChapter2Save, setHasChapter2Save] = useState(false);
@@ -720,8 +721,23 @@ const PLAYER_SKILL_COUNT = 5;
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      
+      // サインアウト時にローカルの進行状況をクリア（別ユーザでのログイン時に混ざらないように）
+      localStorage.removeItem('shiden_stage_cycle');
+      localStorage.removeItem('shiden_owned_skills');
+      localStorage.removeItem('shiden_stage_mode');
+      localStorage.removeItem('shiden_last_game_mode');
+      localStorage.removeItem('shiden_can_go_to_boss');
+      localStorage.removeItem('shiden_stage_victory_skills');
+      localStorage.removeItem('shiden_updated_at');
+      localStorage.removeItem('shiden_medals');
+      localStorage.removeItem('shiden_uid');
+      
       setStageMode('MID');
       setIsTitle(true);
+      
+      // リロードして状態を完全に初期化
+      window.location.reload();
     } catch (error) {
       console.error("Sign-Out Error:", error);
     }
@@ -1063,8 +1079,53 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
+    //if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
+    
     setShowChapterSelect({ mode: 'NEW' });
+    
+    // const now = Date.now();
+    
+    // // 1. まず LocalStorage を同期的に更新し、後続の onValue 発火時に備える
+    // localStorage.setItem('shiden_stage_cycle', '1');
+    // localStorage.setItem('shiden_owned_skills', JSON.stringify(["一"]));
+    // localStorage.setItem('shiden_stage_mode', 'MID');
+    // localStorage.setItem('shiden_last_game_mode', 'MID');
+    // localStorage.setItem('shiden_can_go_to_boss', 'false');
+    // localStorage.setItem('shiden_stage_victory_skills', JSON.stringify({}));
+    // localStorage.setItem('shiden_medals', JSON.stringify([]));
+    // localStorage.setItem('shiden_is_title', 'false');
+    // localStorage.setItem('shiden_updated_at', now.toString());
+    
+    // // 2. Firebase を一括更新する（原子性を確保し、中途半端な状態での onValue 発火を防ぐ）
+    // if (user) {
+    //   try {
+    //     await update(ref(database, `profiles/${user.uid}`), {
+    //       stageCycle: 1,
+    //       ownedSkills: ["一"],
+    //       lastGameMode: 'MID',
+    //       canGoToBoss: false,
+    //       victorySkills: null,
+    //       medals: [],
+    //       updatedAt: now
+    //     });
+    //   } catch (err) {
+    //     console.error("Firebase reset failed:", err);
+    //   }
+    // }
+
+    // // 3. React 状態を更新
+    // setIsTitle(false);
+    // setStageMode('MID');
+    // setStageCycle(1);
+    // setOwnedSkillAbbrs(["一"]);
+    // setStageVictorySkills({});
+    // setCanGoToBoss(false);
+    
+    // // 4. 少し待ってからリロードして状態を完全にクリア
+    // setTimeout(() => {
+    //     window.location.reload();
+    // }, 150);
   };
 
   const handleContinue = async () => {
@@ -1293,6 +1354,15 @@ const PLAYER_SKILL_COUNT = 5;
     const unsubscribeAuth = onAuthStateChanged(auth, (authenticatedUser) => {
       setUser(authenticatedUser);
       if (authenticatedUser) {
+        // ユーザ切り替え検知：現在の localStorage がログインしたユーザのものでない場合、
+        // 以前のユーザのデータが混ざるのを防ぐため、一旦ローカルの最終更新時間を0にして
+        // Firebase からの同期を強制する。
+        const savedUid = localStorage.getItem('shiden_uid');
+        if (savedUid !== authenticatedUser.uid) {
+          localStorage.setItem('shiden_updated_at', '0');
+          localStorage.setItem('shiden_uid', authenticatedUser.uid);
+        }
+
         if (!authenticatedUser.emailVerified && authenticatedUser.providerData.some(p => p.providerId === 'password')) {
            setStageMode('VERIFY_EMAIL');
            setIsTitle(false);
@@ -1369,19 +1439,21 @@ const PLAYER_SKILL_COUNT = 5;
               } else if (localUpdatedAt > firebaseUpdatedAt) {
                 // ローカルの方が新しい場合、Firebaseを更新
                 const localStageCycle = parseInt(localStorage.getItem('shiden_stage_cycle') || '1', 10);
-                const localStageMode = localStorage.getItem('shiden_last_game_mode') || 'MID';
+                const localStageMode = (localStorage.getItem('shiden_last_game_mode') || 'MID') as StageMode;
                 const localCanGoToBoss = localStorage.getItem('shiden_can_go_to_boss') === 'true';
-                set(ref(database, `profiles/${authenticatedUser.uid}/stageCycle`), localStageCycle);
-                set(ref(database, `profiles/${authenticatedUser.uid}/lastGameMode`), localStageMode);
-                set(ref(database, `profiles/${authenticatedUser.uid}/canGoToBoss`), localCanGoToBoss);
-                set(ref(database, `profiles/${authenticatedUser.uid}/updatedAt`), localUpdatedAt);
+                update(ref(database, `profiles/${authenticatedUser.uid}`), {
+                  stageCycle: localStageCycle,
+                  lastGameMode: localStageMode,
+                  canGoToBoss: localCanGoToBoss,
+                  updatedAt: localUpdatedAt
+                });
               } else {
                 // 日時が同じか、どちらも0（初回など）の場合は「より進んでいる方」を優先
                 const localStageCycle = parseInt(localStorage.getItem('shiden_stage_cycle') || '1', 10);
                 if (firebaseStageCycle > localStageCycle) {
                   setStageCycle(firebaseStageCycle);
                   localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
-                } else if (localStageCycle > firebaseStageCycle) {
+                } else if (localStageCycle > firebaseStageCycle && localUpdatedAt > firebaseUpdatedAt) {
                   set(ref(database, `profiles/${authenticatedUser.uid}/stageCycle`), localStageCycle);
                 }
               }
@@ -1573,21 +1645,38 @@ const PLAYER_SKILL_COUNT = 5;
     setSelectedPlayerSkills([]);
 
 
-    const imageUrls = [
+    // 画像の事前読み込み
+    const criticalImages = [
       getStorageUrl('/images/background/background.jpg'),
       getStorageUrl('/images/title/titlelogo.png')
     ];
+
+    const skillIcons = ALL_SKILLS.map(s => getStorageUrl(s.icon));
+    const statusIcons = STATUS_DATA.map(s => getStorageUrl(s.icon));
+    const monsterImages = STAGE_DATA.map(s => getStorageUrl(s.bossImage));
+    const kenjuImages = KENJU_DATA.map(k => getStorageUrl(k.image));
+    const backgrounds = STAGE_DATA.map(s => getStorageUrl(`/images/background/${s.no}.jpg`));
+    const kenjuBackgrounds = KENJU_DATA.map(k => getStorageUrl(k.background));
+
+    const allImages = [...criticalImages, ...skillIcons, ...statusIcons, ...monsterImages, ...kenjuImages, ...backgrounds, ...kenjuBackgrounds];
+    
     let loadedCount = 0;
-    imageUrls.forEach(url => {
+    const totalToLoad = criticalImages.length; // タイトル表示にはクリティカルな画像のみを待つ
+
+    allImages.forEach((url, index) => {
       const img = new Image();
       img.src = url;
       img.onload = () => {
-        loadedCount++;
-        if (loadedCount === imageUrls.length) setIsAssetsLoaded(true);
+        if (index < totalToLoad) {
+          loadedCount++;
+          if (loadedCount === totalToLoad) setIsAssetsLoaded(true);
+        }
       };
       img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === imageUrls.length) setIsAssetsLoaded(true);
+        if (index < totalToLoad) {
+          loadedCount++;
+          if (loadedCount === totalToLoad) setIsAssetsLoaded(true);
+        }
       };
     });
 
@@ -1901,8 +1990,10 @@ const PLAYER_SKILL_COUNT = 5;
     localStorage.setItem('shiden_last_game_mode', 'BOSS');
     localStorage.setItem('shiden_updated_at', now.toString());
     if (user) {
-      set(ref(database, `profiles/${user.uid}/lastGameMode`), 'BOSS');
-      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+      update(ref(database, `profiles/${user.uid}`), {
+        lastGameMode: 'BOSS',
+        updatedAt: now
+      });
     }
 
     handleResetGame();
@@ -2076,11 +2167,13 @@ const PLAYER_SKILL_COUNT = 5;
     localStorage.setItem('shiden_last_game_mode', 'MID');
     localStorage.setItem('shiden_can_go_to_boss', 'false');
     localStorage.setItem('shiden_updated_at', now.toString());
-    // Firebaseにも保存
+    // Firebaseにも一括保存
     if (user) {
-      set(ref(database, `profiles/${user.uid}/stageCycle`), nextCycle);
-      set(ref(database, `profiles/${user.uid}/lastGameMode`), 'MID');
-      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+      update(ref(database, `profiles/${user.uid}`), {
+        stageCycle: nextCycle,
+        lastGameMode: 'MID',
+        updatedAt: now
+      });
     }
     setShowBossClearPanel(false);
     handleResetGame();
@@ -2483,39 +2576,45 @@ const PLAYER_SKILL_COUNT = 5;
             zIndex: 1000,
             borderBottom: '1px solid #00d2ff',
             display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '15px',
+            gap: '5px',
             animation: 'slideDown 0.5s ease-out'
           }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
-            <button
-              onClick={handleForceUpdate}
-              style={{
-                padding: '5px 15px',
-                background: '#00d2ff',
-                color: '#000',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 'bold'
-              }}
-            >
-              今すぐ更新
-            </button>
-            <button
-              onClick={() => setShowUpdateNotify(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#888',
-                cursor: 'pointer',
-                fontSize: '1.2rem'
-              }}
-            >
-              ×
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>✨ アップデートされました！ページを更新してください。</span>
+              <button
+                onClick={handleForceUpdate}
+                style={{
+                  padding: '5px 15px',
+                  background: '#00d2ff',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                今すぐ更新
+              </button>
+              <button
+                onClick={() => setShowUpdateNotify(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#888',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
+              【重要】複数の端末でゲームをする場合、最新の進捗状況を全ての端末で共有するように改善しました。よりクリアしたStageの多い端末で「今すぐ更新」ボタンを押すことを推奨します。
+            </div>
           </div>
         )}
         <div className="TitleBackgroundEffect"></div>
@@ -2716,6 +2815,31 @@ const PLAYER_SKILL_COUNT = 5;
             </div>
           </div>
         )}
+        <div 
+          onClick={() => setShowYoutubeModal(true)} 
+          className="YoutubeTab"
+        >
+          <span style={{ fontSize: '0.8rem' }}></span>
+          <div style={{
+            width: '20px',
+            height: '20px',
+            backgroundColor: '#ff0000',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative'
+          }}>
+            <div style={{
+              width: 0,
+              height: 0,
+              borderTop: '5px solid transparent',
+              borderBottom: '5px solid transparent',
+              borderLeft: '8px solid #fff',
+              marginLeft: '2px'
+            }}></div>
+          </div>
+        </div>
 
         <div
             className="LifukuTab"
@@ -2809,6 +2933,33 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
 
+        {showYoutubeModal && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowYoutubeModal(false)}>
+            <div className="ChangelogModal YoutubeModal" onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader">
+                <span>プレイ動画</span>
+                <button onClick={() => setShowYoutubeModal(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ padding: '20px', textAlign: 'center'}}>
+                <p style={{ fontSize: '1rem', color: '#eee', lineHeight: '1.6', marginBottom: '20px', textAlign: 'left' }}>
+                  Vtuber大饗ぬるさんによる初見プレイ動画です。プレイの参考にどうぞ。<br />
+                  <span style={{ color: '#ffeb3b', fontWeight: 'bold', fontSize: '0.9em' }}>※Stage8ボス前までのプレイが公開されています。初見でプレイしたい方はそこまでクリアしてからご視聴ください。</span>
+                </p>
+                <div className="video-container" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '100%', background: '#000', borderRadius: '8px' }}>
+                  <iframe 
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                    src="https://www.youtube.com/embed/fjtSx8UDoUc" 
+                    title="YouTube video player" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+              <button className="ChangelogCloseButton" onClick={() => setShowYoutubeModal(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+
         {showRuleHint && (
           <div className="ChangelogModalOverlay" onClick={() => setShowRuleHint(false)}>
             <div className="ChangelogModal" style={{ maxWidth: '440px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
@@ -2818,7 +2969,7 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
               <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
                 <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0 }}>
-                  まずは<strong style={{ color: '#00d2ff' }}>NEW GAME</strong>でプレイしてみましょう！<br />
+                  まずは<strong style={{ color: '#00d2ff' }}>NEW GAME</strong>でプレイ！<br />
                   スキルを<strong style={{ color: '#ffd700' }}>5回ポチポチ</strong>すれば大丈夫です！
                 </p>
               </div>

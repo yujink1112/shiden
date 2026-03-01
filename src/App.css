@@ -109,12 +109,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* クラッカー（紙吹雪）アニメーション */
@@ -823,10 +819,38 @@
 }
 
 /* 更新履歴のスタイル */
+.YoutubeTab {
+  position: fixed;
+  left: -20px;
+  top: 80px;
+  width: 60px;
+  height: 40px;
+  background-color: #fff;
+  color: #ff0000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 15px;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+  z-index: 1000;
+  font-weight: bold;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  animation: tabSlideIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.5s;
+  transform: translateX(-130px);
+  text-decoration: none;
+  gap: 8px;
+}
+
+.YoutubeTab:hover {
+  background-color: #f0f0f0;
+}
+
 .ChangelogTab {
   position: fixed;
   left: -20px;
-  top: 40px;
+  top: 30px;
   width: 100px;
   height: 40px;
   background-color: rgba(0, 210, 255, 0.8);
@@ -886,6 +910,41 @@
   overflow: hidden;
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
   animation: zoomIn 0.3s forwards;
+}
+
+.YoutubeModal {
+  max-width: 640px !important;
+}
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .YoutubeModal {
+    max-height: 98vh !important;
+    max-width: 95vw !important;
+    width: auto !important;
+  }
+  .YoutubeModal .ChangelogHeader {
+    padding: 5px 15px !important;
+    font-size: 1rem !important;
+  }
+  .YoutubeModal .ChangelogContent {
+    padding: 5px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .YoutubeModal .video-container {
+    width: 70vw !important;
+    padding-bottom: 39.375% !important; /* (9/16) * 70vw */
+  }
+  .YoutubeModal p {
+    font-size: 0.8rem !important;
+    margin-bottom: 5px !important;
+  }
+  .YoutubeModal .ChangelogCloseButton {
+    margin: 5px !important;
+    padding: 5px 15px !important;
+    font-size: 0.8rem !important;
+  }
 }
 
 .ChangelogHeader {

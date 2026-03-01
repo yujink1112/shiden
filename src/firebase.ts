@@ -19,11 +19,15 @@ export const database = getDatabase(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const storageBaseUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/`;
+const storageCache: { [key: string]: string } = {};
 export const getStorageUrl = (path: string) => {
-  if (!path) return "";
+  if (!path) return '';
   if (path.startsWith('http')) return path;
+  if (storageCache[path]) return storageCache[path];
   const encodedPath = encodeURIComponent(path.startsWith('/') ? path.substring(1) : path);
-  return `${storageBaseUrl}${encodedPath}?alt=media`;
+  const url = `${storageBaseUrl}${encodedPath}?alt=media`;
+  storageCache[path] = url;
+  return url;
 };
 export const googleProvider = new GoogleAuthProvider();
 
