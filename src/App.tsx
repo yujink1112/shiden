@@ -568,10 +568,6 @@ function App() {
     return saved === null ? true : saved === 'true';
   });
 
-  // 初回レンダリング時に本日の剣獣を初期化
-  useEffect(() => {
-    refreshKenju();
-  }, []);
   const [user, setUser] = useState<User | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
   const [viewingProfile, setViewingProfile] = useState<UserProfile | null>(null);
@@ -580,6 +576,43 @@ function App() {
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
+
+  // タイトル画面表示中（F5等）の進行状況最新同期
+  useEffect(() => {
+    if (isTitle && user) {
+      const profileRef = ref(database, `profiles/${user.uid}`);
+      get(profileRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const firebaseUpdatedAt = data.updatedAt || 0;
+          const localUpdatedAt = parseInt(localStorage.getItem('shiden_updated_at') || '0', 10);
+          
+          if (firebaseUpdatedAt > localUpdatedAt) {
+            let firebaseStageCycle = data.stageCycle || 1;
+            if (firebaseStageCycle >= 13) firebaseStageCycle = 12;
+            const firebaseStageMode = data.lastGameMode as StageMode;
+            const firebaseCanGoToBoss = data.canGoToBoss || false;
+            
+            setStageCycle(firebaseStageCycle);
+            localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
+            if (firebaseStageMode) {
+              localStorage.setItem('shiden_last_game_mode', firebaseStageMode);
+              localStorage.setItem('shiden_stage_mode', firebaseStageMode);
+              setStageMode(firebaseStageMode);
+            }
+            setCanGoToBoss(firebaseCanGoToBoss);
+            localStorage.setItem('shiden_can_go_to_boss', firebaseCanGoToBoss.toString());
+            localStorage.setItem('shiden_updated_at', firebaseUpdatedAt.toString());
+          }
+        }
+      });
+    }
+  }, [isTitle, !!user]);
+
+  // 初回レンダリング時に本日の剣獣を初期化
+  useEffect(() => {
+    refreshKenju();
+  }, []);
   const [iconMode, setIconMode] = useState<IconMode>(() => {
     const saved = localStorage.getItem('shiden_icon_mode');
     return (saved as IconMode) || 'ORIGINAL';
@@ -1217,26 +1250,59 @@ const PLAYER_SKILL_COUNT = 5;
     }
   };
 
-  const handleNewGame = () => {
+  const handleNewGame = async () => {
     if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
+    
+    const now = Date.now();
     localStorage.removeItem('shiden_stage_cycle');
     localStorage.removeItem('shiden_owned_skills');
     localStorage.removeItem('shiden_stage_mode');
     localStorage.removeItem('shiden_last_game_mode');
     localStorage.removeItem('shiden_can_go_to_boss');
     localStorage.removeItem('shiden_stage_victory_skills');
+    localStorage.removeItem('shiden_medals');
     localStorage.setItem('shiden_is_title', 'false');
+    localStorage.setItem('shiden_updated_at', now.toString());
+    
+    // Firebaseの進捗もリセット
+    if (user) {
+      await set(ref(database, `profiles/${user.uid}/stageCycle`), 1);
+      await set(ref(database, `profiles/${user.uid}/ownedSkills`), ["一"]);
+      await set(ref(database, `profiles/${user.uid}/lastGameMode`), 'MID');
+      await set(ref(database, `profiles/${user.uid}/canGoToBoss`), false);
+      await set(ref(database, `profiles/${user.uid}/victorySkills`), null);
+      await set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
+
+    // 状態を直接更新して強制リロードなしで反映させやすくする
     setIsTitle(false);
     setStageMode('MID');
     setStageCycle(1);
     setOwnedSkillAbbrs(["一"]);
     setStageVictorySkills({});
-    window.location.reload();
+    // LocalStorage にも初期化した所持スキルを保存
+    localStorage.setItem('shiden_owned_skills', JSON.stringify(["一"]));
+    
+    // しばらく待ってからリロード（Firebaseへの保存を確実にするため）
+    setTimeout(() => {
+        window.location.reload();
+    }, 100);
   };
 
   const handleContinue = () => {
     setStageMode(getLastGameMode());
     setIsTitle(false);
+  };
+
+  const backToTitle = () => {
+    // タイトルに戻る際に最新の状態を同期するためにUpdatedAtを更新
+    if (user) {
+      const now = Date.now();
+      localStorage.setItem('shiden_updated_at', now.toString());
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
+    setIsTitle(true);
+    setStageMode(getLastGameMode());
   };
 
   useEffect(() => {
@@ -1329,6 +1395,74 @@ const PLAYER_SKILL_COUNT = 5;
           if (snapshot.exists()) {
             const data = snapshot.val();
             setMyProfile(data);
+            
+            // 進行状況の同期ロジック
+            // Firebase側にある最終更新日時を確認
+            const firebaseUpdatedAt = data.updatedAt || 0;
+            const localUpdatedAt = parseInt(localStorage.getItem('shiden_updated_at') || '0', 10);
+            
+              let firebaseStageCycle = data.stageCycle || 1;
+              if (firebaseStageCycle >= 13) firebaseStageCycle = 12;
+
+              const firebaseStageMode = data.lastGameMode as StageMode;
+              const firebaseCanGoToBoss = data.canGoToBoss || false;
+
+              // 1. 基本は「最終更新日時が新しい方」を採用する
+              if (firebaseUpdatedAt > localUpdatedAt) {
+                // Firebaseの方が新しい場合
+                setStageCycle(firebaseStageCycle);
+                localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
+                if (firebaseStageMode) {
+                  localStorage.setItem('shiden_last_game_mode', firebaseStageMode);
+                  localStorage.setItem('shiden_stage_mode', firebaseStageMode);
+                  setStageMode(firebaseStageMode);
+                }
+                setCanGoToBoss(firebaseCanGoToBoss);
+                localStorage.setItem('shiden_can_go_to_boss', firebaseCanGoToBoss.toString());
+                localStorage.setItem('shiden_updated_at', firebaseUpdatedAt.toString());
+              } else if (localUpdatedAt > firebaseUpdatedAt) {
+                // ローカルの方が新しい場合、Firebaseを更新
+                const localStageCycle = parseInt(localStorage.getItem('shiden_stage_cycle') || '1', 10);
+                const localStageMode = localStorage.getItem('shiden_last_game_mode') || 'MID';
+                const localCanGoToBoss = localStorage.getItem('shiden_can_go_to_boss') === 'true';
+                set(ref(database, `profiles/${authenticatedUser.uid}/stageCycle`), localStageCycle);
+                set(ref(database, `profiles/${authenticatedUser.uid}/lastGameMode`), localStageMode);
+                set(ref(database, `profiles/${authenticatedUser.uid}/canGoToBoss`), localCanGoToBoss);
+                set(ref(database, `profiles/${authenticatedUser.uid}/updatedAt`), localUpdatedAt);
+              } else {
+                // 日時が同じか、どちらも0（初回など）の場合は「より進んでいる方」を優先
+                const localStageCycle = parseInt(localStorage.getItem('shiden_stage_cycle') || '1', 10);
+                if (firebaseStageCycle > localStageCycle) {
+                  setStageCycle(firebaseStageCycle);
+                  localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
+                } else if (localStageCycle > firebaseStageCycle) {
+                  set(ref(database, `profiles/${authenticatedUser.uid}/stageCycle`), localStageCycle);
+                }
+              }
+
+            // 所持スキルの同期
+            const firebaseOwnedSkills = data.ownedSkills || ["一"];
+            const localOwnedSkills = JSON.parse(localStorage.getItem('shiden_owned_skills') || '["一"]');
+            
+            // 基本は日時の新しい方を優先
+            if (firebaseUpdatedAt > localUpdatedAt) {
+              setOwnedSkillAbbrs(firebaseOwnedSkills);
+              localStorage.setItem('shiden_owned_skills', JSON.stringify(firebaseOwnedSkills));
+            } else if (localUpdatedAt > firebaseUpdatedAt) {
+              set(ref(database, `profiles/${authenticatedUser.uid}/ownedSkills`), localOwnedSkills);
+            }
+
+            // 称号(medals)の同期
+            const firebaseMedals = data.medals || [];
+            const localMedals = JSON.parse(localStorage.getItem('shiden_medals') || '[]');
+            const mergedMedals = Array.from(new Set([...firebaseMedals, ...localMedals]));
+            if (mergedMedals.length > firebaseMedals.length) {
+              set(ref(database, `profiles/${authenticatedUser.uid}/medals`), mergedMedals);
+            }
+            if (mergedMedals.length > localMedals.length) {
+              localStorage.setItem('shiden_medals', JSON.stringify(mergedMedals));
+            }
+
             // Firebaseから取得した勝利スキルをセット
             const firebaseVictorySkills = data.victorySkills || {};
             setStageVictorySkills(firebaseVictorySkills);
@@ -1707,9 +1841,11 @@ const PLAYER_SKILL_COUNT = 5;
                 setTimeout(() => {
                     if (winRateVal >= threshold) {
                         setCanGoToBoss(true);
+                        localStorage.setItem('shiden_can_go_to_boss', 'true');
                         triggerVictoryConfetti();
                     } else {
                         setCanGoToBoss(false);
+                        localStorage.setItem('shiden_can_go_to_boss', 'false');
                     }
                     if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
                       setRewardSelectionMode(true);
@@ -1724,6 +1860,7 @@ const PLAYER_SKILL_COUNT = 5;
             
             if (isVictory) {
               setCanGoToBoss(true);
+              localStorage.setItem('shiden_can_go_to_boss', 'true');
               if (stageMode === 'MID') {
                 triggerVictoryConfetti();
                 if (stageCycle === 1) {
@@ -1765,7 +1902,18 @@ const PLAYER_SKILL_COUNT = 5;
     setLogComplete(false);
   };
 
-  const goToBossStage = () => { setStageMode('BOSS'); handleResetGame(); };
+  const goToBossStage = () => { 
+    const now = Date.now();
+    setStageMode('BOSS'); 
+    localStorage.setItem('shiden_stage_mode', 'BOSS');
+    localStorage.setItem('shiden_last_game_mode', 'BOSS');
+    localStorage.setItem('shiden_updated_at', now.toString());
+    if (user) {
+      set(ref(database, `profiles/${user.uid}/lastGameMode`), 'BOSS');
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
+    handleResetGame(); 
+  };
 
   const handleRewardSelection = (abbr: string) => {
     if (selectedRewards.includes(abbr)) setSelectedRewards([]);
@@ -1773,7 +1921,17 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const confirmRewards = () => {
-    setOwnedSkillAbbrs(prev => [...prev, ...selectedRewards]);
+    const now = Date.now();
+    const newOwnedSkills = Array.from(new Set([...ownedSkillAbbrs, ...selectedRewards]));
+    setOwnedSkillAbbrs(newOwnedSkills);
+    localStorage.setItem('shiden_owned_skills', JSON.stringify(newOwnedSkills));
+    localStorage.setItem('shiden_updated_at', now.toString());
+    
+    // Firebaseにも保存
+    if (user) {
+      set(ref(database, `profiles/${user.uid}/ownedSkills`), newOwnedSkills);
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
     setSelectedRewards([]);
     setRewardSelectionMode(false);
     if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle();
@@ -1791,12 +1949,33 @@ const PLAYER_SKILL_COUNT = 5;
     }
     if (stageCycle === 12) {
       setShowEpilogue(true);
+      // Stage 12 クリア後は、CONTINUE で BOSS ステージに戻るようにする
+      const now = Date.now();
+      setStageMode('BOSS');
+      localStorage.setItem('shiden_stage_mode', 'BOSS');
+      localStorage.setItem('shiden_last_game_mode', 'BOSS');
+      localStorage.setItem('shiden_updated_at', now.toString());
+      if (user) {
+        set(ref(database, `profiles/${user.uid}/lastGameMode`), 'BOSS');
+        set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+      }
       return;
     }
-    setStageMode('MID');
     const nextCycle = stageCycle + 1;
+    const now = Date.now();
+    setStageMode('MID');
     setStageCycle(nextCycle);
     localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
+    localStorage.setItem('shiden_stage_mode', 'MID');
+    localStorage.setItem('shiden_last_game_mode', 'MID');
+    localStorage.setItem('shiden_can_go_to_boss', 'false');
+    localStorage.setItem('shiden_updated_at', now.toString());
+    // Firebaseにも保存
+    if (user) {
+      set(ref(database, `profiles/${user.uid}/stageCycle`), nextCycle);
+      set(ref(database, `profiles/${user.uid}/lastGameMode`), 'MID');
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
     setShowBossClearPanel(false);
     handleResetGame();
     setCanGoToBoss(false);
@@ -2001,9 +2180,8 @@ const PLAYER_SKILL_COUNT = 5;
 
         onDeleteAccount={handleDeleteAccount}
         onBack={() => {
-          setIsTitle(true);
-          // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
-          setStageMode(getLastGameMode());
+          backToTitle();
+          
           refreshKenju();
         }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
@@ -2426,14 +2604,14 @@ const PLAYER_SKILL_COUNT = 5;
               animation: 'epilogueFadeIn 2s forwards',
               animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
             }}>
-              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); setIsTitle(true); setStageMode('MID'); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
+              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); backToTitle(); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
             </div>
           </div>
         </div>
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <button onClick={() => { handleResetGame(); backToTitle(); setKenjuBoss(null); }} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle(stageContext)}
           </h1>
