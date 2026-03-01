@@ -1,8 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { STAGE_DATA, KENJU_DATA } from './stageData';
 
-// 剣獣の情報を表示するコンポーネント
-const KenjuAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getStorageUrl }) => {
+// 広告（剣獣やボス）情報を表示するコンポーネント
+const AdCard: React.FC<{ 
+  getStorageUrl?: (path: string) => string, 
+  mode: 'kenju' | 'boss',
+  bossInfo?: { name: string, image: string, background?: string }
+}> = ({ getStorageUrl, mode, bossInfo }) => {
   // 本日の剣獣を生成（App.tsxと同じロジック）
   const generateDailyKenju = () => {
     const today = new Date();
@@ -12,6 +16,20 @@ const KenjuAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getSt
   };
 
   const currentKenju = generateDailyKenju();
+  
+  const displayInfo = mode === 'kenju' ? {
+    title: '本日の剣獣はこちら！',
+    subtitle: '※遊ぶにはユーザ登録が必要です。',
+    name: currentKenju.name,
+    image: currentKenju.image,
+    background: currentKenju.background
+  } : {
+    title: '現在のステージボス',
+    subtitle: '立ちはだかる強敵を打ち破れ！',
+    name: bossInfo?.name || '???',
+    image: bossInfo?.image || '',
+    background: bossInfo?.background || ''
+  };
 
   return (
     <div style={{
@@ -25,7 +43,7 @@ const KenjuAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getSt
       borderRadius: '10px',
       padding: '20px',
       boxSizing: 'border-box',
-      border: '2px solid #ad1457',
+      border: `2px solid ${mode === 'kenju' ? '#ad1457' : '#0288d1'}`,
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -35,22 +53,22 @@ const KenjuAd: React.FC<{ getStorageUrl?: (path: string) => string }> = ({ getSt
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url(${getStorageUrl ? getStorageUrl(currentKenju.background) : ''})`,
+        backgroundImage: `url(${getStorageUrl && displayInfo.background ? getStorageUrl(displayInfo.background) : ''})`,
         backgroundSize: 'cover',
         opacity: 0.3,
         zIndex: 0
       }} />
       
       <div style={{ zIndex: 1, textAlign: 'center' }}>
-        <div style={{ color: '#ff80ab', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>本日の剣獣はこちら！</div>
-        <div style={{ color: '#aaa', fontSize: '0.6rem', marginBottom: '10px' }}>※遊ぶにはユーザ登録が必要です。</div>
+        <div style={{ color: mode === 'kenju' ? '#ff80ab' : '#4fc3f7', fontSize: '0.8rem', marginBottom: '5px', fontWeight: 'bold' }}>{displayInfo.title}</div>
+        <div style={{ color: '#aaa', fontSize: '0.6rem', marginBottom: '10px' }}>{displayInfo.subtitle}</div>
         <img
-          src={getStorageUrl ? getStorageUrl(currentKenju.image) : currentKenju.image}
-          alt={currentKenju.name}
+          src={getStorageUrl ? getStorageUrl(displayInfo.image) : displayInfo.image}
+          alt={displayInfo.name}
           style={{ width: '120px', height: '120px', objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))' }}
         />
         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', textShadow: '0 0 5px #000' }}>
-          {currentKenju.name}
+          {displayInfo.name}
         </div>
       </div>
     </div>
@@ -246,9 +264,10 @@ interface LifukuProps {
   onShowLounge?: () => void;
   allProfiles?: any[];
   myProfile?: any;
+  currentBoss?: { name: string, image: string, background?: string };
 }
 
-const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScore, onShowLounge, allProfiles = [], myProfile }) => {
+const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScore, onShowLounge, allProfiles = [], myProfile, currentBoss }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
@@ -259,6 +278,8 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
   });
   const [gameState, setGameState] = useState<'start' | 'playing' | 'paused' | 'result' | 'ranking'>('start');
   const [vScore, setVScore] = useState({ v: 0, s: 0 }); // 不正対策用の検証済みスコア
+  const vScoreRef = useRef({ v: 0, s: 0 }); // タイマー内での最新値参照用
+  const [retryCount, setRetryCount] = useState(0); // 広告切替用
   const [bonusEffect, setBonusEffect] = useState<{ show: boolean; text: string; subText?: string; color?: string }>({ show: false, text: '' });
   const [gravityInverted, setGravityInverted] = useState(false);
   const [zeroGravity, setZeroGravity] = useState(false);
@@ -403,7 +424,10 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     setGameState(skipStart ? 'playing' : 'start');
     setHasStartedOnce(false);
     const initialScore = initialEntities.length;
-    setVScore({ v: initialScore, s: initialScore ^ 0x55 });
+    const initialVScore = { v: initialScore, s: initialScore ^ 0x55 };
+    setVScore(initialVScore);
+    vScoreRef.current = initialVScore;
+    if (skipStart) setRetryCount(prev => prev + 1);
   };
 
   const spawnGlider = () => {
@@ -430,7 +454,11 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
     });
 
     entitiesRef.current = [...entitiesRef.current, ...newEntities];
-    setScore(entitiesRef.current.length);
+    const newScore = entitiesRef.current.length;
+    setScore(newScore);
+    const newVScore = { v: newScore, s: newScore ^ 0x55 };
+    setVScore(newVScore);
+    vScoreRef.current = newVScore;
     
     setBonusEffect({ show: true, text: 'GLIDER DEPLOYED!', color: '#4fc3f7' });
     setTimeout(() => setBonusEffect({ show: false, text: '' }), 1500);
@@ -453,9 +481,10 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
 
           // スコアの改ざんチェック
           const finalScore = entitiesRef.current.length;
-          if ((vScore.v ^ 0x55) === vScore.s && vScore.v === finalScore) {
+          const currentVScore = vScoreRef.current;
+          if ((currentVScore.v ^ 0x55) === currentVScore.s && currentVScore.v === finalScore) {
             const currentHighscore = myProfile?.lifukuHighscore || 0;
-            if (finalScore > currentHighscore) {
+            if (finalScore > currentHighscore || (currentHighscore === 0 && finalScore > 0)) {
               setIsNewHighscore(true);
             }
             if (onSaveScore) onSaveScore(finalScore);
@@ -575,7 +604,9 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
         return;
       }
 
-      setVScore({ v: newScore, s: newScore ^ 0x55 });
+      const newVScore = { v: newScore, s: newScore ^ 0x55 };
+      setVScore(newVScore);
+      vScoreRef.current = newVScore;
 
       // 10個ごとのボーナス判定 (20, 30, 40...)
       if (newScore >= lastMilestoneRef.current + 10) {
@@ -1151,7 +1182,11 @@ const Lifuku: React.FC<LifukuProps> = ({ onBack, getStorageUrl, user, onSaveScor
             display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
             borderRadius: '10px', marginBottom: '30px', position: 'relative', overflow: 'hidden'
           }}>
-            <KenjuAd getStorageUrl={getStorageUrl} />
+            <AdCard 
+              getStorageUrl={getStorageUrl} 
+              mode={(retryCount % 2 === 1) ? 'boss' : 'kenju'} 
+              bossInfo={currentBoss}
+            />
           </div>
 
           <button
