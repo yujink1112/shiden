@@ -5,11 +5,12 @@ import { ref, get } from "firebase/database";
 import './Kamishibai.css'; // スタイルシートを後で作成
 
 interface KamishibaiProps {
-  script: StoryScript;
+  script: StoryScript | null;
+  text?: string;
   onEnd: () => void;
 }
 
-const Kamishibai: React.FC<KamishibaiProps> = ({ script, onEnd }) => {
+const Kamishibai: React.FC<KamishibaiProps> = ({ script, text, onEnd }) => {
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -18,11 +19,17 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, onEnd }) => {
   const [activeCharacters, setActiveCharacters] = useState<{[key in "left" | "center" | "right"]?: { name: string; image: string; focus: boolean; } | null }>({});
   const [currentBackground, setCurrentBackground] = useState<string | null>(null);
 
-  const currentEntry = script[currentEntryIndex];
+  // 第1章などの単純なテキスト表示用のエントリを作成
+  const effectiveScript: StoryScript = script || (text ? [{
+      type: 'direction',
+      text: text
+  }] : []);
+
+  const currentEntry = effectiveScript[currentEntryIndex];
 
   useEffect(() => {
     if (!currentEntry) {
-      onEnd();
+      if (effectiveScript.length > 0) onEnd();
       return;
     }
 
@@ -132,7 +139,7 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, onEnd }) => {
       // タイピング中はスキップして全文表示
       setDisplayedText(currentEntry.text || '');
       setIsTyping(false);
-    } else if (currentEntryIndex < script.length - 1) {
+    } else if (currentEntryIndex < effectiveScript.length - 1) {
       setCurrentEntryIndex((prev) => prev + 1);
     } else {
       onEnd();

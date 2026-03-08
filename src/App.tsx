@@ -13,557 +13,20 @@ import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidS
 import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
 import Kamishibai from './components/Kamishibai';
+import { parseStoryText, StoryAssets } from './types/storyParser';
 import StoryCanvas from './components/StoryCanvas';
+import AnimatedRichLog, { StageMode } from './components/AnimatedRichLog';
+import SkillCard, { IconMode } from './components/SkillCard';
+import GameChapter1 from './GameChapter1';
+import GameChapter2 from './GameChapter2';
+import { GameProps, BattleResult } from './types/GameProps';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
 
-interface AnimatedRichLogProps {
-  log: string;
-  onComplete: () => void;
-  immediate?: boolean;
-  bossImage?: string;
-  bossName?: string;
-  battleInstance?: any;
-  battleStageCycle?: number;
-  processor: StageProcessor;
-  stageMode: StageMode;
-  stageContext: any;
-  getStorageUrl: (path: string) => string;
-}
-
-const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor, stageMode, stageContext, getStorageUrl }) => {
-    const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
-    const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
-    const [roundVisibleCounts, setRoundVisibleCounts] = useState<number[]>(new Array(rounds.length).fill(0));
-    const [roundFinished, setRoundFinished] = useState<boolean[]>(new Array(rounds.length).fill(false));
-    const [bossAnim, setBossAnim] = useState<'idle' | 'attack' | 'damage' | 'counter' | 'defeat'>('idle');
-    const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
-    const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
-    useEffect(() => {
-        if (!roundFinished[currentRoundIdx]) {
-            const currentLineIdx = roundVisibleCounts[currentRoundIdx];
-            if (currentLineIdx < currentRoundLines.length) {
-                const line = currentRoundLines[currentLineIdx];
-                if (line.includes('破壊された')) {
-                    if (line.includes('あなたの')) {
-                      const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
-                      if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    } else if (bossName && line.includes(`${bossName}の`)) {
-                      // 特殊文字をエスケープして正規表現を作成
-                      const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                      const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                      if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    }
-                }
-                if (line.includes('リミテッド') && line.includes('破壊された')) {
-                    if (line.includes('あなたの')) {
-                        const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
-                        if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    } else if (bossName && line.includes(`${bossName}の`)) {
-                        const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                        if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
-                    }
-                }
-                if (bossName) {
-                    if (line.includes(`${bossName}の勝利`) || line.includes(`${bossName}が破壊された`)) setBossAnim('defeat');
-                    else if (line.includes(`${bossName}の【`) && line.includes('が発動')) { setBossAnim('counter'); setTimeout(() => setBossAnim('idle'), 800); }
-                    else if (line.includes(`${bossName}の攻撃フェイズ`)) { setBossAnim('attack'); setTimeout(() => setBossAnim('idle'), 800); }
-                    else if (line.includes(`${bossName}に`) && line.includes('のダメージ')) { setBossAnim('damage'); setTimeout(() => setBossAnim('idle'), 800); }
-                }
-            }
-        }
-    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished]);
-    useEffect(() => {
-      if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
-      if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
-          const nc = [...roundVisibleCounts];
-          if (nc[currentRoundIdx] !== currentRoundLines.length) {
-            nc[currentRoundIdx] = currentRoundLines.length;
-            setRoundVisibleCounts(nc);
-          }
-          if (!roundFinished[currentRoundIdx]) {
-            const nf = [...roundFinished];
-            nf[currentRoundIdx] = true;
-            setRoundFinished(nf);
-          }
-          onComplete();
-          return;
-      }
-      if (!roundFinished[currentRoundIdx]) {
-        if (roundVisibleCounts[currentRoundIdx] < currentRoundLines.length) {
-          const timer = setTimeout(() => { const nc = [...roundVisibleCounts]; nc[currentRoundIdx]++; setRoundVisibleCounts(nc); }, 400);
-          return () => clearTimeout(timer);
-        } else {
-          const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
-          if (currentRoundIdx === rounds.length - 1) onComplete();
-        }
-      }
-    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds, onComplete]);
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [roundVisibleCounts]);
-    const goNext = () => {
-      if (!roundFinished[currentRoundIdx]) {
-        const fullLines = currentRoundLines;
-        let newPc1Scar = [...currentPc1Scar], newPc2Scar = [...currentPc2Scar];
-        fullLines.forEach(line => {
-            if (line.includes('破壊された')) {
-                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
-                else if (bossName && line.includes(`${bossName}の`)) {
-                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
-                }
-            }
-            if (line.includes('リミテッド') && line.includes('破壊された')) {
-                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
-                else if (bossName && line.includes(`${bossName}の`)) {
-                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
-                }
-            }
-        });
-        setCurrentPc1Scar(newPc1Scar); setCurrentPc2Scar(newPc2Scar);
-        const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
-        const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
-        if (currentRoundIdx === rounds.length - 1) {
-          onComplete();
-        }
-      } else if (currentRoundIdx < rounds.length - 1) {
-        setCurrentRoundIdx(prev => prev + 1);
-      } else {
-        // すでに最終ラウンドが終了している場合でも確実に onComplete を呼ぶ
-        onComplete();
-      }
-    };
-    const goBack = () => { if (currentRoundIdx > 0) setCurrentRoundIdx(prev => prev - 1); };
-    
-    // PC1 (プレイヤー) と PC2 (ボス) のゲージを個別に管理
-    const renderGauge = (player: any, scars: number[], color: string) => {
-      if (!player) return null;
-      const totalSkills = player.getSkillsLength();
-      const brokenSkills = scars.filter((s: number) => s === 1).length;
-      const percentage = Math.max(0, ((totalSkills - brokenSkills) / totalSkills) * 100);
-      
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.8))', width: '80px' }}>
-          <div style={{ fontSize: player.playerName.length >= 9 ? '8px' : '10px', fontWeight: 'bold', marginBottom: '6px', color: '#fff', textShadow: '0 0 4px #000, 1px 1px 2px #000', textAlign: 'center', width: '100%', wordBreak: 'break-all', height: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1.2' }}>
-            {player.playerName}
-          </div>
-          <div style={{ height: '140px', width: '16px', backgroundColor: 'rgba(20,20,20,0.8)', border: '2px solid #fff', borderRadius: '4px', boxSizing: 'border-box', boxShadow: '0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.8)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`,
-              background: `linear-gradient(to top, ${color}, ${color}dd)`,
-              transition: 'height 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-              boxShadow: `0 0 15px ${color}`
-            }} />
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, width: '100%', height: `${percentage}%`,
-              backgroundColor: '#fff', opacity: 0.3, filter: 'blur(2px)', mixBlendMode: 'overlay'
-            }} />
-          </div>
-        </div>
-      );
-    };
-
-    const isMobile = window.innerWidth < 768;
-
-    return (
-      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
-        {bossImage && (
-          <div className="boss-stage-area sticky-boss-area" style={{
-            height: isMobile ? '200px' : '240px' , minHeight: isMobile ? '200px' : '240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(stageContext.kenjuBoss?.background || '') : (processor.getBackgroundImage(stageContext)) || '')})`,
-            paddingTop: '10px', position: 'relative', overflow: 'hidden', flexShrink: 0
-          }}>
-            {/* 背景を暗くするオーバーレイ */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1 }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.15, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px', zIndex: 2 }} />
-            
-            <div style={{ zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 10px', boxSizing: 'border-box' }}>
-              <div style={{ zIndex: 10, position: 'relative' }}>
-                {battleInstance && renderGauge(battleInstance.pc2, currentPc2Scar, '#ff5252')}
-              </div>
-              
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (battleStageCycle === 8 || battleStageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 5, overflow: battleStageCycle === 4 ? 'visible' : 'hidden' }}>
-                <img
-                  src={bossImage}
-                  alt={bossName}
-                  className={`boss-battle-image boss-anim-${bossAnim}`}
-                  style={{
-                      ...processor.getBossImageStyle({ ...stageContext, stageCycle: battleStageCycle }, isMobile, 'battle')
-                  }}
-                />
-              </div>
-              
-              <div style={{ zIndex: 10, position: 'relative' }}>
-                {battleInstance && renderGauge(battleInstance.pc1, currentPc1Scar, '#2196f3')}
-              </div>
-            </div>
-            <style>{`
-              @keyframes slideUp {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-              }
-              @-webkit-keyframes slideUp {
-                from { opacity: 0; -webkit-transform: translateY(10px); }
-                to { opacity: 1; -webkit-transform: translateY(0); }
-              }
-              .rich-log-modern div {
-                will-change: transform, opacity;
-              }
-            `}</style>
-          </div>
-        )}
-        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 'auto', height: isMobile ? '400px' : 0, boxSizing: 'border-box', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
-            <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
-            <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
-          </div>
-          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', minHeight: 0, boxSizing: 'border-box' }}>
-            {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
-              let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards', WebkitTransform: 'translateY(10px)', WebkitAnimation: 'slideUp 0.3s forwards' };
-              if (line.includes('VS')) {
-                const [p1, p2] = line.split('VS');
-                return (
-                  <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '0 10px' }}>
-                      <span className="battle-start-player-name" style={{ fontSize: p1.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p1.trim()}</span>
-                      <span className="battle-start-vs" style={{ fontSize: '2.2rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
-                      <span className="battle-start-enemy-name" style={{ fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p2.trim()}</span>
-                    </div>
-                  </div>
-                );
-              }
-              if (line.includes('戦闘開始')) return <div key={i} style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: '#ffd54f', margin: '20px 0' }}>{line.replace(/[-―=]/g, '').trim()}</div>;
-              if (line.includes('ラウンド') || line.includes('勝敗判定')) style = { ...style, color: '#61dafb', fontSize: '1.2em', borderBottom: '1px solid #333' };
-              else if (line.includes('フェイズ')) style = { ...style, color: '#81c784', fontWeight: 'bold' };
-              else if (line.includes('ダメージ') || line.includes('破壊')) style = { ...style, color: '#ff5252', paddingLeft: '10px', borderLeft: '2px solid #ff5252' };
-              else if (line.includes('発動') || line.includes('効果')) style = { ...style, color: '#ffd54f', fontStyle: 'italic' };
-              return <div key={i} className="log-line" style={style}>{line}</div>;
-            })}
-            
-          </div>
-        </div>
-        <style>{`
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @-webkit-keyframes slideUp {
-            from { opacity: 0; -webkit-transform: translateY(10px); }
-            to { opacity: 1; -webkit-transform: translateY(0); }
-          }
-          .rich-log-modern div {
-            will-change: transform, opacity;
-          }
-        `}</style>
-      </div>
-    );
-  }, (prevProps, nextProps) => {
-    return prevProps.log === nextProps.log &&
-           prevProps.immediate === nextProps.immediate &&
-           prevProps.bossName === nextProps.bossName;
-  });
-
-interface SkillCardProps {
-  skill: SkillDetail;
-  isSelected?: boolean;
-  onClick?: (abbr: string) => void;
-  disableTooltip?: boolean;
-  iconMode?: IconMode;
-}
-
-interface BattleResult {
-  playerSkills: SkillDetail[];
-  computerSkills: SkillDetail[];
-  winner: number;
-  resultText: string;
-  gameLog: string;
-  battleInstance?: any;
-}
-
-const SkillCard: React.FC<SkillCardProps & { id?: string; isConnected?: boolean; isDimmed?: boolean }> = ({ skill, isSelected, onClick, id, isConnected, isDimmed, disableTooltip, iconMode }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [isTooltipForceClosed, setIsTooltipForceClosed] = useState(false);
-  const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
-  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick(skill.abbr);
-    }
-
-  };
-
-  const renderFormattedDescription = (text: string) => {
-    let parts: (string | React.ReactNode)[] = [text];
-    
-    STATUS_DATA.forEach(status => {
-      const newParts: (string | React.ReactNode)[] = [];
-      parts.forEach(part => {
-        if (typeof part === 'string') {
-          const regex = new RegExp(`(${status.name})`, 'g');
-          const subParts = part.split(regex);
-          subParts.forEach(subPart => {
-            if (subPart === status.name) {
-              newParts.push(
-                <span 
-                  key={status.name + Math.random()}
-                  onMouseEnter={() => setHoveredStatus(status.name)}
-                  onMouseLeave={() => setHoveredStatus(null)}
-                  style={{ color: '#ffeb3b', textDecoration: 'underline', cursor: 'help', fontWeight: 'bold', pointerEvents: 'auto' }}
-                >
-                  {subPart}
-                </span>
-              );
-            } else {
-              newParts.push(subPart);
-            }
-          });
-        } else {
-          newParts.push(part);
-        }
-      });
-      parts = newParts;
-    });
-
-    return parts.map((part, i) => {
-        if (typeof part === 'string') {
-            return part.split('\n').map((line, j) => (
-                <React.Fragment key={`${i}-${j}`}>
-                    {line}
-                    {j < part.split('\n').length - 1 && <br />}
-                </React.Fragment>
-            ));
-        }
-        return part;
-    });
-  };
-
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [tooltipPos, setTooltipPos] = useState<'center' | 'left' | 'right'>('center');
-  const [isTooltipBelow, setIsTooltipBelow] = useState(false);
-
-  useEffect(() => {
-    if (showTooltip && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const screenWidth = window.innerWidth;
-      const margin = 20;
-      const tooltipWidth = 220;
-      const estimatedTooltipHeight = 150; // およその高さ
-
-      // 垂直方向の判定
-      const spaceAbove = rect.top;
-      if (spaceAbove < estimatedTooltipHeight) {
-        setIsTooltipBelow(true);
-      } else {
-        setIsTooltipBelow(false);
-      }
-
-      // 親要素(deneiSkillPanel または bossSkillGrid)がある場合、その範囲内に収める
-      const deneiPanel = document.getElementById('deneiSkillPanel');
-      const bossPanel = document.querySelector('.BossSkillPreview');
-      const containerPanel = deneiPanel || bossPanel;
-
-      if (containerPanel) {
-        const panelRect = containerPanel.getBoundingClientRect();
-        const relativeLeft = rect.left - panelRect.left;
-        const relativeRight = panelRect.right - rect.right;
-
-        // パネル内での垂直判定を強化
-        const spaceInPanelAbove = rect.top - panelRect.top;
-        if (spaceInPanelAbove < estimatedTooltipHeight) {
-          setIsTooltipBelow(true);
-        }
-
-        if (relativeLeft < tooltipWidth / 2) {
-          setTooltipPos('left');
-        } else if (relativeRight < tooltipWidth / 2) {
-          setTooltipPos('right');
-        } else {
-          setTooltipPos('center');
-        }
-      } else {
-        if (rect.left < tooltipWidth / 2 + margin) {
-          setTooltipPos('left');
-        } else if (screenWidth - rect.right < tooltipWidth / 2 + margin) {
-          setTooltipPos('right');
-        } else {
-          setTooltipPos('center');
-        }
-      }
-    }
-  }, [showTooltip]);
-
-  const getTooltipStyle = (): React.CSSProperties => {
-    const base: React.CSSProperties = {
-      position: 'absolute',
-      ...(isTooltipBelow ? { top: '105%' } : { bottom: '105%' }),
-      backgroundColor: 'rgba(30, 30, 30, 0.95)',
-      color: 'white',
-      padding: '12px',
-      borderRadius: '8px',
-      whiteSpace: 'normal',
-      zIndex: 2000,
-      textAlign: 'left',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-      minWidth: '220px',
-      maxWidth: '300px',
-      pointerEvents: 'auto',
-      fontSize: '12px',
-      lineHeight: '1.4',
-      border: '1px solid #555',
-    };
-
-    if (tooltipPos === 'left') {
-      return { ...base, left: '0', transform: 'none' };
-    } else if (tooltipPos === 'right') {
-      return { ...base, right: '0', transform: 'none' };
-    }
-    return { ...base, left: '50%', transform: 'translateX(-50%)' };
-  };
-
-  const renderIcon = () => {
-    if (iconMode === 'ABBR') {
-      return (
-        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#333', border: '1px solid #666', borderRadius: '4px', fontSize: '18px', fontWeight: 'bold', color: '#fff', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
-          {skill.abbr}
-        </div>
-      );
-    }
-    if (iconMode === 'PHONE') {
-      const allAbbrs = ALL_SKILLS.map(s => s.abbr);
-      const index = allAbbrs.indexOf(skill.abbr);
-      let char = '';
-      if (index >= 0 && index <= 9) char = index.toString();
-      else if (index >= 10 && index <= 35) char = String.fromCharCode(65 + (index - 10)); // A-Z
-      else char = '?';
-      
-      return (
-        <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', border: '2px solid #4fc3f7', borderRadius: '50%', fontSize: '20px', fontWeight: 'bold', color: '#4fc3f7', boxShadow: '0 0 5px #4fc3f7', filter: isDimmed ? 'grayscale(100%)' : 'none' }}>
-          {char}
-        </div>
-      );
-    }
-    return <img src={getStorageUrl(skill.icon)} alt={skill.name} className="skill-icon" style={{ filter: isDimmed ? 'grayscale(100%)' : 'drop-shadow(0 0 2px rgba(255,255,255,0.2))' }} />;
-  };
-
-  return (
-    <div
-      id={id}
-      ref={cardRef}
-      className={(isConnected ? 'synergy-active ' : '') + 'skill-card'}
-      onClick={handleClick}
-      onMouseEnter={() => {
-        if (!disableTooltip) {
-          if (tooltipTimeoutRef.current) {
-            clearTimeout(tooltipTimeoutRef.current);
-            tooltipTimeoutRef.current = null;
-          }
-          setShowTooltip(true);
-          setIsTooltipForceClosed(false);
-        }
-      }}
-      onMouseLeave={() => {
-        if (!disableTooltip) {
-          tooltipTimeoutRef.current = setTimeout(() => {
-            setShowTooltip(false);
-          }, 200); // 200msの猶予を与える
-        }
-      }}
-      style={{
-        border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : '1px solid #444')),
-        borderRadius: '8px',
-        padding: '8px',
-        margin: '2px',
-        cursor: onClick ? 'pointer' : 'default',
-        backgroundColor: isConnected ? '#4a4a00' : (isSelected ? '#333300' : '#1a1a1a'),
-        color: isDimmed ? '#666' : '#eee',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: isConnected ? '0 0 20px #ffeb3b, inset 0 0 15px #ffeb3b' : (isDimmed ? 'none' : (isSelected ? '0 0 10px rgba(255,215,0,0.7)' : '0 2px 4px rgba(0,0,0,0.3)')),
-        position: 'relative',
-        transition: 'all 0.3s ease',
-        filter: isDimmed ? 'grayscale(80%)' : 'none',
-        opacity: isDimmed ? 0.7 : 1,
-      }}
-    >
-      {renderIcon()}
-      <span className="skill-name">{skill.name}</span>
-      {showTooltip && !isTooltipForceClosed && (
-        <div 
-          style={getTooltipStyle()}
-          onClick={(e) => e.stopPropagation()}
-          onMouseEnter={() => {
-            if (tooltipTimeoutRef.current) {
-              clearTimeout(tooltipTimeoutRef.current);
-              tooltipTimeoutRef.current = null;
-            }
-          }}
-          onMouseLeave={() => {
-            tooltipTimeoutRef.current = setTimeout(() => {
-              setShowTooltip(false);
-            }, 300);
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', alignItems: 'baseline' }}>
-            <div>
-                <strong style={{ fontSize: '14px', color: '#ffd700' }}>{skill.name}</strong>
-                <span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{skill.kana}</span>
-            </div>
-            <button 
-              onClick={(e) => { e.stopPropagation(); setIsTooltipForceClosed(true); }}
-              style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', padding: '2px 6px' }}
-            >
-              閉じる
-            </button>
-          </div>
-          <strong>種別:</strong> <span style={{ color: '#61dafb' }}>{skill.type}</span><br />
-          <strong>速度:</strong> <span style={{ color: '#61dafb' }}>{skill.speed}</span><br />
-          {renderFormattedDescription(skill.description)}
-
-          {hoveredStatus && (
-            <div style={{
-              position: 'absolute',
-              left: window.innerWidth < 600 ? '0' : '105%',
-              top: window.innerWidth < 600 ? '105%' : 0,
-              backgroundColor: '#444',
-              color: '#fff',
-              padding: '10px',
-              borderRadius: '5px',
-              width: window.innerWidth < 600 ? '100%' : '200px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-              zIndex: 2001,
-              border: '1px solid #ffd700',
-              boxSizing: 'border-box'
-            }}>
-              <strong style={{ color: '#ffd700' }}>【{hoveredStatus}】</strong><br />
-              {STATUS_DATA.find(s => s.name === hoveredStatus)?.description}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-type StageMode = 'MID' | 'BOSS' | 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'KENJU' | 'DENEI' | 'VERIFY_EMAIL' | 'DELETE_ACCOUNT' | 'ADMIN_ANALYTICS' | 'LIFUKU';
-type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
-
 const parseV2TextStory = (text: string): any[] => {
   const lines = text.split('\n');
   const script: any[] = [];
-  script.push({ type: "background", background: "images/background/v2/pirate-ship-deck1.jpg" });
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -629,6 +92,8 @@ function App() {
         // 共通リソース
         imageUrls.add(getStorageUrl('/images/background/background.jpg'));
         imageUrls.add(getStorageUrl('/images/title/titlelogo.png'));
+        imageUrls.add(getStorageUrl('/images/chapter/Chapter1.png'));
+        imageUrls.add(getStorageUrl('/images/chapter/Chapter2.png'));
 
         // 画像のプリロード
         const preloadImage = (url: string) => {
@@ -655,6 +120,7 @@ function App() {
     const loungeModes = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'];
     if (savedMode && loungeModes.includes(savedMode)) return false;
     
+    // shiden_is_title のデフォルトを true にして、明示的に開始されるまでタイトルを維持
     const saved = localStorage.getItem('shiden_is_title');
     return saved === null ? true : saved === 'true';
   });
@@ -688,6 +154,20 @@ function App() {
   const [showLegal, setShowLegal] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
+  const [showChapterSelect, setShowChapterSelect] = useState<{ mode: 'NEW' | 'CONTINUE' } | null>(null);
+  const [chapterProgress, setChapterProgress] = useState<{ [key: number]: number }>({
+    1: parseInt(localStorage.getItem('shiden_chapter1_stage') || '1', 10),
+    2: parseInt(localStorage.getItem('shiden_chapter2_stage') || '13', 10) // デフォルト13に修正（第2章開始ステージ）
+  });
+
+  const [chapter2SubStage, setChapter2SubStage] = useState<number>(() => {
+    const saved = localStorage.getItem('shiden_chapter2_sub_stage');
+    return saved ? parseInt(saved, 10) : 1;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shiden_chapter2_sub_stage', chapter2SubStage.toString());
+  }, [chapter2SubStage]);
 
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
@@ -770,6 +250,7 @@ function App() {
   const [showLogForBattleIndex, setShowLogForBattleIndex] = useState<number>(-1);
   const [storyContent, setStoryContent] = useState<string | null>(null);
   const [storyContentV2, setStoryContentV2] = useState<any[] | null>(null);
+  const [storyUrl, setStoryUrl] = useState<string | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
   const [showEpilogue, setShowEpilogue] = useState(false);
@@ -800,8 +281,9 @@ function App() {
     kenjuBoss: (stageMode === 'DENEI' || stageMode === 'KENJU') ? (currentKenjuBattle || kenjuBoss || undefined) : undefined,
     selectedPlayerSkills,
     midEnemyData,
-    userName: myProfile?.displayName
-  }), [stageCycle, stageMode, currentKenjuBattle, kenjuBoss, selectedPlayerSkills, midEnemyData, myProfile]);
+    userName: myProfile?.displayName,
+    chapter2SubStage
+  }), [stageCycle, stageMode, currentKenjuBattle, kenjuBoss, selectedPlayerSkills, midEnemyData, myProfile, chapter2SubStage]);
 
   const lastSavedVictoryRef = useRef<string>("");
 
@@ -813,10 +295,14 @@ const PLAYER_SKILL_COUNT = 5;
 
   const loadV2Story = async (filenameBase: string) => {
     try {
+      // story_assets.json も読み込む
+      const assetsResponse = await fetch('/data/story_assets.json');
+      const assets: StoryAssets = await assetsResponse.json();
+
       let response = await fetch(`story/v2/${filenameBase}.txt`);
       if (response.ok) {
         const text = await response.text();
-        return parseV2TextStory(text);
+        return parseStoryText(text, assets);
       }
     } catch (e) {
       console.error("Story load error:", e);
@@ -827,15 +313,26 @@ const PLAYER_SKILL_COUNT = 5;
   useEffect(() => {
     const fetchStory = async () => {
       if (stageMode === 'MID' && !gameStarted) {
+        // ストーリー表示の条件判定を整理
         const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-        if (stageCycle >= 13 && !isAdmin) {
-          setStoryContent(null);
-          setStoryContentV2(null);
-          return;
+        if (stageCycle >= 13 && !isAdmin && !currentStage?.chapter) {
+           // 未実装ステージなどのガード
+           setStoryContent(null);
+           setStoryContentV2(null);
+           return;
         }
+
+        // オープニング表示中（storyUrlがセットされている）ならfetchをスキップ
+        if (storyUrl) {
+            setStoryContent(null);
+            setStoryContentV2(null);
+            return;
+        }
+
         try {
-          if (currentStage?.chapter || stageCycle === 1) {
-            const filenameBase = currentStage?.chapter ? `${currentStage.chapter}-${currentStage.stageInChapter}` : "1-1";
+          if (currentStage?.chapter && currentStage.chapter >= 2) {
+            // 第2章以降
+            const filenameBase = `${currentStage.chapter}-${currentStage.stageInChapter}`;
             const data = await loadV2Story(filenameBase);
             if (data) {
               setStoryContentV2(data);
@@ -844,6 +341,7 @@ const PLAYER_SKILL_COUNT = 5;
               setStoryContentV2(null);
             }
           } else {
+            // 第1章（Stage 1-12）
             const response = await fetch(`${process.env.PUBLIC_URL}/story/${stageCycle}.txt`);
             if (response.ok) {
               const text = await response.text();
@@ -855,15 +353,22 @@ const PLAYER_SKILL_COUNT = 5;
           console.error("Story fetch error:", e);
         }
       } else {
-        setStoryContent(null);
-        setStoryContentV2(null);
+        // ゲーム中や他のモードではストーリーデータをクリア
+        if (!storyUrl) { // オープニング表示中以外
+            setStoryContent(null);
+            setStoryContentV2(null);
+        }
       }
     };
     fetchStory().then(() => {
-      // ストーリーが読み込まれ、かつ第2章のステージ、またはStage1であればモーダルを表示
-      const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-      if (((currentStage?.chapter && currentStage.chapter >= 2)) && !gameStarted && storyContentV2) { // 第2章のステージまたはStage1で、かつstoryContentV2がセットされた場合のみ表示
-        setShowStoryModal(true);
+      // ストーリーが読み込まれたらモーダルを表示
+      if (!gameStarted && !showStoryModal) {
+        // 第2章以降、またはStage1（V2形式）の場合のみモーダル表示
+        // また、storyUrlがある場合は常にモーダル
+        if (storyContentV2 || storyUrl) {
+          setShowStoryModal(true);
+        }
+        // 第1章のテキストストーリー (storyContent) はモーダルを自動表示せず、サイドバー（復活）に任せる
       }
     });
 
@@ -1359,25 +864,62 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleNewGame = () => {
-    if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
-    localStorage.removeItem('shiden_stage_cycle');
-    localStorage.removeItem('shiden_owned_skills');
-    localStorage.removeItem('shiden_stage_mode');
-    localStorage.removeItem('shiden_last_game_mode');
-    localStorage.removeItem('shiden_can_go_to_boss');
-    localStorage.removeItem('shiden_stage_victory_skills');
-    localStorage.setItem('shiden_is_title', 'false');
-    setIsTitle(false);
-    setStageMode('MID');
-    setStageCycle(1);
-    setOwnedSkillAbbrs(["一"]);
-    setStageVictorySkills({});
-    window.location.reload();
+    setShowChapterSelect({ mode: 'NEW' });
   };
 
   const handleContinue = () => {
-    setStageMode(getLastGameMode());
-    setIsTitle(false);
+    setShowChapterSelect({ mode: 'CONTINUE' });
+  };
+
+  const handleChapterSelect = (chapter: number, isNewGame: boolean = false) => {
+    const stage = isNewGame ? (chapter === 2 ? 13 : 1) : (chapterProgress[chapter] || (chapter === 2 ? 13 : 1));
+    
+    if (isNewGame) {
+      if (chapter === 1) {
+        localStorage.removeItem('shiden_chapter1_stage');
+        setChapterProgress(prev => ({ ...prev, 1: 1 }));
+      } else {
+        localStorage.removeItem('shiden_chapter2_stage');
+        setChapterProgress(prev => ({ ...prev, 2: 13 }));
+      }
+    }
+
+    setStageCycle(stage);
+    setStageMode('MID');
+    // 章選択時にはまだタイトル画面の状態を維持し、ストーリー終了後に false にする
+    setShowChapterSelect(null);
+    
+    // NEW GAME時、または初回の開始時
+    if (isNewGame || (chapter === 2 && stage === 13) || (chapter === 1 && stage === 1)) {
+      if (chapter === 1) {
+        // 第1章の開始時はテキストストーリーを読み込んでサイドバーに表示し、StoryCanvasは出さない
+        const fetchFirstStory = async () => {
+          try {
+            const response = await fetch(`${process.env.PUBLIC_URL}/story/1.txt`);
+            if (response.ok) {
+              const text = await response.text();
+              setStoryContent(text);
+              setStoryContentV2(null);
+              setStoryUrl(null);
+              setShowStoryModal(false);
+              setIsTitle(false);
+            }
+          } catch (e) {
+            console.error("First story fetch error:", e);
+            setIsTitle(false);
+          }
+        };
+        fetchFirstStory();
+      } else {
+        setStoryContent(null);
+        setStoryContentV2(null);
+        setStoryUrl('story/v2/opening.txt');
+        setShowStoryModal(true);
+      }
+    } else {
+      // ストーリーがない場合は即座にタイトルを抜ける
+      setIsTitle(false);
+    }
   };
 
   useEffect(() => {
@@ -1827,18 +1369,75 @@ const PLAYER_SKILL_COUNT = 5;
               }
             }, 30);
           } else {
-            const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) ? winCount >= 1 : winCount === 10;
+            // 第2章の場合はMIDでも1勝で勝利とする
+            const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+            const isChapter2 = currentStageInfo?.chapter === 2;
+            const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) || isChapter2 ? winCount >= 1 : winCount === 10;
             const result = isVictory ? stageProcessor.onVictory(context) : stageProcessor.onFailure(context);
             
             if (isVictory) {
-              setCanGoToBoss(true);
-              if (stageMode === 'MID') triggerVictoryConfetti();
+              // 第2章の処理
+              if (isChapter2) {
+                if (chapter2SubStage === 1) { // N-1 クリア -> 中ボス
+                  triggerVictoryConfetti();
+                  setTimeout(async () => {
+                    const data = await loadV2Story(`${currentStageInfo.chapter}-${currentStageInfo.stageInChapter}-mid`);
+                    if (data) {
+                      setStoryContentV2(data);
+                      setShowStoryModal(true);
+                    }
+                    setChapter2SubStage(2);
+                    setStageMode('BOSS'); // BossStageProcessorを使うためにBOSSモードにする（実際にはずっとBOSSモードでもいいが、App.tsxのロジックに合わせる）
+                    handleResetGame();
+                  }, 2000);
+                  return;
+                } else if (chapter2SubStage === 2) { // 中ボス クリア -> N-2
+                  triggerVictoryConfetti();
+                  setTimeout(() => {
+                    setChapter2SubStage(3);
+                    setStageMode('BOSS'); // 雑魚戦もBossStageProcessorで処理する
+                    handleResetGame();
+                  }, 2000);
+                  return;
+                } else if (chapter2SubStage === 3) { // N-2 クリア -> 大ボス
+                  triggerVictoryConfetti();
+                  setTimeout(async () => {
+                    const data = await loadV2Story(`${currentStageInfo.chapter}-${currentStageInfo.stageInChapter}-boss`);
+                    if (data) {
+                      setStoryContentV2(data);
+                      setShowStoryModal(true);
+                    }
+                    setChapter2SubStage(4);
+                    setStageMode('BOSS');
+                    handleResetGame();
+                  }, 2000);
+                  return;
+                } else if (chapter2SubStage === 4) { // 大ボス クリア -> 報酬選択
+                  triggerVictoryConfetti();
+                  setShowBossClearPanel(true);
+                  // 報酬選択へ進む（下の共通ロジックへ）
+                } else if (chapter2SubStage === 5) { // N-3 クリア -> 次のステージ
+                  triggerVictoryConfetti();
+                  setTimeout(() => {
+                    clearBossAndNextCycle();
+                  }, 2000);
+                  return;
+                }
+              } else {
+                setCanGoToBoss(true);
+                if (stageMode === 'MID') triggerVictoryConfetti();
+              }
+
+              // 第2章のMIDクリア時、自動的にBossストーリーを表示してボス戦へ (既存ロジックは削除または第2章以外に限定)
+              if (stageMode === 'MID' && !isChapter2 && currentStageInfo?.chapter && currentStageInfo.chapter >= 2) {
+                 // この分岐は到達しないはずだが念のため残すなら修正が必要
+              }
             }
 
             if (result.showReward && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
               if ((result as any).pendingClear) setBossClearRewardPending(true);
               else setRewardSelectionMode(true);
-            } else if (isVictory && (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode)) {
+            } else if (isVictory && (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !isChapter2) { // 第2章以外
               setShowBossClearPanel(true);
             }
           }
@@ -1882,30 +1481,101 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleRewardSelection = (abbr: string) => {
-    if (selectedRewards.includes(abbr)) setSelectedRewards([]);
-    else setSelectedRewards([abbr]);
+    // 第2章の報酬選択（2つ選択）
+    const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+    const isChapter2 = stageInfo?.chapter === 2;
+    
+    if (isChapter2 && chapter2SubStage === 4) { // 大ボス撃破後の報酬
+      if (selectedRewards.includes(abbr)) {
+        setSelectedRewards(prev => prev.filter(a => a !== abbr));
+      } else {
+        if (selectedRewards.length < 2) {
+          setSelectedRewards(prev => [...prev, abbr]);
+        }
+      }
+    } else {
+      // 通常の報酬選択（1つ選択）
+      if (selectedRewards.includes(abbr)) setSelectedRewards([]);
+      else setSelectedRewards([abbr]);
+    }
   };
 
   const confirmRewards = () => {
     setOwnedSkillAbbrs(prev => [...prev, ...selectedRewards]);
     setSelectedRewards([]);
     setRewardSelectionMode(false);
+    
+    // 第2章の大ボス報酬の場合、N-3へ進む
+    const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+    if (stageInfo?.chapter === 2 && chapter2SubStage === 4) {
+      setChapter2SubStage(5);
+      setStageMode('BOSS'); // N-3もBossStageProcessorで処理する
+      setShowBossClearPanel(false);
+      handleResetGame();
+      // N-3のストーリーがあればここで読み込む
+      return;
+    }
+
     if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle();
   };
 
   const clearBossAndNextCycle = async () => {
+    const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+    const isChapter2 = stageInfo?.chapter === 2;
+
+    if (isChapter2) {
+      if (chapter2SubStage === 1) {
+        // 中ボス撃破後 -> N-2.txt ロード -> 大ボス(SubStage 2)へ
+        const data = await loadV2Story(`${stageInfo.chapter}-${stageInfo.stageInChapter}-2`);
+        if (data) {
+          setStoryContentV2(data);
+          setShowStoryModal(true);
+        }
+        setChapter2SubStage(2);
+        setStageMode('BOSS');
+        handleResetGame();
+        setShowBossClearPanel(false);
+        return;
+      } else if (chapter2SubStage === 2) {
+        // 大ボス撃破後 -> N-3.txt ロード -> 報酬選択(SubStage 3)へ
+        const data = await loadV2Story(`${stageInfo.chapter}-${stageInfo.stageInChapter}-3`);
+        if (data) {
+          setStoryContentV2(data);
+          setShowStoryModal(true);
+        }
+        setChapter2SubStage(3); // GameChapter2側でSubStage 3なら報酬選択を表示
+        handleResetGame();
+        setShowBossClearPanel(false);
+        return;
+      } else if (chapter2SubStage === 3) {
+        // 報酬獲得完了（confirmRewardsから呼ばれる想定） -> 次のサイクルへ
+        setChapter2SubStage(1);
+        // 下の次サイクル移行ロジックへ続く
+      }
+    }
+
     if (bossClearRewardPending) {
         const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
         if (availableRewards.length > 0) { setRewardSelectionMode(true); setBossClearRewardPending(false); return; }
     }
     
-    const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-    if (currentStage?.chapter && currentStage.chapter >= 2 && stageMode === 'BOSS') {
-      const data = await loadV2Story(`${currentStage.chapter}-${currentStage.stageInChapter}-clear`);
-      if (data) {
-        setStoryContentV2(data);
-        setShowStoryModal(true);
-      }
+    // 第2章のクリア時演出
+    if (stageInfo?.chapter && stageInfo.chapter >= 2) {
+       // subStage 5 (N-3) クリア時、または大ボスのみの場合のクリア時
+       if (stageMode === 'MID' && chapter2SubStage === 5) {
+          const data = await loadV2Story(`${stageInfo.chapter}-${stageInfo.stageInChapter}-clear`);
+          if (data) {
+            setStoryContentV2(data);
+            setShowStoryModal(true);
+          }
+       } else if (stageMode === 'BOSS' && !stageInfo.chapter /* 第1章などはここ */) {
+          // 第1章などの既存処理
+       }
+    }
+    
+    // 既存のBOSSクリア時の演出（第1章など）
+    if (stageInfo?.chapter && stageInfo.chapter < 2 && stageMode === 'BOSS') {
+       // ...
     }
 
     if (stageMode === 'KENJU' || stageMode === 'DENEI') {
@@ -1920,7 +1590,21 @@ const PLAYER_SKILL_COUNT = 5;
     setStageMode('MID');
     const nextCycle = stageCycle + 1;
     setStageCycle(nextCycle);
+    setChapter2SubStage(1); // 第2章サブステージリセット
     localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
+
+    // 章ごとの進捗も保存
+    const nextStageInfo = STAGE_DATA.find(s => s.no === nextCycle);
+    if (nextStageInfo?.chapter) {
+      const chapterKey = `shiden_chapter${nextStageInfo.chapter}_stage`;
+      localStorage.setItem(chapterKey, nextCycle.toString());
+      setChapterProgress(prev => ({ ...prev, [nextStageInfo.chapter!]: nextCycle }));
+    } else if (nextCycle <= 12) {
+      // 既存のステージ（1-12）は第1章扱いとする場合
+      localStorage.setItem('shiden_chapter1_stage', nextCycle.toString());
+      setChapterProgress(prev => ({ ...prev, 1: nextCycle }));
+    }
+
     setShowBossClearPanel(false);
     handleResetGame();
     setCanGoToBoss(false);
@@ -2166,23 +1850,22 @@ const PLAYER_SKILL_COUNT = 5;
         left: 0,
         width: '100%'
       }}>
-        {showStoryModal && storyContentV2 && (
-          (stageCycle >= 13 || stageCycle === 1 || (isAdmin && showAdmin === false)) ? (
+        {showStoryModal && (storyContentV2 || storyUrl) && (
+          (stageCycle >= 13 || stageCycle === 1 || storyUrl || (isAdmin && showAdmin === false)) ? (
             <StoryCanvas
-              script={storyContentV2}
+              script={storyContentV2 || undefined}
+              scriptUrl={storyUrl || undefined}
               onEnd={() => {
                 setShowStoryModal(false);
+                setStoryUrl(null);
+                setStoryContentV2(null);
                 setGameStarted(false);
+                if (isTitle) setIsTitle(false);
               }}
             />
           ) : (
-            <Kamishibai
-              script={storyContentV2}
-              onEnd={() => {
-                setShowStoryModal(false);
-                setGameStarted(false);
-              }}
-            />
+            // 第1章のテキストストーリーはモーダル（StoryCanvas/Kamishibai）を出さない
+            null
           )
         )}
         {showUpdateNotify && (
@@ -2260,8 +1943,12 @@ const PLAYER_SKILL_COUNT = 5;
           <div className="TitleMenu" style={{
             gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '12px'
           }}>
-            <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
-            <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
+            {!showChapterSelect && (
+              <>
+                <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
+                <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
+              </>
+            )}
             <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
             <button
               className="TitleButton neon-purple"
@@ -2316,6 +2003,97 @@ const PLAYER_SKILL_COUNT = 5;
         <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
           <span>更新履歴</span>
         </div>
+
+        {showChapterSelect && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowChapterSelect(null)} style={{ zIndex: 11000 }}>
+            <div className="ChangelogModal" onClick={(e) => e.stopPropagation()} style={{ 
+              maxWidth: '800px', 
+              width: '90%', 
+              backgroundColor: '#000', 
+              border: '2px solid #4fc3f7',
+              padding: isMobile ? '10px' : '20px'
+            }}>
+              <div className="ChangelogHeader" style={{ background: '#4fc3f7', color: '#000', marginBottom: '20px' }}>
+                <span style={{ fontWeight: 'bold' }}>{showChapterSelect.mode === 'NEW' ? 'NEW GAME - 章選択' : 'CONTINUE - 章選択'}</span>
+                <button onClick={() => setShowChapterSelect(null)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row', 
+                gap: '20px', 
+                justifyContent: 'center',
+                padding: '10px'
+              }}>
+                {/* 第1章 */}
+                <div 
+                  onClick={() => handleChapterSelect(1, showChapterSelect.mode === 'NEW')}
+                  style={{ 
+                    flex: 1,
+                    cursor: 'pointer',
+                    border: '1px solid #4fc3f7',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: '#1a1a1a',
+                    transition: 'transform 0.2s',
+                    position: 'relative'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <img 
+                    src={getStorageUrl('/images/chapter/Chapter1.png')} 
+                    alt="Chapter 1" 
+                    style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
+                  />
+                  <div style={{ padding: '15px', textAlign: 'center' }}>
+                    <div style={{ color: '#4fc3f7', fontSize: '1.2rem', fontWeight: 'bold' }}>第1章 ISLAND</div>
+                    <div style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '5px' }}>
+                      {showChapterSelect.mode === 'NEW' ? '最初から開始' : `現在進行中: Stage ${chapterProgress[1] || 1}`}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 第2章 */}
+                <div 
+                  onClick={() => handleChapterSelect(2, showChapterSelect.mode === 'NEW')}
+                  style={{ 
+                    flex: 1,
+                    cursor: 'pointer',
+                    border: '1px solid #ff5252',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: '#1a1a1a',
+                    transition: 'transform 0.2s',
+                    position: 'relative'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <img 
+                    src={getStorageUrl('/images/chapter/Chapter2.png')} 
+                    alt="Chapter 2" 
+                    style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
+                  />
+                  <div style={{ padding: '15px', textAlign: 'center' }}>
+                    <div style={{ color: '#ff5252', fontSize: '1.2rem', fontWeight: 'bold' }}>第2章 FLAG</div>
+                    <div style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '5px' }}>
+                      {showChapterSelect.mode === 'NEW' ? '最初から開始' : `現在進行中: Stage ${chapterProgress[2] || 1}`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                className="ChangelogCloseButton" 
+                onClick={() => setShowChapterSelect(null)}
+                style={{ marginTop: '20px' }}
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        )}
 
         <div
             className="LifukuTab"
@@ -2473,46 +2251,85 @@ const PLAYER_SKILL_COUNT = 5;
         {isAdmin && showAdmin && (
           <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, maxHeight: '80vh', overflowY: 'auto', width: '90%', maxWidth: '800px' }}>
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '15px' }}>
-              {STAGE_DATA.map(s => (
-                <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                  <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', minWidth: '100px' }}>
-                    {s.chapter ? `${s.chapter}-${s.stageInChapter}` : `Stage ${s.no}`}
-                  </button>
-                  {/* ストーリープレビューボタン */}
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    {s.chapter && (
-                      <>
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}`);
-                          if (data) { 
-                          setStoryContentV2(data); 
-                          setShowAdmin(false); 
-                          setTimeout(() => setShowStoryModal(true), 50);
-                        }
-                        }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start</button>
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-boss`);
-                          if (data) { 
-                          setStoryContentV2(data); 
-                          setShowAdmin(false); 
-                          setTimeout(() => setShowStoryModal(true), 50);
-                        }
-                        }} style={{ fontSize: '10px', background: '#c62828' }}>Boss</button>
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${s.chapter}-${s.stageInChapter}-clear`);
-                          if (data) { 
-                          setStoryContentV2(data); 
-                          setShowAdmin(false); 
-                          setTimeout(() => setShowStoryModal(true), 50);
-                        }
-                        }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear</button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444' }}>
+              <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
+              <button onClick={() => {
+                setStoryUrl('story/v2/opening.txt');
+                setShowAdmin(false);
+                setTimeout(() => setShowStoryModal(true), 50);
+              }} style={{ background: '#4527a0' }}>オープニング (opening.txt)</button>
             </div>
+
+            {/* 第1章 (Stage 1-12) */}
+            <div style={{ marginBottom: '30px' }}>
+              <h3 style={{ color: '#4fc3f7', borderBottom: '2px solid #4fc3f7', paddingBottom: '5px', marginBottom: '10px' }}>第1章 ISLAND</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                {STAGE_DATA.filter(s => s.no <= 12).map(s => (
+                  <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ minWidth: '80px', fontWeight: 'bold', color: '#eee' }}>Stage {s.no}</div>
+                    <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#333', color: '#fff', border: '1px solid #555' }}>
+                      開始
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 第2章 (Stage 13~) */}
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ color: '#ff5252', borderBottom: '2px solid #ff5252', paddingBottom: '5px', marginBottom: '10px' }}>第2章 FLAG (story/v2)</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                {STAGE_DATA.filter(s => s.chapter === 2 && s.stageInChapter && s.stageInChapter <= 12).map(s => {
+                  const n = s.stageInChapter;
+                  return (
+                    <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{s.stageInChapter}</div>
+                      
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#1a237e', border: '1px solid #534bae' }}>
+                          MID
+                        </button>
+                        <button onClick={() => { setStageCycle(s.no); setStageMode('BOSS'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#b71c1c', border: '1px solid #f05545' }}>
+                          BOSS
+                        </button>
+                      </div>
+
+                      <div style={{ width: '1px', height: '20px', background: '#555', margin: '0 5px' }}></div>
+
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${n}-1`);
+                          if (data) { 
+                            setStoryContentV2(data); 
+                            setShowAdmin(false); 
+                            setTimeout(() => setShowStoryModal(true), 50);
+                          }
+                        }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start ({n}-1)</button>
+
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${n}-2`);
+                          if (data) { 
+                            setStoryContentV2(data); 
+                            setShowAdmin(false); 
+                            setTimeout(() => setShowStoryModal(true), 50);
+                          }
+                        }} style={{ fontSize: '10px', background: '#c62828' }}>Boss ({n}-2)</button>
+
+                        <button onClick={async () => {
+                          const data = await loadV2Story(`${n}-3`);
+                          if (data) { 
+                            setStoryContentV2(data); 
+                            setShowAdmin(false); 
+                            setTimeout(() => setShowStoryModal(true), 50);
+                          }
+                        }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear ({n}-3)</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '20px', padding: '10px' }}>閉じる</button>
           </div>
         )}
@@ -2524,322 +2341,95 @@ const PLAYER_SKILL_COUNT = 5;
   }
 
 
-  return (
-    <div className="AppContainer" style={{ display: (isLoungeMode || showEpilogue) ? 'block' : 'flex', height: '100vh', color: '#eee', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
-      {showStoryModal && storyContentV2 && (
-        (stageCycle >= 13 || stageCycle === 1 || (isAdmin && showAdmin === false)) ? (
-          <StoryCanvas
-            script={storyContentV2}
-            onEnd={() => {
-              setShowStoryModal(false);
-              setGameStarted(false);
-            }}
-          />
-        ) : (
-          <Kamishibai
-            script={storyContentV2}
-            onEnd={() => {
-              setShowStoryModal(false);
-              setGameStarted(false);
-            }}
-          />
-        )
-      )}
-      {showEpilogue && (
-        <div className="EpilogueContainer">
-          <div className="EpilogueBackground"></div>
-          <div className="EpilogueStars"></div>
-          <div className="EpilogueContent">
-            <h1 className="EpilogueTitle">エピローグ</h1>
-            <div className="EpilogueText">
-              {(epilogueContent || '').split('\n').map((line, idx) => (
-                <span
-                  key={idx}
-                  className="EpilogueLine"
-                  style={{
-                    animationDelay: `${idx * 1.2}s`,
-                    display: 'block',
-                    width: '100%',
-                    minHeight: line.trim() === '' ? '1.5rem' : 'auto'
-                  }}
-                >
-                  {line}
-                </span>
-              ))}
-            </div>
-            <div style={{
-                opacity: 0,
-                animation: 'epilogueFadeIn 3s forwards',
-                animationDelay: `${((epilogueContent || '').split('\n').length + 2) * 1.2}s`,
-                textAlign: 'center',
-                marginTop: '100px',
-                marginBottom: '100px'
-            }}>
-                <div style={{ fontSize: '3rem', color: '#ffd700', fontFamily: 'serif', letterSpacing: '0.5rem' }}>完</div>
-            </div>
-            <div style={{
-              textAlign: 'center',
-              marginTop: '40px',
-              opacity: 0,
-              animation: 'epilogueFadeIn 2s forwards',
-              animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
-            }}>
-              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); setIsTitle(true); setStageMode('MID'); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
-            </div>
-          </div>
-        </div>
-      )}
-      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative' }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { handleResetGame();　setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
-          <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
-              {stageProcessor.getStageTitle(stageContext)}
-          </h1>
-          <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageProcessor.getStageDescription(stageContext)}</p>
-          <div style={{ position: 'absolute', right: '5px', top: '10px', display: 'flex', gap: '5px', zIndex: 11 }}>
-            <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
-            <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '2px' }} title="設定">⚙️</button>
-          </div>
-        </div>
+  const gameProps: GameProps = {
+    stageCycle,
+    stageMode,
+    setStageMode,
+    gameStarted,
+    setGameStarted,
+    battleResults,
+    setBattleResults,
+    showLogForBattleIndex,
+    setShowLogForBattleIndex,
+    logComplete,
+    setLogComplete,
+    useRichLog,
+    setUseRichLog,
+    stageProcessor,
+    stageContext,
+    isMobile,
+    isLargeScreen,
+    handleResetGame,
+    handleStartGame,
+    handleBattleLogComplete,
+    triggerVictoryConfetti,
+    getStorageUrl,
+    selectedPlayerSkills,
+    setSelectedPlayerSkills,
+    availablePlayerCards,
+    ownedSkillAbbrs,
+    setOwnedSkillAbbrs,
+    storyContent,
+    storyContentV2,
+    setStoryContentV2,
+    setShowStoryModal,
+    showStoryModal,
+    canGoToBoss,
+    setCanGoToBoss,
+    showBossClearPanel,
+    setShowBossClearPanel,
+    rewardSelectionMode,
+    setRewardSelectionMode,
+    selectedRewards,
+    setSelectedRewards,
+    handleRewardSelection,
+    confirmRewards,
+    clearBossAndNextCycle,
+    goToBossStage,
+    iconMode,
+    panelRef,
+    mainGameAreaRef,
+    connections,
+    dimmedIndices,
+    lineCoords,
+    kenjuBoss,
+    currentKenjuBattle,
+    setKenjuBoss,
+    setIsTitle,
+    setShowRule,
+    setShowSettings,
+    getSkillCardsFromAbbrs,
+    getSkillByAbbr,
+    handleSelectedSkillClick,
+    handlePlayerSkillSelectionClick,
+    winRateDisplay,
+    stage11TrialActive,
+    stageVictorySkills,
+    PLAYER_SKILL_COUNT,
+    ALL_SKILLS,
+    user,
+    myProfile,
+    isLoungeMode,
+    showEpilogue,
+    isAdmin,
+    showAdmin,
+    chapter2SubStage,
+    setChapter2SubStage
+  };
 
-        <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
-          <div style={{
-            width: '100%',
-            height: stageProcessor.getBossImage(stageContext) ? '300px' : '240px',
-            backgroundImage: `url(${(stageMode === 'KENJU' || stageMode === 'DENEI' ? getStorageUrl(currentKenjuBattle?.background || '') : (stageProcessor.getBackgroundImage(stageContext)) || '')})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            borderRadius: '10px',
-            border: `2px solid ${(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#ff5252' : '#4fc3f7'}`,
-            boxSizing: 'border-box',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {stageProcessor.getBossImage(stageContext) && (!gameStarted || (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) && (
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: (stageCycle === 8 || stageCycle === 12) ? 'flex-start' : 'flex-end', zIndex: 1, overflow: stageCycle === 4 ? 'visible' : 'hidden' }}>
-                <img
-                  src={stageProcessor.getBossImage(stageContext) || ""}
-                  alt=""
-                  className="boss-battle-image"
-                  style={{
-                      ...stageProcessor.getBossImageStyle(stageContext, isMobile, 'back')
-                  }}
-                />
-              </div>
-            )}
-            {!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
-              <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
-                  <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
-                      {stageProcessor.getEnemyTitle?.({ ...stageContext, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
-                  </h2>
-                  <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : ((stageMode === 'DENEI' || stageMode === 'KENJU' && kenjuBoss) || stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
-                    {stageProcessor.getEnemySkills(0, stageContext).length > 0 ? (
-                      stageProcessor.getEnemySkills(0, stageContext).map((skill, index) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={false} /></div>)
-                    ) : (
-                      <div style={{ color: '#ff5252', padding: '20px' }}>スキル未設定</div>
-                    )}
-                  </div>
-              </div>
-            )}
-          </div>
+  if (!stagesLoaded) {
+    return <div style={{ backgroundColor: '#000', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Loading...</div>;
+  }
 
-          {selectedPlayerSkills.length > 0 && (
-            <div className="SelectedSkillsPanel" ref={panelRef} style={{ position: (stageMode === 'MID' || (!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI'))) ? 'absolute' : 'relative', bottom: 0, left: 0, width: '100%', padding: '15px', background: (stageMode === 'MID' || !gameStarted) ? 'rgba(0, 0, 0, 0.5)' : '#121212', borderRadius: '10px', boxSizing: 'border-box', zIndex: 5, backdropFilter: (stageMode === 'MID' || !gameStarted) ? 'blur(5px)' : 'none' }}>
-              <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                {lineCoords.map((coord, idx) => <line key={idx} x1={coord.x1} y1={coord.y1} x2={coord.x2} y2={coord.y2} stroke="#ffeb3b" strokeWidth="4" />)}
-              </svg>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>{getSkillCardsFromAbbrs(selectedPlayerSkills).map((skill, index) => <SkillCard key={index} id={`selected-skill-${index}`} skill={skill} isSelected={true} isConnected={connections.some(c => c.fromId === `selected-skill-${index}` || c.toId === `selected-skill-${index}`)} isDimmed={dimmedIndices.includes(index)} onClick={gameStarted ? undefined : handleSelectedSkillClick} iconMode={iconMode} />)}</div>
-            </div>
-          )}
-        </div>
+  // Determine which chapter component to render
+  const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+  const isChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || stageCycle >= 13;
 
-        {(!gameStarted && stageVictorySkills[`${stageMode}_${stageCycle}`]?.length > 0) && (
-          <div className="BossSkillPreview" style={{ marginBottom: '20px', width: '100%', maxWidth: '800px', padding: '10px 20px', border: `2px solid ${(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#ff5252' : '#4fc3f7'}`, borderRadius: '10px', background: (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#2c0a0a' : '#0a1a2c', boxSizing: 'border-box' }}>
-            <h3 style={{ color: '#ffd700', textAlign: 'center', margin: '5px 0px 10px 0px', fontSize: '1rem' }}>戦いの記憶</h3>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>{getSkillCardsFromAbbrs(stageVictorySkills[`${stageMode}_${stageCycle}`]).map((skill, idx) => <img key={idx} src={getStorageUrl(skill.icon)} alt="" style={{ width: '30px', border: '1px solid #ffd700', borderRadius: '4px' }} />)}</div>
-          </div>
-        )}
-        {!gameStarted && (
-          <div style={{ width: '100%', maxWidth: '800px' }}>
-            {selectedPlayerSkills.length === PLAYER_SKILL_COUNT && (
-              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                <button onClick={handleStartGame} style={{ padding: '10px 60px', fontSize: '20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 0 15px rgba(40, 167, 69, 0.5)', fontWeight: 'bold' }}>戦闘開始</button>
-              </div>
-            )}
-            <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>
-              <h2 style={{ padding: '10px', color: '#4fc3f7' }}>所持スキルから編成してください</h2>
-              <div className="skill-card-grid">{(stageMode === 'KENJU' || stageMode === 'DENEI' ? ALL_SKILLS.filter(s => s.name !== "空白") : availablePlayerCards).map(skill => <SkillCard key={skill.abbr} skill={skill} isSelected={selectedPlayerSkills.includes(skill.abbr)} onClick={handlePlayerSkillSelectionClick} iconMode={iconMode} />)}</div>
-            </div>
-          </div>
-        )}
-        {gameStarted && (logComplete || stageMode === 'MID') && (
-          <div className="ResultsOverview" style={{ marginTop: '0px', width: '100%', maxWidth: '800px' }}>
-            {stageCycle === 11 && stageMode === 'MID' && winRateDisplay !== null && (
-              <div style={{ textAlign: 'center', marginBottom: '20px', padding: '30px', background: '#000', border: '3px solid #ff5252', borderRadius: '15px', boxShadow: '0 0 20px rgba(255,82,82,0.5)' }}>
-                <h2 style={{ color: '#aaa', margin: '0 0 10px 0', fontSize: '1rem' }}>WIN RATE</h2>
-                <div style={{ fontSize: '5rem', fontWeight: 'bold', color: winRateDisplay >= 80 ? '#66bb6a' : '#ff5252', textShadow: `0 0 15px ${winRateDisplay >= 80 ? '#66bb6a' : '#ff5252'}`, fontFamily: 'monospace' }}>
-                  {winRateDisplay}%
-                </div>
-                {!stage11TrialActive && (
-                  <div style={{ marginTop: '10px', fontSize: '1.5rem', fontWeight: 'bold', color: winRateDisplay >= 80 ? '#66bb6a' : '#ff5252' }}>
-                    {winRateDisplay >= 80 ? 'SUCCESS - TARGET REACHED' : 'FAILED - 80% REQUIRED'}
-                  </div>
-                )}
-              </div>
-            )}
-            {rewardSelectionMode && (
-              <div className="RewardSelection" style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '10px' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{(stageCycle === 11 && stageMode === 'MID' && canGoToBoss) ? '関門を突破！！' : battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}<br />スキルを1つ選んでください</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>{getAvailableSkillsUntilStage(stageCycle).map(skill => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}</div>
-                <button disabled={selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>スキルを獲得する</button>
-                <div style={{ marginTop: '15px' }}><button onClick={() => { setSelectedRewards([]); setRewardSelectionMode(false); if (stageMode === 'BOSS' && battleResults[0]?.winner === 1) clearBossAndNextCycle(); }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button></div>
-              </div>
-            )}
-            {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
-              <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
-                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{ (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</>)}</h2>
-                <button onClick={() => {
-                  if (stageMode === 'MID') {
-                    const nextStage = STAGE_DATA.find(s => s.no === stageCycle);
-                    if (nextStage?.chapter && nextStage.chapter >= 2) {
-                      // 第2章の中間ステージクリア後は、ボス戦をスキップして（というかMID=BOSSなので）次のステージへ
-                      clearBossAndNextCycle();
-                    } else {
-                      goToBossStage();
-                    }
-                  } else {
-                    clearBossAndNextCycle();
-                  }
-                }} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
-                  {(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? (STAGE_DATA.find(s => s.no === stageCycle)?.chapter ? '次のステージへ進む' : 'ボスステージへ進む') : '次のステージへ進む')}
-                </button>
-              </div>
-            )}
-            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel &&
-              ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? (battleResults[0]?.winner === 2 && logComplete) :
-               (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss))) && (
-              <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-                {!stage11TrialActive && (
-                  <>
-                    <div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every(r => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div>
-                    <button onClick={handleResetGame} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>再挑戦</button>
-                  </>
-                )}
-              </div>
-            )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle, index) => <div key={index} onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.winner === 1 ? '#66bb6a' : '#ef5350' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((s, si) => <img key={si} src={getStorageUrl(s.icon)} alt="" style={{ width: '30px', height: '30px' }} />)}</div></div>)}</div>
-          </div>
-        )}
-      </div>
-      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'auto', borderLeft: '1px solid #333', visibility: isLoungeMode ? 'hidden' : 'visible', display: isLoungeMode ? 'none' : 'flex', flexDirection: 'column' }}>
-        <h2 style={{ color: '#61dafb' }}>
-            {storyContent && !gameStarted ? 'ストーリー' :
-             ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || stageMode === 'DELETE_ACCOUNT') && !logComplete ? 'BOSS' : 'ゲームログ')}
-        </h2>
-        {(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-            <button
-              onClick={() => setUseRichLog(!useRichLog)}
-              style={{
-                padding: '5px 10px',
-                fontSize: '0.7rem',
-                backgroundColor: useRichLog ? '#2e7d32' : '#333',
-                color: '#fff',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              {useRichLog ? 'アニメーション表示中' : 'テキスト表示中'}
-            </button>
-          </div>
-        )}
-        {showLogForBattleIndex !== -1 && battleResults[showLogForBattleIndex] ? (
-          ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')  && useRichLog) ? <AnimatedRichLog
-            log={battleResults[showLogForBattleIndex].gameLog}
-            onComplete={() => {
-              //setLogComplete(true);
-              handleBattleLogComplete();
-              // ボス戦または剣獣戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
-              const winCount = battleResults.filter(r => r.winner === 1).length;
-              const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? winCount >= 1 : winCount === 10;
-              if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) {
-                  triggerVictoryConfetti();
-                  if (stageMode === 'BOSS') {
-                      setShowBossClearPanel(true);
-                      // Stage12のボス勝利で「クリアしたよ！」の称号
-                      if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
-                          const profileRef = ref(database, `profiles/${user.uid}/`);
-                          const newMedals = [...(myProfile.medals || []), 'master'];
-                          set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                      }
-                  } else if (stageMode === 'DENEI') {
-                      setShowBossClearPanel(true);
-                  }
-
-                  if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
-                      const targetBossName = kenjuBoss.name;
-                      const kenjuConfig = KENJU_DATA.find(k => k.name === targetBossName);
-                      if (kenjuConfig && (kenjuConfig as any).medalId) {
-                          const medalId = (kenjuConfig as any).medalId;
-                          if (!(myProfile.medals || []).includes(medalId)) {
-                              const profileRef = ref(database, `profiles/${user.uid}/`);
-                              const newMedals = [...(myProfile.medals || []), medalId];
-                              set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                              console.log(`[Medal] Awarded ${medalId} for defeating ${targetBossName}`);
-                          }
-                      }
-                  }
-              }
-            }}
-            bossImage={(() => {
-              const bossImage = stageProcessor.getBossImage(stageContext);
-              return bossImage || "";
-            })()}
-            bossName={stageProcessor.getEnemyName(0, stageContext)}
-            battleInstance={battleResults[showLogForBattleIndex].battleInstance}
-            key={`animated-log-${showLogForBattleIndex}-${battleResults[showLogForBattleIndex].gameLog.length}`}
-            battleStageCycle={(stageMode === 'KENJU' || stageMode === 'DENEI') ? 11 : stageCycle}
-            processor={stageProcessor}
-            stageMode={stageMode}
-            stageContext={stageContext}
-            getStorageUrl={getStorageUrl}
-          /> : <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}><pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{battleResults[showLogForBattleIndex].gameLog}</pre>{(['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !logComplete && <button onClick={handleBattleLogComplete} style={{ marginTop: '10px', padding: '5px 15px', backgroundColor: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>結果を確認</button>}</div>
-        ) :
-        
-        ((storyContent || (storyContentV2 && !STAGE_DATA.find(s => s.no === stageCycle)?.chapter)) && !gameStarted ?
-        
-        <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
-          {storyContent && <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'serif' }}>{storyContent}</pre>}
-          </div> :
-          ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ?
-           <div style={{ textAlign: 'center' }}>
-            <img src={(() => {
-              const bossImage = stageProcessor.getBossImage(stageContext);
-              return bossImage || "";
-            })()} alt="" style={stageProcessor.getBossImageStyle(stageContext, isMobile, 'sidebar')} />
-            <h3>{stageProcessor.getEnemyName(0, stageContext)}</h3>
-            <p>{stageProcessor.getBossDescription(stageContext)}</p></div> : "ログがありません。"))}
-      </div>
-      {showRule && <Rule onClose={() => setShowRule(false)} />}
-      {showSettings && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ backgroundColor: '#1a1a1a', border: '2px solid #fff', padding: '30px', borderRadius: '10px', width: '400px', maxWidth: '90%', textAlign: 'center' }}>
-            <h2 style={{ padding: '0px', color: '#4fc3f7' }}>設定</h2>
-            <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
-              <h3 style={{ textAlign: 'left', color: '#4fc3f7', marginBottom: '20px' }}>アイコン</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button onClick={() => setIconMode('ORIGINAL')} style={{ padding: '10px', background: iconMode === 'ORIGINAL' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>通常アイコン</button>
-                <button onClick={() => setIconMode('ABBR')} style={{ padding: '10px', background: iconMode === 'ABBR' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>スキルの略字</button>
-                <button onClick={() => setIconMode('PHONE')} style={{ padding: '10px', background: iconMode === 'PHONE' ? '#4fc3f7' : '#333', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>電話番号風</button>
-              </div>
-            </div>
-            <button onClick={() => setShowSettings(false)} style={{ padding: '10px 30px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>閉じる</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  if (isChapter2) {
+      return <GameChapter2 {...gameProps} />;
+  } else {
+      return <GameChapter1 {...gameProps} />;
+  }
 }
 
 

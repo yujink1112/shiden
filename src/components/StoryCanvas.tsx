@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StoryScript } from '../types/story';
 import { getStorageUrl } from '../firebase';
+import { parseStoryText, StoryAssets } from '../types/storyParser';
 
 interface StoryCanvasProps {
-  script: StoryScript;
+  script?: StoryScript; // 以前の互換性のために残す
+  scriptUrl?: string; // 新しいURL指定
   onEnd: () => void;
 }
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, onEnd }) => {
+  const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -17,18 +20,19 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
   const imagesRef = useRef<{ [key: string]: HTMLImageElement }>({});
   const activeCharactersRef = useRef<{ [key: string]: { img: HTMLImageElement; focus: boolean; position: string; opacity: number } }>({});
   const currentBackgroundRef = useRef<HTMLImageElement | null>(null);
+  const currentStillRef = useRef<HTMLImageElement | null>(null); // スチル画像用
   const bgOpacityRef = useRef(0);
   
   const [isLoaded, setIsLoaded] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
+  const [shakeAmount, setShakeAmount] = useState(0); // 画面揺れ用
   const endingAlphaRef = useRef(1);
   const waitAfterEndingTimerRef = useRef<number | null>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastProcessedIndexRef = useRef<number>(-1); // インデックス変更検知用
+  const lastProcessedIndexRef = useRef<number>(-1);
 
   const currentEntry = script[currentEntryIndex];
 
-  // 設定定数 (PC/スマホ別)
   const CONFIG = {
     PC: {
       boxHeight: 180,
@@ -41,69 +45,102 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
       lineSpacing: 1.6
     },
     MOBILE: {
-      boxHeight: 150,
+      boxHeight: 180, // 4行分確保するために高さを調整
       fontSize: 18,
       nameFontSize: 19,
       margin: 10,
       paddingX: 15,
       paddingY: 15,
       charScale: 0.75,
-      lineSpacing: 1.5
+      lineSpacing: 1.4 // 行間を少し詰めて4行入りやすくする
     }
   };
 
-  // 画像のプリロード
+  // スクリプトとアセットの読み込み
   useEffect(() => {
-    const loadAllImages = async () => {
-      const imageUrls = new Set<string>();
-      for (const entry of script) {
-        if (entry.background) imageUrls.add(entry.background);
-        if (entry.characterImage) imageUrls.add(entry.characterImage);
-        if (entry.icon) imageUrls.add(entry.icon);
-      }
+    const loadScriptAndAssets = async () => {
+      try {
+        let finalScript = initialScript;
 
-      const loadPromises = Array.from(imageUrls).map(async (key) => {
-        if (imagesRef.current[key]) return;
+        if (scriptUrl) {
+          // アセット設定の読み込み
+          const assetsResponse = await fetch('/data/story_assets.json');
+          const assets: StoryAssets = await assetsResponse.json();
 
-        const tryLoad = (u: string) => {
-          return new Promise<boolean>((resolve) => {
-            const img = new Image();
-            img.src = u;
-            img.onload = () => {
-              imagesRef.current[key] = img;
-              resolve(true);
-            };
-            img.onerror = () => resolve(false);
-          });
-        };
+          // スクリプトの読み込み
+          const scriptResponse = await fetch(scriptUrl);
+          const scriptText = await scriptResponse.text();
 
-        let url = key;
-        if (!key.startsWith("/") && !key.startsWith("http")) {
-          let storagePath = key;
-          if (!key.startsWith("images/")) {
-            storagePath = `images/character/${key}`;
-          }
-
-          if (!storagePath.includes(".")) {
-            const success = await tryLoad(getStorageUrl(storagePath + ".png"));
-            if (success) return;
-            const successJpg = await tryLoad(getStorageUrl(storagePath + ".jpg"));
-            if (successJpg) return;
-            await tryLoad(getStorageUrl(storagePath + ".gif"));
+          if (scriptUrl.endsWith('.json')) {
+            finalScript = JSON.parse(scriptText);
           } else {
-            await tryLoad(getStorageUrl(storagePath));
+            finalScript = parseStoryText(scriptText, assets);
           }
-        } else {
-          await tryLoad(key);
         }
-      });
 
-      await Promise.all(loadPromises);
-      setIsLoaded(true);
+        if (!finalScript) return;
+        setScript(finalScript);
+        
+        // 画像のプリロード
+        const imageUrls = new Set<string>();
+        for (const entry of finalScript) {
+          if (entry.background) imageUrls.add(entry.background);
+          if (entry.characterImage) imageUrls.add(entry.characterImage);
+          if (entry.icon) imageUrls.add(entry.icon);
+          if (entry.still) imageUrls.add(entry.still); // スチルのプリロード追加
+        }
+
+        const loadPromises = Array.from(imageUrls).map(async (key) => {
+          if (imagesRef.current[key]) return;
+
+          const tryLoad = (u: string) => {
+            return new Promise<boolean>((resolve) => {
+              const img = new Image();
+              img.src = u;
+              img.onload = () => {
+                imagesRef.current[key] = img;
+                resolve(true);
+              };
+              img.onerror = () => resolve(false);
+            });
+          };
+
+          let url = key;
+          if (!key.startsWith("/") && !key.startsWith("http")) {
+            let storagePath = key;
+            if (!key.startsWith("images/")) {
+              storagePath = `images/character/${key}`;
+            }
+
+            // すでに拡張子が含まれている場合は直接読み込む
+            if (storagePath.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+              await tryLoad(getStorageUrl(storagePath));
+              return;
+            }
+
+            if (!storagePath.includes(".")) {
+              const success = await tryLoad(getStorageUrl(storagePath + ".png"));
+              if (success) return;
+              const successJpg = await tryLoad(getStorageUrl(storagePath + ".jpg"));
+              if (successJpg) return;
+              await tryLoad(getStorageUrl(storagePath + ".gif"));
+            } else {
+              await tryLoad(getStorageUrl(storagePath));
+            }
+          } else {
+            await tryLoad(key);
+          }
+        });
+
+        await Promise.all(loadPromises);
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Failed to load story script:", error);
+      }
     };
 
-    loadAllImages();
-  }, [script]);
+    loadScriptAndAssets();
+  }, [scriptUrl, initialScript]);
 
   // シーン管理
   useEffect(() => {
@@ -113,7 +150,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         clearInterval(typingIntervalRef.current);
     }
 
-    // エントリが変わった瞬間にテキストをリセット (State)
     setDisplayedText('');
     lastProcessedIndexRef.current = currentEntryIndex;
 
@@ -123,7 +159,39 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         currentBackgroundRef.current = newBg;
         bgOpacityRef.current = 0;
         activeCharactersRef.current = {};
+        currentStillRef.current = null; // 背景が変わったらスチル解除
       }
+    }
+
+    // スチル表示処理
+    if (currentEntry.still) {
+        if (currentEntry.still === "none") {
+            currentStillRef.current = null;
+        } else if (imagesRef.current[currentEntry.still]) {
+            currentStillRef.current = imagesRef.current[currentEntry.still];
+        }
+        
+        // スチルの場合は自動で次へ
+        setTimeout(() => {
+          if (currentEntryIndex < script.length - 1) {
+            setCurrentEntryIndex(prev => prev + 1);
+          }
+        }, 50); 
+        setDisplayedText("");
+        setIsTyping(false);
+    }
+
+    if (currentEntry.type === "effect" && currentEntry.animation === "shake") {
+        setShakeAmount(15);
+        setTimeout(() => setShakeAmount(0), 500);
+        // エフェクトの時は、少し待ってから自動で次へ
+        setTimeout(() => {
+          if (currentEntryIndex < script.length - 1) {
+            setCurrentEntryIndex(prev => prev + 1);
+          }
+        }, 600);
+        setDisplayedText("");
+        setIsTyping(false);
     }
 
     const setFocus = (targetPos: string) => {
@@ -147,8 +215,9 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         setFocus(pos);
       }
     } else if (currentEntry.type === "dialogue") {
-        if (currentEntry.icon) {
-            const img = imagesRef.current[currentEntry.icon];
+        const targetIcon = currentEntry.icon || currentEntry.characterImage;
+        if (targetIcon) {
+            const img = imagesRef.current[targetIcon];
             if (img) {
                 const targetPos = currentEntry.position || "center";
                 if (!activeCharactersRef.current[targetPos] || activeCharactersRef.current[targetPos].img !== img) {
@@ -162,9 +231,21 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
                 setFocus(targetPos);
             }
         }
+    } else if (currentEntry.type === "clearCharacter" && currentEntry.position) {
+        if (activeCharactersRef.current[currentEntry.position]) {
+            delete activeCharactersRef.current[currentEntry.position];
+        }
+        
+        // 自動で次へ
+        setTimeout(() => {
+          if (currentEntryIndex < script.length - 1) {
+            setCurrentEntryIndex(prev => prev + 1);
+          }
+        }, 50); 
+        setDisplayedText("");
+        setIsTyping(false);
     }
 
-    // テキストタイピング
     if (currentEntry.text) {
       setIsTyping(true);
       let i = 0;
@@ -202,7 +283,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
       const isMobileMode = (width / dpr) < 800;
       const conf = isMobileMode ? CONFIG.MOBILE : CONFIG.PC;
 
-      // 終了フェードアウト
       if (isEnding) {
         if (endingAlphaRef.current > 0) {
           endingAlphaRef.current -= 0.015;
@@ -218,10 +298,17 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         }
       }
 
-      // 1. 背景描画 (クリア)
       ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, width, height);
+
+      // 画面揺れの適用
+      ctx.save();
+      if (shakeAmount > 0) {
+        const sx = (Math.random() - 0.5) * shakeAmount * dpr;
+        const sy = (Math.random() - 0.5) * shakeAmount * dpr;
+        ctx.translate(sx, sy);
+      }
 
       if (bgOpacityRef.current < 1) {
         bgOpacityRef.current += 0.03;
@@ -242,8 +329,48 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         ctx.restore();
       }
 
-      // 2. キャラクター描画
-      Object.values(activeCharactersRef.current).forEach(char => {
+      // 1.5 スチル描画 (背景の上に重ねる)
+      if (currentStillRef.current) {
+        const stillImg = currentStillRef.current;
+        // スマホ版では幅400px、通常は800px。高さは4:3を維持
+        const baseW = isMobileMode ? 300 : 600;
+        const baseH = isMobileMode ? 200 : 400;
+        const stillW = baseW * dpr;
+        const stillH = baseH * dpr;
+        const x = (width - stillW) / 2;
+        // セリフ枠との重なりを避けるため、少し上に配置
+        const y = (height - stillH) / 2 - (isMobileMode ? 40 : 60) * dpr;
+        
+        ctx.save();
+        ctx.globalAlpha = bgOpacityRef.current;
+        
+        // 枠の描画
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 4 * dpr;
+        ctx.strokeRect(x - 2 * dpr, y - 2 * dpr, stillW + 4 * dpr, stillH + 4 * dpr);
+
+        // スチル本体（アスペクト比を維持しつつ指定サイズ内に収める）
+        const imgScale = Math.min(stillW / stillImg.width, stillH / stillImg.height);
+        const drawW = stillImg.width * imgScale;
+        const drawH = stillImg.height * imgScale;
+        const drawX = x + (stillW - drawW) / 2;
+        const drawY = y + (stillH - drawH) / 2;
+
+        // 黒い背景で塗りつぶしてから描画
+        ctx.fillStyle = '#000';
+        ctx.fillRect(x, y, stillW, stillH);
+        ctx.drawImage(stillImg, drawX, drawY, drawW, drawH);
+        
+        ctx.restore();
+      }
+
+      Object.values(activeCharactersRef.current)
+        .sort((a, b) => {
+            if (a.focus && !b.focus) return 1;
+            if (!a.focus && b.focus) return -1;
+            return 0;
+        })
+        .forEach(char => {
         if (char.opacity < 1) {
             char.opacity += 0.05;
             if (char.opacity > 1) char.opacity = 1;
@@ -273,7 +400,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         ctx.restore();
       });
 
-      // 3. テキストボックス
       const margin = conf.margin * dpr;
       const boxHeight = conf.boxHeight * dpr;
       const boxY = height - boxHeight - margin;
@@ -295,7 +421,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
       ctx.stroke();
       ctx.restore();
 
-      // 4. 名前
       const paddingX = conf.paddingX * dpr;
       const paddingY = conf.paddingY * dpr;
       ctx.textBaseline = 'top';
@@ -307,17 +432,14 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
         ctx.fillText(currentEntry.name, margin + paddingX, boxY + paddingY);
       }
 
-      // 5. テキスト
       const textFontSize = conf.fontSize * dpr;
       ctx.fillStyle = '#fff';
       ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
       const textX = margin + paddingX;
-      const nameOffset = currentEntry?.name ? (isMobileMode ? 35 : 48) * dpr : 0;
+      const nameOffset = currentEntry?.name ? (isMobileMode ? 30 : 48) * dpr : 0;
       const textY = boxY + paddingY + nameOffset;
       const maxWidth = boxW - paddingX * 2;
       
-      // バグ対策: 現在処理中のインデックスと描画ループが一致している場合のみテキストを描画
-      // かつ、displayedText が空文字でなければ描画
       if (lastProcessedIndexRef.current === currentEntryIndex && displayedText) {
           const lines = wrapText(ctx, displayedText, maxWidth);
           
@@ -335,7 +457,8 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
           ctx.restore();
       }
 
-      // 6. 終了フェードアウト用の黒ベタ被せ
+      ctx.restore(); // 画面揺れ ctx.save() の対
+
       if (isEnding) {
           ctx.save();
           ctx.globalAlpha = 1 - endingAlphaRef.current;
@@ -352,7 +475,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLoaded, currentEntryIndex, displayedText, isEnding, CONFIG.PC, CONFIG.MOBILE]);
+  }, [isLoaded, currentEntryIndex, displayedText, isEnding, shakeAmount, CONFIG.PC, CONFIG.MOBILE]);
 
   const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
     if (!text) return [];
@@ -385,7 +508,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
       setDisplayedText(currentEntry.text || '');
       setIsTyping(false);
     } else if (currentEntryIndex < script.length - 1) {
-      // 次へ行く前にテキストをリセット (同期性を高めるため)
       setDisplayedText('');
       setCurrentEntryIndex((prev) => prev + 1);
     } else {
@@ -443,7 +565,9 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
           boxShadow: '0 0 30px rgba(0,0,0,0.5)',
           cursor: 'pointer',
           overflow: 'hidden',
-          border: '2px solid #444'
+          border: '2px solid #444',
+          WebkitTapHighlightColor: 'transparent',
+          userSelect: 'none'
         }}
       >
         <canvas
@@ -455,6 +579,35 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script, onEnd }) => {
             imageRendering: 'crisp-edges'
           }}
         />
+        {isLoaded && !isEnding && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm('ストーリーをスキップしますか？')) {
+                setIsEnding(true);
+              }
+            }}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              padding: '8px 16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              zIndex: 10000,
+              transition: 'background-color 0.2s',
+              fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+          >
+            SKIP
+          </button>
+        )}
         {!isLoaded && (
           <div style={{
             position: 'absolute',

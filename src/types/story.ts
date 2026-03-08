@@ -1,5 +1,5 @@
 export interface StoryEntry {
-  type: "monologue" | "dialogue" | "direction" | "background" | "character" | "effect";
+  type: "monologue" | "dialogue" | "direction" | "background" | "character" | "effect" | "clearCharacter";
   text?: string; // モノローグ、会話、演出指示などで使用
   name?: string; // 会話のキャラクター名
   icon?: string; // 会話のキャラクターアイコン (画像ファイル名)
@@ -10,6 +10,8 @@ export interface StoryEntry {
   background?: string; // 背景画像ファイル名 (backgroundタイプで使用)
   bgm?: string; // BGMファイル名 (effectタイプで使用)
   soundEffect?: string; // 効果音ファイル名 (effectタイプで使用)
+  animation?: string; // アニメーション名
+  still?: string; // スチル画像ファイル名
 }
 
 export type StoryScript = StoryEntry[];

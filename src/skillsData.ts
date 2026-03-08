@@ -32,6 +32,52 @@ export const ALL_SKILLS = [
   { abbr: "連", name: "連撃", kana:"れんげき", icon: "/images/skill/d11.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。" },
   { abbr: "燐", name: "燐光", kana:"りんこう", icon: "/images/skill/d12.gif", type: "付帯", speed: "なし", description: "各ラウンドの開始フェイズに効果を発揮する。あなたが受けている悪い状態を全て解除する。" },
   { abbr: "空", name: "空白", kana:"くうはく", icon: "/images/skill/d13.gif", type: "付帯", speed: "なし", description: "何の効果も持たない。" },
+  // 新規追加
+  // 攻撃スキル
+  { abbr: "瘴", name: "瘴気", kana:"しょうき", icon: "/images/skill/a11.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。相手に状態「中毒」を与える。" },
+  { abbr: "鉄", name: "鉄拳", kana:"てっけん", icon: "/images/skill/a12.gif", type: "攻撃", speed: "3", description: "相手に2点のダメージを与える。" },
+  { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/a13.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。" },
+  { abbr: "審", name: "審判", kana:"しんぱん", icon: "/images/skill/a14.gif", type: "攻撃", speed: "LV", description: "相手にLV点のダメージを与える。相手のスキルをランダムで1つ破壊する。" },
+  { abbr: "艦", name: "艦砲", kana:"かんぽう", icon: "/images/skill/a15.gif", type: "攻撃（リミテッド）", speed: "1", description: "相手に3点のダメージを与える。" },
+  { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/a16.gif", type: "攻撃", speed: "LV", description: "相手に1点のダメージを与える。相手の生存スキルが1つだけなら、そのスキルを破壊する。" },
+
+  // 補助スキル
+  { abbr: "蟲", name: "蟲毒", kana:"こどく", icon: "/images/skill/b05.gif", type: "補助", speed: "LV", description: "相手に状態「中毒」を与える。" },
+  { abbr: "医", name: "医術", kana:"いじゅつ", icon: "/images/skill/b06.gif", type: "補助", speed: "LV", description: "あなたが受けている悪い状態を1つ解除する。" },
+  { abbr: "魚", name: "魚群", kana:"ぎょぐん", icon: "/images/skill/b07.gif", type: "補助", speed: "LV", description: "相手に1点のダメージを与える。このダメージに対して迎撃スキルは発動しない。" },
+  { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/b08.gif", type: "補助", speed: "LV", description: "相手に状態「火傷」を与える。" },
+  { abbr: "協", name: "協奏", kana:"きょうそう", icon: "/images/skill/b09.gif", type: "補助", speed: "LV", description: "あなたが次に使用するスキルのLVは+1として扱われる。" },
+  { abbr: "盗", name: "盗賊", kana:"とうぞく", icon: "/images/skill/b10.gif", type: "補助", speed: "LV", description: "相手の先頭のスキルを1つ奪い、自分の最後尾に追加する（最大5つまで）。奪えない場合は1点ダメージ。" },
+
+  // 迎撃スキル
+  { abbr: "幻", name: "幻惑", kana:"げんわく", icon: "/images/skill/c07.gif", type: "迎撃", speed: "LV", description: "相手の攻撃スキルの対象をランダムに変更する。" },
+  { abbr: "水", name: "水幕", kana:"すいまく", icon: "/images/skill/c08.gif", type: "迎撃", speed: "LV+1", description: "ダメージを無効化する。" },
+  { abbr: "転", name: "転回", kana:"てんかい", icon: "/images/skill/c09.gif", type: "迎撃", speed: "LV", description: "受けたダメージをそのまま相手に与え返す。" },
+  { abbr: "罠", name: "罠師", kana:"わなし", icon: "/images/skill/c10.gif", type: "迎撃", speed: "1", description: "相手に状態「スタン」を与える。" },
+  { abbr: "受", name: "受難", kana:"じゅなん", icon: "/images/skill/c11.gif", type: "迎撃", speed: "LV", description: "相手にLV点のダメージを与える。" },
+
+  // 付帯スキル
+  { abbr: "飛", name: "飛行", kana:"ひこう", icon: "/images/skill/d14.gif", type: "付帯", speed: "なし", description: "このスキルへのダメージを50%の確率で回避する。" },
+  { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/d15.gif", type: "付帯", speed: "なし", description: "このスキルが破壊された時、復活する（1回のみ）。" },
+  { abbr: "礁", name: "座礁", kana:"ざしょう", icon: "/images/skill/d16.gif", type: "付帯", speed: "なし", description: "相手の速度を-1する。" },
+  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/d17.gif", type: "付帯", speed: "なし", description: "物理攻撃（剣、鉄など）によるダメージを受けない。" },
+  { abbr: "翔", name: "＋翔", kana:"プラスしょう", icon: "/images/skill/d18.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルの速度は常に+2される。" },
+  { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/d19.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルは、相手の後列のスキルを優先して狙う。" },
+
+  // 神業スキル
+  { abbr: "狼", name: "狼嵐", kana:"ろうらん", icon: "/images/skill/s01.gif", type: "神業", speed: "LV", description: "相手に3点のダメージを与える。相手に状態「狼狽」を与える。" },
+  { abbr: "解", name: "▽解", kana:"かい", icon: "/images/skill/s02.gif", type: "神業", speed: "LV", description: "相手の全ての付帯スキルの効果を無効にする。" },
+  { abbr: "爆", name: "爆砕", kana:"ばくさい", icon: "/images/skill/s03.gif", type: "神業", speed: "1", description: "敵味方全員に3点のダメージを与える。" },
+  { abbr: "魔", name: "魔弾", kana:"まだん", icon: "/images/skill/s04.gif", type: "神業", speed: "LV", description: "相手にX点のダメージを与える。Xはあなたの残りスキル数。" },
+
+  // 敵専用スキル
+  { abbr: "傲", name: "傲慢", kana:"ごうまん", icon: "/images/skill/e01.gif", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。" },
+  { abbr: "欲", name: "強欲", kana:"ごうよく", icon: "/images/skill/e02.gif", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。" },
+  { abbr: "嫉", name: "嫉妬", kana:"しっと", icon: "/images/skill/e03.gif", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。" },
+  { abbr: "憤", name: "憤怒", kana:"ふんぬ", icon: "/images/skill/e04.gif", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。" },
+  { abbr: "色", name: "色欲", kana:"しきよく", icon: "/images/skill/e05.gif", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。" },
+  { abbr: "暴", name: "暴食", kana:"ぼうしょく", icon: "/images/skill/e06.gif", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。" },
+  { abbr: "怠", name: "怠惰", kana:"たいだ", icon: "/images/skill/e07.gif", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。" },
 ];
 
 export interface SkillDetail {
@@ -65,4 +111,6 @@ export const STATUS_DATA: StatusDetail[] = [
     { name: "スタン", type: 1, kana: "", icon: "/images/skill/x01.gif", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。スキルの速度には影響しない。" },
     { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。先攻決定フェイズには影響しない。他のあらゆる速度変化効果に対して優先される。" },
     { name: "忘却", type: 1, kana: "ぼうきゃく", icon: "/images/skill/x03.gif", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
+    { name: "毒", type: 1, kana: "ちゅうどく", icon: "/images/skill/x04.gif", description: "毎ラウンド終了時に1点のダメージを受ける。" },
+    { name: "火傷", type: 1, kana: "やけど", icon: "/images/skill/x05.gif", description: "攻撃スキルのダメージが-1される（最低0）。" },
 ];

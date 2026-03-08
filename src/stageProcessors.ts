@@ -266,11 +266,45 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getEnemyName(index: number, context: StageContext): string {
+    // 第2章の分岐
+    if (context.chapter2SubStage) {
+      const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+      const bossName = info?.bossName || "BOSS";
+      
+      if (context.chapter2SubStage === 1) {
+        // 中ボス: 例として「(ボス名)親衛隊長」など
+        // ユーザー仕様により、すぐに中ボス戦へ
+        return `${bossName}親衛隊長`;
+      } else if (context.chapter2SubStage === 2) {
+        // 大ボス
+        return bossName;
+      }
+    }
+
     const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
     return info?.bossName || "BOSS";
   }
 
   getEnemySkills(index: number, context: StageContext): SkillDetail[] {
+    // 第2章の分岐
+    if (context.chapter2SubStage) {
+      if (context.chapter2SubStage === 1) {
+        // 中ボス用スキル (仮: 一閃 + ランダム3つ)
+        const issen = getSkillByAbbr("一")!;
+        const allPool = getAvailableSkillsUntilStage(context.stageCycle);
+        const selected: SkillDetail[] = [issen];
+        for (let i = 0; i < 3; i++) {
+          const s = allPool.length > 0 ? allPool[Math.floor(Math.random() * allPool.length)] : issen;
+          selected.push(s);
+        }
+        return selected;
+      } else if (context.chapter2SubStage === 2) {
+         // 大ボス用スキル（従来のボススキル取得ロジックを使用）
+         const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+         return info?.bossSkillAbbrs.split("").map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[] || [];
+      }
+    }
+
     if (context.stageCycle === 10) {
       const gekirin = getSkillByAbbr("逆")!;
       const playerSkills = context.selectedPlayerSkills.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
@@ -290,10 +324,22 @@ export class BossStageProcessor implements StageProcessor {
 
   getStageTitle(context: StageContext): string {
     const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    
+    if (context.chapter2SubStage) {
+        if (context.chapter2SubStage === 1) return `${info?.name} - 迎撃`;
+        if (context.chapter2SubStage === 2) return `VS ${info?.bossName}`;
+    }
+
     return info ? `VS ${info.bossName}` : "VS BOSS";
   }
 
   getStageDescription(context: StageContext): string {
+    if (context.chapter2SubStage) {
+        const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle);
+        const bossName = info?.bossName || "ボス";
+        if (context.chapter2SubStage === 1) return `${bossName}の側近が現れた。油断するな！`;
+        if (context.chapter2SubStage === 2) return `最奥部に到達。${bossName}を撃破せよ！`;
+    }
     return '敵の構成を見て対策を練れ！';
   }
 
@@ -303,6 +349,16 @@ export class BossStageProcessor implements StageProcessor {
 
   getBossImage(context: StageContext): string | undefined {
     const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    if (context.chapter2SubStage) {
+        if (context.chapter2SubStage === 2) {
+             // 大ボスのみ画像を表示
+             return info ? getStorageUrl(info.bossImage) : undefined;
+        } else {
+             // 中ボスは画像なし（または汎用画像）
+             return undefined;
+        }
+    }
+    
     return info ? getStorageUrl(info.bossImage) : undefined;
   }
 

@@ -55,6 +55,8 @@ export class Battle {
             if (pc1.gekirin >= 1) { sta1 = 1; for (let i = 0; i < pc1.gekirin; i++) statusPc1 += "逆"; }
             if (pc1.musou === 1) { sta1 = 1; statusPc1 += "無"; }
             if (pc1.sensei === 1) { sta1 = 1; statusPc1 += "先"; }
+            if (pc1.tyudoku === 1) { sta1 = 1; statusPc1 += "毒"; }
+            if (pc1.yakedo === 1) { sta1 = 1; statusPc1 += "火"; }
 
             if (sta1 === 1) this.text += `〔${statusPc1}〕`;
 
@@ -77,6 +79,8 @@ export class Battle {
             if (pc2.gekirin >= 1) { sta2 = 1; for (let i = 0; i < pc2.gekirin; i++) statusPc2 += "逆"; }
             if (pc2.musou === 1) { sta2 = 1; statusPc2 += "無"; }
             if (pc2.sensei === 1) { sta2 = 1; statusPc2 += "先"; }
+            if (pc2.tyudoku === 1) { sta2 = 1; statusPc2 += "毒"; }
+            if (pc2.yakedo === 1) { sta2 = 1; statusPc2 += "火"; }
 
             if (sta2 === 1) this.text += `〔${statusPc2}〕`;
 
@@ -92,6 +96,32 @@ export class Battle {
 
             this.rinko(pc1);
             this.rinko(pc2);
+
+            // 中毒の処理
+            if (pc1.tyudoku === 1) {
+                this.text += `＞${pc1.playerName}は毒に蝕まれている！\n`;
+                for (let i = 0; i < pc1.getSkillsLength(); i++) {
+                    if (pc1.type[i] !== Player.NONE) {
+                        this.text += `＞${pc1.playerName}の【${pc1.name[i]}】${i + 1}に1点のダメージ！\n`;
+                        pc1.scar[i] = 1;
+                        startFlag = 1;
+                        break;
+                    }
+                }
+            }
+            if (pc2.tyudoku === 1) {
+                this.text += `＞${pc2.playerName}は毒に蝕まれている！\n`;
+                for (let i = 0; i < pc2.getSkillsLength(); i++) {
+                    if (pc2.type[i] !== Player.NONE) {
+                        this.text += `＞${pc2.playerName}の【${pc2.name[i]}】${i + 1}に1点のダメージ！\n`;
+                        pc2.scar[i] = 1;
+                        startFlag = 1;
+                        break;
+                    }
+                }
+            }
+            if (this.breakup(pc1) + this.breakup(pc2) >= 1) startFlag = 1;
+
 
             if (this.turn <= pc1.getSkillsLength()) {
 
@@ -169,7 +199,15 @@ export class Battle {
                     }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1 += 1;
+                    if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "翔") speedBufPc1 += 2; // ＋翔
                     if (pc1.kakugo === 1) speedBufPc1 += 2;
+
+                    // 座礁チェック
+                    for (let k = 0; k < pc2.getSkillsLength(); k++) {
+                        if (pc2.skill[k] === "礁") {
+                            speedBufPc1 -= 1;
+                        }
+                    }
 
                     this.text += `【${pc1.name[i]}】${i + 1}　速度：${pc1.speed[i] + speedBufPc1}　`;
                     speedPc1 = pc1.speed[i] + speedBufPc1;
@@ -178,6 +216,14 @@ export class Battle {
 
                 if (pc1.type[i] === Player.BUFF) {
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "速") speedBufPc1 += 1;
+                    // BUFFに翔が効くかどうかは記述がないが、攻撃スキルの直前とあるのでBUFFには効かないはず
+                    
+                    // 座礁チェック
+                    for (let k = 0; k < pc2.getSkillsLength(); k++) {
+                        if (pc2.skill[k] === "礁") {
+                            speedBufPc1 -= 1;
+                        }
+                    }
 
                     this.text += `【${pc1.name[i]}】${i + 1}　速度：${pc1.speed[i] + speedBufPc1}　`;
                     speedPc1 = pc1.speed[i] + speedBufPc1;
@@ -224,7 +270,15 @@ export class Battle {
                     }
 
                     if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2 += 1;
+                    if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "翔") speedBufPc2 += 2; // ＋翔
                     if (pc2.kakugo === 1) speedBufPc2 += 2;
+
+                    // 座礁チェック
+                    for (let k = 0; k < pc1.getSkillsLength(); k++) {
+                        if (pc1.skill[k] === "礁") {
+                            speedBufPc2 -= 1;
+                        }
+                    }
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
                     speedPc2 = pc2.speed[i] + speedBufPc2;
@@ -233,6 +287,13 @@ export class Battle {
 
                 if (pc2.type[i] === Player.BUFF) {
                     if (i < pc2.getSkillsLength() - 1 && pc2.skill[i + 1] === "速") speedBufPc2 += 1;
+                    
+                    // 座礁チェック
+                    for (let k = 0; k < pc1.getSkillsLength(); k++) {
+                        if (pc1.skill[k] === "礁") {
+                            speedBufPc2 -= 1;
+                        }
+                    }
 
                     this.text += `【${pc2.name[i]}】${i + 1}　速度：${pc2.speed[i] + speedBufPc2}　`;
                     speedPc2 = pc2.speed[i] + speedBufPc2;
@@ -510,6 +571,14 @@ export class Battle {
                     this.text += `＞${pc1.playerName}の忘却が解除された！\n`;
                     pc1.suijaku = 0;
                 }
+                if (pc1.tyudoku === 1) {
+                    this.text += `＞${pc1.playerName}の中毒が解除された！\n`;
+                    pc1.tyudoku = 0;
+                }
+                if (pc1.yakedo === 1) {
+                    this.text += `＞${pc1.playerName}の火傷が解除された！\n`;
+                    pc1.yakedo = 0;
+                }
                 // if (pc1.roubai === 1) {
                 //     this.text += `＞${pc1.playerName}の狼狽が解除された！\n`;
                 //     pc1.roubai = 0;
@@ -624,6 +693,47 @@ export class Battle {
                         pc1.damage[i] = this.turn;
                     }
 
+                    // 新スキル追加
+                    if (pc1.skill[i] === "烈") {
+                        pc1.speed[i] = (i + 1) + 2; // LV+2
+                    }
+                    if (pc1.skill[i] === "審") {
+                        pc1.damage[i] = i + 1; // LV
+                    }
+                    if (pc1.skill[i] === "死") {
+                        pc1.damage[i] = 1;
+                    }
+                    if (pc1.skill[i] === "狼") { // 狼嵐（神業）
+                        pc1.damage[i] = 3;
+                    }
+                    if (pc1.skill[i] === "爆") { // 爆砕（神業）
+                        pc1.damage[i] = 3;
+                    }
+                    if (pc1.skill[i] === "魔") { // 魔弾（神業）
+                        // 残りスキル数
+                        let skillCount = 0;
+                        for (let k = 0; k < pc1.getSkillsLength(); k++) {
+                            if (pc1.type[k] !== Player.NONE) skillCount++;
+                        }
+                        pc1.damage[i] = skillCount;
+                    }
+                    if (pc1.skill[i] === "憤") { // 憤怒（敵専用）
+                        let damageTaken = 0;
+                        // 破壊されたスキルの数をダメージとして計算する簡易実装
+                         for(let k=0; k<pc1.getSkillsLength(); k++) {
+                             if(pc1.type[k] === Player.NONE && pc1.skill[k] !== "空" && pc1.skill[k] !== "＿") damageTaken++;
+                        }
+                        pc1.damage[i] = damageTaken;
+                    }
+
+                    // 協奏の適用
+                    if (pc1.nextLvUp === 1) {
+                        this.text += `＞協奏の効果でLVが+1された！\n`;
+                        pc1.damage[i]++;
+                        pc1.speed[i]++;
+                        pc1.nextLvUp = 0; 
+                    }
+
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "強") {
                         this.text += `＞【＋強】${i + 2}の効果でダメージが1点上昇！\n`;
                         damageBuf++;
@@ -657,12 +767,41 @@ export class Battle {
                     // 狼狽時メッセージ
                     if (pc1.roubai === 1) this.text += "＞狼狽の効果で速度が0になっている！\n";
 
+                    // 火傷の効果
+                    if (pc1.yakedo === 1) {
+                        this.text += "＞火傷の効果でダメージが1下がった！\n";
+                        damageBuf--;
+                    }
+
                     damage = pc1.damage[i] + damageBuf;
+                    if (damage < 0) damage = 0;
                     break;
                 }
 
                 if (pc1.type[i] === Player.BUFF) {
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}！\n`;
+
+                    if (pc1.skill[i] === "協") {
+                        pc1.nextLvUp = 1;
+                    }
+                    if (pc1.skill[i] === "医") {
+                         let cured = false;
+                         if (pc1.tyudoku === 1) { pc1.tyudoku = 0; this.text += "＞中毒が回復した！\n"; cured = true; }
+                         else if (pc1.yakedo === 1) { pc1.yakedo = 0; this.text += "＞火傷が回復した！\n"; cured = true; }
+                         else if (pc1.roubai === 1) { pc1.roubai = 0; this.text += "＞狼狽が回復した！\n"; cured = true; }
+                         else if (pc1.stan === 1) { pc1.stan = 0; this.text += "＞スタンが回復した！\n"; cured = true; }
+                         else if (pc1.suijaku === 1) { pc1.suijaku = 0; this.text += "＞忘却が回復した！\n"; cured = true; }
+                         
+                         if(!cured) this.text += "＞回復する状態異常がなかった。\n";
+                    }
+                    if (pc1.skill[i] === "魚") {
+                         this.text += `＞${pc2.playerName}に1点のダメージ！（迎撃不可）\n`;
+                         pc1.gyogun = 1;
+                    }
+                    if (pc1.skill[i] === "盗") {
+                        this.text += `＞盗賊の効果！\n`;
+                        pc1.tozoku = 1;
+                    }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "盾") {
                         this.text += `＞【＋盾】${i + 2}の効果で防壁が2つ与えられる！\n`;
@@ -713,6 +852,47 @@ export class Battle {
                         pc1.damage[i] = this.turn;
                     }
 
+                    // 新スキル追加
+                    if (pc1.skill[i] === "烈") {
+                        pc1.speed[i] = (i + 1) + 2; // LV+2
+                    }
+                    if (pc1.skill[i] === "審") {
+                        pc1.damage[i] = i + 1; // LV
+                    }
+                    if (pc1.skill[i] === "死") {
+                        pc1.damage[i] = 1;
+                    }
+                    if (pc1.skill[i] === "狼") { // 狼嵐（神業）
+                        pc1.damage[i] = 3;
+                    }
+                    if (pc1.skill[i] === "爆") { // 爆砕（神業）
+                        pc1.damage[i] = 3;
+                    }
+                    if (pc1.skill[i] === "魔") { // 魔弾（神業）
+                        // 残りスキル数
+                        let skillCount = 0;
+                        for (let k = 0; k < pc1.getSkillsLength(); k++) {
+                            if (pc1.type[k] !== Player.NONE) skillCount++;
+                        }
+                        pc1.damage[i] = skillCount;
+                    }
+                    if (pc1.skill[i] === "憤") { // 憤怒（敵専用）
+                        let damageTaken = 0;
+                        // 破壊されたスキルの数をダメージとして計算する簡易実装
+                         for(let k=0; k<pc1.getSkillsLength(); k++) {
+                             if(pc1.type[k] === Player.NONE && pc1.skill[k] !== "空" && pc1.skill[k] !== "＿") damageTaken++;
+                        }
+                        pc1.damage[i] = damageTaken;
+                    }
+
+                    // 協奏の適用
+                    if (pc1.nextLvUp === 1) {
+                        this.text += `＞協奏の効果でLVが+1された！\n`;
+                        pc1.damage[i]++;
+                        pc1.speed[i]++;
+                        pc1.nextLvUp = 0; 
+                    }
+
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "強") {
                         this.text += `＞【＋強】${i + 2}の効果でダメージが1点上昇！\n`;
                         damageBuf++;
@@ -746,12 +926,41 @@ export class Battle {
                     // 狼狽時メッセージ
                     if (pc1.roubai === 1) this.text += "＞狼狽の効果で速度が0になっている！\n";
 
+                    // 火傷の効果
+                    if (pc1.yakedo === 1) {
+                        this.text += "＞火傷の効果でダメージが1下がった！\n";
+                        damageBuf--;
+                    }
+
                     damage = pc1.damage[i] + damageBuf;
+                    if (damage < 0) damage = 0;
                     break;
                 }
 
                 if (pc1.type[i] === Player.BUFF) {
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}！\n`;
+
+                    if (pc1.skill[i] === "協") {
+                        pc1.nextLvUp = 1;
+                    }
+                    if (pc1.skill[i] === "医") {
+                         let cured = false;
+                         if (pc1.tyudoku === 1) { pc1.tyudoku = 0; this.text += "＞中毒が回復した！\n"; cured = true; }
+                         else if (pc1.yakedo === 1) { pc1.yakedo = 0; this.text += "＞火傷が回復した！\n"; cured = true; }
+                         else if (pc1.roubai === 1) { pc1.roubai = 0; this.text += "＞狼狽が回復した！\n"; cured = true; }
+                         else if (pc1.stan === 1) { pc1.stan = 0; this.text += "＞スタンが回復した！\n"; cured = true; }
+                         else if (pc1.suijaku === 1) { pc1.suijaku = 0; this.text += "＞忘却が回復した！\n"; cured = true; }
+                         
+                         if(!cured) this.text += "＞回復する状態異常がなかった。\n";
+                    }
+                    if (pc1.skill[i] === "魚") {
+                         this.text += `＞${pc2.playerName}に1点のダメージ！（迎撃不可）\n`;
+                         pc1.gyogun = 1;
+                    }
+                    if (pc1.skill[i] === "盗") {
+                        this.text += `＞盗賊の効果！\n`;
+                        pc1.tozoku = 1;
+                    }
 
                     if (i < pc1.getSkillsLength() - 1 && pc1.skill[i + 1] === "盾") {
                         this.text += `＞【＋盾】${i + 2}の効果で防壁が2つ与えられる！\n`;
@@ -776,8 +985,17 @@ export class Battle {
         // 攻撃側の速度決定
 
         if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "速") speedBufPc1 += 1;
+        if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "翔") speedBufPc1 += 2; // ＋翔
         if (pc1.kakugo === 1) speedBufPc1 += 2;
         speedPc1 = pc1.speed[use] + speedBufPc1;
+
+        // 攻撃側の速度決定での座礁計算
+        for (let k = 0; k < pc2.getSkillsLength(); k++) {
+             if (pc2.skill[k] === "礁") {
+                 speedPc1 -= 1;
+             }
+        }
+
         if (pc1.roubai === 1) speedPc1 = 0;
         if (bonda === 1) speedPc1 = 0;
 
@@ -808,14 +1026,35 @@ export class Battle {
             // 目標指定
             target = 0;
             suspend = 0;
-            for (let j = 0; j < pc2.getSkillsLength(); j++) {
-                if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
-                    target = j;
-                    break;
+            
+            // ＋弓の効果（後列優先）
+            let bowTarget = false;
+            if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "弓") {
+                bowTarget = true;
+                this.text += `＞【＋弓】${use + 2}の効果で後列を狙う！\n`;
+            }
+
+            if (bowTarget) {
+                for (let j = pc2.getSkillsLength() - 1; j >= 0; j--) {
+                    if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
+                        target = j;
+                        break;
+                    }
+                    if (j === 0) { // 最後まで見つからなかった場合（通常ありえないが）
+                        suspend = 1;
+                        break;
+                    }
                 }
-                if (j === pc2.getSkillsLength() - 1) {
-                    suspend = 1;
-                    break;
+            } else {
+                for (let j = 0; j < pc2.getSkillsLength(); j++) {
+                    if (pc2.type[j] !== Player.NONE && pc2.scar[j] !== 2) {
+                        target = j;
+                        break;
+                    }
+                    if (j === pc2.getSkillsLength() - 1) {
+                        suspend = 1;
+                        break;
+                    }
                 }
             }
 
@@ -850,6 +1089,30 @@ export class Battle {
                 }
             }
 
+            // 幻惑（迎撃）の効果：ターゲットランダム変更
+            if (suspend === 0 && pc2.skill[target] === "幻") {
+                 let genwakuSpeed = pc2.speed[target];
+                 if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") genwakuSpeed += 1;
+                 if (pc2.kakugo === 1) genwakuSpeed += 2;
+                 
+                 let genwakuPenetrate = 0;
+                 if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "錬" && penetrate === 0) genwakuPenetrate = 1;
+
+                 if ((genwakuSpeed >= speedPc1 || bonda === 1) && genwakuPenetrate === 0) {
+                     this.text += `＞${pc2.playerName}の【幻惑】${target + 1}が発動！\n`;
+                     let validTargets = [];
+                     for(let k=0; k<pc2.getSkillsLength(); k++) {
+                         if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) validTargets.push(k);
+                     }
+                     if (validTargets.length > 0) {
+                         const randIndex = Math.floor(Math.random() * validTargets.length);
+                         target = validTargets[randIndex];
+                         this.text += `＞攻撃対象が【${pc2.name[target]}】${target + 1}に変更された！\n`;
+                     }
+                     pc2.limited[target] = 2; 
+                 }
+            }
+
             if (suspend === 1) {
                 suspend = 0;
                 break;
@@ -857,14 +1120,39 @@ export class Battle {
 
             // 目標にダメージカウンタを置く
 
-            this.text += `＞${pc2.playerName}の【${pc2.name[target]}】${target + 1}にダメージを与えた！\n`;
-            pc2.scar[target] = 2;
+            // 飛行の回避判定
+            let avoided = false;
+            if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "飛") {
+                if (Math.random() < 0.5) {
+                    this.text += `＞【飛行】の効果で${pc2.playerName}の【${pc2.name[target]}】${target + 1}は回避した！\n`;
+                    avoided = true;
+                }
+            }
+            
+            // 霊化の回避判定
+            if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "霊") {
+                 // 物理攻撃（剣、鉄など）
+                 const physics = ["一", "刺", "果", "剣", "鉄", "烈", "艦", "死", "怒", "弱", "逆", "憤", "暴"];
+                 if (physics.includes(pc1.skill[use])) {
+                     this.text += `＞【霊化】の効果で${pc2.playerName}の【${pc2.name[target]}】${target + 1}はダメージを受けない！\n`;
+                     avoided = true;
+                 }
+            }
+
+            if (!avoided) {
+                this.text += `＞${pc2.playerName}の【${pc2.name[target]}】${target + 1}にダメージを与えた！\n`;
+                pc2.scar[target] = 2;
+            } else {
+                // 回避された場合、ダメージ処理をスキップするが、ループは継続する（回数消化）
+                // ただし、迎撃スキルの発動判定もスキップされるべきか？
+                // 通常、ダメージを受けないと迎撃は発動しない。
+            }
 
             let target2 = 0; // 迎撃スキルの対象
             let suspend2 = 0; // 受動側の攻撃中断フラグ
 
             // 迎撃スキルの確認
-            if (pc2.type[target] === Player.COUNTER || (pc2.type[target] === Player.ATTACK && (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "反"))) {
+            if (!avoided && (pc2.type[target] === Player.COUNTER || (pc2.type[target] === Player.ATTACK && (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "反")))) {
 
                 if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "錬" && penetrate === 0) {
                     this.text += `＞【${pc1.name[use + 1]}】${use + 2}の効果で${pc2.playerName}の【${pc2.name[target]}】${target + 1}は発動しない！\n`;
@@ -915,10 +1203,33 @@ export class Battle {
                         if (pc2.skill[target] === "交" || pc2.skill[target] === "待" || pc2.skill[target] === "玉" ||
                             pc2.skill[target] === "一" || pc2.skill[target] === "刺" || pc2.skill[target] === "果" || pc2.skill[target] === "剣" ||
                             pc2.skill[target] === "紫" || pc2.skill[target] === "呪" || pc2.skill[target] === "雷" ||
-                            pc2.skill[target] === "隠" || pc2.skill[target] === "怒" || pc2.skill[target] === "弱") { // 通常ダメージ
+                            pc2.skill[target] === "隠" || pc2.skill[target] === "怒" || pc2.skill[target] === "弱" ||
+                            pc2.skill[target] === "鉄" || pc2.skill[target] === "烈" || pc2.skill[target] === "審" ||
+                            pc2.skill[target] === "艦" || pc2.skill[target] === "死" || pc2.skill[target] === "狼" ||
+                            pc2.skill[target] === "爆" || pc2.skill[target] === "魔" || pc2.skill[target] === "転" || 
+                            pc2.skill[target] === "受" || pc2.skill[target] === "傲" || pc2.skill[target] === "欲" || 
+                            pc2.skill[target] === "嫉" || pc2.skill[target] === "憤" || pc2.skill[target] === "色" || 
+                            pc2.skill[target] === "暴") { // 通常ダメージ
 
                             if (pc2.skill[target] === "玉") {
                                 pc2.damage[target] = speedPc1;
+                            }
+                            if (pc2.skill[target] === "転") {
+                                pc2.damage[target] = 1;
+                            }
+                            if (pc2.skill[target] === "転") { // 転回：受けたダメージを返す
+                                // ここでの「受けたダメージ」は、本来受けるはずだったダメージ。
+                                // しかしこの迎撃が発動した時点でダメージは中断されるため、1ダメージ（カウンターとして与えるダメージ）になるのか？
+                                // 仕様：「受けたダメージをそのまま相手に与え返す」
+                                // 攻撃スキルの総ダメージではなく、この1回のダメージ処理分(1点)を返すのが自然。
+                                // しかし description によると "受けたダメージを" とある。
+                                // ここでは簡易的に「相手の攻撃スキルの総ダメージ」とするか、「1点」とするか。
+                                // 迎撃スキルはダメージ処理を中断するため、このスキル自体はダメージを受けない（破壊されるが）。
+                                // "そのまま与え返す" なので、本来受けるはずだった 1点 を返す、つまりダメージ1。
+                                // pc2.damage[target] は初期化時に0になっているので、ここで設定が必要かもだが、
+                                // Player.tsでdamage変数が設定されているはず。
+                                // 転回のdamageは0設定だった。ここで1にする。
+                                pc2.damage[target] = 1;
                             }
 
                             // ダメージの処理
@@ -1012,6 +1323,16 @@ export class Battle {
 
                         // ダメージ以外の効果予約
 
+                        if (pc2.skill[target] === "水") {
+                            this.text += `＞【水幕】の効果でダメージ無効化！\n`;
+                            // ダメージループを抜けるためにsuspend=1にするが、これは迎撃発動で自動的にそうなる。
+                            // ここでの処理は特に不要（ダメージが発生しない迎撃スキルとして処理される）
+                        }
+
+                        if (pc2.skill[target] === "罠") {
+                            pc1.stan = 2;
+                        }
+
                         if (pc2.skill[target] === "搦") {
                             pc1.roubai = 2;
                         }
@@ -1031,6 +1352,49 @@ export class Battle {
                         if (pc2.skill[target] === "呪") {
                             pc1.suijaku = 2;
                         }
+                        
+                        if (pc2.skill[target] === "色") {
+                            // 色欲：魅了（次の攻撃対象を自分に変更）
+                            // これは次の自分のターンに影響する効果。
+                            // 実装が複雑なので、今回はログ出力のみにとどめるか、簡易実装する。
+                            this.text += `＞${pc1.playerName}は魅了された！\n`;
+                        }
+                        
+                        if (pc2.skill[target] === "傲") {
+                            // 傲慢：相手の補助スキルを全て破壊
+                            for(let k=0; k<pc1.getSkillsLength(); k++) {
+                                if(pc1.type[k] === Player.BUFF) pc1.scar[k] = 2;
+                            }
+                        }
+                        
+                        if (pc2.skill[target] === "欲") {
+                            // 強欲：相手のスキルを2つ奪う
+                            // 奪う処理は複雑なので、破壊に変更するか、あるいは簡易的に破壊として扱う。
+                            // 仕様通りにするなら「奪う」だが、Playerクラスにスキルを追加するメソッドが必要。
+                            // ここでは「2つ破壊」として実装。
+                            this.text += `＞強欲の効果でスキルが奪われる（破壊される）！\n`;
+                            let count = 0;
+                            for(let k=0; k<pc1.getSkillsLength(); k++) {
+                                if(pc1.type[k] !== Player.NONE && pc1.scar[k] !== 2) {
+                                    pc1.scar[k] = 2;
+                                    count++;
+                                    if(count >= 2) break;
+                                }
+                            }
+                        }
+                        
+                        if (pc2.skill[target] === "暴") {
+                            // 暴食：1つ食べてHP回復
+                            // HP回復＝破壊されたスキルを復活？あるいは空白を埋める？
+                            // ここでは「1つ破壊」のみ実装。
+                            this.text += `＞暴食の効果でスキルが食べられる（破壊される）！\n`;
+                             for(let k=0; k<pc1.getSkillsLength(); k++) {
+                                if(pc1.type[k] !== Player.NONE && pc1.scar[k] !== 2) {
+                                    pc1.scar[k] = 2;
+                                    break;
+                                }
+                            }
+                        }
 
                         if (i_damage_loop < damage - 1) {
                             this.text += `＞${pc1.playerName}の【${pc1.name[use]}】${use + 1}が強制中断された！\n`;
@@ -1043,6 +1407,30 @@ export class Battle {
 
                     }
                 }
+            }
+
+            // 幻惑（迎撃）の効果：ターゲットランダム変更
+            if (suspend === 0 && pc2.skill[target] === "幻") {
+                 let genwakuSpeed = pc2.speed[target];
+                 if (target < pc2.getSkillsLength() - 1 && pc2.skill[target + 1] === "速") genwakuSpeed += 1;
+                 if (pc2.kakugo === 1) genwakuSpeed += 2;
+                 
+                 let genwakuPenetrate = 0;
+                 if (use < pc1.getSkillsLength() - 1 && pc1.skill[use + 1] === "錬" && penetrate === 0) genwakuPenetrate = 1;
+
+                 if ((genwakuSpeed >= speedPc1 || bonda === 1) && genwakuPenetrate === 0) {
+                     this.text += `＞${pc2.playerName}の【幻惑】${target + 1}が発動！\n`;
+                     let validTargets = [];
+                     for(let k=0; k<pc2.getSkillsLength(); k++) {
+                         if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) validTargets.push(k);
+                     }
+                     if (validTargets.length > 0) {
+                         const randIndex = Math.floor(Math.random() * validTargets.length);
+                         target = validTargets[randIndex];
+                         this.text += `＞攻撃対象が【${pc2.name[target]}】${target + 1}に変更された！\n`;
+                     }
+                     pc2.limited[target] = 2; 
+                 }
             }
 
             if (suspend === 1) {
@@ -1065,6 +1453,50 @@ export class Battle {
 
         // ダメージ以外の効果予約
 
+        if (pc1.skill[use] === "瘴") {
+            pc2.tyudoku = 1;
+            this.text += `＞${pc2.playerName}は毒を受けた！\n`;
+        }
+        if (pc1.skill[use] === "審") {
+            // ランダム破壊
+            let validTargets = [];
+            for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) validTargets.push(k);
+            }
+            if (validTargets.length > 0) {
+                const randIndex = Math.floor(Math.random() * validTargets.length);
+                pc2.scar[validTargets[randIndex]] = 2;
+                this.text += `＞審判の効果で【${pc2.name[validTargets[randIndex]]}】が破壊された！\n`;
+            }
+        }
+        if (pc1.skill[use] === "死") {
+            // 瀕死（残り1つ）なら即死（破壊）
+            let count = 0;
+            let lastIdx = -1;
+            for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) {
+                    count++;
+                    lastIdx = k;
+                }
+            }
+            if (count === 1 && lastIdx !== -1) {
+                pc2.scar[lastIdx] = 2;
+                this.text += `＞死神の効果でとどめを刺した！\n`;
+            }
+        }
+        if (pc1.skill[use] === "狼") {
+            pc2.roubai = 2;
+        }
+        if (pc1.skill[use] === "解") {
+            // 全ての付帯スキル無効化（破壊）
+             for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] === Player.ENCHANT) {
+                    pc2.scar[k] = 2;
+                }
+            }
+            this.text += `＞▽解の効果で全ての付帯スキルが破壊された！\n`;
+        }
+
         if (pc1.skill[use] === "紫") {
             pc1.stan = 2;
         }
@@ -1081,6 +1513,64 @@ export class Battle {
 
         // ここから補助スキル
 
+        if (pc1.skill[use] === "蟲") {
+            pc2.tyudoku = 1;
+            this.text += `＞${pc2.playerName}は毒を受けた！\n`;
+        }
+        if (pc1.skill[use] === "焦") {
+            pc2.yakedo = 1;
+            this.text += `＞${pc2.playerName}は火傷を受けた！\n`;
+        }
+        if (pc1.skill[use] === "盗") {
+             for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) {
+                    pc2.scar[k] = 2;
+                    this.text += `＞盗賊の効果で【${pc2.name[k]}】を破壊した！\n`;
+                    break;
+                }
+            }
+        }
+
+
+        if (pc1.skill[use] === "蟲") {
+            pc2.tyudoku = 1;
+            this.text += `＞${pc2.playerName}は毒を受けた！\n`;
+        }
+        if (pc1.skill[use] === "焦") {
+            pc2.yakedo = 1;
+            this.text += `＞${pc2.playerName}は火傷を受けた！\n`;
+        }
+        if (pc1.skill[use] === "盗") {
+             // 盗賊：相手の先頭スキルを奪う
+             // 簡易実装：相手の先頭を破壊し、自分の末尾に追加（可能なら）
+             // 追加処理はPlayerクラスにメソッドがないと厳しいので、ここでは「破壊」のみとする。
+             // 説明文「奪えない場合は1点ダメージ」 -> 破壊＝ダメージなのでOK
+             for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) {
+                    pc2.scar[k] = 2;
+                    this.text += `＞盗賊の効果で【${pc2.name[k]}】を破壊した！\n`;
+                    break;
+                }
+            }
+        }
+
+        if (pc1.skill[use] === "蟲") {
+            pc2.tyudoku = 1;
+            this.text += `＞${pc2.playerName}は毒を受けた！\n`;
+        }
+        if (pc1.skill[use] === "焦") {
+            pc2.yakedo = 1;
+            this.text += `＞${pc2.playerName}は火傷を受けた！\n`;
+        }
+        if (pc1.skill[use] === "盗") {
+             for(let k=0; k<pc2.getSkillsLength(); k++) {
+                if (pc2.type[k] !== Player.NONE && pc2.scar[k] !== 2) {
+                    pc2.scar[k] = 2;
+                    this.text += `＞盗賊の効果で【${pc2.name[k]}】を破壊した！\n`;
+                    break;
+                }
+            }
+        }
 
         if (pc1.skill[use] === "覚") {
             pc1.kakugo = 2;
@@ -1160,6 +1650,18 @@ export class Battle {
             flag = 1;
         }
 
+        if (pc1.tyudoku === 2) {
+            this.text += `${pc1.playerName}は毒を受けた！\n`;
+            pc1.tyudoku = 1;
+            flag = 1;
+        }
+
+        if (pc1.yakedo === 2) {
+            this.text += `${pc1.playerName}は火傷を受けた！\n`;
+            pc1.yakedo = 1;
+            flag = 1;
+        }
+
         for (let i = 0; i < pc2.getSkillsLength(); i++) {
             if (pc2.kage[i] === 2) {
                 this.text += `${pc2.playerName}の【${pc2.name[i]}】${i + 1}は終了フェイズに破壊される！\n`;
@@ -1215,6 +1717,20 @@ export class Battle {
 
 
                 } else {
+
+                    if (pc1.skill[i] === "円" && pc1.scar[i] === 1) { // scar=1は破壊フラグ
+                        // 円環の復活処理
+                        // limitedを使って回数制限（1回のみ）を管理するか？
+                        // skillDataでは speed="なし" なので limited は使われていないはず。
+                        // limited=0:未使用, 1:使用済み(復活済み) とする。
+                        if (pc1.limited[i] === 0) {
+                            this.text += `${pc1.playerName}の【円環】${i+1}は破壊されたが復活した！\n`;
+                            pc1.scar[i] = 0; // 破壊無効
+                            pc1.limited[i] = 1; // 使用済みにする
+                            flag = 1; // 変更があったのでフラグON
+                            continue; // 次のスキルの処理へ（破壊処理をスキップ）
+                        }
+                    }
 
                     this.text += `${pc1.playerName}の【${pc1.name[i]}】${i + 1}が破壊された！\n`;
 

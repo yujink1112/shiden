@@ -71,6 +71,7 @@ export interface StageContext {
   selectedPlayerSkills: string[];
   midEnemyData: { [stage: number]: string[] };
   userName?: string;
+  chapter2SubStage?: number;
 }
 
 export interface StageProcessor {

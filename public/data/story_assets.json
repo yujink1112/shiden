@@ -1,0 +1,38 @@
+{
+  "characters": {
+    "レミエル": {
+      "image": "レミエル.png",
+      "position": "left"
+    },
+    "ルーサー": {
+      "image": "ルーサー.png",
+      "position": "right"
+    },
+    "アダム": {
+      "image": "アダム.png",
+      "position": "center"
+    },
+    "ラスト・ウィッチ号": {
+      "image": ".png",
+      "position": "center"
+    },
+    "？？？": {
+      "image": "？？？.png",
+      "position": "center"
+    }
+  },
+  "backgrounds": {
+    "甲板": "images/background/v2/pirate-ship-deck1.jpg",
+    "甲板2": "images/background/v2/pirate-ship-deck2.jpg",
+    "海": "images/background/v2/pirate-ship1.jpg",
+    "船室": "images/background/v2/pirate_ship2.jpg",
+    "海面": "images/background/v2/Calm-lake-surface1.jpg"
+  },
+  "animations": {
+    "fade": "fade",
+    "shake": "shake"
+  },
+  "stills": {
+    "肉厚な魚": "images/still/肉厚な魚.png"
+  }
+}
