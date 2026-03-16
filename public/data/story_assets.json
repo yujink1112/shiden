@@ -2,11 +2,11 @@
   "characters": {
     "レミエル": {
       "image": "レミエル.png",
-      "position": "left"
+      "position": "center"
     },
     "ルーサー": {
       "image": "ルーサー.png",
-      "position": "right"
+      "position": "center"
     },
     "アダム": {
       "image": "アダム.png",
@@ -19,20 +19,103 @@
     "？？？": {
       "image": "？？？.png",
       "position": "center"
+    },
+    "リザベル": {
+      "image": "リザベル.png",
+      "position": "center"
+    },
+    "歌う海賊": {
+      "image": "歌う海賊.png",
+      "position": "center"
+    },
+    "エーヴィス": {
+      "image": "エーヴィス.png",
+      "position": "center"
+    },
+    "エーアイン" : {
+      "image": "エーアイン.png",
+      "position": "center"
+    },
+    "ブッパー" : {
+      "image": "砲術士.png",
+      "position": "center"
+    },
+    "イスパニア軍" : {
+      "image": "イスパニア軍.png",
+      "position": "center"
     }
+
   },
   "backgrounds": {
     "甲板": "images/background/v2/pirate-ship-deck1.jpg",
     "甲板2": "images/background/v2/pirate-ship-deck2.jpg",
+    "甲板3": "images/background/v2/pirate-ship-deck3.jpg",
     "海": "images/background/v2/pirate-ship1.jpg",
     "船室": "images/background/v2/pirate_ship2.jpg",
-    "海面": "images/background/v2/Calm-lake-surface1.jpg"
+    "海面": "images/background/v2/Calm-lake-surface1.jpg",
+    "海賊船": "images/background/v2/海賊船の襲来.png",
+    "イスパニア船": "images/background/v2/イスパニア船の襲来.png"
+
   },
   "animations": {
     "fade": "fade",
     "shake": "shake"
   },
   "stills": {
-    "肉厚な魚": "images/still/肉厚な魚.png"
+    "肉厚な魚": "images/still/肉厚な魚.png",
+    "海賊たち": "images/still/海賊たち.png",
+    "古地図": "images/still/古地図.png"
+  },
+  "bgm": {
+    "港": "audio/VSQSE_0903_bird_05_sea.mp3",
+    "波": "audio/VSQSE_1185_wave_34.mp3",
+    "嵐": "audio/VSQSE_0406_Japanese_storm_02.mp3",
+    "雷": "audio/VSQSE_0726_thunder_01.mp3",
+    "洞窟": "audio/VSQSE_0974_wind_05_draft.mp3",
+    "風": "audio/VSQSE_0610_wind_01.mp3",
+    "エーヴィス": "audio/海賊が現れそうな曲.mp3",
+    "エーヴィス2": "audio/Pirate_Attack_loop.ogg",
+    "戦闘準備": "audio/海賊の洞窟で流れそうな曲_ループ.ogg",
+    "海底洞窟": "audio/海底洞窟.mp3",
+    "船室": "audio/酒場.mp3",
+    "空の下": "audio/海辺の小屋.mp3",
+    "イスパニア": "audio/south-kingdom_free_loop.ogg",
+    "親友": "audio/あなたと出逢えて.mp3",
+    "ハーモニカ": "audio/舟の行方は風のまにまに_loop.ogg",
+    "竜宮城下": "audio/海の都ネイレーディア.mp3",
+    "マヌケ": "audio/Seasick-Pirate.mp3",
+    "ギャグ": "audio/二日酔いのテーマ.mp3",
+    "緊迫": "audio/Battle04.mp3",
+    "超緊迫": "audio/Battle05.mp3",
+    "空落ちる日": "audio/空落ちる日.ogg",
+    "海賊の意志": "audio/Go-Against-the-Compass.mp3",
+    "魔女の正体": "audio/Fight-Against-the-Thunderstorm.mp3",
+    "島の発見": "audio/Meat_Again.ogg",
+    "海賊の愉快な歌": "audio/Golden_Hour_Tide.mp3",
+    "海賊の葬送曲": "audio/The_Captain_s_Descent.mp3",
+    "戦闘：ルーサー": "audio/Seasick-Pirate.mp3",
+    "戦闘：肉厚な魚": "audio/Seasick-Pirate.mp3",
+    "戦闘：血に飢えたジョーズ": "audio/Battle04.mp3",
+    "戦闘：弱者狩りのハゲタカ": "audio/Battle04.mp3",
+    "戦闘：デザインドエッグ号": "audio/海賊が現れそうな曲.mp3",
+    "戦闘：エーヴィス": "audio/Metal_01.mp3",
+    "戦闘：イスパニア海軍": "audio/chosenjo_loop.mp3",
+    "戦闘：ラ・マンチャ号": "audio/chosenjo_loop.mp3",
+    "戦闘：海ゴリラ": "audio/二日酔いのテーマ.mp3",
+    "戦闘：アビサルクラーケン": "audio/二日酔いのテーマ.mp3",
+    "戦闘：大嵐": "audio/二日酔いのテーマ.mp3",
+    "戦闘：ゴルゾアの胃袋": "audio/Ravin'_U.ogg",
+    "戦闘：死霊の群れ": "audio/battle1.ogg",
+    "戦闘：バクバク": "audio/battle1.ogg",
+    "戦闘：黒潮号": "audio/battle1.ogg",
+    "戦闘：ブライニクル": "audio/pandem04.ogg",
+    "戦闘：グウィン": "audio/desolate storehouse.ogg",
+    "戦闘：ジズ": "audio/Blaze_a_Trail.mp3",
+    "戦闘：黒魔の眷属": "audio/A_Cruel_Fallen_Angel.ogg",
+    "戦闘：デザインドエッグ号2": "audio/Pirate_Attack_loop.ogg",
+    "戦闘：エーヴィス海賊団": "audio/天使殲滅戦.mp3",
+    "戦闘：エーヴィス2": "audio/月下の死闘.ogg",
+    "戦闘：リザベル": "audio/Knight_in_the_wind.ogg",
+    "戦闘：グリザーベルク": "audio/Will_you_still_cry.mp3"
   }
 }

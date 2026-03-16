@@ -14,7 +14,9 @@ import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
 import Kamishibai from './components/Kamishibai';
 import { parseStoryText, StoryAssets } from './types/storyParser';
+import { Chapter2StageFlow, Chapter2FlowStep } from './types/chapter2';
 import StoryCanvas from './components/StoryCanvas';
+import AudioManager from './utils/audioManager';
 import AnimatedRichLog, { StageMode } from './components/AnimatedRichLog';
 import SkillCard, { IconMode } from './components/SkillCard';
 import GameChapter1 from './GameChapter1';
@@ -52,13 +54,15 @@ const parseV2TextStory = (text: string): any[] => {
 
 function App() {
   const [stagesLoaded, setStagesLoaded] = useState(false);
+  const [chapter2Flows, setChapter2Flows] = useState<Chapter2StageFlow[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [stagesRes, kenjuRes] = await Promise.all([
+        const [stagesRes, kenjuRes, flowRes] = await Promise.all([
           fetch(`${process.env.PUBLIC_URL}/data/stages.json`),
-          fetch(`${process.env.PUBLIC_URL}/data/kenju.json`)
+          fetch(`${process.env.PUBLIC_URL}/data/kenju.json`),
+          fetch(`${process.env.PUBLIC_URL}/data/chapter2_flow.json`)
         ]);
 
         let stagesData: any[] = [];
@@ -72,6 +76,11 @@ function App() {
         if (kenjuRes.ok) {
           kenjuData = await kenjuRes.json();
           setKenjuData(kenjuData);
+        }
+
+        if (flowRes.ok) {
+          const flowData = await flowRes.json();
+          setChapter2Flows(flowData);
         }
 
         // プリロード対象の画像URLを収集
@@ -160,15 +169,6 @@ function App() {
     2: parseInt(localStorage.getItem('shiden_chapter2_stage') || '13', 10) // デフォルト13に修正（第2章開始ステージ）
   });
 
-  const [chapter2SubStage, setChapter2SubStage] = useState<number>(() => {
-    const saved = localStorage.getItem('shiden_chapter2_sub_stage');
-    return saved ? parseInt(saved, 10) : 1;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('shiden_chapter2_sub_stage', chapter2SubStage.toString());
-  }, [chapter2SubStage]);
-
   const [availablePlayerCards, setAvailablePlayerCards] = useState<SkillDetail[]>([]);
   const [selectedPlayerSkills, setSelectedPlayerSkills] = useState<string[]>([]);
   const [connections, setConnections] = useState<{ fromId: string; toId: string }[]>([]);
@@ -223,6 +223,62 @@ function App() {
     const saved = localStorage.getItem('shiden_stage_cycle');
     return saved ? parseInt(saved, 10) : 1;
   });
+
+  const [chapter2FlowIndex, setChapter2FlowIndex] = useState<number>(() => {
+    const saved = localStorage.getItem('shiden_chapter2_flow_index');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shiden_chapter2_flow_index', chapter2FlowIndex.toString());
+  }, [chapter2FlowIndex]);
+
+  // 互換性のための chapter2SubStage (フロー内の battle ステップに割り当てられる subStage)
+  const chapter2SubStage = React.useMemo(() => {
+    const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+    if (!flow) return 1;
+    const step = flow.flow[chapter2FlowIndex];
+    return step?.subStage || 1;
+  }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
+
+  // 第2章の次のステップへ進む
+  const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number) => {
+    const flow = currentFlow || chapter2Flows.find(f => f.stageNo === stageCycle);
+    if (!flow) return;
+    
+    const nextIndex = (currentIndex !== undefined ? currentIndex : chapter2FlowIndex) + 1;
+    if (nextIndex < flow.flow.length) {
+      setChapter2FlowIndex(nextIndex);
+      const nextStep = flow.flow[nextIndex];
+      
+      if (nextStep.type === 'story') {
+        const data = await loadV2Story(nextStep.id!);
+        if (data) {
+          setStoryContentV2(data);
+          setShowStoryModal(true);
+        } else {
+          // ストーリーが無い場合はさらに次へ
+          moveToNextStep(flow, nextIndex);
+        }
+      } else if (nextStep.type === 'reward') {
+        setSelectedRewards([]); // 報酬選択前にリセット
+        if (nextStep.skill) {
+          setSelectedRewards([nextStep.skill]);
+        }
+        setRewardSelectionMode(true);
+        // 大ボス撃破後のステップならクリアパネルも出す
+        if (flow.flow[nextIndex - 1]?.subStage === 4) {
+          setShowBossClearPanel(true);
+        }
+      } else if (nextStep.type === 'battle') {
+        setStageMode('BOSS');
+        handleResetGame();
+      }
+    } else {
+      // ステージクリア、次のサイクルへ
+      clearBossAndNextCycle();
+    }
+  };
   const stageProcessor = React.useMemo<StageProcessor>(() => {
     // console.log(`[StageProcessor] Creating processor for Mode: ${stageMode}, Cycle: ${stageCycle}`);
     if (stageMode === 'KENJU' || stageMode === 'DENEI') return new KenjuStageProcessor();
@@ -331,12 +387,17 @@ const PLAYER_SKILL_COUNT = 5;
 
         try {
           if (currentStage?.chapter && currentStage.chapter >= 2) {
-            // 第2章以降
-            const filenameBase = `${currentStage.chapter}-${currentStage.stageInChapter}`;
-            const data = await loadV2Story(filenameBase);
-            if (data) {
-              setStoryContentV2(data);
-              setStoryContent(null);
+            // 第2章以降 (JSONフローに基づく)
+            const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+            const step = flow?.flow[chapter2FlowIndex];
+            if (step?.type === 'story') {
+              const data = await loadV2Story(step.id!);
+              if (data) {
+                setStoryContentV2(data);
+                setStoryContent(null);
+              } else {
+                setStoryContentV2(null);
+              }
             } else {
               setStoryContentV2(null);
             }
@@ -403,7 +464,7 @@ const PLAYER_SKILL_COUNT = 5;
       setShowLogForBattleIndex(-1);
       setCanGoToBoss(false);
     }
-  }, [gameStarted, ownedSkillAbbrs, stageCycle, stageMode]);
+  }, [gameStarted, ownedSkillAbbrs, stageCycle, stageMode, chapter2FlowIndex]);
 
   useEffect(() => {
     if (stageMode === 'BOSS' && stagesLoaded) {
@@ -880,12 +941,19 @@ const PLAYER_SKILL_COUNT = 5;
         setChapterProgress(prev => ({ ...prev, 1: 1 }));
       } else {
         localStorage.removeItem('shiden_chapter2_stage');
+        localStorage.removeItem('shiden_chapter2_flow_index');
         setChapterProgress(prev => ({ ...prev, 2: 13 }));
+        setChapter2FlowIndex(0);
       }
     }
 
     setStageCycle(stage);
-    setStageMode('MID');
+    if (chapter === 2) {
+      setChapter2FlowIndex(0);
+      setStageMode('BOSS');
+    } else {
+      setStageMode('MID');
+    }
     // 章選択時にはまだタイトル画面の状態を維持し、ストーリー終了後に false にする
     setShowChapterSelect(null);
     
@@ -1377,60 +1445,18 @@ const PLAYER_SKILL_COUNT = 5;
             
             if (isVictory) {
               // 第2章の処理
+              const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+              const isChapter2 = currentStageInfo?.chapter === 2;
+
               if (isChapter2) {
-                if (chapter2SubStage === 1) { // N-1 クリア -> 中ボス
-                  triggerVictoryConfetti();
-                  setTimeout(async () => {
-                    const data = await loadV2Story(`${currentStageInfo.chapter}-${currentStageInfo.stageInChapter}-mid`);
-                    if (data) {
-                      setStoryContentV2(data);
-                      setShowStoryModal(true);
-                    }
-                    setChapter2SubStage(2);
-                    setStageMode('BOSS'); // BossStageProcessorを使うためにBOSSモードにする（実際にはずっとBOSSモードでもいいが、App.tsxのロジックに合わせる）
-                    handleResetGame();
-                  }, 2000);
-                  return;
-                } else if (chapter2SubStage === 2) { // 中ボス クリア -> N-2
-                  triggerVictoryConfetti();
-                  setTimeout(() => {
-                    setChapter2SubStage(3);
-                    setStageMode('BOSS'); // 雑魚戦もBossStageProcessorで処理する
-                    handleResetGame();
-                  }, 2000);
-                  return;
-                } else if (chapter2SubStage === 3) { // N-2 クリア -> 大ボス
-                  triggerVictoryConfetti();
-                  setTimeout(async () => {
-                    const data = await loadV2Story(`${currentStageInfo.chapter}-${currentStageInfo.stageInChapter}-boss`);
-                    if (data) {
-                      setStoryContentV2(data);
-                      setShowStoryModal(true);
-                    }
-                    setChapter2SubStage(4);
-                    setStageMode('BOSS');
-                    handleResetGame();
-                  }, 2000);
-                  return;
-                } else if (chapter2SubStage === 4) { // 大ボス クリア -> 報酬選択
-                  triggerVictoryConfetti();
-                  setShowBossClearPanel(true);
-                  // 報酬選択へ進む（下の共通ロジックへ）
-                } else if (chapter2SubStage === 5) { // N-3 クリア -> 次のステージ
-                  triggerVictoryConfetti();
-                  setTimeout(() => {
-                    clearBossAndNextCycle();
-                  }, 2000);
-                  return;
-                }
+                triggerVictoryConfetti();
+                setTimeout(() => {
+                  moveToNextStep();
+                }, 2000);
+                return;
               } else {
                 setCanGoToBoss(true);
                 if (stageMode === 'MID') triggerVictoryConfetti();
-              }
-
-              // 第2章のMIDクリア時、自動的にBossストーリーを表示してボス戦へ (既存ロジックは削除または第2章以外に限定)
-              if (stageMode === 'MID' && !isChapter2 && currentStageInfo?.chapter && currentStageInfo.chapter >= 2) {
-                 // この分岐は到達しないはずだが念のため残すなら修正が必要
               }
             }
 
@@ -1481,20 +1507,42 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleRewardSelection = (abbr: string) => {
-    // 第2章の報酬選択（2つ選択）
+    // 第2章の報酬選択（JSONフローに基づく）
     const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
     const isChapter2 = stageInfo?.chapter === 2;
     
-    if (isChapter2 && chapter2SubStage === 4) { // 大ボス撃破後の報酬
-      if (selectedRewards.includes(abbr)) {
-        setSelectedRewards(prev => prev.filter(a => a !== abbr));
-      } else {
-        if (selectedRewards.length < 2) {
-          setSelectedRewards(prev => [...prev, abbr]);
+    if (isChapter2) {
+      const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+      const currentStep = flow?.flow[chapter2FlowIndex];
+
+      if (currentStep?.choices) {
+        // 選択肢がある場合は1つだけ選択
+        setSelectedRewards([abbr]);
+      } else if (currentStep?.count) {
+        // count 指定がある場合はその数まで選択
+        if (selectedRewards.includes(abbr)) {
+          setSelectedRewards(prev => prev.filter(a => a !== abbr));
+        } else {
+          if (selectedRewards.length < (currentStep.count || 1)) {
+            setSelectedRewards(prev => [...prev, abbr]);
+          }
         }
+      } else if (chapter2SubStage === 4) { 
+        // 互換性：大ボス撃破後の報酬（フローに count 指定がない場合）
+        if (selectedRewards.includes(abbr)) {
+          setSelectedRewards(prev => prev.filter(a => a !== abbr));
+        } else {
+          if (selectedRewards.length < 2) {
+            setSelectedRewards(prev => [...prev, abbr]);
+          }
+        }
+      } else {
+        // デフォルト（1つ選択）
+        if (selectedRewards.includes(abbr)) setSelectedRewards([]);
+        else setSelectedRewards([abbr]);
       }
     } else {
-      // 通常の報酬選択（1つ選択）
+      // 第1章などの通常の報酬選択（1つ選択）
       if (selectedRewards.includes(abbr)) setSelectedRewards([]);
       else setSelectedRewards([abbr]);
     }
@@ -1505,14 +1553,10 @@ const PLAYER_SKILL_COUNT = 5;
     setSelectedRewards([]);
     setRewardSelectionMode(false);
     
-    // 第2章の大ボス報酬の場合、N-3へ進む
+    // 第2章の場合、次のステップへ
     const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
-    if (stageInfo?.chapter === 2 && chapter2SubStage === 4) {
-      setChapter2SubStage(5);
-      setStageMode('BOSS'); // N-3もBossStageProcessorで処理する
-      setShowBossClearPanel(false);
-      handleResetGame();
-      // N-3のストーリーがあればここで読み込む
+    if (stageInfo?.chapter === 2) {
+      moveToNextStep();
       return;
     }
 
@@ -1521,38 +1565,6 @@ const PLAYER_SKILL_COUNT = 5;
 
   const clearBossAndNextCycle = async () => {
     const stageInfo = STAGE_DATA.find(s => s.no === stageCycle);
-    const isChapter2 = stageInfo?.chapter === 2;
-
-    if (isChapter2) {
-      if (chapter2SubStage === 1) {
-        // 中ボス撃破後 -> N-2.txt ロード -> 大ボス(SubStage 2)へ
-        const data = await loadV2Story(`${stageInfo.chapter}-${stageInfo.stageInChapter}-2`);
-        if (data) {
-          setStoryContentV2(data);
-          setShowStoryModal(true);
-        }
-        setChapter2SubStage(2);
-        setStageMode('BOSS');
-        handleResetGame();
-        setShowBossClearPanel(false);
-        return;
-      } else if (chapter2SubStage === 2) {
-        // 大ボス撃破後 -> N-3.txt ロード -> 報酬選択(SubStage 3)へ
-        const data = await loadV2Story(`${stageInfo.chapter}-${stageInfo.stageInChapter}-3`);
-        if (data) {
-          setStoryContentV2(data);
-          setShowStoryModal(true);
-        }
-        setChapter2SubStage(3); // GameChapter2側でSubStage 3なら報酬選択を表示
-        handleResetGame();
-        setShowBossClearPanel(false);
-        return;
-      } else if (chapter2SubStage === 3) {
-        // 報酬獲得完了（confirmRewardsから呼ばれる想定） -> 次のサイクルへ
-        setChapter2SubStage(1);
-        // 下の次サイクル移行ロジックへ続く
-      }
-    }
 
     if (bossClearRewardPending) {
         const availableRewards = getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr));
@@ -1587,14 +1599,21 @@ const PLAYER_SKILL_COUNT = 5;
       setShowEpilogue(true);
       return;
     }
-    setStageMode('MID');
+
     const nextCycle = stageCycle + 1;
+    const nextStageInfo = STAGE_DATA.find(s => s.no === nextCycle);
+
+    if (nextStageInfo?.chapter && nextStageInfo.chapter >= 2) {
+      setStageMode('BOSS');
+    } else {
+      setStageMode('MID');
+    }
+    
     setStageCycle(nextCycle);
-    setChapter2SubStage(1); // 第2章サブステージリセット
+    setChapter2FlowIndex(0); // 第2章フローインデックスリセット
     localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
 
     // 章ごとの進捗も保存
-    const nextStageInfo = STAGE_DATA.find(s => s.no === nextCycle);
     if (nextStageInfo?.chapter) {
       const chapterKey = `shiden_chapter${nextStageInfo.chapter}_stage`;
       localStorage.setItem(chapterKey, nextCycle.toString());
@@ -1663,6 +1682,60 @@ const PLAYER_SKILL_COUNT = 5;
   const isMobile = window.innerWidth < 768;
   const isLargeScreen = window.innerWidth > 1024;
   const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'].includes(stageMode);
+
+  useEffect(() => {
+    // BGMデータのロード
+    AudioManager.getInstance().loadAudioData();
+  }, []);
+
+  // BGM制御
+  useEffect(() => {
+    const audioManager = AudioManager.getInstance();
+    
+    // 設定の同期
+    audioManager.setVolume(bgmVolume);
+    audioManager.setMute(!bgmEnabled);
+
+    // シーンに応じたBGM再生
+    const playSceneBgm = async () => {
+      if (showStoryModal) return;
+
+      if (isTitle) {
+        audioManager.playBgm("Title");
+        return;
+      }
+
+      if (isLoungeMode) {
+        audioManager.playBgm("Lounge");
+        return;
+      }
+
+      if (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') {
+        // ボス戦・電影戦
+        if (kenjuBoss || currentKenjuBattle) {
+            audioManager.playBgm("BossBattle");
+        } else {
+            audioManager.playBgm("BossBattle");
+        }
+        return;
+      }
+
+      if (stageMode === 'MID') {
+        // 通常ステージ
+        // 第2章かどうかで切り替える例
+        const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+        if (currentStage?.chapter && currentStage.chapter >= 2) {
+             audioManager.playBgm("Chapter2Field");
+        } else {
+             audioManager.playBgm("Field");
+        }
+        return;
+      }
+    };
+
+    playSceneBgm();
+
+  }, [isTitle, stageMode, showStoryModal, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle]);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -1861,6 +1934,8 @@ const PLAYER_SKILL_COUNT = 5;
                 setStoryContentV2(null);
                 setGameStarted(false);
                 if (isTitle) setIsTitle(false);
+                const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+                if (currentStage?.chapter === 2) moveToNextStep();
               }}
             />
           ) : (
@@ -2247,6 +2322,73 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
 
+        {showSettings && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 12000 }}>
+            <div className="ChangelogModal" style={{ maxWidth: '400px', border: '2px solid #888', backgroundColor: '#222' }} onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader" style={{ background: '#444' }}>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>設定</span>
+                <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ padding: '20px', color: '#fff' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '1.1rem' }}>BGM</span>
+                    <div 
+                      onClick={() => {
+                        const newState = !bgmEnabled;
+                        setBgmEnabled(newState);
+                        localStorage.setItem('shiden_bgm_enabled', String(newState));
+                      }}
+                      style={{
+                        width: '50px',
+                        height: '26px',
+                        backgroundColor: bgmEnabled ? '#4caf50' : '#555',
+                        borderRadius: '13px',
+                        position: 'relative',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        top: '3px',
+                        left: bgmEnabled ? '27px' : '3px',
+                        transition: 'left 0.2s'
+                      }} />
+                    </div>
+                  </label>
+                </div>
+
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                    <span>音量</span>
+                    <span>{Math.round(bgmVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={bgmVolume}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setBgmVolume(val);
+                      localStorage.setItem('shiden_bgm_volume', String(val));
+                    }}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                    disabled={!bgmEnabled}
+                  />
+                </div>
+              </div>
+              <button className="ChangelogCloseButton" style={{ background: '#555', color: '#fff' }} onClick={() => setShowSettings(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+
         {showRule && <Rule onClose={() => setShowRule(false)} />}
         {isAdmin && showAdmin && (
           <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, maxHeight: '80vh', overflowY: 'auto', width: '90%', maxWidth: '800px' }}>
@@ -2398,6 +2540,11 @@ const PLAYER_SKILL_COUNT = 5;
     setIsTitle,
     setShowRule,
     setShowSettings,
+    bgmEnabled,
+    setBgmEnabled,
+    bgmVolume,
+    setBgmVolume,
+    showSettings,
     getSkillCardsFromAbbrs,
     getSkillByAbbr,
     handleSelectedSkillClick,
@@ -2414,7 +2561,9 @@ const PLAYER_SKILL_COUNT = 5;
     isAdmin,
     showAdmin,
     chapter2SubStage,
-    setChapter2SubStage
+    chapter2FlowIndex,
+    chapter2Flows,
+    moveToNextStep
   };
 
   if (!stagesLoaded) {
@@ -2425,11 +2574,108 @@ const PLAYER_SKILL_COUNT = 5;
   const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
   const isChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || stageCycle >= 13;
 
-  if (isChapter2) {
-      return <GameChapter2 {...gameProps} />;
-  } else {
-      return <GameChapter1 {...gameProps} />;
-  }
+  const gameContent = isChapter2 ? <GameChapter2 {...gameProps} /> : <GameChapter1 {...gameProps} />;
+
+  return (
+    <>
+      {gameContent}
+      
+      {/* 設定ボタン (画面左下などに配置) */}
+      {!isTitle && !showSettings && (
+        <div 
+          onClick={() => setShowSettings(true)}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            zIndex: 1000,
+            cursor: 'pointer',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            borderRadius: '50%',
+            padding: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid #888',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.8)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.5)'}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+      )}
+
+      {showSettings && (
+          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 12000 }}>
+            <div className="ChangelogModal" style={{ maxWidth: '400px', border: '2px solid #888', backgroundColor: '#222' }} onClick={(e) => e.stopPropagation()}>
+              <div className="ChangelogHeader" style={{ background: '#444' }}>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>設定</span>
+                <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+              </div>
+              <div className="ChangelogContent" style={{ padding: '20px', color: '#fff' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', cursor: 'pointer' }}>
+                    <span style={{ fontSize: '1.1rem' }}>BGM</span>
+                    <div 
+                      onClick={() => {
+                        const newState = !bgmEnabled;
+                        setBgmEnabled(newState);
+                        localStorage.setItem('shiden_bgm_enabled', String(newState));
+                      }}
+                      style={{
+                        width: '50px',
+                        height: '26px',
+                        backgroundColor: bgmEnabled ? '#4caf50' : '#555',
+                        borderRadius: '13px',
+                        position: 'relative',
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        top: '3px',
+                        left: bgmEnabled ? '27px' : '3px',
+                        transition: 'left 0.2s'
+                      }} />
+                    </div>
+                  </label>
+                </div>
+
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                    <span>音量</span>
+                    <span>{Math.round(bgmVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={bgmVolume}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setBgmVolume(val);
+                      localStorage.setItem('shiden_bgm_volume', String(val));
+                    }}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                    disabled={!bgmEnabled}
+                  />
+                </div>
+              </div>
+              <button className="ChangelogCloseButton" style={{ background: '#555', color: '#fff' }} onClick={() => setShowSettings(false)}>閉じる</button>
+            </div>
+          </div>
+        )}
+    </>
+  );
 }
 
 

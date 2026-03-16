@@ -16,6 +16,9 @@ export interface StoryAssets {
   stills: {
     [name: string]: string;
   };
+  bgm: {
+    [name: string]: string;
+  };
 }
 
 export const parseStoryText = (text: string, assets: StoryAssets): StoryScript => {
@@ -66,6 +69,52 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       }
     }
 
+    // BGM停止: #OFF
+    if (line === '#OFF') {
+      script.push({
+        type: "effect",
+        bgm: "OFF",
+        background: currentBackground
+      });
+      continue;
+    }
+
+    // BGMフェードアウト: #FADEOUT N
+    if (line.startsWith('#FADEOUT')) {
+      const parts = line.split(' ');
+      const seconds = parts.length > 1 ? parseFloat(parts[1]) : 2;
+      script.push({
+        type: "effect",
+        bgm: "OFF",
+        duration: seconds * 1000,
+        background: currentBackground
+      });
+      continue;
+    }
+
+    // スリープ: $SLEEP N
+    if (line.startsWith('$SLEEP')) {
+      const parts = line.split(' ');
+      const seconds = parts.length > 1 ? parseFloat(parts[1]) : 1;
+      script.push({
+        type: "effect",
+        duration: seconds * 1000,
+        background: currentBackground
+      });
+      continue;
+    }
+
+    // BGM指定: #<BGM名>
+    if (line.startsWith('#<') && line.endsWith('>')) {
+      const bgmName = line.substring(2, line.length - 1);
+      script.push({
+        type: "effect",
+        bgm: bgmName,
+        background: currentBackground
+      });
+      continue;
+    }
+
     // 背景変更: 《...》
     if (line.startsWith('《') && line.endsWith('》')) {
       const content = line.substring(1, line.length - 1);
@@ -105,19 +154,37 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       }
     }
 
-    // ト書き演出指示: 【...】
-    if (line.startsWith('【') && line.endsWith('】')) {
-      const content = line.substring(1, line.length - 1);
+    // ト書き演出指示: 【...】 または 【...】$duration,fadeDuration
+    if (line.startsWith('【') && line.includes('】')) {
+      const closingBracketIndex = line.indexOf('】');
+      const content = line.substring(1, closingBracketIndex);
+      const remaining = line.substring(closingBracketIndex + 1).trim();
+      
+      let duration: number | undefined = undefined;
+      let fadeDuration: number | undefined = undefined;
+      
+      if (remaining.startsWith('$')) {
+        const parts = remaining.substring(1).split(',');
+        if (parts.length >= 1) duration = parseFloat(parts[0]);
+        if (parts.length >= 2) fadeDuration = parseFloat(parts[1]);
+      }
+
       script.push({
         type: "direction",
         text: content,
+        duration: duration,
+        fadeDuration: fadeDuration,
         background: currentBackground
       });
       continue;
     }
 
     // 会話: 名前(表情)@位置 \n 「セリフ」
-    if (i + 1 < lines.length && lines[i+1].trim().startsWith('「')) {
+    // または キャラクター登場を伴うト書き: 名前(表情)@位置 \n 【ト書き】
+    const nextLine = i + 1 < lines.length ? lines[i+1].trim() : "";
+    const isPotentialName = line.includes('@') || !!assets.characters[line.split('@')[0].split('(')[0]];
+    
+    if (isPotentialName && (nextLine.startsWith('「') || nextLine.startsWith('【'))) {
       let rawName = line;
       let position: "left" | "center" | "right" | undefined = undefined;
       let expression: string | undefined = undefined;
@@ -143,20 +210,45 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         expression = expressionMatch[2]; // 表情
       }
 
-      const dialogue = lines[i+1].trim().substring(1, lines[i+1].trim().length - 1);
       const charDef = assets.characters[searchName];
+      let entry: StoryEntry;
 
-      const entry: StoryEntry = {
-        type: "dialogue",
-        name: displayName,
-        text: dialogue,
-        background: currentBackground
-      };
+      if (nextLine.startsWith('「')) {
+        const dialogue = nextLine.substring(1, nextLine.length - 1);
+        entry = {
+          type: "dialogue",
+          name: displayName,
+          text: dialogue,
+          background: currentBackground
+        };
+      } else {
+        // 【ト書き】のケース
+        const closingBracketIndex = nextLine.indexOf('】');
+        const content = nextLine.substring(1, closingBracketIndex);
+        const remaining = nextLine.substring(closingBracketIndex + 1).trim();
+        
+        let duration: number | undefined = undefined;
+        let fadeDuration: number | undefined = undefined;
+        
+        if (remaining.startsWith('$')) {
+          const parts = remaining.substring(1).split(',');
+          if (parts.length >= 1) duration = parseFloat(parts[0]);
+          if (parts.length >= 2) fadeDuration = parseFloat(parts[1]);
+        }
+
+        entry = {
+          type: "direction",
+          name: displayName,
+          text: content,
+          duration: duration,
+          fadeDuration: fadeDuration,
+          background: currentBackground
+        };
+      }
 
       if (charDef) {
         let imageName = charDef.image;
         if (expression) {
-          // 画像名が "remiel.png" の場合、"remiel_smile.png" のように変換を試みる
           const dotIndex = imageName.lastIndexOf('.');
           if (dotIndex !== -1) {
             imageName = imageName.substring(0, dotIndex) + "_" + expression + imageName.substring(dotIndex);

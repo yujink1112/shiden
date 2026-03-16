@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StoryScript } from '../types/story';
 import { getStorageUrl } from '../firebase';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
+import AudioManager from '../utils/audioManager';
 
 interface StoryCanvasProps {
   script?: StoryScript; // 以前の互換性のために残す
@@ -29,7 +30,10 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
   const endingAlphaRef = useRef(1);
   const waitAfterEndingTimerRef = useRef<number | null>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoNextTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedIndexRef = useRef<number>(-1);
+  const [, setForceUpdate] = useState(false); // UI更新用
 
   const currentEntry = script[currentEntryIndex];
 
@@ -149,6 +153,12 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     if (typingIntervalRef.current) {
         clearInterval(typingIntervalRef.current);
     }
+    if (autoNextTimerRef.current) {
+        clearTimeout(autoNextTimerRef.current);
+    }
+    if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+    }
 
     setDisplayedText('');
     lastProcessedIndexRef.current = currentEntryIndex;
@@ -170,28 +180,12 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         } else if (imagesRef.current[currentEntry.still]) {
             currentStillRef.current = imagesRef.current[currentEntry.still];
         }
-        
-        // スチルの場合は自動で次へ
-        setTimeout(() => {
-          if (currentEntryIndex < script.length - 1) {
-            setCurrentEntryIndex(prev => prev + 1);
-          }
-        }, 50); 
-        setDisplayedText("");
-        setIsTyping(false);
     }
 
+    // 画面揺れ演出
     if (currentEntry.type === "effect" && currentEntry.animation === "shake") {
         setShakeAmount(15);
         setTimeout(() => setShakeAmount(0), 500);
-        // エフェクトの時は、少し待ってから自動で次へ
-        setTimeout(() => {
-          if (currentEntryIndex < script.length - 1) {
-            setCurrentEntryIndex(prev => prev + 1);
-          }
-        }, 600);
-        setDisplayedText("");
-        setIsTyping(false);
     }
 
     const setFocus = (targetPos: string) => {
@@ -214,7 +208,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         }
         setFocus(pos);
       }
-    } else if (currentEntry.type === "dialogue") {
+    } else if (currentEntry.type === "dialogue" || currentEntry.type === "direction") {
         const targetIcon = currentEntry.icon || currentEntry.characterImage;
         if (targetIcon) {
             const img = imagesRef.current[targetIcon];
@@ -235,15 +229,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         if (activeCharactersRef.current[currentEntry.position]) {
             delete activeCharactersRef.current[currentEntry.position];
         }
-        
-        // 自動で次へ
-        setTimeout(() => {
-          if (currentEntryIndex < script.length - 1) {
-            setCurrentEntryIndex(prev => prev + 1);
-          }
-        }, 50); 
-        setDisplayedText("");
-        setIsTyping(false);
     }
 
     if (currentEntry.text) {
@@ -261,8 +246,56 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       setIsTyping(false);
     }
 
+    // BGM再生
+    if (currentEntry.bgm) {
+      if (currentEntry.bgm === "OFF") {
+        AudioManager.getInstance().fadeOutAndStop(currentEntry.duration || 2000);
+      } else {
+        // duration（自動進行）が設定されている場合は、1回限りの再生（ループなし）とする
+        const loop = !currentEntry.duration;
+        AudioManager.getInstance().playBgm(currentEntry.bgm, loop);
+      }
+    }
+
+    // 自動で次へ進むかどうかの判定
+    const isAutoNext = !!currentEntry.duration;
+    const isEffectOnly = !currentEntry.text && (
+      currentEntry.type === "effect" ||
+      currentEntry.type === "background" ||
+      currentEntry.type === "clearCharacter" ||
+      currentEntry.still ||
+      currentEntry.bgm
+    );
+
+    if (isAutoNext || isEffectOnly) {
+      const delay = currentEntry.duration || (currentEntry.animation === "shake" ? 600 : 50);
+      autoNextTimerRef.current = setTimeout(() => {
+        setCurrentEntryIndex(prev => {
+          if (prev === lastProcessedIndexRef.current && prev < script.length - 1) {
+            return prev + 1;
+          }
+          return prev;
+        });
+      }, delay);
+
+      // BGMフェードアウトの予約処理
+      if (currentEntry.duration && currentEntry.fadeDuration) {
+        const fadeDelay = Math.max(0, currentEntry.duration - currentEntry.fadeDuration);
+        fadeTimerRef.current = setTimeout(() => {
+          AudioManager.getInstance().fadeOutAndStop(currentEntry.fadeDuration!);
+        }, fadeDelay);
+      }
+
+      if (!currentEntry.text) {
+        setDisplayedText("");
+        setIsTyping(false);
+      }
+    }
+
     return () => {
         if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+        if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
+        if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [currentEntryIndex, isLoaded, currentEntry]);
 
@@ -425,18 +458,20 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       const paddingY = conf.paddingY * dpr;
       ctx.textBaseline = 'top';
 
-      if (currentEntry?.name) {
+      // 名前欄の表示 (dialogueタイプのみ、またはnameがありdirectionでない場合)
+      const shouldDisplayName = currentEntry?.name && currentEntry.type !== "direction";
+      if (shouldDisplayName) {
         const nameFontSize = conf.nameFontSize * dpr;
         ctx.fillStyle = '#81d4fa';
         ctx.font = `bold ${nameFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
-        ctx.fillText(currentEntry.name, margin + paddingX, boxY + paddingY);
+        ctx.fillText(currentEntry.name!, margin + paddingX, boxY + paddingY);
       }
 
       const textFontSize = conf.fontSize * dpr;
       ctx.fillStyle = '#fff';
       ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
       const textX = margin + paddingX;
-      const nameOffset = currentEntry?.name ? (isMobileMode ? 30 : 48) * dpr : 0;
+      const nameOffset = shouldDisplayName ? (isMobileMode ? 30 : 48) * dpr : 0;
       const textY = boxY + paddingY + nameOffset;
       const maxWidth = boxW - paddingX * 2;
       
@@ -502,6 +537,9 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
   const handleNext = () => {
     if (isEnding || !isLoaded) return;
+
+    // 自動進行（duration指定）中はクリックによる進行を無効化する
+    if (currentEntry?.duration) return;
 
     if (isTyping) {
       if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
@@ -580,33 +618,62 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           }}
         />
         {isLoaded && !isEnding && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (window.confirm('ストーリーをスキップしますか？')) {
-                setIsEnding(true);
-              }
-            }}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              padding: '8px 16px',
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              color: '#fff',
-              border: '1px solid rgba(255, 255, 255, 0.5)',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              zIndex: 10000,
-              transition: 'background-color 0.2s',
-              fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
-          >
-            SKIP
-          </button>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 10000 }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const manager = AudioManager.getInstance();
+                const newMuted = !manager.isMutedStatus();
+                manager.setMute(newMuted);
+                setForceUpdate(prev => !prev);
+              }}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                color: '#fff',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                transition: 'background-color 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
+                WebkitTapHighlightColor: 'transparent',
+                minWidth: '45px'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+              title={AudioManager.getInstance().isMutedStatus() ? "BGMを再生" : "BGMをミュート"}
+            >
+              {AudioManager.getInstance().isMutedStatus() ? "🔇" : "🔊"}
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm('ストーリーをスキップしますか？')) {
+                  setIsEnding(true);
+                }
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                color: '#fff',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                transition: 'background-color 0.2s',
+                fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
+                WebkitTapHighlightColor: 'transparent'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+            >
+              SKIP
+            </button>
+          </div>
         )}
         {!isLoaded && (
           <div style={{

@@ -4,6 +4,7 @@ import { StageProcessor } from "../stageData";
 import { SkillDetail } from "../skillsData";
 import { StageMode } from "../components/AnimatedRichLog";
 import { IconMode } from "../components/SkillCard";
+import { Chapter2StageFlow } from "./chapter2";
 
 export interface BattleResult {
   playerSkills: SkillDetail[];
@@ -57,7 +58,9 @@ export interface GameProps {
   setShowStoryModal: (show: boolean) => void;
   showStoryModal: boolean;
   chapter2SubStage: number;
-  setChapter2SubStage: (stage: number) => void;
+  chapter2FlowIndex: number;
+  chapter2Flows: Chapter2StageFlow[];
+  moveToNextStep: () => Promise<void>;
   
   // Boss/Reward related
   canGoToBoss: boolean;
@@ -90,6 +93,11 @@ export interface GameProps {
   setIsTitle: (isTitle: boolean) => void;
   setShowRule: (show: boolean) => void;
   setShowSettings: (show: boolean) => void;
+  bgmEnabled: boolean;
+  setBgmEnabled: (enabled: boolean) => void;
+  bgmVolume: number;
+  setBgmVolume: (volume: number) => void;
+  showSettings: boolean;
   
   // Additional props needed for components
   getSkillCardsFromAbbrs: (abbrs: string[]) => SkillDetail[];

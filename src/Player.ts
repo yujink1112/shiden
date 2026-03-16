@@ -32,6 +32,17 @@ export class Player {
     tate: number = 0;
     tyudoku: number = 0; // 中毒
     yakedo: number = 0; // 火傷
+    kaifuku: number = 0;
+    kyousou: number = 0;
+    reika: number = 0;
+    gouyoku: number = 0;
+    gouman: number = 0;
+    funnu: number = 0;
+    boushoku: number = 0;
+    taida: number = 0;
+    shimon: number = 0;
+    shitto: number = 0;
+    shikiyoku: number = 0;
     nextLvUp: number = 0; // 協奏用
     gyogun: number = 0; // 魚群フラグ
     tozoku: number = 0; // 盗賊フラグ
@@ -70,6 +81,17 @@ export class Player {
         this.tate = 0;
         this.tyudoku = 0;
         this.yakedo = 0;
+        this.kaifuku = 0;
+        this.kyousou = 0;
+        this.reika = 0;
+        this.gouyoku = 0;
+        this.gouman = 0;
+        this.funnu = 0;
+        this.boushoku = 0;
+        this.taida = 0;
+        this.shimon = 0;
+        this.shitto = 0;
+        this.shikiyoku = 0;
         this.nextLvUp = 0;
         this.gyogun = 0;
         this.tozoku = 0;
@@ -168,7 +190,7 @@ export class Player {
                 case "影":
                     this.name[i] = "影討";
                     this.type[i] = Player.BUFF;
-                    this.speed[i] = 0;
+                    this.speed[i] = i + 1;
                     break;
                 case "交":
                     this.name[i] = "交錯";
@@ -277,63 +299,61 @@ export class Player {
                 case "瘴":
                     this.name[i] = "瘴気";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
-                    this.damage[i] = 1;
+                    this.speed[i] = i;
+                    this.damage[i] = 0; // 変数
                     break;
-                case "鉄":
+                case "拳":
                     this.name[i] = "鉄拳";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
-                    this.damage[i] = 2;
+                    this.speed[i] = 3;
+                    this.damage[i] = 1; // 変数
                     break;
                 case "烈":
                     this.name[i] = "烈風";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = (i + 1) + 2;
+                    this.speed[i] = i;
                     this.damage[i] = 1;
                     break;
-                case "審":
-                    this.name[i] = "審判";
+                case "滅":
+                    this.name[i] = "撃滅";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = i + 1;
-                    this.damage[i] = i + 1;
+                    this.speed[i] = 2;
+                    this.damage[i] = 1;
                     break;
-                case "艦":
+                case "砲":
                     this.name[i] = "艦砲";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
+                    this.speed[i] = 0;
                     this.damage[i] = 3;
-                    this.limited[i] = 1;
                     break;
                 case "死":
                     this.name[i] = "死神";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = i + 1;
+                    this.speed[i] = i;
+                    this.damage[i] = 0; // 変数
+                    break;
+                case "焦":
+                    this.name[i] = "焦熱";
+                    this.type[i] = Player.ATTACK;
+                    this.speed[i] = 1;
                     this.damage[i] = 1;
                     break;
                 case "蟲":
                     this.name[i] = "蟲毒";
                     this.type[i] = Player.BUFF;
-                    this.speed[i] = i + 1;
-                    this.damage[i] = 0;
+                    this.speed[i] = 0;
                     break;
                 case "医":
                     this.name[i] = "医術";
                     this.type[i] = Player.BUFF;
                     this.speed[i] = i + 1;
                     break;
-                case "魚":
-                    this.name[i] = "魚群";
-                    this.type[i] = Player.BUFF;
-                    this.speed[i] = i + 1;
-                    this.damage[i] = 1;
-                    break;
-                case "焦":
-                    this.name[i] = "焦熱";
+                case "凍":
+                    this.name[i] = "凍結";
                     this.type[i] = Player.BUFF;
                     this.speed[i] = i + 1;
                     break;
-                case "協":
+                case "奏":
                     this.name[i] = "協奏";
                     this.type[i] = Player.BUFF;
                     this.speed[i] = i + 1;
@@ -341,133 +361,129 @@ export class Player {
                 case "盗":
                     this.name[i] = "盗賊";
                     this.type[i] = Player.BUFF;
-                    this.speed[i] = i + 1;
+                    this.speed[i] = 0;
+                    this.limited[i] = 1;
                     break;
                 case "幻":
                     this.name[i] = "幻惑";
                     this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "水":
                     this.name[i] = "水幕";
                     this.type[i] = Player.COUNTER;
-                    this.speed[i] = i + 1 + 1;
-                    this.damage[i] = 0;
+                    this.speed[i] = i;
                     break;
                 case "転":
                     this.name[i] = "転回";
                     this.type[i] = Player.COUNTER;
-                    this.speed[i] = i + 1;
-                    this.damage[i] = 0; // 変数
+                    this.speed[i] = (i + 1) + 2;
                     break;
                 case "罠":
                     this.name[i] = "罠師";
                     this.type[i] = Player.COUNTER;
-                    this.speed[i] = 1;
-                    this.damage[i] = 0;
+                    this.speed[i] = 0;
+                    this.damage[i] = 3;
                     break;
                 case "受":
                     this.name[i] = "受難";
                     this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = i + 1;
                     break;
                 case "飛":
                     this.name[i] = "飛行";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
                     break;
                 case "円":
                     this.name[i] = "円環";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
                     break;
                 case "礁":
                     this.name[i] = "座礁";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
                     break;
                 case "霊":
                     this.name[i] = "霊化";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
+                    break;
+                case "光":
+                    this.name[i] = "＋光";
+                    this.type[i] = Player.ENCHANT;
                     break;
                 case "翔":
                     this.name[i] = "＋翔";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
                     break;
                 case "弓":
                     this.name[i] = "＋弓";
                     this.type[i] = Player.ENCHANT;
-                    this.speed[i] = 0;
                     break;
                 case "狼":
                     this.name[i] = "狼嵐";
-                    this.type[i] = Player.ATTACK; // 神業だが扱いとしては攻撃スキルに近い？元データでは神業となっているがPlayerクラスの定数に神業はないためATTACKにするか要検討。一旦ATTACKで。
-                    this.speed[i] = i + 1;
-                    this.damage[i] = 3;
+                    this.type[i] = Player.ATTACK;
+                    this.speed[i] = 1;
+                    this.damage[i] = i + 1;
+                    this.limited[i] = 1;
                     break;
                 case "解":
                     this.name[i] = "▽解";
-                    this.type[i] = Player.ATTACK; // 同上
+                    this.type[i] = Player.ATTACK;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
+                    this.damage[i] = 1;
+                    this.limited[i] = 1;
                     break;
                 case "爆":
                     this.name[i] = "爆砕";
-                    this.type[i] = Player.ATTACK; // 同上
-                    this.speed[i] = 1;
-                    this.damage[i] = 3;
+                    this.type[i] = Player.ATTACK;
+                    this.speed[i] = i + 1;
+                    this.damage[i] = i + 1;
+                    this.limited[i] = 1;
                     break;
                 case "魔":
                     this.name[i] = "魔弾";
-                    this.type[i] = Player.ATTACK; // 同上
+                    this.type[i] = Player.ATTACK;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0; // 変数
+                    this.damage[i] = 1;
+                    this.limited[i] = 1;
                     break;
                 case "傲":
                     this.name[i] = "傲慢";
-                    this.type[i] = Player.ATTACK; // 敵専用もとりあえずATTACKで扱うか？
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "欲":
                     this.name[i] = "強欲";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "嫉":
                     this.name[i] = "嫉妬";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "憤":
                     this.name[i] = "憤怒";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0; // 変数
                     break;
                 case "色":
                     this.name[i] = "色欲";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "暴":
                     this.name[i] = "暴食";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = i + 1;
-                    this.damage[i] = 0;
                     break;
                 case "怠":
                     this.name[i] = "怠惰";
-                    this.type[i] = Player.ATTACK;
+                    this.type[i] = Player.COUNTER;
                     this.speed[i] = 0;
-                    this.damage[i] = 0;
+                    break;
+                case "Ｈ":
+                    this.name[i] = "ＨＰ";
+                    this.type[i] = Player.NONE;
                     break;
                 default:
                     break;

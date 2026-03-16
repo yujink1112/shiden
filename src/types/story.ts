@@ -12,6 +12,8 @@ export interface StoryEntry {
   soundEffect?: string; // 効果音ファイル名 (effectタイプで使用)
   animation?: string; // アニメーション名
   still?: string; // スチル画像ファイル名
+  duration?: number; // 演出の持続時間 (ミリ秒)
+  fadeDuration?: number; // BGMなどのフェードアウト時間 (ミリ秒)
 }
 
 export type StoryScript = StoryEntry[];

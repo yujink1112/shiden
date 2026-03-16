@@ -70,20 +70,28 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     showStoryModal,
     isAdmin,
     showAdmin,
-    chapter2SubStage
+    chapter2SubStage,
+    chapter2FlowIndex,
+    chapter2Flows,
+    moveToNextStep
   } = props;
 
   // 第2章のステージかどうかを判定
   const isChapter2 = React.useMemo(() => {
-     // stageCycleからSTAGE_DATAを参照できればより確実だが、ここではpropsからは直接取れないため、
-     // 簡易的にstageCycle >= 13 (第2章開始) で判定するか、
-     // または親コンポーネントから渡される stageProcessor の挙動で判断する。
-     // ここでは chapter2SubStage が存在するかどうかで判断するのが確実。
-     return !!chapter2SubStage;
-  }, [chapter2SubStage]);
+     return !!chapter2Flows.find(f => f.stageNo === stageCycle);
+  }, [chapter2Flows, stageCycle]);
 
-  // 第2章の報酬選択（大ボス撃破後 = subStage 3）
-  const isChapter2Reward = isChapter2 && chapter2SubStage === 3;
+  // 第2章の現在のステップ
+  const currentStep = React.useMemo(() => {
+    const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+    return flow?.flow[chapter2FlowIndex] || null;
+  }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
+
+  // 第2章の報酬選択（flow type が reward の場合）
+  const isChapter2Reward = isChapter2 && currentStep?.type === 'reward';
+
+  // 報酬選択の表示判定を上書き
+  const showRewardSelection = rewardSelectionMode || isChapter2Reward;
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', width: '100%', height: '100%', overflow: 'hidden' }}>
@@ -185,13 +193,66 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                 )}
               </div>
             )}
-            {rewardSelectionMode && (
+            {showRewardSelection && (
               <div className="RewardSelection" style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '10px' }}>
-                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>{(stageCycle === 11 && stageMode === 'MID' && canGoToBoss) ? '関門を突破！！' : battleResults.every(r => r.winner === 1) ? '全員倒した！' : '修行するぞ！'}<br />{isChapter2Reward ? 'スキルを2つ選んでください' : 'スキルを1つ選んでください'}</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
-                  {getAvailableSkillsUntilStage(stageCycle).map((skill: SkillDetail) => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}
+                <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
+                  {(stageCycle === 11 && stageMode === 'MID' && canGoToBoss) ? '関門を突破！！' : 
+                   (isChapter2 || stageMode === 'BOSS') ? (battleResults.length > 0 && battleResults.every(r => r.winner === 1) ? '撃破！！' : '敗北……') :
+                   (battleResults.length > 0 && battleResults.every(r => r.winner === 1)) ? '全員倒した！' : '修行するぞ！'}<br />
+                  {currentStep?.skill ? '新しいスキルを獲得しました！' :
+                   currentStep?.choices ? 'どちらかのスキルを選んでください' :
+                   isChapter2Reward ? `スキルを${currentStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
+                  {currentStep?.skill ? (
+                    <div style={{ transform: 'scale(1.2)', margin: '20px 0' }}>
+                      <SkillCard skill={getSkillCardsFromAbbrs([currentStep.skill])[0]} isSelected={true} iconMode={iconMode} />
+                    </div>
+                  ) : currentStep?.choices ? (
+                    currentStep.choices.map((abbr: string) => {
+                      const skill = getSkillCardsFromAbbrs([abbr])[0];
+                      if (!skill) return null;
+                      return (
+                        <div key={abbr} onClick={() => handleRewardSelection(abbr)} style={{ cursor: 'pointer', transition: 'transform 0.2s' }} className={selectedRewards.includes(abbr) ? 'selected-reward-card' : ''}>
+                          <SkillCard skill={skill} isSelected={selectedRewards.includes(abbr)} iconMode={iconMode} />
+                        </div>
+                      );
+                    })
+                  ) : (
+                    getAvailableSkillsUntilStage(stageCycle).map((skill: SkillDetail) => {
+                      if (ownedSkillAbbrs.includes(skill.abbr)) return null;
+                      return (
+                        <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}>
+                          <SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} />
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-                <button disabled={isChapter2Reward ? selectedRewards.length !== 2 : selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isChapter2Reward ? selectedRewards.length !== 2 : selectedRewards.length === 0) ? 0.5 : 1 }}>スキルを獲得する</button>
+                <button 
+                  disabled={
+                    currentStep?.skill ? false :
+                    currentStep?.choices ? selectedRewards.length !== 1 :
+                    isChapter2Reward ? selectedRewards.length !== (currentStep?.count || 1) : 
+                    selectedRewards.length === 0
+                  } 
+                  onClick={() => {
+                    if (currentStep?.skill) {
+                      // 単一スキルの場合は自動的にそれを報酬として渡す
+                      handleRewardSelection(currentStep.skill);
+                      // handleRewardSelection は state 更新なので、直後に confirmRewards を呼ぶために
+                      // selectedRewards を直接使うのではなく、confirmRewards 側で考慮するか、
+                      // あるいはここで selectedRewards にセットされるのを待つ必要がある。
+                      // App.tsx の confirmRewards を修正して、引数で渡せるようにするか、
+                      // あるいは currentStep を参照するようにする。
+                      // ここではひとまず既存の confirmRewards を呼ぶ。
+                    }
+                    confirmRewards();
+                  }} 
+                  style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : isChapter2Reward ? selectedRewards.length !== (currentStep?.count || 1) : selectedRewards.length === 0) ? 0.5 : 1 }}
+                >
+                  {currentStep?.skill ? '確認' : 'スキルを獲得する'}
+                </button>
                 <div style={{ marginTop: '15px' }}>
                     {!isChapter2Reward && (
                         <button onClick={() => { 
@@ -203,9 +264,13 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                 </div>
               </div>
             )}
-            {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !rewardSelectionMode && (
+            {(canGoToBoss && (stageMode === 'MID' || showBossClearPanel)) && !showRewardSelection && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
-                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>{ (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</>)}</h2>
+                <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>
+                  { (stageMode === 'KENJU' || stageMode === 'DENEI') ? <>{currentKenjuBattle?.name || kenjuBoss?.name}撃破！<br />おめでとうございます！！</> : 
+                    (isChapter2 || stageMode === 'BOSS') ? <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</> :
+                    (stageMode === 'MID' ? 'ボスへの道が開かれた！' : <>{stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！</>)}
+                </h2>
                 <button onClick={() => {
                   if (stageMode === 'MID') {
                     // 第2章では中間ステージクリアも次のサイクルへ（あるいはボスへ）
@@ -215,11 +280,13 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                     clearBossAndNextCycle();
                   }
                 }} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
-                  {(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}
+                  {(stageMode === 'KENJU' || stageMode === 'DENEI') ? 'ラウンジへ戻る' : 
+                   (isChapter2) ? '次へ進む' :
+                   (stageMode === 'MID' ? 'ボスステージへ進む' : '次のステージへ進む')}
                 </button>
               </div>
             )}
-            {battleResults.length > 0 && !rewardSelectionMode && !showBossClearPanel &&
+            {battleResults.length > 0 && !showRewardSelection && !showBossClearPanel &&
               ((stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? (battleResults[0]?.winner === 2 && logComplete) :
                (stageCycle != 11 && (battleResults.some(r => r.winner === 2)) || (stageMode === 'MID' && !canGoToBoss))) && (
               <div style={{ marginBottom: '20px', textAlign: 'center' }}>
@@ -290,6 +357,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                     onEnd={() => {
                         setShowStoryModal(false);
                         setGameStarted(false);
+                        moveToNextStep();
                     }}
                 />
             )}
