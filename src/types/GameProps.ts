@@ -98,6 +98,7 @@ export interface GameProps {
   bgmVolume: number;
   setBgmVolume: (volume: number) => void;
   showSettings: boolean;
+  loadingImageUrl: string;
   
   // Additional props needed for components
   getSkillCardsFromAbbrs: (abbrs: string[]) => SkillDetail[];

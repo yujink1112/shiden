@@ -57,7 +57,7 @@ export class Battle {
         this.log("――戦闘開始――");
         this.log();
 
-        for (this.turn = 1; this.turn < 1000; this.turn++) { // 無限ループ回避のため上限設定
+        for (this.turn = 1; this.turn < 100; this.turn++) { // 無限ループ回避のため上限設定
             const result = this.executeTurn();
             if (result !== BattleResult.CONTINUE) {
                 return result;
@@ -138,6 +138,8 @@ export class Battle {
                 this.log(`▼${pc.playerName}の攻撃フェイズ`);
                 this.log();
                 this.phaseAction(pc, opponent, isFirst);
+                // 強欲終了時に状態解除
+                pc.gouyoku = 0;
                 return true;
             }
             return false;
@@ -153,12 +155,19 @@ export class Battle {
             for (let i = 0; i < pc.getSkillsLength(); i++) if (pc.skill[i] === "円") return true;
             return false;
         };
-        if (hasEnkan(this.pc1) || hasEnkan(this.pc2)) {
+        if (hasEnkan(this.pc1)) {
             this.log();
-            this.log("円環の理によって終了フェイズが繰り返される……");
+            this.log(this.pc2.name + "の【円環】によって終了フェイズが繰り返される……。");
             this.log();
             this.phaseEnd();
         }
+        if (hasEnkan(this.pc2)) {
+            this.log();
+            this.log(this.pc2.name + "の【円環】によって終了フェイズが繰り返される……。");
+            this.log();
+            this.phaseEnd();
+        }
+        
     }
 
     /**
@@ -233,7 +242,7 @@ export class Battle {
                 this.log(`${pc.playerName}の【${pc.name[i]}】${i + 1}が発動！`);
                 if (pc.stan === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}のスタンが解除された！`); pc.stan = StatusFlag.NONE; }
                 if (pc.suijaku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の忘却が解除された！`); pc.suijaku = StatusFlag.NONE; }
-                if (pc.tyudoku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の中毒が解除された！`); pc.tyudoku = StatusFlag.NONE; }
+                if (pc.tyudoku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の毒が解除された！`); pc.tyudoku = StatusFlag.NONE; }
                 if (pc.yakedo === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の火傷が解除された！`); pc.yakedo = StatusFlag.NONE; }
                 this.log();
                 break;
@@ -343,7 +352,7 @@ export class Battle {
 
                 // 状態異常・バフ
                 if (pc.kakugo === StatusFlag.ACTIVE) speedBuf += 2;
-                if (pc.kyousou > 0) speedBuf += 1;
+                if (pc.kyousou > 0) speedBuf += pc.kyousou;
                 if (pc.gouman > 0) speedBuf += 1;
                 
                 // 相手の座礁チェック
@@ -472,7 +481,7 @@ export class Battle {
                 else damage = 1;
                 break;
             case "死":
-                damage = 0;
+                damage = 1;
                 if (defender.stan > 0) damage++;
                 if (defender.roubai > 0) damage++;
                 if (defender.suijaku > 0) damage++;
@@ -562,6 +571,9 @@ export class Battle {
 
         // 攻撃スキルの追加効果予約
         this.reserveSkillEffects(attacker, defender, idx);
+
+        // 強欲の更新
+        if (attacker.skill[idx] === "欲") attacker.gouyoku = StatusFlag.RESERVED;
     }
 
     private handleBuffSkill(attacker: Player, defender: Player, idx: number): void {
@@ -597,7 +609,7 @@ export class Battle {
     }
 
     private getStatusName(key: string): string {
-        const names: Record<string, string> = { tyudoku: "中毒", yakedo: "火傷", roubai: "狼狽", stan: "スタン", suijaku: "忘却" };
+        const names: Record<string, string> = { tyudoku: "毒", yakedo: "火傷", roubai: "狼狽", stan: "スタン", suijaku: "忘却" };
         return names[key] || key;
     }
 
@@ -621,9 +633,6 @@ export class Battle {
             let targetIdx = this.selectTarget(attacker, defender, useIdx);
             if (targetIdx === -1) break;
 
-            // 幻惑によるターゲット変更
-            targetIdx = this.applyGenwaku(attacker, defender, targetIdx, speed, penetrate);
-
             // 回避判定（飛行・霊化）
             if (this.checkEvasion(attacker, defender, useIdx, targetIdx)) continue;
 
@@ -644,29 +653,17 @@ export class Battle {
     }
 
     private selectTarget(attacker: Player, defender: Player, useIdx: number): number {
-        // ＋弓の効果
-        let isBow = false;
-        if (useIdx !== -1) {
-            for (let k = useIdx + 1; k < attacker.getSkillsLength(); k++) {
-                if (attacker.skill[k] === "弓") { isBow = true; break; }
-            }
-        }
-        if (isBow) this.log(`＞【＋弓】の効果で後列を狙う！`);
+
 
         // 刺突・艦砲の特殊ターゲット
         if (useIdx !== -1 && (attacker.skill[useIdx] === "刺" || attacker.skill[useIdx] === "砲")) {
             return this.selectPiercingTarget(defender, useIdx + 1);
         }
 
-        if (isBow) {
-            for (let i = defender.getSkillsLength() - 1; i >= 0; i--) {
-                if (defender.type[i] !== Player.NONE && defender.scar[i] !== 2) return i;
-            }
-        } else {
-            for (let i = 0; i < defender.getSkillsLength(); i++) {
-                if (defender.type[i] !== Player.NONE && defender.scar[i] !== 2) return i;
-            }
+        for (let i = 0; i < defender.getSkillsLength(); i++) {
+            if (defender.type[i] !== Player.NONE && defender.scar[i] !== 2) return i;
         }
+
         return -1;
     }
 
@@ -685,29 +682,6 @@ export class Battle {
         return bestIdx;
     }
 
-    private applyGenwaku(attacker: Player, defender: Player, targetIdx: number, attackerSpeed: number, penetrate: number): number {
-        if (defender.skill[targetIdx] !== "幻") return targetIdx;
-        
-        let genwakuSpeed = defender.speed[targetIdx];
-        if (targetIdx < defender.getSkillsLength() - 1 && defender.skill[targetIdx + 1] === "速") genwakuSpeed += 1;
-        if (defender.kakugo === StatusFlag.ACTIVE) genwakuSpeed += 2;
-        
-        const isPierced = (attacker.skill[attacker.getSkillsLength()-1] === "錬" && penetrate === 0); // 簡易判定
-        if (genwakuSpeed >= attackerSpeed && !isPierced) {
-            this.log(`＞${defender.playerName}の【幻惑】${targetIdx + 1}が発動！`);
-            const validTargets = [];
-            for (let k = 0; k < defender.getSkillsLength(); k++) {
-                if (defender.type[k] !== Player.NONE && defender.scar[k] !== 2) validTargets.push(k);
-            }
-            if (validTargets.length > 0) {
-                const newTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
-                this.log(`＞攻撃対象が【${defender.name[newTarget]}】${newTarget + 1}に変更された！`);
-                defender.limited[targetIdx] = StatusFlag.RESERVED;
-                return newTarget;
-            }
-        }
-        return targetIdx;
-    }
 
     private checkEvasion(attacker: Player, defender: Player, useIdx: number, targetIdx: number): boolean {
         // 飛行
@@ -717,14 +691,7 @@ export class Battle {
                 return true;
             }
         }
-        // 霊化
-        if (targetIdx < defender.getSkillsLength() - 1 && defender.skill[targetIdx + 1] === "霊") {
-            const physics = ["一", "刺", "果", "剣", "鉄", "烈", "艦", "死", "怒", "弱", "逆", "憤", "暴"];
-            if (physics.includes(attacker.skill[useIdx])) {
-                this.log(`＞【霊化】の効果で${defender.playerName}の【${defender.name[targetIdx]}】${targetIdx + 1}はダメージを受けない！`);
-                return true;
-            }
-        }
+
         return false;
     }
 
@@ -813,12 +780,7 @@ export class Battle {
                  }
              }
         }
-        if (s === "解") {
-            for (let k = 0; k < defender.getSkillsLength(); k++) {
-                if (defender.type[k] === Player.ENCHANT) defender.scar[k] = 2;
-            }
-            this.log("＞▽解の効果で全ての付帯スキルが破壊された！");
-        }
+
         if (s === "滅") {
             defender.kakugo = 0;
             defender.bouheki = 0;
@@ -827,11 +789,6 @@ export class Battle {
             defender.kaifuku = 0;
             defender.kyousou = 0;
             defender.reika = 0;
-            defender.gouyoku = 0;
-            defender.gouman = 0;
-            defender.funnu = 0;
-            defender.boushoku = 0;
-            defender.taida = 0;
             this.log(`＞撃滅の効果で${defender.playerName}の良い状態が全て解除された！`);
         }
         if (s === "魔") {
@@ -854,11 +811,6 @@ export class Battle {
             if (defender.kaifuku > 0) { attacker.kaifuku = StatusFlag.ACTIVE; defender.kaifuku = 0; }
             if (defender.kyousou > 0) { attacker.kyousou = StatusFlag.ACTIVE; defender.kyousou = 0; }
             if (defender.reika > 0) { attacker.reika = StatusFlag.ACTIVE; defender.reika = 0; }
-            if (defender.gouyoku > 0) { attacker.gouyoku = StatusFlag.ACTIVE; defender.gouyoku = 0; }
-            if (defender.gouman > 0) { attacker.gouman = StatusFlag.ACTIVE; defender.gouman = 0; }
-            if (defender.funnu > 0) { attacker.funnu = StatusFlag.ACTIVE; defender.funnu = 0; }
-            if (defender.boushoku > 0) { attacker.boushoku = StatusFlag.ACTIVE; defender.boushoku = 0; }
-            if (defender.taida > 0) { attacker.taida = StatusFlag.ACTIVE; defender.taida = 0; }
             attacker.tozoku = 0;
         }
     }
@@ -883,26 +835,6 @@ export class Battle {
             if (defender.shitto > 0) { attacker.shitto = StatusFlag.RESERVED; defender.shitto = 0; }
             if (defender.shikiyoku > 0) { attacker.shikiyoku = StatusFlag.RESERVED; defender.shikiyoku = 0; }
             this.log(`＞受難の効果で${defender.playerName}の悪い状態が${attacker.playerName}に移し替えられた！`);
-        }
-
-        // 敵専用スキル
-        if (s === "傲") {
-            for (let k = 0; k < attacker.getSkillsLength(); k++) if (attacker.type[k] === Player.BUFF) attacker.scar[k] = 2;
-            this.log(`＞傲慢の効果で${attacker.playerName}の補助スキルが全て破壊された！`);
-        }
-        if (s === "欲") {
-            let cnt = 0;
-            for (let k = 0; k < attacker.getSkillsLength(); k++) {
-                if (attacker.type[k] !== Player.NONE && attacker.scar[k] !== 2) { attacker.scar[k] = 2; cnt++; if (cnt >= 2) break; }
-            }
-            this.log(`＞強欲の効果で${attacker.playerName}のスキルが2つ奪われた（破壊された）！`);
-        }
-        if (s === "暴") {
-            for (let k = 0; k < attacker.getSkillsLength(); k++) {
-                if (attacker.type[k] !== Player.NONE && attacker.scar[k] !== 2) { attacker.scar[k] = 2; break; }
-            }
-            this.log(`＞暴食の効果で${attacker.playerName}のスキルが1つ奪われた（破壊された）！`);
-            // HP回復（スキル末尾に一閃追加とか？）
         }
     }
 

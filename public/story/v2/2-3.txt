@@ -165,3 +165,9 @@ $SLEEP 5
 
 アダム@left
 「…………。」
+
+【……】
+
+【To be continued……】
+
+#OFF

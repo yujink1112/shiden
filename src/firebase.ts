@@ -20,6 +20,8 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const storageBaseUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/`;
 export const getStorageUrl = (path: string) => {
+  if (!path) return "";
+  if (path.startsWith('http')) return path;
   const encodedPath = encodeURIComponent(path.startsWith('/') ? path.substring(1) : path);
   return `${storageBaseUrl}${encodedPath}?alt=media`;
 };

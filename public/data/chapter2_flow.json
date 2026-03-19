@@ -2,17 +2,14 @@
   {
     "stageNo": 13,
     "flow": [
-      { "type": "story", "id": "13-1" },
+      { "type": "title" },
+      { "type": "story", "id": "1-1" },
       { "type": "battle", "subStage": 1, "note": "戦闘1" },
-      { "type": "story", "id": "13-mid" },
-      { "type": "battle", "subStage": 2, "note": "中ボス" },
-      { "type": "story", "id": "13-2" },
-      { "type": "battle", "subStage": 3, "note": "戦闘2" },
-      { "type": "story", "id": "13-3" },
-      { "type": "battle", "subStage": 4, "note": "大ボス" },
-      { "type": "reward", "choices": ["紫", "影"] },
-      { "type": "reward", "skill": "一" },
-      { "type": "story", "id": "13-clear" }
+      { "type": "story", "id": "1-2" },
+      { "type": "battle", "subStage": 2, "note": "大ボス" },
+      { "type": "reward", "skill": "拳" },
+      { "type": "reward", "choices": ["転", "剣"] },
+      { "type": "story", "id": "1-3" }
     ]
   },
   {
@@ -21,11 +18,11 @@
       { "type": "story", "id": "14-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "14-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "14-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "14-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "14-clear" }
     ]
@@ -36,11 +33,11 @@
       { "type": "story", "id": "15-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "15-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "15-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "15-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "15-clear" }
     ]
@@ -51,11 +48,11 @@
       { "type": "story", "id": "16-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "16-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "16-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "16-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "16-clear" }
     ]
@@ -66,11 +63,11 @@
       { "type": "story", "id": "17-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "17-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "17-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "17-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "17-clear" }
     ]
@@ -81,11 +78,11 @@
       { "type": "story", "id": "18-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "18-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "18-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "18-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "18-clear" }
     ]
@@ -96,11 +93,11 @@
       { "type": "story", "id": "19-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "19-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "19-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "19-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "19-clear" }
     ]
@@ -111,11 +108,11 @@
       { "type": "story", "id": "20-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "20-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "20-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "20-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "20-clear" }
     ]
@@ -126,11 +123,11 @@
       { "type": "story", "id": "21-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "21-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "21-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "21-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "21-clear" }
     ]
@@ -141,11 +138,11 @@
       { "type": "story", "id": "22-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "22-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "22-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "22-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "22-clear" }
     ]
@@ -156,11 +153,11 @@
       { "type": "story", "id": "23-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "23-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "23-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "23-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "23-clear" }
     ]
@@ -171,11 +168,11 @@
       { "type": "story", "id": "24-1" },
       { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "24-mid" },
-      { "type": "battle", "subStage": 2 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "24-2" },
-      { "type": "battle", "subStage": 3 },
+      { "type": "battle", "subStage": 1 },
       { "type": "story", "id": "24-3" },
-      { "type": "battle", "subStage": 4 },
+      { "type": "battle", "subStage": 2 },
       { "type": "reward", "count": 2 },
       { "type": "story", "id": "24-clear" }
     ]

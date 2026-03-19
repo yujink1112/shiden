@@ -8,15 +8,13 @@ class AudioManager {
   private volume: number = 0.5;
   private isMuted: boolean = false;
   private isLoaded: boolean = false;
+  private listeners: (() => void)[] = [];
 
   private constructor() {
     const savedVolume = localStorage.getItem('shiden_bgm_volume');
     this.volume = savedVolume ? parseFloat(savedVolume) : 0.5;
     
     const savedEnabled = localStorage.getItem('shiden_bgm_enabled');
-    // shiden_bgm_enabled: true = 音が出る, false = ミュート
-    // isMuted: true = ミュート, false = 音が出る
-    // デフォルトは有効(true)なので、savedEnabledが 'false' の場合のみ isMuted = true
     this.isMuted = savedEnabled === 'false';
   }
 
@@ -25,6 +23,17 @@ class AudioManager {
       AudioManager.instance = new AudioManager();
     }
     return AudioManager.instance;
+  }
+
+  public subscribe(listener: () => void) {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  }
+
+  private notify() {
+    this.listeners.forEach(l => l());
   }
 
   // public/data/story_assets.json から audio データを取得
@@ -64,10 +73,18 @@ class AudioManager {
         return;
     }
 
-    const fileName = this.audioData[bgmName];
+    // bgmName が .mp3, .ogg, .wav などで終わる、あるいは / を含む場合はファイルパスとして扱う
+    let fileName = this.audioData[bgmName];
+    let isDirectPath = false;
+
     if (!fileName) {
-      console.warn(`BGM config not found for: ${bgmName}`);
-      return;
+        if (bgmName.includes("/") || bgmName.includes(".")) {
+            fileName = bgmName;
+            isDirectPath = true;
+        } else {
+            console.warn(`BGM config not found for: ${bgmName}`);
+            return;
+        }
     }
 
     // 既に同じ曲が再生されている場合は何もしない（ループ設定も同じ場合）
@@ -147,6 +164,7 @@ class AudioManager {
     if (this.currentBgm && !this.isMuted) {
       this.currentBgm.volume = this.volume;
     }
+    this.notify();
   }
 
   public setMute(mute: boolean) {
@@ -163,6 +181,7 @@ class AudioManager {
             // 基本的には volume 0 でも再生は続いているはず
         }
     }
+    this.notify();
   }
 
   public getVolume(): number {

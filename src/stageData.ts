@@ -2,14 +2,17 @@ import { SkillDetail, getSkillByAbbr, ALL_SKILLS } from './skillsData';
 
 export interface StageConfig {
   no: number;
+  chapter?: number;
+  stage?: number;
+  battle?: number;
   name: string;
   bossName: string;
   bossImage: string;
   bossDescription: string;
   shopSkills: string[]; // スキル名
   bossSkillAbbrs: string; // 略称文字列
-  chapter?: number;
-  stageInChapter?: number;
+  backgroundImage?: string;
+  bgm?: string;
 }
 
 let STAGE_DATA: StageConfig[] = [];

@@ -8,9 +8,11 @@ interface StoryCanvasProps {
   script?: StoryScript; // 以前の互換性のために残す
   scriptUrl?: string; // 新しいURL指定
   onEnd: () => void;
+  onOpenSettings?: () => void;
+  loadingImageUrl?: string;
 }
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, onEnd }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, onEnd, onOpenSettings, loadingImageUrl }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
@@ -619,36 +621,35 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         />
         {isLoaded && !isEnding && (
           <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 10000 }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const manager = AudioManager.getInstance();
-                const newMuted = !manager.isMutedStatus();
-                manager.setMute(newMuted);
-                setForceUpdate(prev => !prev);
-              }}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                color: '#fff',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '18px',
-                transition: 'background-color 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
-                WebkitTapHighlightColor: 'transparent',
-                minWidth: '45px'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
-              title={AudioManager.getInstance().isMutedStatus() ? "BGMを再生" : "BGMをミュート"}
-            >
-              {AudioManager.getInstance().isMutedStatus() ? "🔇" : "🔊"}
-            </button>
+            {onOpenSettings && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenSettings();
+                }}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  color: '#fff',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
+                  WebkitTapHighlightColor: 'transparent',
+                  minWidth: '45px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+                title="設定"
+              >
+                ⚙️
+              </button>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -682,9 +683,14 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
             left: '50%',
             transform: 'translate(-50%, -50%)',
             color: '#fff',
-            fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"'
+            fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px'
           }}>
-            Loading Story...
+            <img src={loadingImageUrl || "/images/title/sailing_loop_32x32_fixed.gif"} alt="Loading" style={{ width: '32px', height: '32px', imageRendering: 'pixelated' }} />
+            <div>Loading Story...</div>
           </div>
         )}
       </div>

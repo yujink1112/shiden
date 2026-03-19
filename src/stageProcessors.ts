@@ -226,6 +226,10 @@ export class MidStageProcessor implements StageProcessor {
   }
 
   getBackgroundImage(context: StageContext): string {
+    const info = STAGE_DATA.find(s => s.no === context.stageCycle);
+    if (info?.backgroundImage) {
+      return getStorageUrl(info.backgroundImage);
+    }
     return getStorageUrl(`/images/background/${context.stageCycle}.jpg`);
   }
 
@@ -265,21 +269,24 @@ export class BossStageProcessor implements StageProcessor {
     return 1;
   }
 
+  private getStageInfo(context: StageContext) {
+    // 第2章の判定: chapter2SubStage があり、stageCycle が第2章の範囲（13以上）
+    if (context.chapter2SubStage !== undefined && context.stageCycle >= 13) {
+      const chapterStage = context.stageCycle - 12;
+      const info = STAGE_DATA.find(s => s.chapter === 2 && s.stage === chapterStage && s.battle === context.chapter2SubStage);
+      if (info) return info;
+    }
+    return STAGE_DATA.find(s => s.no === context.stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
+  }
+
   getEnemyName(index: number, context: StageContext): string {
-    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    const info = this.getStageInfo(context);
     return info?.bossName || "BOSS";
   }
 
   getEnemySkills(index: number, context: StageContext): SkillDetail[] {
-    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    const info = this.getStageInfo(context);
     if (!info) return [];
-
-    // 第2章のサブステージに応じたスキル調整（必要であれば）
-    if (context.chapter2SubStage && context.chapter2SubStage < 4) {
-      // 大ボス(4)以外は少し弱めにするなどの調整が可能
-      // 現状は一律でボススキルを使用
-      return info.bossSkillAbbrs.split("").map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
-    }
 
     if (context.stageCycle === 10) {
       const gekirin = getSkillByAbbr("逆")!;
@@ -298,7 +305,7 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getStageTitle(context: StageContext): string {
-    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    const info = this.getStageInfo(context);
     return info ? `VS ${info.bossName}` : "VS BOSS";
   }
 
@@ -307,16 +314,20 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getBackgroundImage(context: StageContext): string {
+    const info = this.getStageInfo(context);
+    if (info?.backgroundImage) {
+      return getStorageUrl(info.backgroundImage);
+    }
     return getStorageUrl(`/images/background/${context.stageCycle}.jpg`);
   }
 
   getBossImage(context: StageContext): string | undefined {
-    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    const info = this.getStageInfo(context);
     return info ? getStorageUrl(info.bossImage) : undefined;
   }
 
   getBossDescription(context: StageContext): string {
-    const info = (STAGE_DATA || []).find(s => s.no === context.stageCycle) || (STAGE_DATA || [])[STAGE_DATA.length - 1];
+    const info = this.getStageInfo(context);
     return info?.bossDescription || "";
   }
 

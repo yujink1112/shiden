@@ -369,6 +369,7 @@ SkillCard: React.FC<any>;
   changelogData: any[];
   setShowUpdateNotify: (show: boolean) => void;
   handleForceUpdate: () => void;
+  loadingImageUrl?: string;
 }
 
 export const Lounge: React.FC<LoungeProps> = ({
@@ -407,7 +408,8 @@ onPageChange,
   showUpdateNotify,
   changelogData,
   setShowUpdateNotify,
-  handleForceUpdate
+  handleForceUpdate,
+  loadingImageUrl
 }) => {
   const today = new Date().toLocaleDateString();
 
@@ -1479,18 +1481,8 @@ onPageChange,
             backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 70000,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'
           }}>
-            <div className="loading-spinner" style={{
-              width: '60px', height: '60px', border: '6px solid rgba(255, 82, 82, 0.2)',
-              borderTop: '6px solid #ff5252', borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }} />
-            <div style={{ color: '#ff5252', fontWeight: 'bold', fontSize: '1.2rem', textShadow: '0 0 10px rgba(255, 82, 82, 0.5)' }}>電影戦の準備中...</div>
-            <style>{`
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            `}</style>
+            <img src={loadingImageUrl || "/images/title/sailing_loop_32x32_fixed.gif"} alt="Loading" style={{ width: '64px', height: '64px', imageRendering: 'pixelated' }} />
+            <div style={{ color: '#ff5252', fontWeight: 'bold', fontSize: '1.2rem', textShadow: '0 0 10px rgba(255, 82, 82, 0.5)' }}>準備中...</div>
           </div>
         )}
       </div>

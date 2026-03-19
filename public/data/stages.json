@@ -1,284 +1,384 @@
 [
   {
     "no": 1,
+    "chapter": 1,
     "name": "生き残ろう",
     "bossName": "凶暴なサル",
     "bossImage": "/images/monster/1.png",
     "bossDescription": "歯をカチカチして威嚇している。怖い。",
+    "backgroundImage": "/images/background/1.jpg",
     "shopSkills": [
       "一閃",
       "刺突",
       "崩技"
     ],
-    "bossSkillAbbrs": "空一刺一刺"
+    "bossSkillAbbrs": "空一刺一刺",
+    "bgm": "BossBattle"
   },
   {
     "no": 2,
+    "chapter": 1,
     "name": "食料を探そう",
     "bossName": "オオサソリ",
     "bossImage": "/images/monster/2.png",
     "bossDescription": "食べられない……。",
+    "backgroundImage": "/images/background/2.jpg",
     "shopSkills": [
       "搦手",
       "果断"
     ],
-    "bossSkillAbbrs": "搦崩搦刺刺"
+    "bossSkillAbbrs": "搦崩搦刺刺",
+    "bgm": "BossBattle"
   },
   {
     "no": 3,
+    "chapter": 1,
     "name": "狩りをしよう",
     "bossName": "肉厚な馬",
     "bossImage": "/images/monster/3.png",
     "bossDescription": "おいしそう！！すごい！！おいしそう！！",
+    "backgroundImage": "/images/background/3.jpg",
     "shopSkills": [
       "待伏",
       "＋速"
     ],
-    "bossSkillAbbrs": "崩待待果速"
+    "bossSkillAbbrs": "崩待待果速",
+    "bgm": "BossBattle"
   },
   {
     "no": 4,
+    "chapter": 1,
     "name": "家を作ろう",
     "bossName": "古々考古硬木",
     "bossImage": "/images/monster/4.png",
     "bossDescription": "見たこともないが由緒がありそうだ。",
+    "backgroundImage": "/images/background/4.jpg",
     "shopSkills": [
       "防壁",
       "＋硬",
       "＋盾"
     ],
-    "bossSkillAbbrs": "空空刺硬空空刺硬"
+    "bossSkillAbbrs": "空空刺硬空空刺硬",
+    "bgm": "BossBattle"
   },
   {
     "no": 5,
+    "chapter": 1,
     "name": "家が壊れた",
     "bossName": "ゴリラマスター",
     "bossImage": "/images/monster/5.png",
     "bossDescription": "洞窟の主。仁義なき戦いだ。",
+    "backgroundImage": "/images/background/5.jpg",
     "shopSkills": [
       "剣舞",
       "交錯",
       "＋強"
     ],
-    "bossSkillAbbrs": "崩待防果速"
+    "bossSkillAbbrs": "崩待防果速",
+    "bgm": "BossBattle"
   },
   {
     "no": 6,
+    "chapter": 1,
     "name": "魚を獲ろう",
     "bossName": "肉厚な魚",
     "bossImage": "/images/monster/6.png",
     "bossDescription": "仲間と食べる魚は絶対においしい。",
+    "backgroundImage": "/images/background/6.jpg",
     "shopSkills": [
       "怒濤",
       "裏霞",
       "＋反"
     ],
-    "bossSkillAbbrs": "搦搦果反一強"
+    "bossSkillAbbrs": "搦搦果反一強",
+    "bgm": "BossBattle"
   },
   {
     "no": 7,
+    "chapter": 1,
     "name": "魔獣の襲撃",
     "bossName": "リザードロード",
     "bossImage": "/images/monster/7.png",
     "bossDescription": "悪夢にようこそ。",
+    "backgroundImage": "/images/background/7.jpg",
     "shopSkills": [
       "呪詛",
       "疫病",
       "隠刃"
     ],
-    "bossSkillAbbrs": "一交裏一裏剣"
+    "bossSkillAbbrs": "一交裏一裏剣",
+    "bgm": "BossBattle"
   },
   {
     "no": 8,
+    "chapter": 1,
     "name": "燃える海岸",
     "bossName": "絶望のキマイラ",
     "bossImage": "/images/monster/8.png",
     "bossDescription": "絶対に負けられない。あなたは剣を取る。",
+    "backgroundImage": "/images/background/8.jpg",
     "shopSkills": [
       "先制",
       "逆鱗",
       "覚悟"
     ],
-    "bossSkillAbbrs": "疫硬搦硬刺怒硬"
+    "bossSkillAbbrs": "疫硬搦硬刺怒硬",
+    "bgm": "BossBattle"
   },
   {
     "no": 9,
+    "chapter": 1,
     "name": "無人島地下鍾乳洞",
     "bossName": "独裁者の庭園",
     "bossImage": "/images/monster/9.png",
     "bossDescription": "殺戮兵器は邪悪に微笑む。",
+    "backgroundImage": "/images/background/9.jpg",
     "shopSkills": [
       "雷火",
       "封印",
       "連撃"
     ],
-    "bossSkillAbbrs": "先待待封連雷雷"
+    "bossSkillAbbrs": "先待待封連雷雷",
+    "bgm": "BossBattle"
   },
   {
     "no": 10,
+    "chapter": 1,
     "name": "精霊の森",
     "bossName": "レンダリングダスト",
     "bossImage": "/images/monster/10.png",
     "bossDescription": "自分自身に打ち勝つのよ！",
+    "backgroundImage": "/images/background/10.jpg",
     "shopSkills": [
       "紫電",
       "影討",
       "玉響"
     ],
-    "bossSkillAbbrs": "逆逆逆"
+    "bossSkillAbbrs": "逆逆逆",
+    "bgm": "BossBattle"
   },
   {
     "no": 11,
+    "chapter": 1,
     "name": "＜串＞",
     "bossName": "剣獣",
     "bossImage": "/images/monster/11.png",
     "bossDescription": "かつて剣に全てを捧げた者達がいた。",
+    "backgroundImage": "/images/background/11.jpg",
     "shopSkills": [
       "＋錬",
       "無想",
       "燐光"
     ],
-    "bossSkillAbbrs": "無覚交果反玉連紫盾"
+    "bossSkillAbbrs": "無覚交果反玉連紫盾",
+    "bgm": "BossBattle"
   },
   {
     "no": 12,
+    "chapter": 1,
     "name": "生き残ろう",
     "bossName": "アノマ",
     "bossImage": "/images/monster/12.png",
     "bossDescription": "「ハハハハハ！！ハハハハハハハハハ！！！」 ",
+    "backgroundImage": "/images/background/12.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "影影硬逆燐一雷反交怒"
+    "bossSkillAbbrs": "影影硬逆燐一雷反交怒",
+    "bgm": "BossBattle"
   },
   {
     "no": 13,
     "chapter": 2,
-    "stageInChapter": 1,
-    "name": "第2章-1",
+    "stage": 1,
+    "battle": 1,
+    "name": "第2章-1 (戦闘1)",
     "bossName": "ルーサー",
     "bossImage": "/images/monster/v2/1-1.png",
     "bossDescription": "「逃げないでくださいね！」",
-    "shopSkills": ["拳"],
-    "bossSkillAbbrs": "転崩拳速果"
+    "backgroundImage": "/images/background/v2/pirate-ship-deck2.jpg",
+    "shopSkills": [""],
+    "bossSkillAbbrs": "転崩拳速果",
+    "bgm": "戦闘：ルーサー"
   },
   {
     "no": 14,
     "chapter": 2,
-    "stageInChapter": 2,
-    "name": "第2章-2",
+    "stage": 1,
+    "battle": 2,
+    "name": "第2章-1 (大ボス)",
     "bossName": "肉厚な魚",
     "bossImage": "/images/monster/v2/1-2.png",
     "bossDescription": "やぁ、また会ったね。",
-    "shopSkills": ["転","剣"],
-    "bossSkillAbbrs": "搦搦果反一強"
+    "backgroundImage": "/images/background/pirate-ship-deck2.jpg",
+    "shopSkills": [],
+    "bossSkillAbbrs": "崩待果反一強",
+    "bgm": "戦闘：肉厚な魚"
   },
   {
     "no": 15,
     "chapter": 2,
-    "stageInChapter": 3,
-    "name": "第2章-3",
+    "stage": 2,
+    "battle": 1,
+    "name": "第2章-2 (戦闘1)",
     "bossName": "血に飢えたジョーズ",
     "bossImage": "/images/monster/v2/2-1.png",
-    "bossDescription": "第2章 Stage 3",
-    "shopSkills": [],
-    "bossSkillAbbrs": "崩待待果速"
+    "bossDescription": "血の匂いに引き付けられてやってきた、極めて獰猛なサメ。",
+    "backgroundImage": "/images/background/v2/Calm-lake-surface1.jpg",
+    "shopSkills": [""],
+    "bossSkillAbbrs": "搦隠罠",
+    "bgm": "戦闘：血に飢えたジョーズ"
   },
   {
     "no": 16,
     "chapter": 2,
-    "stageInChapter": 4,
-    "name": "第2章-4",
-    "bossName": "古々考古硬木",
-    "bossImage": "/images/monster/4.png",
-    "bossDescription": "第2章 Stage 4",
+    "stage": 2,
+    "battle": 2,
+    "name": "第2章-2 (大ボス)",
+    "bossName": "肉厚な魚",
+    "bossImage": "/images/monster/v2/1-2.png",
+    "bossDescription": "やぁ、また会ったね。",
+    "backgroundImage": "/images/background/6.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "空空刺硬空空刺硬"
+    "bossSkillAbbrs": "搦搦果反一強",
+    "bgm": "戦闘：肉厚な魚"
   },
   {
     "no": 17,
     "chapter": 2,
-    "stageInChapter": 5,
-    "name": "第2章-5",
-    "bossName": "ゴリラマスター",
-    "bossImage": "/images/monster/5.png",
-    "bossDescription": "第2章 Stage 5",
+    "stage": 3,
+    "battle": 2,
+    "name": "第2章-3 (大ボス)",
+    "bossName": "血に飢えたジョーズ",
+    "bossImage": "/images/monster/v2/2-1.png",
+    "bossDescription": "狂気を感じる鋭い牙。",
+    "backgroundImage": "/images/background/6.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "崩待防果速"
+    "bossSkillAbbrs": "崩待待果速",
+    "bgm": "戦闘：血に飢えたジョーズ"
   },
   {
     "no": 18,
     "chapter": 2,
-    "stageInChapter": 6,
-    "name": "第2章-6",
-    "bossName": "肉厚な魚",
-    "bossImage": "/images/monster/6.png",
-    "bossDescription": "第2章 Stage 6",
+    "stage": 4,
+    "battle": 2,
+    "name": "第2章-4 (大ボス)",
+    "bossName": "古々考古硬木",
+    "bossImage": "/images/monster/4.png",
+    "bossDescription": "第2章 Stage 4",
+    "backgroundImage": "/images/background/4.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "搦搦果反一強"
+    "bossSkillAbbrs": "空空刺硬空空刺硬",
+    "bgm": "BossBattle"
   },
   {
     "no": 19,
     "chapter": 2,
-    "stageInChapter": 7,
-    "name": "第2章-7",
-    "bossName": "リザードロード",
-    "bossImage": "/images/monster/7.png",
-    "bossDescription": "第2章 Stage 7",
+    "stage": 5,
+    "battle": 2,
+    "name": "第2章-5 (大ボス)",
+    "bossName": "ゴリラマスター",
+    "bossImage": "/images/monster/5.png",
+    "bossDescription": "第2章 Stage 5",
+    "backgroundImage": "/images/background/5.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "一交裏一裏剣"
+    "bossSkillAbbrs": "崩待防果速",
+    "bgm": "戦闘：海ゴリラ"
   },
   {
     "no": 20,
     "chapter": 2,
-    "stageInChapter": 8,
-    "name": "第2章-8",
-    "bossName": "絶望のキマイラ",
-    "bossImage": "/images/monster/8.png",
-    "bossDescription": "第2章 Stage 8",
+    "stage": 6,
+    "battle": 2,
+    "name": "第2章-6 (大ボス)",
+    "bossName": "肉厚な魚",
+    "bossImage": "/images/monster/6.png",
+    "bossDescription": "第2章 Stage 6",
+    "backgroundImage": "/images/background/6.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "疫硬搦硬刺怒硬"
+    "bossSkillAbbrs": "搦搦果反一強",
+    "bgm": "戦闘：肉厚な魚"
   },
   {
     "no": 21,
     "chapter": 2,
-    "stageInChapter": 9,
-    "name": "第2章-9",
-    "bossName": "独裁者の庭園",
-    "bossImage": "/images/monster/9.png",
-    "bossDescription": "第2章 Stage 9",
+    "stage": 7,
+    "battle": 2,
+    "name": "第2章-7 (大ボス)",
+    "bossName": "リザードロード",
+    "bossImage": "/images/monster/7.png",
+    "bossDescription": "第2章 Stage 7",
+    "backgroundImage": "/images/background/7.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "先待待封連雷雷"
+    "bossSkillAbbrs": "一交裏一裏剣",
+    "bgm": "BossBattle"
   },
   {
     "no": 22,
     "chapter": 2,
-    "stageInChapter": 10,
-    "name": "第2章-10",
-    "bossName": "レンダリングダスト",
-    "bossImage": "/images/monster/10.png",
-    "bossDescription": "第2章 Stage 10",
+    "stage": 8,
+    "battle": 2,
+    "name": "第2章-8 (大ボス)",
+    "bossName": "絶望のキマイラ",
+    "bossImage": "/images/monster/8.png",
+    "bossDescription": "第2章 Stage 8",
+    "backgroundImage": "/images/background/8.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "逆逆逆"
+    "bossSkillAbbrs": "疫硬搦硬刺怒硬",
+    "bgm": "BossBattle"
   },
   {
     "no": 23,
     "chapter": 2,
-    "stageInChapter": 11,
-    "name": "第2章-11",
-    "bossName": "剣獣",
-    "bossImage": "/images/monster/11.png",
-    "bossDescription": "第2章 Stage 11",
+    "stage": 9,
+    "battle": 2,
+    "name": "第2章-9 (大ボス)",
+    "bossName": "独裁者の庭園",
+    "bossImage": "/images/monster/9.png",
+    "bossDescription": "第2章 Stage 9",
+    "backgroundImage": "/images/background/9.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "無覚交果反玉連紫盾"
+    "bossSkillAbbrs": "先待待封連雷雷",
+    "bgm": "BossBattle"
   },
   {
     "no": 24,
     "chapter": 2,
-    "stageInChapter": 12,
-    "name": "第2章-12",
+    "stage": 10,
+    "battle": 2,
+    "name": "第2章-10 (大ボス)",
+    "bossName": "レンダリングダスト",
+    "bossImage": "/images/monster/10.png",
+    "bossDescription": "第2章 Stage 10",
+    "backgroundImage": "/images/background/10.jpg",
+    "shopSkills": [],
+    "bossSkillAbbrs": "逆逆逆",
+    "bgm": "BossBattle"
+  },
+  {
+    "no": 25,
+    "chapter": 2,
+    "stage": 11,
+    "battle": 2,
+    "name": "第2章-11 (大ボス)",
+    "bossName": "剣獣",
+    "bossImage": "/images/monster/11.png",
+    "bossDescription": "第2章 Stage 11",
+    "backgroundImage": "/images/background/11.jpg",
+    "shopSkills": [],
+    "bossSkillAbbrs": "無覚交果反玉連紫盾",
+    "bgm": "BossBattle"
+  },
+  {
+    "no": 26,
+    "chapter": 2,
+    "stage": 12,
+    "battle": 2,
+    "name": "第2章-12 (大ボス)",
     "bossName": "アノマ",
     "bossImage": "/images/monster/12.png",
     "bossDescription": "第2章 Stage 12",
+    "backgroundImage": "/images/background/12.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "影影硬逆燐一雷反交怒"
+    "bossSkillAbbrs": "影影硬逆燐一雷反交怒",
+    "bgm": "BossBattle"
   }
 ]

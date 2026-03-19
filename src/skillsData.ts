@@ -63,6 +63,7 @@ export const ALL_SKILLS = [
   { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「霊化」を与える。" },
   { abbr: "光", name: "＋光", kana:"プラスひかり", icon: "/images/skill/2011-12-23_3-130.gif", type: "付帯", speed: "なし", description: "このスキルの直前の【一閃】が与えるダメージは常に+2される。" },
   { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルより前にある攻撃スキル全てにリミテッドを与え、速度に+2する。" },
+  { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。" },
 
   // 神業スキル
   { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。" },
