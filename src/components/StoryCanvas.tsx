@@ -12,10 +12,81 @@ interface StoryCanvasProps {
   loadingImageUrl?: string;
 }
 
+interface RubySegment {
+  text: string;
+  ruby?: string;
+}
+
+const parseRubyText = (text: string): RubySegment[] => {
+  const segments: RubySegment[] = [];
+  let i = 0;
+  while (i < text.length) {
+    const char = text[i];
+    
+    // エスケープ処理 (\\《 -> 《)
+    if (char === '\\' && i + 1 < text.length) {
+        const nextChar = text[i + 1];
+        if (nextChar === '《' || nextChar === '》' || nextChar === '｜' || nextChar === '|') {
+            if (segments.length > 0 && !segments[segments.length - 1].ruby) {
+                segments[segments.length - 1].text += nextChar;
+            } else {
+                segments.push({ text: nextChar });
+            }
+            i += 2;
+            continue;
+        }
+    }
+
+    if (char === '|' || char === '｜') {
+      const rubyStart = text.indexOf('《', i);
+      const rubyEnd = text.indexOf('》', rubyStart);
+      if (rubyStart !== -1 && rubyEnd !== -1) {
+        const parent = text.substring(i + 1, rubyStart);
+        const ruby = text.substring(rubyStart + 1, rubyEnd);
+        segments.push({ text: parent, ruby });
+        i = rubyEnd + 1;
+        continue;
+      }
+    } else if (char === '《') {
+       const rubyEnd = text.indexOf('》', i);
+       if (segments.length > 0 && rubyEnd !== -1) {
+         const lastSegment = segments.pop()!;
+         const ruby = text.substring(i + 1, rubyEnd);
+         
+         // 簡易記法の判定: 直前の1文字が漢字、英字、またはカタカナの場合のみルビとみなす
+         const lastChar = lastSegment.text.slice(-1);
+         const isRubyTarget = /[々〇\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uD840-\uD87F[\uDC00-\uDFFF]A-Za-z\u30A1-\u30FC]/.test(lastChar);
+
+         if (lastSegment.ruby || !isRubyTarget) {
+           segments.push(lastSegment);
+           // 通常の文字として処理
+         } else {
+           if (lastSegment.text.length > 1) {
+             segments.push({ text: lastSegment.text.slice(0, -1) });
+             segments.push({ text: lastSegment.text.slice(-1), ruby });
+           } else {
+             segments.push({ text: lastSegment.text, ruby });
+           }
+           i = rubyEnd + 1;
+           continue;
+         }
+       }
+    }
+    
+    if (segments.length > 0 && !segments[segments.length - 1].ruby) {
+      segments[segments.length - 1].text += char;
+    } else {
+      segments.push({ text: char });
+    }
+    i++;
+  }
+  return segments;
+};
+
 const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, onEnd, onOpenSettings, loadingImageUrl }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
-  const [displayedText, setDisplayedText] = useState('');
+  const [displayedCharCount, setDisplayedCharCount] = useState(0); // ルビ対応用の表示文字数
   const [isTyping, setIsTyping] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,6 +96,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
   const currentBackgroundRef = useRef<HTMLImageElement | null>(null);
   const currentStillRef = useRef<HTMLImageElement | null>(null); // スチル画像用
   const bgOpacityRef = useRef(0);
+  const screenFadeAlphaRef = useRef(0); // 演出用フェード
   
   const [isLoaded, setIsLoaded] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
@@ -162,16 +234,21 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         clearTimeout(fadeTimerRef.current);
     }
 
-    setDisplayedText('');
+    setDisplayedCharCount(0);
     lastProcessedIndexRef.current = currentEntryIndex;
 
-    if (currentEntry.background && imagesRef.current[currentEntry.background]) {
-      const newBg = imagesRef.current[currentEntry.background];
-      if (currentBackgroundRef.current !== newBg) {
-        currentBackgroundRef.current = newBg;
-        bgOpacityRef.current = 0;
-        activeCharactersRef.current = {};
-        currentStillRef.current = null; // 背景が変わったらスチル解除
+    if (currentEntry.background) {
+      if (currentEntry.background === "OFF" || currentEntry.background === "None") {
+        currentBackgroundRef.current = null;
+      } else if (imagesRef.current[currentEntry.background]) {
+        const newBg = imagesRef.current[currentEntry.background];
+        if (currentBackgroundRef.current !== newBg) {
+          currentBackgroundRef.current = newBg;
+          // もし画面が完全に暗い状態なら、背景は最初から表示しておく (フェードアウト演出用)
+          bgOpacityRef.current = screenFadeAlphaRef.current >= 0.95 ? 1 : 0;
+          activeCharactersRef.current = {};
+          currentStillRef.current = null; // 背景が変わったらスチル解除
+        }
       }
     }
 
@@ -184,10 +261,33 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         }
     }
 
-    // 画面揺れ演出
-    if (currentEntry.type === "effect" && currentEntry.animation === "shake") {
-        setShakeAmount(15);
-        setTimeout(() => setShakeAmount(0), 500);
+    // 演出処理 (画面揺れ、フェード)
+    if (currentEntry.type === "effect") {
+        if (currentEntry.animation === "shake") {
+            setShakeAmount(15);
+            setTimeout(() => setShakeAmount(0), 500);
+        } else if (currentEntry.animation === "fadeOut" || currentEntry.animation === "fadeIn") {
+            const isFadeOut = currentEntry.animation === "fadeOut";
+            const duration = currentEntry.duration || 1000;
+            const startTime = Date.now();
+            
+            const animateFade = () => {
+                const now = Date.now();
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                if (isFadeOut) {
+                    screenFadeAlphaRef.current = progress;
+                } else {
+                    screenFadeAlphaRef.current = 1 - progress;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateFade);
+                }
+            };
+            requestAnimationFrame(animateFade);
+        }
     }
 
     const setFocus = (targetPos: string) => {
@@ -235,17 +335,24 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
     if (currentEntry.text) {
       setIsTyping(true);
+      const fullSegments = parseRubyText(currentEntry.text);
+      const totalChars = fullSegments.reduce((sum, seg) => sum + seg.text.length, 0);
       let i = 0;
       typingIntervalRef.current = setInterval(() => {
-        setDisplayedText(currentEntry.text!.substring(0, i + 1));
+        setDisplayedCharCount(i + 1);
         i++;
-        if (i >= currentEntry.text!.length) {
+        if (i >= totalChars) {
           if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
           setIsTyping(false);
         }
       }, 40);
     } else {
       setIsTyping(false);
+    }
+
+    // SE再生
+    if (currentEntry.soundEffect) {
+      AudioManager.getInstance().playSe(currentEntry.soundEffect);
     }
 
     // BGM再生
@@ -289,7 +396,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       }
 
       if (!currentEntry.text) {
-        setDisplayedText("");
+        setDisplayedCharCount(0);
         setIsTyping(false);
       }
     }
@@ -477,8 +584,10 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       const textY = boxY + paddingY + nameOffset;
       const maxWidth = boxW - paddingX * 2;
       
-      if (lastProcessedIndexRef.current === currentEntryIndex && displayedText) {
-          const lines = wrapText(ctx, displayedText, maxWidth);
+      if (lastProcessedIndexRef.current === currentEntryIndex && currentEntry?.text) {
+          const fullSegments = parseRubyText(currentEntry.text);
+          const currentSegments = getDisplayedSegments(fullSegments, displayedCharCount);
+          const lines = wrapTextWithRuby(ctx, currentSegments, maxWidth);
           
           ctx.save();
           ctx.strokeStyle = '#000';
@@ -488,13 +597,45 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
           lines.forEach((line, index) => {
             const ly = textY + index * textFontSize * conf.lineSpacing;
-            ctx.strokeText(line, textX, ly);
-            ctx.fillText(line, textX, ly);
+            let currentX = textX;
+            
+            line.forEach(seg => {
+                const charWidth = ctx.measureText(seg.text).width;
+                
+                // 親文字の描画
+                ctx.strokeText(seg.text, currentX, ly);
+                ctx.fillText(seg.text, currentX, ly);
+                
+                // ルビの描画
+                if (seg.ruby) {
+                    ctx.save();
+                    const rubyFontSize = textFontSize * 0.5;
+                    ctx.font = `${rubyFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                    const rubyWidth = ctx.measureText(seg.ruby).width;
+                    const rubyX = currentX + (charWidth - rubyWidth) / 2;
+                    const rubyY = ly - rubyFontSize * 0.9;
+                    
+                    ctx.strokeText(seg.ruby, rubyX, rubyY);
+                    ctx.fillText(seg.ruby, rubyX, rubyY);
+                    ctx.restore();
+                }
+                
+                currentX += charWidth;
+            });
           });
           ctx.restore();
       }
 
       ctx.restore(); // 画面揺れ ctx.save() の対
+
+      // 演出用フェードオーバーレイ
+      if (screenFadeAlphaRef.current > 0) {
+          ctx.save();
+          ctx.globalAlpha = screenFadeAlphaRef.current;
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+      }
 
       if (isEnding) {
           ctx.save();
@@ -512,30 +653,93 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLoaded, currentEntryIndex, displayedText, isEnding, shakeAmount, CONFIG.PC, CONFIG.MOBILE]);
+  }, [isLoaded, currentEntryIndex, displayedCharCount, isEnding, shakeAmount, CONFIG.PC, CONFIG.MOBILE]);
 
-  const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
-    if (!text) return [];
-    const lines: string[] = [];
-    const paragraphs = text.split('\n');
-    
-    paragraphs.forEach(p => {
-        let currentLine = '';
-        for (let n = 0; n < p.length; n++) {
-            const char = p[n];
-            const testLine = currentLine + char;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && n > 0) {
-                lines.push(currentLine);
-                currentLine = char;
-            } else {
-                currentLine = testLine;
-            }
-        }
+const getDisplayedSegments = (fullSegments: RubySegment[], count: number): RubySegment[] => {
+  const result: RubySegment[] = [];
+  let remaining = count;
+  for (const seg of fullSegments) {
+    if (remaining <= 0) break;
+    if (seg.text.length <= remaining) {
+      result.push(seg);
+      remaining -= seg.text.length;
+    } else {
+      result.push({ text: seg.text.substring(0, remaining), ruby: seg.ruby });
+      remaining = 0;
+    }
+  }
+  return result;
+};
+
+const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[], maxWidth: number): RubySegment[][] => {
+  const lines: RubySegment[][] = [];
+  const kinsokuChars = '、。！？）］｝〉》」』】〕ゝゞー々';
+  
+  let currentLine: RubySegment[] = [];
+  let currentWidth = 0;
+  
+  for (const seg of segments) {
+    if (seg.ruby) {
+      // ルビ付きセグメントは基本的には塊として扱う
+      const segWidth = ctx.measureText(seg.text).width;
+      if (currentWidth + segWidth > maxWidth && currentLine.length > 0) {
         lines.push(currentLine);
-    });
-    return lines;
-  };
+        currentLine = [seg];
+        currentWidth = segWidth;
+      } else {
+        currentLine.push(seg);
+        currentWidth += segWidth;
+      }
+    } else {
+      // 通常のテキストは1文字ずつ処理して禁則処理を行う
+      const parentText = seg.text;
+      for (let n = 0; n < parentText.length; n++) {
+        const char = parentText[n];
+        const charWidth = ctx.measureText(char).width;
+        
+        if (currentWidth + charWidth > maxWidth && currentLine.length > 0) {
+          // 行頭禁則 ( char が句読点なら、直前の1文字を道連れにして改行する )
+          if (kinsokuChars.includes(char)) {
+             const last = currentLine.pop()!;
+             if (last.ruby || last.text.length === 1) {
+                // 直前がルビ付き、または1文字だけの場合
+                if (currentLine.length > 0) {
+                  lines.push(currentLine);
+                }
+                currentLine = [last, { text: char }];
+                currentWidth = ctx.measureText(last.text).width + charWidth;
+             } else {
+                // 直前が複数文字のテキストセグメントなら、最後の1文字を切り出す
+                const textWithoutLast = last.text.slice(0, -1);
+                const lastChar = last.text.slice(-1);
+                
+                lines.push([...currentLine, { text: textWithoutLast }]);
+                currentLine = [{ text: lastChar }, { text: char }];
+                currentWidth = ctx.measureText(lastChar).width + charWidth;
+             }
+          } else {
+             lines.push(currentLine);
+             currentLine = [{ text: char }];
+             currentWidth = charWidth;
+          }
+        } else {
+          // 直前もルビなしセグメントなら、まとめる（描画効率のため）
+          const last = currentLine[currentLine.length - 1];
+          if (last && !last.ruby) {
+            last.text += char;
+          } else {
+            currentLine.push({ text: char });
+          }
+          currentWidth += charWidth;
+        }
+      }
+    }
+  }
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+  return lines;
+};
 
   const handleNext = () => {
     if (isEnding || !isLoaded) return;
@@ -545,10 +749,12 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
     if (isTyping) {
       if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
-      setDisplayedText(currentEntry.text || '');
+      const fullSegments = parseRubyText(currentEntry.text || '');
+      const totalChars = fullSegments.reduce((sum, seg) => sum + seg.text.length, 0);
+      setDisplayedCharCount(totalChars);
       setIsTyping(false);
     } else if (currentEntryIndex < script.length - 1) {
-      setDisplayedText('');
+      setDisplayedCharCount(0);
       setCurrentEntryIndex((prev) => prev + 1);
     } else {
       setIsEnding(true);

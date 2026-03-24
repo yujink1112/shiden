@@ -2458,10 +2458,32 @@ const PLAYER_SKILL_COUNT = 5;
                       <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>
                       
                       <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#1a237e', border: '1px solid #534bae' }}>
+                        <button onClick={() => { 
+                          const flow = chapter2Flows.find(f => f.stageNo === s.no);
+                          const midStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 1);
+                          if (midStepIndex !== undefined && midStepIndex !== -1) {
+                            setChapter2FlowIndex(midStepIndex);
+                          }
+                          setStageCycle(s.no); 
+                          setStageMode('BOSS'); 
+                          localStorage.setItem('shiden_stage_cycle', s.no.toString()); 
+                          setIsTitle(false); 
+                          setShowAdmin(false); 
+                        }} style={{ padding: '5px 10px', background: '#1a237e', border: '1px solid #534bae' }}>
                           MID
                         </button>
-                        <button onClick={() => { setStageCycle(s.no); setStageMode('BOSS'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#b71c1c', border: '1px solid #f05545' }}>
+                        <button onClick={() => { 
+                          const flow = chapter2Flows.find(f => f.stageNo === s.no);
+                          const bossStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 2);
+                          if (bossStepIndex !== undefined && bossStepIndex !== -1) {
+                            setChapter2FlowIndex(bossStepIndex);
+                          }
+                          setStageCycle(s.no); 
+                          setStageMode('BOSS'); 
+                          localStorage.setItem('shiden_stage_cycle', s.no.toString()); 
+                          setIsTitle(false); 
+                          setShowAdmin(false); 
+                        }} style={{ padding: '5px 10px', background: '#b71c1c', border: '1px solid #f05545' }}>
                           BOSS
                         </button>
                       </div>

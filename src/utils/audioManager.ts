@@ -157,6 +157,26 @@ class AudioManager {
     fade();
   }
 
+  public playSe(seName: string) {
+    if (!this.isLoaded) return;
+    
+    // assets.json に SE データがある場合はそちらを優先する等の処理があれば追加可能
+    let url = seName;
+    if (!url.startsWith("http") && !url.startsWith("/")) {
+        // storage 経由か、直接 public フォルダか
+        if (url.includes('.')) {
+          url = getStorageUrl(url);
+        } else {
+          // 拡張子がない場合は暫定的に .mp3 を付与するか、単にスキップ
+          return;
+        }
+    }
+    
+    const audio = new Audio(url);
+    audio.volume = this.isMuted ? 0 : this.volume;
+    audio.play().catch(e => console.error("Failed to play SE:", e));
+  }
+
   public setVolume(volume: number) {
     this.volume = Math.max(0, Math.min(1, volume));
     localStorage.setItem('shiden_bgm_volume', this.volume.toString());

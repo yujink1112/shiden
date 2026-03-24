@@ -43,6 +43,10 @@
     "イスパニア軍" : {
       "image": "イスパニア軍.png",
       "position": "center"
+    },
+    "ゾルゲイド" : {
+      "image": "ゾルゲイド.png",
+      "position": "center"
     }
 
   },
@@ -56,16 +60,39 @@
     "海賊船": "images/background/v2/海賊船の襲来.png",
     "イスパニア船": "images/background/v2/イスパニア船の襲来.png",
     "イスパニア艦隊": "images/background/v2/イスパニア艦隊.png",
-    "船が空を飛ぶ": "images/background/v2/船が空を飛ぶ.png"
+    "船が空を飛ぶ": "images/background/v2/船が空を飛ぶ.png",
+    "夜の航海": "images/background/v2/夜の航海.png",
+    "船倉1": "images/background/v2/Ghost-Ships-Hold1.jpg",
+    "船倉2": "images/background/v2/Ghost-ships-interior-corridor1.jpg",
+    "船倉3": "images/background/v2/船倉の深部.png",
+    "エルダゾルゲイド": "images/background/v2/海妖.png",
+    "クラーケンの海": "images/background/v2/クラーケンの海.png",
+    "クラーケン": "images/background/v2/クラーケン.png",
+    "ゴルゾアの海": "images/background/v2/ゴルゾアの海.png",
+    "ゴルゾアの胃袋": "images/background/v2/ゴルゾアの胃袋.png",
+    "深海1": "images/background/v2/深海1.png",
+    "深海2": "images/background/v2/深海2.png",
+    "深海3": "images/background/v2/深海3.png",
+    "彼方の海": "images/background/v2/彼方の海.png",
+    "ベッドルーム": "images/background/v2/ベッドルーム.png"
+    
   },
   "animations": {
     "fade": "fade",
-    "shake": "shake"
+    "shake": "shake",
+    "フェードアウト": "fadeOut",
+    "フェードイン": "fadeIn"
   },
   "stills": {
     "肉厚な魚": "images/still/肉厚な魚.png",
     "海賊たち": "images/still/海賊たち.png",
-    "古地図": "images/still/古地図.png"
+    "古地図": "images/still/古地図.png",
+    "七つ道具：釣り竿": "images/still/七つ道具：釣り竿.png",
+    "七つ道具：拳銃": "images/still/七つ道具：拳銃.png",
+    "七つ道具：潜水藻": "images/still/古地図.png",
+    "七つ道具：ランタン": "images/still/七つ道具：ランタン.png",
+    "七つ道具：フープ": "images/still/七つ道具：フープ.png"   
+
   },
   "bgm": {
     "港": "audio/VSQSE_0903_bird_05_sea.mp3",
@@ -96,19 +123,19 @@
     "船が空を飛ぶ": "audio/疾風舞うアリア・マテリア.mp3",
     "海賊の葬送曲": "audio/The_Captain_s_Descent.mp3",
     "オルゴール": "audio/空が茜に染まるまで.mp3",
-    "船室のひととき": "audio/The_Captain_s_Descent.mp3",
-    "船底": "audio/Maison-Hantee.mp3",
+    "船室のひととき": "audio/空が茜に染まるまで.mp3",
+    "船倉": "audio/Maison-Hantee.mp3",
     "戦闘：ルーサー": "audio/Seasick-Pirate.mp3",
     "戦闘：肉厚な魚": "audio/Seasick-Pirate.mp3",
     "戦闘：血に飢えたジョーズ": "audio/Battle04.mp3",
     "戦闘：弱者狩りのハゲタカ": "audio/Battle04.mp3",
     "戦闘：デザインドエッグ号": "audio/海賊が現れそうな曲.mp3",
     "戦闘：エーヴィス": "audio/Metal_01.mp3",
-    "戦闘：イスパニア海軍": "audio/chosenjo_loop.mp3",
+    "戦闘：イスパニア艦隊": "audio/chosenjo_loop.mp3",
     "戦闘：ラ・マンチャ号": "audio/chosenjo_loop.mp3",
     "戦闘：ゾルゲイド": "audio/ホラーな感じのピアノ.mp3",
     "戦闘：エルダゾルゲイド": "audio/這い寄るもの.mp3",
-    "戦闘：クラーケン": "audio/灰色の天つ風.mp3",
+    "戦闘：アビサルクラーケン": "audio/灰色の天つ風.mp3",
     "戦闘：ゴルゾアの胃袋": "audio/Ravin'_U.ogg",
     "戦闘：死霊の群れ": "audio/battle1.ogg",
     "戦闘：バクバク": "audio/battle1.ogg",

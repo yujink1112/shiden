@@ -119,6 +119,15 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
     if (line.startsWith('《') && line.endsWith('》')) {
       const content = line.substring(1, line.length - 1);
       
+      if (content === "OFF" || content === "None" || content === "消去") {
+        currentBackground = "";
+        script.push({
+          type: "background",
+          background: "OFF"
+        });
+        continue;
+      }
+
       let targetBg = "";
       if (assets.backgrounds[content]) {
         targetBg = assets.backgrounds[content];

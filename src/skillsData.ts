@@ -34,7 +34,7 @@ export const ALL_SKILLS = [
   { abbr: "空", name: "空白", kana:"くうはく", icon: "/images/skill/d13.gif", type: "付帯", speed: "なし", description: "何の効果も持たない。" },
   // 新規追加
   // 攻撃スキル
-  { abbr: "瘴", name: "瘴気", kana:"しょうき", icon: "/images/skill/v2/a11.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、互いが所持している【疫病】の数である。" },
+  { abbr: "瘴", name: "瘴気", kana:"しょうき", icon: "/images/skill/v2/2011-12-23_3-189.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、互いが所持している【疫病】の数である。" },
   { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに3点のダメージを与える。" },
   { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/v2/2011-12-23_3-067.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。迎撃スキルが発動しなければ、さらに上から2つのスキルを破壊する。【＋〇】の効果を受けられない。" },
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "2", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。" },
@@ -57,28 +57,28 @@ export const ALL_SKILLS = [
   { abbr: "受", name: "受難", kana:"じゅなん", icon: "/images/skill/v2/2021-7-17_100.gif", type: "迎撃", speed: "LV", description: "あなたが受けている悪い状態を全て解除し、相手に同じ状態を全て与える。" },
 
   // 付帯スキル
-  { abbr: "飛", name: "飛行", kana:"ひこう", icon: "/images/skill/2011-12-23_1-294.gif", type: "付帯", speed: "なし", description: "【弱撃】以外の速度0の攻撃スキルによるダメージと効果を受けない。" },
-  { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/2013-4-20_038.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直後に効果を発揮する。終了フェイズをもう一度行う。" },
-  { abbr: "礁", name: "座礁", kana:"ざしょう", icon: "/images/skill/2011-12-23_3-094.gif", type: "付帯", speed: "なし", description: "互いの攻撃スキルの速度に-1する(最低0)。複数ある場合、効果は重複する。" },
-  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「霊化」を与える。" },
-  { abbr: "光", name: "＋光", kana:"プラスひかり", icon: "/images/skill/2011-12-23_3-130.gif", type: "付帯", speed: "なし", description: "このスキルの直前の【一閃】が与えるダメージは常に+2される。" },
-  { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルより前にある攻撃スキル全てにリミテッドを与え、速度に+2する。" },
-  { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。" },
+  { abbr: "飛", name: "飛行", kana:"ひこう", icon: "/images/skill/v2/2011-12-23_1-294.gif", type: "付帯", speed: "なし", description: "【弱撃】以外の速度0の攻撃スキルによるダメージと効果を受けない。" },
+  { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/v2/2013-4-20_038.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直後に効果を発揮する。終了フェイズをもう一度行う。" },
+  { abbr: "礁", name: "座礁", kana:"ざしょう", icon: "/images/skill/v2/2011-12-23_3-094.gif", type: "付帯", speed: "なし", description: "互いの攻撃スキルの速度に-1する(最低0)。複数存在する場合、効果は重複する。" },
+  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「霊化」を与える。" },
+  { abbr: "光", name: "＋光", kana:"プラスひかり", icon: "/images/skill/v2/2011-12-23_3-130.gif", type: "付帯", speed: "なし", description: "このスキルの直前の【一閃】が与えるダメージは常に+2される。" },
+  { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/v2/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルより前にある攻撃スキル全てにリミテッドを与え、速度に+2する。" },
+  { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/v2/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。" },
 
   // 神業スキル
-  { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。" },
-  { abbr: "解", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/2011-12-23_3-036.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。" },
-  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「狼狽」「スタン」「忘却」を与える。" },
-  { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。" },
+  { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/v2/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。" },
+  { abbr: "解", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。" },
+  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「狼狽」「スタン」「忘却」を与える。" },
+  { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。" },
 
   // 敵専用スキル
-  { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。" },
-  { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。" },
-  { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。" },
-  { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。" },
-  { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。" },
-  { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。" },
-  { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。" },
+  { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。" },
+  { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/v2/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。" },
+  { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/v2/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。" },
+  { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/v2/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。" },
+  { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。" },
+  { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。" },
+  { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。" },
 ];
 
 export interface SkillDetail {
