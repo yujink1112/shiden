@@ -225,9 +225,21 @@ function App() {
     return saved ? parseInt(saved, 10) : 0;
   });
 
+  // Determine which chapter component to render
+  const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+  const isChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || stageCycle >= 13;
+  const chapter = isChapter2 ? 2 : 1;
+
   useEffect(() => {
-    localStorage.setItem('shiden_chapter2_flow_index', chapter2FlowIndex.toString());
-  }, [chapter2FlowIndex]);
+    if (isChapter2) {
+      if (user) {
+        const flowIndexRef = ref(database, `profiles/${user.uid}/chapter2/flowIndex`);
+        set(flowIndexRef, chapter2FlowIndex);
+      }
+    } else {
+      localStorage.setItem('shiden_chapter2_flow_index', chapter2FlowIndex.toString());
+    }
+  }, [chapter2FlowIndex, isChapter2, user]);
 
   // 互換性のための chapter2SubStage (フロー内の battle ステップに割り当てられる subStage)
   const chapter2SubStage = React.useMemo(() => {
@@ -334,13 +346,14 @@ function App() {
   const [midEnemyData, setMidEnemyData] = useState<{ [stage: number]: string[] }>({});
 
   const stageContext = React.useMemo<import('./stageData').StageContext>(() => ({
+    chapter,
     stageCycle,
     kenjuBoss: (stageMode === 'DENEI' || stageMode === 'KENJU') ? (currentKenjuBattle || kenjuBoss || undefined) : undefined,
     selectedPlayerSkills,
     midEnemyData,
     userName: myProfile?.displayName,
     chapter2SubStage
-  }), [stageCycle, stageMode, currentKenjuBattle, kenjuBoss, selectedPlayerSkills, midEnemyData, myProfile, chapter2SubStage]);
+  }), [stageCycle, stageMode, currentKenjuBattle, kenjuBoss, selectedPlayerSkills, midEnemyData, myProfile, chapter2SubStage, chapter]);
 
   const lastSavedVictoryRef = useRef<string>("");
 
@@ -498,8 +511,15 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   useEffect(() => {
-    localStorage.setItem('shiden_owned_skills', JSON.stringify(ownedSkillAbbrs));
-  }, [ownedSkillAbbrs]);
+    if (isChapter2) {
+      if (user) {
+        const skillsRef = ref(database, `profiles/${user.uid}/chapter2/ownedSkills`);
+        set(skillsRef, ownedSkillAbbrs);
+      }
+    } else {
+      localStorage.setItem('shiden_owned_skills', JSON.stringify(ownedSkillAbbrs));
+    }
+  }, [ownedSkillAbbrs, isChapter2, user]);
 
   useEffect(() => {
     // 全てのモードを永続化する（リロード時に状態を維持するため）
@@ -523,8 +543,15 @@ const PLAYER_SKILL_COUNT = 5;
   }, [currentKenjuBattle]);
 
   useEffect(() => {
-    localStorage.setItem('shiden_can_go_to_boss', canGoToBoss.toString());
-  }, [canGoToBoss]);
+    if (isChapter2) {
+      if (user) {
+        const bossRef = ref(database, `profiles/${user.uid}/chapter2/canGoToBoss`);
+        set(bossRef, canGoToBoss);
+      }
+    } else {
+      localStorage.setItem('shiden_can_go_to_boss', canGoToBoss.toString());
+    }
+  }, [canGoToBoss, isChapter2, user]);
 
   useEffect(() => {
     localStorage.setItem('shiden_use_rich_log', useRichLog.toString());
@@ -937,6 +964,15 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleChapterSelect = (chapter: number, isNewGame: boolean = false) => {
+    // 第2章はログイン必須
+    if (chapter === 2 && !user) {
+      alert("第2章をプレイするにはユーザー登録（ログイン）が必要です。タイトル画面の「修行・交流（ログイン）」から登録を行ってください。");
+      setStageMode('LOUNGE');
+      setIsTitle(false);
+      setShowChapterSelect(null);
+      return;
+    }
+
     const stage = isNewGame ? (chapter === 2 ? 13 : 1) : (chapterProgress[chapter] || (chapter === 2 ? 13 : 1));
     
     if (isNewGame) {
@@ -948,11 +984,37 @@ const PLAYER_SKILL_COUNT = 5;
         localStorage.removeItem('shiden_chapter2_flow_index');
         setChapterProgress(prev => ({ ...prev, 2: 13 }));
         setChapter2FlowIndex(0);
+
+        // 第2章のデータをFirebaseにもリセット
+        if (user) {
+          const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+          set(chapter2Ref, {
+            stageCycle: 13,
+            flowIndex: 0,
+            ownedSkills: CHAPTER2_INITIAL_SKILLS,
+            lastUpdated: serverTimestamp()
+          });
+        }
       }
       // NEW GAME時は所持スキルもリセット
       const initialSkills = chapter === 2 ? CHAPTER2_INITIAL_SKILLS : CHAPTER1_INITIAL_SKILLS;
       setOwnedSkillAbbrs(initialSkills);
-      localStorage.setItem('shiden_owned_skills', JSON.stringify(initialSkills));
+      if (chapter === 1) {
+        localStorage.setItem('shiden_owned_skills', JSON.stringify(initialSkills));
+      }
+    } else if (chapter === 2 && user) {
+      // 続きからの場合、Firebaseからデータをロードして反映させる
+      const loadChapter2Data = async () => {
+        const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+        const snapshot = await get(chapter2Ref);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.stageCycle) setStageCycle(data.stageCycle);
+          if (data.flowIndex !== undefined) setChapter2FlowIndex(data.flowIndex);
+          if (data.ownedSkills) setOwnedSkillAbbrs(data.ownedSkills);
+        }
+      };
+      loadChapter2Data();
     }
 
     setStageCycle(stage);
@@ -1055,6 +1117,33 @@ const PLAYER_SKILL_COUNT = 5;
         } else if (stageMode === 'VERIFY_EMAIL') {
            setStageMode('LOUNGE');
         }
+
+        // 第2章の進捗をFirebaseからロード
+        const loadChapter2Data = async () => {
+          const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+          const snapshot = await get(chapter2Ref);
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            // 現在が第2章なら、Firebaseのデータで状態を上書き
+            // (章選択画面などで「続きから」を選んだ時や、ページリロード時の対応)
+            const currentStage = STAGE_DATA.find(s => s.no === (data.stageCycle || stageCycle));
+            const isTargetChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || (data.stageCycle || stageCycle) >= 13;
+            
+            if (isTargetChapter2) {
+              if (data.stageCycle) setStageCycle(data.stageCycle);
+              if (data.flowIndex !== undefined) setChapter2FlowIndex(data.flowIndex);
+              if (data.ownedSkills) setOwnedSkillAbbrs(data.ownedSkills);
+              if (data.canGoToBoss !== undefined) setCanGoToBoss(data.canGoToBoss);
+              
+              // 章別進捗も更新
+              if (data.stageCycle) {
+                setChapterProgress(prev => ({ ...prev, 2: data.stageCycle }));
+              }
+            }
+          }
+        };
+        loadChapter2Data();
+
         // if (user.uid === process.env.REACT_APP_ADMIN_UID) {
         //   setShowAdmin(true);
         // }
@@ -1100,6 +1189,16 @@ const PLAYER_SKILL_COUNT = 5;
         });
       } else {
         setMyProfile(null);
+        // ログアウト時に第2章だった場合は、第1章の初期状態にリセット（ログイン必須のため）
+        const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+        const isCurrentlyChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || stageCycle >= 13;
+        if (isCurrentlyChapter2) {
+          setStageCycle(1);
+          setStageMode('MID');
+          setIsTitle(true);
+          setOwnedSkillAbbrs(CHAPTER1_INITIAL_SKILLS);
+          setChapter2FlowIndex(0);
+        }
       }
     });
 
@@ -1620,13 +1719,31 @@ const PLAYER_SKILL_COUNT = 5;
     
     setStageCycle(nextCycle);
     setChapter2FlowIndex(0); // 第2章フローインデックスリセット
-    localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
+    
+    if (isChapter2) {
+      if (user) {
+        const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+        set(chapter2Ref, {
+          stageCycle: nextCycle,
+          flowIndex: 0,
+          ownedSkills: ownedSkillAbbrs,
+          lastUpdated: serverTimestamp()
+        });
+      }
+    } else {
+      localStorage.setItem('shiden_stage_cycle', nextCycle.toString());
+    }
 
     // 章ごとの進捗も保存
     if (nextStageInfo?.chapter) {
       const chapterKey = `shiden_chapter${nextStageInfo.chapter}_stage`;
-      localStorage.setItem(chapterKey, nextCycle.toString());
-      setChapterProgress(prev => ({ ...prev, [nextStageInfo.chapter!]: nextCycle }));
+      if (nextStageInfo.chapter >= 2) {
+        // 第2章以降はFirebaseに保存（上記で実施済み）
+        setChapterProgress(prev => ({ ...prev, [nextStageInfo.chapter!]: nextCycle }));
+      } else {
+        localStorage.setItem(chapterKey, nextCycle.toString());
+        setChapterProgress(prev => ({ ...prev, [nextStageInfo.chapter!]: nextCycle }));
+      }
     } else if (nextCycle <= 12) {
       // 既存のステージ（1-12）は第1章扱いとする場合
       localStorage.setItem('shiden_chapter1_stage', nextCycle.toString());
@@ -1729,53 +1846,37 @@ const PLAYER_SKILL_COUNT = 5;
         return;
       }
 
-      if (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') {
-        // ボス戦・電影戦
-        if (kenjuBoss || currentKenjuBattle) {
-            audioManager.playBgm("BossBattle");
+      if (stageMode === 'BOSS' || stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') {
+        
+        // ステージごとのBGM指定を確認
+        let currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+        
+        // 第2章の場合はサブステージ（battle）に応じたデータを取得
+        if (stageCycle >= 13) {
+            const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+            const step = flow?.flow[chapter2FlowIndex];
+            const subStage = step?.subStage;
+            if (subStage !== undefined) {
+                const chapterStage = stageCycle - 12;
+                const info = STAGE_DATA.find(s => s.chapter === 2 && s.stage === chapterStage && s.battle === subStage);
+                if (info) currentStage = info;
+            }
+        }
+        
+        const customBgm = currentStage?.bgm;
+        if (customBgm && customBgm !== "BossBattle") {
+            audioManager.playBgm(customBgm);
         } else {
-            // ステージごとのBGM指定を確認
-            let currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-            
-            // 第2章の場合はサブステージ（battle）に応じたデータを取得
-            if (stageCycle >= 13) {
-                const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
-                const step = flow?.flow[chapter2FlowIndex];
-                const subStage = step?.subStage;
-                if (subStage !== undefined) {
-                    const chapterStage = stageCycle - 12;
-                    const info = STAGE_DATA.find(s => s.chapter === 2 && s.stage === chapterStage && s.battle === subStage);
-                    if (info) currentStage = info;
-                }
-            }
-            
-            const customBgm = currentStage?.bgm;
-            if (customBgm) {
-                audioManager.playBgm(customBgm);
-            } else {
-                audioManager.playBgm("BossBattle");
-            }
+            audioManager.playBgm("BossBattle");
         }
         return;
       }
 
-      if (stageMode === 'MID') {
-        // 通常ステージ
-        const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-        if (currentStage?.bgm) {
-             audioManager.playBgm(currentStage.bgm);
-        } else if (currentStage?.chapter && currentStage.chapter >= 2) {
-             audioManager.playBgm("Chapter2Field");
-        } else {
-             audioManager.playBgm("Field");
-        }
-        return;
-      }
     };
 
     playSceneBgm();
 
-  }, [isTitle, stageMode, showStoryModal, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex]);
+  }, [isTitle, stageMode, showStoryModal, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex, gameStarted, stagesLoaded]);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -1789,11 +1890,16 @@ const PLAYER_SKILL_COUNT = 5;
       if (lastSavedVictoryRef.current !== currentBattleId) {
           lastSavedVictoryRef.current = currentBattleId;
 
-          // まずはローカルストレージに保存
-          const localVictorySkills = JSON.parse(localStorage.getItem('shiden_stage_victory_skills') || '{}');
-          const updatedLocalVictorySkills = { ...localVictorySkills, [saveKey]: selectedPlayerSkills };
-          localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(updatedLocalVictorySkills));
-          setStageVictorySkills(updatedLocalVictorySkills);
+          // 第1章の場合、または未ログインの場合はローカルストレージにも保存
+          if (!isChapter2) {
+            const localVictorySkills = JSON.parse(localStorage.getItem('shiden_stage_victory_skills') || '{}');
+            const updatedLocalVictorySkills = { ...localVictorySkills, [saveKey]: selectedPlayerSkills };
+            localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(updatedLocalVictorySkills));
+            setStageVictorySkills(updatedLocalVictorySkills);
+          } else if (user) {
+            // 第2章でログイン済みの場合はメモリ上のステートのみ更新（Firebaseへの保存は以下で行う）
+            setStageVictorySkills(prev => ({ ...prev, [saveKey]: selectedPlayerSkills }));
+          }
           
 
           // Firebase/サーバーへの保存は勝利時のみ
@@ -2352,7 +2458,7 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showSettings && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 12000 }}>
+          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 30000 }}>
             <div className="ChangelogModal" style={{ maxWidth: '400px', border: '2px solid #888', backgroundColor: '#222' }} onClick={(e) => e.stopPropagation()}>
               <div className="ChangelogHeader" style={{ background: '#444' }}>
                 <span style={{ color: '#fff', fontWeight: 'bold' }}>設定</span>
@@ -2451,7 +2557,7 @@ const PLAYER_SKILL_COUNT = 5;
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ color: '#ff5252', borderBottom: '2px solid #ff5252', paddingBottom: '5px', marginBottom: '10px' }}>第2章 FLAG (story/v2)</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 2).map(s => {
+                {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
                   const n = s.stage!;
                   return (
                     <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
@@ -2459,28 +2565,28 @@ const PLAYER_SKILL_COUNT = 5;
                       
                       <div style={{ display: 'flex', gap: '5px' }}>
                         <button onClick={() => { 
-                          const flow = chapter2Flows.find(f => f.stageNo === s.no);
+                          const flow = chapter2Flows.find(f => f.stageNo === n + 12);
                           const midStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 1);
                           if (midStepIndex !== undefined && midStepIndex !== -1) {
                             setChapter2FlowIndex(midStepIndex);
                           }
-                          setStageCycle(s.no); 
+                          setStageCycle(n + 12); 
                           setStageMode('BOSS'); 
-                          localStorage.setItem('shiden_stage_cycle', s.no.toString()); 
+                          localStorage.setItem('shiden_stage_cycle', (n + 12).toString()); 
                           setIsTitle(false); 
                           setShowAdmin(false); 
                         }} style={{ padding: '5px 10px', background: '#1a237e', border: '1px solid #534bae' }}>
                           MID
                         </button>
                         <button onClick={() => { 
-                          const flow = chapter2Flows.find(f => f.stageNo === s.no);
+                          const flow = chapter2Flows.find(f => f.stageNo === n + 12);
                           const bossStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 2);
                           if (bossStepIndex !== undefined && bossStepIndex !== -1) {
                             setChapter2FlowIndex(bossStepIndex);
                           }
-                          setStageCycle(s.no); 
+                          setStageCycle(n + 12); 
                           setStageMode('BOSS'); 
-                          localStorage.setItem('shiden_stage_cycle', s.no.toString()); 
+                          localStorage.setItem('shiden_stage_cycle', (n + 12).toString()); 
                           setIsTitle(false); 
                           setShowAdmin(false); 
                         }} style={{ padding: '5px 10px', background: '#b71c1c', border: '1px solid #f05545' }}>
@@ -2576,6 +2682,7 @@ const PLAYER_SKILL_COUNT = 5;
 
 
   const gameProps: GameProps = {
+    chapter,
     stageCycle,
     stageMode,
     setStageMode,
@@ -2668,12 +2775,8 @@ const PLAYER_SKILL_COUNT = 5;
     );
   }
 
-  // Determine which chapter component to render
-  const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
-  const isChapter2 = (currentStage?.chapter && currentStage.chapter >= 2) || stageCycle >= 13;
-
   const gameContent = isChapter2 ? <GameChapter2 {...gameProps} /> : <GameChapter1 {...gameProps} />;
-
+  
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
       {!showChapter2Title && !showStoryModal && gameContent}
@@ -2775,7 +2878,7 @@ const PLAYER_SKILL_COUNT = 5;
       )}
       
       {showSettings && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 25000 }}>
+          <div className="ChangelogModalOverlay" onClick={() => setShowSettings(false)} style={{ zIndex: 30000 }}>
             <div className="ChangelogModal" style={{ maxWidth: '400px', border: '2px solid #888', backgroundColor: '#222' }} onClick={(e) => e.stopPropagation()}>
               <div className="ChangelogHeader" style={{ background: '#444' }}>
                 <span style={{ color: '#fff', fontWeight: 'bold' }}>設定</span>

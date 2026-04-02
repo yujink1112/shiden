@@ -18,6 +18,7 @@ export interface BattleResult {
 export interface GameProps {
   user: User | null;
   myProfile: UserProfile | null;
+  chapter: number;
   stageCycle: number;
   stageMode: StageMode;
   setStageMode: (mode: StageMode) => void;

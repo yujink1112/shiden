@@ -14,6 +14,7 @@ export interface StoryEntry {
   still?: string; // スチル画像ファイル名
   duration?: number; // 演出の持続時間 (ミリ秒)
   fadeDuration?: number; // BGMなどのフェードアウト時間 (ミリ秒)
+  sepia?: boolean; // セピア調にするかどうか
 }
 
 export type StoryScript = StoryEntry[];

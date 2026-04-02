@@ -338,7 +338,7 @@ export class Player {
                     this.speed[i] = 1;
                     this.damage[i] = 1;
                     break;
-                case "蟲":
+                case "毒":
                     this.name[i] = "蟲毒";
                     this.type[i] = Player.BUFF;
                     this.speed[i] = 0;

@@ -466,6 +466,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         const y = (height - drawH) / 2;
         
         ctx.save();
+        if (currentEntry?.sepia) ctx.filter = "sepia(100%) brightness(90%)";
         ctx.globalAlpha = bgOpacityRef.current;
         ctx.drawImage(bgImg, x, y, drawW, drawH);
         ctx.restore();
@@ -484,6 +485,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         const y = (height - stillH) / 2 - (isMobileMode ? 40 : 60) * dpr;
         
         ctx.save();
+        if (currentEntry?.sepia) ctx.filter = "sepia(100%) brightness(90%)";
         ctx.globalAlpha = bgOpacityRef.current;
         
         // 枠の描画
@@ -530,9 +532,11 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         const baseAlpha = char.opacity;
         
         ctx.save();
+        if (currentEntry?.sepia) ctx.filter = "sepia(100%) brightness(90%)";
         if (!char.focus) {
           ctx.globalAlpha = baseAlpha * 0.5;
-          if (ctx.filter) ctx.filter = "brightness(60%)";
+          if (ctx.filter === "none") ctx.filter = "brightness(60%)";
+          else ctx.filter += " brightness(60%)";
         } else {
           ctx.globalAlpha = baseAlpha;
         }
@@ -786,7 +790,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
         left: 0, 
         width: '100%', 
         height: '100dvh', 
-        zIndex: 9999, 
+        zIndex: 999, 
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         display: 'flex',
         alignItems: 'center',
@@ -826,7 +830,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
           }}
         />
         {isLoaded && !isEnding && (
-          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 10000 }}>
+          <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 10 }}>
             {onOpenSettings && (
               <button
                 onClick={(e) => {

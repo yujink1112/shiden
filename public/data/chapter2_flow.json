@@ -4,9 +4,9 @@
     "flow": [
       { "type": "title" },
       { "type": "story", "id": "1-1" },
-      { "type": "battle", "subStage": 1, "note": "戦闘1" },
+      { "type": "battle", "subStage": 1},
       { "type": "story", "id": "1-2" },
-      { "type": "battle", "subStage": 2, "note": "大ボス" },
+      { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "拳" },
       { "type": "reward", "choices": ["転", "剣"] },
       { "type": "story", "id": "1-3" }
@@ -15,166 +15,136 @@
   {
     "stageNo": 14,
     "flow": [
-      { "type": "story", "id": "14-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "14-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "14-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "14-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "14-clear" }
+      { "type": "story", "id": "2-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "2-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "飛" },
+      { "type": "reward", "choices": ["罠", "怒"] },
+      { "type": "story", "id": "2-3" }
     ]
   },
   {
     "stageNo": 15,
     "flow": [
-      { "type": "story", "id": "15-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "15-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "15-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "15-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "15-clear" }
+      { "type": "story", "id": "3-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "3-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "奏" },
+      { "type": "reward", "choices": ["盗", "待"] },
+      { "type": "story", "id": "3-3" }
     ]
   },
   {
     "stageNo": 16,
     "flow": [
-      { "type": "story", "id": "16-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "16-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "16-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "16-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "16-clear" }
+      { "type": "story", "id": "4-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "4-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "砲" },
+      { "type": "reward", "choices": ["弓", "紫"] },
+      { "type": "story", "id": "4-3" }
     ]
   },
   {
     "stageNo": 17,
     "flow": [
-      { "type": "story", "id": "17-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "17-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "17-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "17-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "17-clear" }
+      { "type": "story", "id": "5-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "5-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "焦" },
+      { "type": "reward", "choices": ["毒", "玉"] },
+      { "type": "story", "id": "5-3" }
     ]
   },
   {
     "stageNo": 18,
     "flow": [
-      { "type": "story", "id": "18-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "18-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "18-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "18-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "18-clear" }
+      { "type": "story", "id": "6-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "6-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "礁" },
+      { "type": "reward", "choices": ["光", "反"] },
+      { "type": "story", "id": "6-3" }
     ]
   },
   {
     "stageNo": 19,
     "flow": [
-      { "type": "story", "id": "19-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "19-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "19-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "19-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "19-clear" }
+      { "type": "story", "id": "7-1" },
+      { "type": "reward", "skill": "▽" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "7-2" },
+      { "type": "reward", "skill": "狼" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "水" },
+      { "type": "reward", "choices": ["瘴", "封"] },
+      { "type": "story", "id": "7-3" }
     ]
   },
   {
     "stageNo": 20,
     "flow": [
-      { "type": "story", "id": "20-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "20-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "20-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "20-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "20-clear" }
+      { "type": "story", "id": "8-1" },
+      { "type": "reward", "skill": "爆" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "8-2" },
+      { "type": "reward", "skill": "魔" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "円" },
+      { "type": "reward", "choices": ["凍", "隠"] },
+      { "type": "story", "id": "8-3" }
     ]
   },
   {
     "stageNo": 21,
     "flow": [
-      { "type": "story", "id": "21-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "21-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "21-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "21-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "21-clear" }
+      { "type": "story", "id": "9-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "9-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "撃" },
+      { "type": "reward", "choices": ["受", "燐"] },
+      { "type": "story", "id": "9-3" }
     ]
   },
   {
     "stageNo": 22,
     "flow": [
-      { "type": "story", "id": "22-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "22-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "22-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "22-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "22-clear" }
+      { "type": "story", "id": "10-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "10-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "弓" },
+      { "type": "reward", "choices": ["瘴", "錬"] },
+      { "type": "story", "id": "10-3" }
     ]
   },
   {
     "stageNo": 23,
     "flow": [
-      { "type": "story", "id": "23-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "23-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "23-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "23-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "23-clear" }
+      { "type": "story", "id": "11-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "story", "id": "11-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "reward", "skill": "死" },
+      { "type": "reward", "choices": ["幻", "無"] },
+      { "type": "story", "id": "11-3" }
     ]
   },
   {
     "stageNo": 24,
     "flow": [
-      { "type": "story", "id": "24-1" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "24-mid" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "24-2" },
-      { "type": "battle", "subStage": 1 },
-      { "type": "story", "id": "24-3" },
-      { "type": "battle", "subStage": 2 },
-      { "type": "reward", "count": 2 },
-      { "type": "story", "id": "24-clear" }
+      { "type": "story", "id": "12-1" },
+      { "type": "battle", "subStage": 1},
+      { "type": "reward", "choices": ["盾", "連"] },
+      { "type": "story", "id": "12-2" },
+      { "type": "battle", "subStage": 2},
+      { "type": "story", "id": "12-3" }
     ]
   }
 ]

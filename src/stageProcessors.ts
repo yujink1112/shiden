@@ -23,7 +23,34 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   10: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   11: { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } },
-  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, mobile: { height: '170%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } }
+  12: { pc: { height: '200%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);'}, 
+   mobile: { height: '170%', width: '200%', position: 'absolute', top: '-50%', left: '-50%', transform: 'translate(-50%,-50%);' } },
+  13: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  14: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  15: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  16: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  17: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  18: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  19: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  20: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  21: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
+  22: { pc: { height: '120%', width: '100%', position: 'absolute', top: '0%', left: '0%', transform: 'translate(-50%,-50%);'},
+   mobile: { height: '120%', width: '100%', position: 'absolute', top: '0%', left: '0%', transform: 'translate(-50%,-50%);' } },
+  23: { pc: { height: '90%', width: '90%' }, mobile: { height: '60%', width: '60%' } },
+  24: { pc: { height: '160%', width: '100%', position: 'absolute', top: '0%', left: '0%', transform: 'translate(-50%,-50%);' },
+   mobile: { height: '120%', width: '100%', position: 'absolute', top: '10%', left: '0%', transform: 'translate(-50%,-50%);' } },
+  25: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  26: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  27: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  28: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  29: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  30: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  31: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  32: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  34: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  36: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } }
 };
 
 const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -38,7 +65,31 @@ const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '60%', width: '60%' }, mobile: { height: '60%', width: '60%' } },
   10: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   11: { pc: { height: '90%', width: '90%' }, mobile: { height: '90%', width: '90%' } },
-  12: { pc: { height: '150%', width: '150%' }, mobile: { height: '150%', width: '150%' } }
+  12: { pc: { height: '150%', width: '150%' }, mobile: { height: '150%', width: '150%' } },
+  13: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  14: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  15: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  16: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  17: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  18: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  19: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  20: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  21: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
+  22: { pc: { height: '100%', width: '80%' }, mobile: { height: '100%', width: '60%' } },
+  23: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  24: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  25: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  26: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  27: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  28: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  29: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  30: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  31: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  32: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  34: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  36: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } }
 };
 
 const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -242,7 +293,10 @@ export class MidStageProcessor implements StageProcessor {
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
-    return getBossImageStyleCommon(context.stageCycle, isMobile, type);
+    console.log(context);
+    const subStage = context.chapter2SubStage ? context.chapter2SubStage - 1 : 0;
+    const idx = context.chapter === 1 ? context.stageCycle : (13 + (context.stageCycle - 13) * 2 + subStage);
+    return getBossImageStyleCommon(idx, isMobile, type);
   }
 }
 
@@ -332,11 +386,13 @@ export class BossStageProcessor implements StageProcessor {
   }
 
   getBossImageStyle(context: StageContext, isMobile: boolean, type: 'back' | 'battle' | 'sidebar'): React.CSSProperties {
-    return getBossImageStyleCommon(context.stageCycle, isMobile, type);
+    const subStage = context.chapter2SubStage ? context.chapter2SubStage - 1 : 0;
+    const idx = context.chapter === 1 ? context.stageCycle : (13 + (context.stageCycle - 13) * 2 + subStage);
+    return getBossImageStyleCommon(idx, isMobile, type);
   }
 
   getEnemyTitle(context: StageContext): string {
-    const stageCycle = context.stageCycle;
+    const stageCycle = context.stageCycle + 12 * (context.chapter - 1);
     if (stageCycle === 7) return 'MONSTER SURPRISED YOU';
     if (stageCycle === 8) return 'WALLOP';
     if (stageCycle === 9) return "IT'S ANNOYING";

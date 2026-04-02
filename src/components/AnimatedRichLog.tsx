@@ -205,6 +205,11 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                 will-change: transform, opacity;
               }
             `}</style>
+            <style>{`
+              .rich-log-modern::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
           </div>
         )}
         <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 'auto', height: isMobile ? '400px' : 0, boxSizing: 'border-box', overflow: 'hidden' }}>
@@ -212,7 +217,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
             <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
             <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
           </div>
-          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', minHeight: 0, boxSizing: 'border-box' }}>
+          <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none', msOverflowStyle: 'none', scrollbarGutter: 'stable', WebkitOverflowScrolling: 'touch', minHeight: 0, boxSizing: 'border-box' }}>
             {currentRoundLines.slice(0, roundVisibleCounts[currentRoundIdx]).map((line, i) => {
               let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards', WebkitTransform: 'translateY(10px)', WebkitAnimation: 'slideUp 0.3s forwards' };
               if (line.includes('VS')) {

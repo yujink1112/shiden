@@ -59,6 +59,7 @@ export const getSkillByName = (name: string): SkillDetail | undefined => {
 };
 
 export interface StageContext {
+  chapter: number,
   stageCycle: number;
   kenjuBoss?: {
     name: string;

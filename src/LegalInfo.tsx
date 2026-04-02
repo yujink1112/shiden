@@ -42,13 +42,6 @@ const LegalInfo: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <li><strong>取得情報：</strong>メールアドレス（認証用）、Googleアカウントの公開情報（表示名・画像URL）、およびゲーム内のプレイデータ。</li>
               <li><strong>利用目的：</strong>ユーザーの識別、ランキング表示、およびサービス改善。</li>
               <li><strong>第三者提供：</strong>法令に基づく場合を除き、ユーザーの同意なく第三者に提供することはありません。</li>
-              <li><strong>広告について：</strong>
-                <p>本サービスでは、第三者配信による広告サービス（Google AdSense）を利用しています。</p>
-                <p>広告配信事業者は、ユーザーの興味に応じた広告を表示するためにCookieを使用することがあります。Cookieを無効にする設定およびGoogle AdSenseに関する詳細は「<a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>Googleポリシーと規約</a>」をご覧ください。</p>
-              </li>
-              <li><strong>アクセス解析ツールについて：</strong>
-                <p>本サービスでは、Googleによるアクセス解析ツール「Googleアナリティクス」を利用しています。このGoogleアナリティクスはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。</p>
-              </li>
             </ul>
           </div>
         </section>

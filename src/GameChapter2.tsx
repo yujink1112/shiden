@@ -78,6 +78,14 @@ const GameChapter2: React.FC<GameProps> = (props) => {
   // 報酬選択の表示判定を上書き
   const showRewardSelection = rewardSelectionMode || isChapter2Reward;
 
+  // 敵のスキル数に応じたスケール計算
+  const enemySkills = React.useMemo(() => stageProcessor.getEnemySkills(0, stageContext), [stageProcessor, stageContext]);
+  const skillCount = enemySkills.length;
+  const bossSkillScale = isMobile ? 'none' : 
+                         skillCount === 7 ? 'scale(0.9)' :
+                         skillCount === 8 ? 'scale(0.8)' :
+                         skillCount >= 9 ? 'scale(0.7)' : 'none';
+
   return (
     <div style={{ 
       display: 'flex', 
@@ -134,9 +142,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
                       {stageProcessor.getEnemyTitle?.(stageContext)}
                   </h2>
-                  <div className="boss-skill-grid" style={{ transform: isMobile ? 'none' : (stageCycle === 4 || stageCycle === 10) ? 'scale(0.8)' : stageCycle === 9 ? 'scale(0.9)' : stageCycle === 11 || stageCycle === 12 ? 'scale(0.7)' : 'none', transformOrigin: 'center' }}>
-                    {stageProcessor.getEnemySkills(0, stageContext).length > 0 ? (
-                      stageProcessor.getEnemySkills(0, stageContext).map((skill: SkillDetail, index: number) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={false} /></div>)
+                  <div className="boss-skill-grid" style={{ transform: bossSkillScale, transformOrigin: 'center' }}>
+                    {enemySkills.length > 0 ? (
+                      enemySkills.map((skill: SkillDetail, index: number) => <div key={index} className="boss-skill-card-wrapper"><SkillCard skill={skill} isSelected={false} disableTooltip={false} /></div>)
                     ) : (
                       <div style={{ color: '#ff5252', padding: '20px' }}>スキル未設定</div>
                     )}
@@ -282,9 +290,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
           </div>
         )}
       </div>
-      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflowY: 'auto', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
+      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflow: 'hidden', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
         <h2 style={{ color: '#61dafb' }}>
-            {!gameStarted ? 'ストーリー' : (logComplete ? 'ゲームログ' : 'BOSS')}
+            {!gameStarted ? 'BOSS' : (logComplete ? 'ゲームログ' : 'BOSS')}
         </h2>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
           <button
@@ -322,7 +330,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
           <div style={{ textAlign: 'center' }}>
             <img src={stageProcessor.getBossImage(stageContext) || ""} alt="" style={stageProcessor.getBossImageStyle(stageContext, isMobile, 'sidebar')} />
             <h3>{stageProcessor.getEnemyName(0, stageContext)}</h3>
-            <p>{stageProcessor.getBossDescription(stageContext)}</p>
+            <p style={{ textAlign: 'left', whiteSpace: 'pre-wrap', padding: '0 10px' }}>
+              {stageProcessor.getBossDescription(stageContext).replace(/\\n/g, '\n')}
+            </p>
           </div>
         )}
       </div>

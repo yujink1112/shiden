@@ -25,10 +25,21 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
   const lines = text.split('\n');
   const script: StoryScript = [];
   let currentBackground = "";
+  let currentSepia = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
+
+    // セピア設定: @SEPIA ON/OFF
+    if (line.toUpperCase() === '@SEPIA ON') {
+      currentSepia = true;
+      continue;
+    }
+    if (line.toUpperCase() === '@SEPIA OFF') {
+      currentSepia = false;
+      continue;
+    }
 
     // キャラクター消去: /消去/@position
     if (line.startsWith('/消去')) {
@@ -43,7 +54,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       script.push({
         type: "clearCharacter",
         position: position,
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -55,7 +67,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         script.push({
           type: "effect",
           still: "none",
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         });
         continue;
       }
@@ -63,7 +76,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         script.push({
           type: "effect",
           still: assets.stills[stillName],
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         });
         continue;
       }
@@ -74,7 +88,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       script.push({
         type: "effect",
         bgm: "OFF",
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -87,7 +102,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         type: "effect",
         bgm: "OFF",
         duration: seconds * 1000,
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -99,7 +115,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       script.push({
         type: "effect",
         duration: seconds * 1000,
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -110,7 +127,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       script.push({
         type: "effect",
         bgm: bgmName,
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -123,7 +141,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         currentBackground = "";
         script.push({
           type: "background",
-          background: "OFF"
+          background: "OFF",
+          sepia: currentSepia
         });
         continue;
       }
@@ -144,7 +163,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         currentBackground = targetBg;
         script.push({
           type: "background",
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         });
       }
       continue;
@@ -157,7 +177,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         script.push({
           type: "effect",
           animation: assets.animations[animName],
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         });
         continue;
       }
@@ -183,7 +204,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         text: content,
         duration: duration,
         fadeDuration: fadeDuration,
-        background: currentBackground
+        background: currentBackground,
+        sepia: currentSepia
       });
       continue;
     }
@@ -228,7 +250,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           type: "dialogue",
           name: displayName,
           text: dialogue,
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         };
       } else {
         // 【ト書き】のケース
@@ -251,7 +274,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           text: content,
           duration: duration,
           fadeDuration: fadeDuration,
-          background: currentBackground
+          background: currentBackground,
+          sepia: currentSepia
         };
       }
 
@@ -282,7 +306,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
     script.push({
       type: "monologue",
       text: line,
-      background: currentBackground
+      background: currentBackground,
+      sepia: currentSepia
     });
   }
 

@@ -47,6 +47,10 @@
     "ゾルゲイド" : {
       "image": "ゾルゲイド.png",
       "position": "center"
+    },
+    "マルトー" : {
+      "image": "副船長.png",
+      "position": "center"
     }
 
   },
@@ -56,8 +60,10 @@
     "甲板3": "images/background/v2/pirate-ship-deck3.jpg",
     "海": "images/background/v2/pirate-ship1.jpg",
     "船室": "images/background/v2/pirate_ship2.jpg",
+    "朝の寝室": "images/background/v2/朝の寝室.png",
     "海面": "images/background/v2/Calm-lake-surface1.jpg",
     "海賊船": "images/background/v2/海賊船の襲来.png",
+    "イスパニアの海": "images/background/v2/イスパニアの海.png",
     "イスパニア船": "images/background/v2/イスパニア船の襲来.png",
     "イスパニア艦隊": "images/background/v2/イスパニア艦隊.png",
     "船が空を飛ぶ": "images/background/v2/船が空を飛ぶ.png",
@@ -66,15 +72,23 @@
     "船倉2": "images/background/v2/Ghost-ships-interior-corridor1.jpg",
     "船倉3": "images/background/v2/船倉の深部.png",
     "エルダゾルゲイド": "images/background/v2/海妖.png",
+    "虹の渦": "images/background/v2/虹の渦.png",
+    "執務室": "images/background/v2/執務室.png",
     "クラーケンの海": "images/background/v2/クラーケンの海.png",
     "クラーケン": "images/background/v2/クラーケン.png",
     "ゴルゾアの海": "images/background/v2/ゴルゾアの海.png",
+    "ゴルゾアの胃袋_初": "images/background/v2/ゴルゾアの胃袋_初.png",
     "ゴルゾアの胃袋": "images/background/v2/ゴルゾアの胃袋.png",
     "深海1": "images/background/v2/深海1.png",
     "深海2": "images/background/v2/深海2.png",
     "深海3": "images/background/v2/深海3.png",
     "彼方の海": "images/background/v2/彼方の海.png",
-    "ベッドルーム": "images/background/v2/ベッドルーム.png"
+    "ベッドルーム": "images/background/v2/ベッドルーム.png",
+    "竜宮城": "images/background/v2/竜宮城.png",
+    "夕暮れの港": "images/background/v2/夕暮れの港.png",
+    "教室": "images/background/v2/教室.png",
+    "食堂": "images/background/v2/食堂.png"
+    
     
   },
   "animations": {
@@ -89,7 +103,7 @@
     "古地図": "images/still/古地図.png",
     "七つ道具：釣り竿": "images/still/七つ道具：釣り竿.png",
     "七つ道具：拳銃": "images/still/七つ道具：拳銃.png",
-    "七つ道具：潜水藻": "images/still/古地図.png",
+    "七つ道具：潜水藻": "images/still/七つ道具：潜水藻.png",
     "七つ道具：ランタン": "images/still/七つ道具：ランタン.png",
     "七つ道具：フープ": "images/still/七つ道具：フープ.png"   
 
@@ -115,6 +129,7 @@
     "ギャグ": "audio/二日酔いのテーマ.mp3",
     "緊迫": "audio/Battle04.mp3",
     "超緊迫": "audio/Battle05.mp3",
+    "BossBattle": "audio/Battle04.mp3",
     "空落ちる日": "audio/空落ちる日.ogg",
     "海賊の意志": "audio/Go-Against-the-Compass.mp3",
     "魔女の正体": "audio/Fight-Against-the-Thunderstorm.mp3",
@@ -122,29 +137,29 @@
     "海賊の愉快な歌": "audio/Golden_Hour_Tide.mp3",
     "船が空を飛ぶ": "audio/疾風舞うアリア・マテリア.mp3",
     "海賊の葬送曲": "audio/The_Captain_s_Descent.mp3",
-    "オルゴール": "audio/空が茜に染まるまで.mp3",
+    "オルゴール": "audio/星空の下で.mp3",
     "船室のひととき": "audio/空が茜に染まるまで.mp3",
     "船倉": "audio/Maison-Hantee.mp3",
     "戦闘：ルーサー": "audio/Seasick-Pirate.mp3",
     "戦闘：肉厚な魚": "audio/Seasick-Pirate.mp3",
     "戦闘：血に飢えたジョーズ": "audio/Battle04.mp3",
     "戦闘：弱者狩りのハゲタカ": "audio/Battle04.mp3",
-    "戦闘：デザインドエッグ号": "audio/海賊が現れそうな曲.mp3",
+    "戦闘：デザインド・エッグ号": "audio/海賊が現れそうな曲.mp3",
     "戦闘：エーヴィス": "audio/Metal_01.mp3",
     "戦闘：イスパニア艦隊": "audio/chosenjo_loop.mp3",
     "戦闘：ラ・マンチャ号": "audio/chosenjo_loop.mp3",
     "戦闘：ゾルゲイド": "audio/ホラーな感じのピアノ.mp3",
     "戦闘：エルダゾルゲイド": "audio/這い寄るもの.mp3",
-    "戦闘：アビサルクラーケン": "audio/灰色の天つ風.mp3",
+    "戦闘：クラーケン": "audio/灰色の天つ風.mp3",
     "戦闘：ゴルゾアの胃袋": "audio/Ravin'_U.ogg",
-    "戦闘：死霊の群れ": "audio/battle1.ogg",
     "戦闘：バクバク": "audio/battle1.ogg",
+    "戦闘：死者の群れ": "audio/battle1.ogg",
     "戦闘：黒潮号": "audio/battle1.ogg",
     "戦闘：ブライニクル": "audio/pandem04.ogg",
     "戦闘：グウィン": "audio/cyrf_freezing_point.mp3",
     "戦闘：ジズ": "audio/Blaze_a_Trail.mp3",
     "戦闘：ゾルゲイドクイーン": "audio/The-Depth.mp3",
-    "戦闘：デザインドエッグ号2": "audio/Pirate_Attack_loop.ogg",
+    "戦闘：デザインド・エッグ号2": "audio/Pirate_Attack_loop.ogg",
     "戦闘：エーヴィス海賊団": "audio/天使殲滅戦.mp3",
     "戦闘：エーヴィス2": "audio/月下の死闘.ogg",
     "戦闘：リザベル": "audio/Knight_in_the_wind.ogg",

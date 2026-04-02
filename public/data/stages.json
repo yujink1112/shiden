@@ -210,7 +210,7 @@
     "bossDescription": "やぁ、また会ったね。",
     "backgroundImage": "/images/background/v2/pirate-ship-deck2.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "崩待果反一強",
+    "bossSkillAbbrs": "待果反一強",
     "bgm": "戦闘：肉厚な魚"
   },
   {
@@ -224,7 +224,7 @@
     "bossDescription": "血の匂いに引き付けられてやってきた、極めて獰猛なサメ。",
     "backgroundImage": "/images/background/v2/Calm-lake-surface1.jpg",
     "shopSkills": [""],
-    "bossSkillAbbrs": "逆交搦隠罠剣",
+    "bossSkillAbbrs": "逆交隠罠剣",
     "bgm": "戦闘：血に飢えたジョーズ"
   },
   {
@@ -235,10 +235,10 @@
     "name": "第2章-2 (大ボス)",
     "bossName": "弱者狩りのハゲタカ",
     "bossImage": "/images/monster/v2/2-2.png",
-    "bossDescription": "",
+    "bossDescription": "海の食物連鎖を支配するのは、結局のところ鳥なのである。",
     "backgroundImage": "/images/background/v2/Blue-sky-and-clouds2.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "先搦搦飛刺強",
+    "bossSkillAbbrs": "先搦飛刺強",
     "bgm": "戦闘：弱者狩りのハゲタカ"
   },
   {
@@ -249,7 +249,7 @@
     "name": "第2章-3 (戦闘1)",
     "bossName": "デザインド・エッグ号",
     "bossImage": "/images/monster/v2/3-1.png",
-    "bossDescription": "ウェルズランドの海を好き放題に荒らし回る、泣く子も黙る海賊団。",
+    "bossDescription": "ウェルズランド近海を好き放題に荒らし回る、泣く子も黙る海賊団。",
     "backgroundImage": "/images/background/v2/海賊船の襲来.png",
     "shopSkills": [],
     "bossSkillAbbrs": "転硬砲速交一",
@@ -263,10 +263,10 @@
     "name": "第2章-3 (大ボス)",
     "bossName": "キャプテン・エーヴィス",
     "bossImage": "/images/monster/v2/3-2.png",
-    "bossDescription": "壊し、奪い、蹂躙する。すべての船に恐れられる邪悪な男。",
+    "bossDescription": "壊し、奪い、蹂躙する。すべての船に恐れられる、邪悪な男。",
     "backgroundImage": "/images/background/v2/pirate-ship-deck2.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "疫盗搦崩硬連死",
+    "bossSkillAbbrs": "疫盗搦崩硬死",
     "bgm": "戦闘：エーヴィス"
   },
   {
@@ -277,10 +277,10 @@
     "name": "第2章-4 (戦闘1)",
     "bossName": "ラ・マンチャ号",
     "bossImage": "/images/monster/v2/4-1.png",
-    "bossDescription": "今なお海の覇者を争うイスパニアの旗艦。大砲の破壊力はラスト・ウィッチ号を遥かに凌ぐ。",
-    "backgroundImage": "/images/background/v2/イスパニア船の襲来.png",
+    "bossDescription": "今なお海の覇者を争うイスパニアの旗艦。大砲の破壊力は、ウェルズランドの軍艦を遥かに凌ぐ。",
+    "backgroundImage": "/images/background/v2/イスパニアの海.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "待硬雷反覚砲強",
+    "bossSkillAbbrs": "待硬雷反覚砲",
     "bgm": "戦闘：ラ・マンチャ号"
   },
   {
@@ -291,10 +291,10 @@
     "name": "第2章-4 (大ボス)",
     "bossName": "イスパニア艦隊",
     "bossImage": "/images/monster/v2/4-2.png",
-    "bossDescription": "",
-    "backgroundImage": "/images/background/v2/イスパニア艦隊.jpg",
+    "bossDescription": "この一糸乱れる艦列を抜けられるか。",
+    "backgroundImage": "/images/background/v2/イスパニアの海.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "先封罠硬雷果速",
+    "bossSkillAbbrs": "先封罠雷果速",
     "bgm": "戦闘：イスパニア艦隊"
   },
   {
@@ -305,10 +305,10 @@
     "name": "第2章-5 (戦闘1)",
     "bossName": "ゾルゲイド",
     "bossImage": "/images/monster/v2/5-1.png",
-    "bossDescription": "",
+    "bossDescription": "■■の怪■。■■■■が■■し■■■海■■■■の■。",
     "backgroundImage": "/images/background/v2/Ghost-Ships-Hold1.jpg",
     "shopSkills": [],
-    "bossSkillAbbrs": "疫疫疫疫疫瘴",
+    "bossSkillAbbrs": "疫疫疫疫瘴",
     "bgm": "戦闘：ゾルゲイド"
   },
   {
@@ -319,7 +319,7 @@
     "name": "第2章-5 (ボス)",
     "bossName": "エルダゾルゲイド",
     "bossImage": "/images/monster/v2/5-2.png",
-    "bossDescription": "",
+    "bossDescription": "■■■■が■■■■■を■■■■■■するために■■■■■■した■■の■■。",
     "backgroundImage": "/images/background/v2/船倉の深部.png",
     "shopSkills": [],
     "bossSkillAbbrs": "転転疫疫毒瘴盾",
@@ -331,13 +331,13 @@
     "stage": 6,
     "battle": 1,
     "name": "第2章-6 (戦闘1)",
-    "bossName": "アビサルクラーケン",
+    "bossName": "クラーケン",
     "bossImage": "/images/monster/v2/6-1.png",
-    "bossDescription": "",
+    "bossDescription": "軽く捻られたくないと思っている。",
     "backgroundImage": "/images/background/v2/クラーケンの海.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "逆隠反座玉盗連烈",
-    "bgm": "戦闘：アビサルクラーケン"
+    "bossSkillAbbrs": "逆隠反礁玉拳烈",
+    "bgm": "戦闘：クラーケン"
   },
   {
     "no": 24,
@@ -347,10 +347,10 @@
     "name": "第2章-6 (ボス)",
     "bossName": "ゴルゾアの胃袋",
     "bossImage": "/images/monster/v2/6-2.png",
-    "bossDescription": "",
+    "bossDescription": "暴食。\\nそれは、生あるものが犯せし冒涜の罪なり。\\n徒に命を奪ひて舌根を潤し、本能のまま甘露の杯を満たして、堕落の限りを尽くさん。\\n純然たる欲望は、筆舌に尽くしがたき馳走を求めて、膨張と収縮を繰り返す。\\n使ひ切れぬ命が腫となり、己が身を残酷に滅ぼさんとも。\\n",
     "backgroundImage": "/images/background/v2/ゴルゾアの海.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "無転転疫毒連瘴盾",
+    "bossSkillAbbrs": "食待待礁礁礁怒硬",
     "bgm": "戦闘：ゴルゾアの胃袋"
   },
   {
@@ -360,26 +360,54 @@
     "battle": 1,
     "name": "第2章-7 (戦闘1)",
     "bossName": "バクバク",
-    "bossImage": "/images/monster/v2/6-1.png",
-    "bossDescription": "",
-    "backgroundImage": "/images/background/v2/クラーケンの海.png",
+    "bossImage": "/images/monster/v2/7-1.png",
+    "bossDescription": "深海に棲む巨大なアンコウ。",
+    "backgroundImage": "/images/background/v2/深海1.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "逆隠反座玉盗連烈",
+    "bossSkillAbbrs": "逆拳水硬燐果速",
     "bgm": "戦闘：バクバク"
   },
   {
     "no": 26,
     "chapter": 2,
-    "stage": 6,
+    "stage": 7,
     "battle": 2,
-    "name": "第2章-6 (ボス)",
-    "bossName": "ゴルゾアの胃袋",
-    "bossImage": "/images/monster/v2/6-2.png",
-    "bossDescription": "",
-    "backgroundImage": "/images/background/v2/ゴルゾアの海.png",
+    "name": "第2章-7 (ボス)",
+    "bossName": "死者の群れ",
+    "bossImage": "/images/monster/v2/7-2.png",
+    "bossDescription": "夢破れて深海に堕とされた海賊の成れの果て。",
+    "backgroundImage": "/images/background/v2/深海2.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "無転転疫毒連瘴盾",
-    "bgm": "戦闘：ゴルゾアの胃袋"
+    "bossSkillAbbrs": "霊崩転連交一盾",
+    "bgm": "戦闘：死者の群れ"
+  },
+  {
+    "no": 27,
+    "chapter": 2,
+    "stage": 8,
+    "battle": 1,
+    "name": "第2章-8 (戦闘1)",
+    "bossName": "死霊船 黒潮号",
+    "bossImage": "/images/monster/v2/7-3.png",
+    "bossDescription": "",
+    "backgroundImage": "/images/background/v2/深海3.png",
+    "shopSkills": [],
+    "bossSkillAbbrs": "先霊覚玉逆砲速",
+    "bgm": "戦闘：黒潮号"
+  },
+  {
+    "no": 28,
+    "chapter": 2,
+    "stage": 8,
+    "battle": 2,
+    "name": "第2章-8 (ボス)",
+    "bossName": "ブライニクル",
+    "bossImage": "/images/monster/v2/7-2.png",
+    "bossDescription": "",
+    "backgroundImage": "/images/background/v2/深海2.png",
+    "shopSkills": [],
+    "bossSkillAbbrs": "怠円凍",
+    "bgm": "戦闘：ブライニクル"
   }
 
 
