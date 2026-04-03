@@ -75,6 +75,38 @@ const GameChapter2: React.FC<GameProps> = (props) => {
   // 第2章の報酬選択（flow type が reward の場合）
   const isChapter2Reward = currentStep?.type === 'reward';
 
+  // 報酬の選択肢を生成
+  const rewardChoices = React.useMemo(() => {
+    if (!isChapter2Reward) return [];
+    if (currentStep.skill) return [currentStep.skill];
+    if (!currentStep.choices) return [];
+
+    let choices = [...currentStep.choices];
+    
+    // 選択肢が3個以下の場合、未所持スキルからランダムに追加
+    if (choices.length <= 3) {
+      const additionalCount = 5 - choices.length; // 最大5個まで増やす、あるいは3個以下なら補充という指示だが、一般的によくある「3個以下なら補充して3個にする」か「3個以下なら追加して選択肢を増やす」か。
+      // 指示は「choice要素に含まれるスキルが3個以下ならば、...ランダムにスキルを選び、選択肢に追加する」
+      // 何個追加するかは明記されていないが、通常は3個や5個にする。ここでは「追加する」とあるので、未所持のものをいくつか足す。
+      
+      const availablePool = ALL_SKILLS.filter(skill => 
+        !ownedSkillAbbrs.includes(skill.abbr) && 
+        !choices.includes(skill.abbr) &&
+        (skill as any).exclude !== 1 &&
+        skill.type !== "敵専用"
+      );
+
+      // ランダムにシャッフルして必要な分（例えば合計5個になるまで、あるいは適当な数）追加
+      const shuffled = [...availablePool].sort(() => Math.random() - 0.5);
+      // 選択肢が3個以下の場合に追加するので、とりあえず合計5個くらいになるようにしてみる（あるいは単に3個追加するなど）
+      // 指示通り「追加する」を実装。ここでは合計5個になるように補充してみる。
+      const toAdd = shuffled.slice(0, 5 - choices.length);
+      choices = [...choices, ...toAdd.map(s => s.abbr)];
+    }
+
+    return choices;
+  }, [isChapter2Reward, currentStep, ownedSkillAbbrs, ALL_SKILLS]);
+
   // 報酬選択の表示判定を上書き
   const showRewardSelection = rewardSelectionMode || isChapter2Reward;
 
@@ -205,13 +237,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                      currentStep?.choices ? 'どちらかのスキルを選んでください' :
                      isChapter2Reward ? `スキルを${currentStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
                   </h2>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
-                    {currentStep?.skill ? (
-                      <div style={{ transform: 'scale(1.2)', margin: '20px 0' }}>
-                        <SkillCard skill={getSkillCardsFromAbbrs([currentStep.skill])[0]} isSelected={true} iconMode={iconMode} />
-                      </div>
-                    ) : currentStep?.choices ? (
-                      currentStep.choices.map((abbr: string) => {
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
+                    {currentStep?.type === 'reward' ? (
+                      rewardChoices.map((abbr: string) => {
                         const skill = getSkillCardsFromAbbrs([abbr])[0];
                         if (!skill) return null;
                         return (
@@ -233,20 +261,23 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                   </div>
                   <button 
                     disabled={
-                      currentStep?.skill ? false :
-                      currentStep?.choices ? selectedRewards.length !== 1 :
-                      isChapter2Reward ? selectedRewards.length !== (currentStep?.count || 1) : 
-                      selectedRewards.length === 0
+                      isChapter2Reward ? (
+                        currentStep?.skill ? false :
+                        currentStep?.choices ? selectedRewards.length !== 1 :
+                        selectedRewards.length !== (currentStep?.count || 1)
+                      ) : (
+                        selectedRewards.length === 0
+                      )
                     } 
                     onClick={() => {
-                      if (currentStep?.skill) {
+                      if (isChapter2Reward && currentStep?.skill) {
                         handleRewardSelection(currentStep.skill);
                       }
                       confirmRewards();
                     }} 
-                    style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : isChapter2Reward ? selectedRewards.length !== (currentStep?.count || 1) : selectedRewards.length === 0) ? 0.5 : 1 }}
+                    style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isChapter2Reward ? (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : selectedRewards.length !== (currentStep?.count || 1)) : selectedRewards.length === 0) ? 0.5 : 1 }}
                   >
-                    {currentStep?.skill ? '確認' : 'スキルを獲得する'}
+                    {isChapter2Reward && currentStep?.skill ? '確認' : 'スキルを獲得する'}
                   </button>
                   <div style={{ marginTop: '15px' }}>
                       {!isChapter2Reward && (

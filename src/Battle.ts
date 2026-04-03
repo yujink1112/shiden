@@ -152,18 +152,20 @@ export class Battle {
 
     private executeEnkan(): void {
         const hasEnkan = (pc: Player) => {
-            for (let i = 0; i < pc.getSkillsLength(); i++) if (pc.skill[i] === "円") return true;
-            return false;
+            for (let i = 0; i < pc.getSkillsLength(); i++) if (pc.skill[i] === "円") return i + 1;
+            return 0;
         };
-        if (hasEnkan(this.pc1)) {
+        const pc1Enkan = hasEnkan(this.pc1);
+        const pc2Enkan = hasEnkan(this.pc2);
+        if (pc1Enkan != 0) {
             this.log();
-            this.log(this.pc2.name + "の【円環】によって終了フェイズが繰り返される……。");
+            this.log(this.pc1.name + `の【円環】${pc1Enkan}によって終了フェイズが繰り返される……。`);
             this.log();
             this.phaseEnd();
         }
-        if (hasEnkan(this.pc2)) {
+        if (pc2Enkan != 0) {
             this.log();
-            this.log(this.pc2.name + "の【円環】によって終了フェイズが繰り返される……。");
+            this.log(this.pc2.name + `の【円環】${pc2Enkan}によって終了フェイズが繰り返される……。`);
             this.log();
             this.phaseEnd();
         }
@@ -219,13 +221,6 @@ export class Battle {
 
         this.applyRinko(this.pc1);
         this.applyRinko(this.pc2);
-
-        // 中毒ダメージ
-        startFlag |= this.applyPoisonDamage(this.pc1);
-        startFlag |= this.applyPoisonDamage(this.pc2);
-
-        // 破壊処理の適用
-        if (this.applyBreakup(this.pc1) + this.applyBreakup(this.pc2) >= 1) startFlag = 1;
 
         // 特殊スキルの発動（無想、先制）
         startFlag |= this.triggerStartPhaseSkills(this.pc1);
@@ -556,7 +551,7 @@ export class Battle {
         if (attacker.gouman > 0) finalSpeed += 1;
 
         for (let k = 0; k < defender.getSkillsLength(); k++) {
-            if (defender.skill[k] === "礁") finalSpeed -= 1;
+            if (defender.skill[k] === "礁") finalSpeed = Math.max(finalSpeed - 1, 0);
         }
         if (attacker.roubai === StatusFlag.ACTIVE) finalSpeed = 0;
 
@@ -565,6 +560,18 @@ export class Battle {
             this.handleBuffSkill(attacker, defender, idx);
         } else {
             const count = attacker.skill[idx] === "解" ? 3 : 1;
+
+            // 飛行の確認
+            if (finalSpeed === 0 && attacker.skill[idx] != "弱") {
+                for (let k = 0; k < defender.getSkillsLength(); k++) {
+                    if (defender.skill[k] === "飛") {
+                        this.log(`＞${defender.playerName}の【${defender.name[k]}】${k + 1}が発動！`);
+                        this.log(`＞${defender.playerName}は速度0の攻撃を受けない！`);
+                        return;
+                    }
+                }
+            }
+
             for (let c = 0; c < count; c++) {
                 this.executeAttack(attacker, defender, idx, finalDamage, finalSpeed);
             }
@@ -721,7 +728,6 @@ export class Battle {
             // 反撃ダメージの処理
             let cDamage = defender.damage[targetIdx];
             if (defender.skill[targetIdx] === "玉") cDamage = attackerSpeed;
-            if (defender.skill[targetIdx] === "転") cDamage = 1;
             if (defender.kakugo === StatusFlag.ACTIVE) cDamage += 1;
 
             for (let i = 0; i < cDamage; i++) {
@@ -753,6 +759,14 @@ export class Battle {
 
             // 迎撃による状態異常付与
             this.reserveCounterEffects(attacker, defender, targetIdx);
+
+            // 幻惑による終了フェイズ破壊予約
+            if (defender.skill[targetIdx] === "幻") {
+                defender.scar[targetIdx] = 0;
+                defender.kage[targetIdx] = StatusFlag.RESERVED;
+                this.log(`＞＞${defender.playerName}の【幻惑】${targetIdx + 1}は終了フェイズまで破壊されない！`);
+            }
+
             return true; // 攻撃中断
         }
 
@@ -770,9 +784,13 @@ export class Battle {
         if (s === "影") {
              for (let i = 0; i < defender.getSkillsLength(); i++) {
                  if (defender.type[i] !== Player.NONE) {
-                     for (let j = 0; j < defender.getSkillsLength(); j++) {
-                         if (defender.skill[j] === defender.skill[i]) defender.kage[j] = StatusFlag.RESERVED;
-                     }
+                    if (defender.skill[i] == "Ｈ"){
+                        this.log(`＞${defender.playerName}の【ＨＰ】${i + 1}は【影討】の効果を受けない！`);
+                    }
+                    // 連鎖破壊
+                    for (let j = 0; j < defender.getSkillsLength(); j++) {
+                        if (defender.skill[j] === defender.skill[i]) defender.kage[j] = StatusFlag.RESERVED;
+                    }
                      break;
                  }
              }
@@ -819,7 +837,7 @@ export class Battle {
         if (s === "疫") attacker.ekibyo = StatusFlag.RESERVED;
         if (s === "紫") defender.stan = StatusFlag.RESERVED;
         if (s === "呪") attacker.suijaku = StatusFlag.RESERVED;
-        if (s === "転") attacker.roubai = StatusFlag.RESERVED;
+        if (s === "転") defender.roubai = StatusFlag.RESERVED;
         if (s === "受") {
             // 自分の悪い状態を相手に、相手の悪い状態を自分に？
             // skillsData: "あなたが受けている悪い状態を全て解除し、相手に同じ状態を全て与える。"
@@ -831,7 +849,7 @@ export class Battle {
             if (defender.shimon > 0) { attacker.shimon += defender.shimon; defender.shimon = 0; }
             if (defender.shitto > 0) { attacker.shitto = StatusFlag.RESERVED; defender.shitto = 0; }
             if (defender.shikiyoku > 0) { attacker.shikiyoku = StatusFlag.RESERVED; defender.shikiyoku = 0; }
-            this.log(`＞受難の効果で${defender.playerName}の悪い状態が${attacker.playerName}に移し替えられた！`);
+            this.log(`＞${defender.playerName}の悪い状態が${attacker.playerName}に移し替えられた！`);
         }
     }
 
@@ -940,12 +958,6 @@ export class Battle {
                     this.destroySkill(pc, i + 1);
                     pc.scar[i] = 0;
                 } else {
-                    // 円環の復活
-                    if (pc.skill[i] === "円" && pc.limited[i] === 0) {
-                        this.log(`${pc.playerName}の【円環】${i + 1}は破壊されたが復活した！`);
-                        pc.scar[i] = 0; pc.limited[i] = 1; flag = 1;
-                        continue;
-                    }
                     this.log(`${pc.playerName}の【${pc.name[i]}】${i + 1}が破壊された！`);
                     // 逆鱗の発動
                     if (pc.skill[i] === "逆") {
@@ -1020,10 +1032,6 @@ export class Battle {
         // 毒のダメージ
         endFlag |= this.applyPoisonDamage(this.pc1);
         endFlag |= this.applyPoisonDamage(this.pc2);
-
-        // 回復の処理
-        endFlag |= this.applyKaifuku(this.pc1);
-        endFlag |= this.applyKaifuku(this.pc2);
         
         // 怠惰の処理
         endFlag |= this.applyTaida(this.pc1);
@@ -1043,6 +1051,10 @@ export class Battle {
 
         if (this.applyBreakup(this.pc1) + this.applyBreakup(this.pc2) >= 1) endFlag = 1;
 
+        // 回復の処理
+        endFlag |= this.applyKaifuku(this.pc1);
+        endFlag |= this.applyKaifuku(this.pc2);
+
         // 忘却の処理
         endFlag |= this.applySuijaku(this.pc1);
         endFlag |= this.applySuijaku(this.pc2);
@@ -1053,17 +1065,18 @@ export class Battle {
 
     private applyKaifuku(pc: Player): number {
         if (pc.kaifuku === 0) return 0;
-        this.log(`＞${pc.playerName}の回復！【ＨＰ】が3つ追加された！`);
-        for (let i = 0; i < 3; i++) {
-            pc.skill.push("Ｈ");
-            pc.name.push("ＨＰ");
-            pc.type.push(Player.NONE);
-            pc.speed.push(0);
-            pc.damage.push(0);
-            pc.scar.push(0);
-            pc.limited.push(0);
-            pc.kage.push(0);
+        this.log(`＞回復の効果で${pc.playerName}の【ＨＰ】が復元された！`);
+        
+        for (let idx = 0; idx < pc.getSkillsLength(); idx++) {
+            if(pc.name[idx] == "　　") {
+                pc.skill[idx] = "Ｈ";
+                pc.name[idx] = "ＨＰ";
+                pc.type[idx] = Player.ENCHANT;
+            }
+
         }
+        this.log(`＞${pc.playerName}の回復が解除された！`);
+        pc.kaifuku = 0;
         return 1;
     }
 
@@ -1074,7 +1087,7 @@ export class Battle {
             if (pc.type[i] === Player.COUNTER) count++;
         }
         if (count > 0) {
-            this.log(`＞怠惰の効果！防壁が${count}個与えられた！`);
+            this.log(`＞怠惰の効果で防壁が${count}個与えられた！`);
             pc.bouheki += count;
             return 1;
         }
@@ -1089,7 +1102,7 @@ export class Battle {
                  const opponent = (pc === this.pc1 ? this.pc2 : this.pc1);
                  for (let j = 0; j < opponent.getSkillsLength(); j++) {
                      if (opponent.type[j] !== Player.NONE && opponent.scar[j] === 0) {
-                         this.log(`＞凍結の効果！${opponent.playerName}の【${opponent.name[j]}】${j + 1}を破壊した！`);
+                         this.log(`＞【凍結】の効果で${opponent.playerName}の【${opponent.name[j]}】${j + 1}を破壊した！`);
                          opponent.scar[j] = 1;
                          break;
                      }

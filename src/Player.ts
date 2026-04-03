@@ -140,8 +140,9 @@ export class Player {
                 case "呪":
                     this.name[i] = "呪詛";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
+                    this.speed[i] = (i + 1) - 2;
                     this.damage[i] = 1;
+                    if (this.speed[i] < 0) this.speed[i] = 0;
                     break;
                 case "雷":
                     this.name[i] = "雷火";
@@ -317,7 +318,7 @@ export class Player {
                 case "滅":
                     this.name[i] = "撃滅";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 2;
+                    this.speed[i] = 1;
                     this.damage[i] = 1;
                     break;
                 case "砲":
@@ -483,7 +484,7 @@ export class Player {
                     break;
                 case "Ｈ":
                     this.name[i] = "ＨＰ";
-                    this.type[i] = Player.NONE;
+                    this.type[i] = Player.ENCHANT;
                     break;
                 default:
                     break;

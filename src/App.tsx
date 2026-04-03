@@ -21,13 +21,15 @@ import AnimatedRichLog, { StageMode } from './components/AnimatedRichLog';
 import SkillCard, { IconMode } from './components/SkillCard';
 import GameChapter1 from './GameChapter1';
 import GameChapter2 from './GameChapter2';
+import StoryTitle from './components/StoryTitle';
 import { GameProps, BattleResult } from './types/GameProps';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
 
 const CHAPTER1_INITIAL_SKILLS = ["一"];
-const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "雷", "呪", "覚", "防", "影", "交", "搦", "崩", "疫", "強", "硬", "速", "逆", "裏", "先"];
+//const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "雷", "呪", "覚", "防", "影", "交", "搦", "崩", "疫", "強", "硬", "速", "逆", "裏", "先"];
+const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強", "速"];
 
 function App() {
   const [stagesLoaded, setStagesLoaded] = useState(false);
@@ -250,18 +252,24 @@ function App() {
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
 
   // 第2章の次のステップへ進む
-  const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number) => {
+  const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number, ignoreTitle: boolean = false) => {
     const flow = currentFlow || chapter2Flows.find(f => f.stageNo === stageCycle);
     if (!flow) return;
     
     const nextIndex = (currentIndex !== undefined ? currentIndex : chapter2FlowIndex) + 1;
     if (nextIndex < flow.flow.length) {
-      setChapter2FlowIndex(nextIndex);
       const nextStep = flow.flow[nextIndex];
       
       if (nextStep.type === 'story') {
+        // 第2章でかつ "-1" で終わるストーリー（第1節）の場合、タイトルを表示
+        if (!ignoreTitle && nextStep.id?.endsWith('-1')) {
+          setChapter2FlowIndex(nextIndex); // インデックスだけ進めておく
+          setShowChapterTitle(true);
+          return; 
+        }
         const data = await loadV2Story(nextStep.id!);
         if (data) {
+          setChapter2FlowIndex(nextIndex);
           setStoryContentV2(data);
           setShowStoryModal(true);
         } else {
@@ -269,9 +277,11 @@ function App() {
           moveToNextStep(flow, nextIndex);
         }
       } else if (nextStep.type === 'title') {
+        setChapter2FlowIndex(nextIndex);
         setShowChapter2Title(true);
         AudioManager.getInstance().playBgm("海賊の意志");
       } else if (nextStep.type === 'reward') {
+        setChapter2FlowIndex(nextIndex);
         setSelectedRewards([]); // 報酬選択前にリセット
         if (nextStep.skill) {
           setSelectedRewards([nextStep.skill]);
@@ -282,6 +292,7 @@ function App() {
           setShowBossClearPanel(true);
         }
       } else if (nextStep.type === 'battle') {
+        setChapter2FlowIndex(nextIndex);
         setStageMode('BOSS');
         handleResetGame();
       }
@@ -319,6 +330,7 @@ function App() {
   const [storyContentV2, setStoryContentV2] = useState<any[] | null>(null);
   const [storyUrl, setStoryUrl] = useState<string | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const [showChapterTitle, setShowChapterTitle] = useState(false);
   const [showChapter2Title, setShowChapter2Title] = useState(false);
   const [isTitleFadingOut, setIsTitleFadingOut] = useState(false);
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
@@ -2779,7 +2791,21 @@ const PLAYER_SKILL_COUNT = 5;
   
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
-      {!showChapter2Title && !showStoryModal && gameContent}
+      {!showChapter2Title && !showStoryModal && !showChapterTitle && gameContent}
+
+      {showChapterTitle && (
+        <StoryTitle 
+          chapter={chapter}
+          stage={stageCycle >= 13 ? stageCycle - 12 : stageCycle}
+          title={STAGE_DATA.find(s => s.no === stageCycle)?.name || ""}
+          onComplete={() => {
+            setShowChapterTitle(false);
+            // タイトル表示後、改めて現在のステップ（ストーリー）を表示する
+            // chapter2FlowIndex は既に更新済みなので、引数を調整
+            moveToNextStep(undefined, chapter2FlowIndex - 1, true);
+          }}
+        />
+      )}
 
       {showStoryModal && (storyContentV2 || storyUrl) && (
           (stageCycle >= 13 || stageCycle === 1 || storyUrl || (isAdmin && showAdmin === false)) ? (
