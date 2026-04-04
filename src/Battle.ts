@@ -302,19 +302,21 @@ export class Battle {
     /**
      * 先攻決定フェイズ
      */
-    private phaseSpeed(): { first: Player, second: Player } {
+    private phaseSpeed(isLogging: boolean): { first: Player, second: Player } {
         const speed1 = this.calculateCurrentSpeed(this.pc1, this.pc2);
         const speed2 = this.calculateCurrentSpeed(this.pc2, this.pc1);
 
-        this.log(`${this.pc1.playerName} 速度：${speed1 === 999 ? "先制" : speed1 === -999 ? "スタン" : speed1}`);
-        this.log(`${this.pc2.playerName} 速度：${speed2 === 999 ? "先制" : speed2 === -999 ? "スタン" : speed2}`);
-        this.log();
+        if (isLogging) {
+            this.log(`${this.pc1.playerName} 速度：${speed1 === 999 ? "先制" : speed1 === -999 ? "スタン" : speed1}`);
+            this.log(`${this.pc2.playerName} 速度：${speed2 === 999 ? "先制" : speed2 === -999 ? "スタン" : speed2}`);
+            this.log();
+        }
 
         if (speed1 >= speed2) {
-            this.log(`${this.pc1.playerName}の先攻！${speed1 === speed2 ? "（速度同値のため）" : ""}`);
+            if (isLogging) this.log(`${this.pc1.playerName}の先攻！${speed1 === speed2 ? "（速度同値のため）" : ""}`);
             return { first: this.pc1, second: this.pc2 };
         } else {
-            this.log(`${this.pc2.playerName}の先攻！`);
+            if (isLogging) this.log(`${this.pc2.playerName}の先攻！`);
             return { first: this.pc2, second: this.pc1 };
         }
     }
@@ -1003,7 +1005,7 @@ export class Battle {
             return false;
         };
 
-        const { first } = this.phaseSpeed(); // 再度誰が先攻か確認（状態が変わっている可能性があるため）
+        const { first } = this.phaseSpeed(false); // 再度誰が先攻か確認（状態が変わっている可能性があるため）
         const pc1IsFirst = (first === this.pc1);
 
         if (applyRengeki(this.pc1, this.pc2, 1, pc1IsFirst)) {

@@ -4,6 +4,7 @@ class AudioManager {
   private static instance: AudioManager;
   private currentBgm: HTMLAudioElement | null = null;
   private currentBgmName: string | null = null;
+  private currentBgmUrl: string | null = null;
   private audioData: { [key: string]: string } = {}; // BGM名 -> ファイル名
   private volume: number = 0.5;
   private isMuted: boolean = false;
@@ -88,27 +89,27 @@ class AudioManager {
     }
 
     // 既に同じ曲が再生されている場合は何もしない（ループ設定も同じ場合）
-    if (this.currentBgmName === bgmName && this.currentBgm && !this.currentBgm.paused && this.currentBgm.loop === loop) {
-      return;
+    // URL レベルでも比較を行う（エイリアス対策）
+    let targetUrl: string;
+    if (fileName.startsWith("http") || fileName.startsWith("/")) {
+        targetUrl = fileName;
+    } else {
+        targetUrl = getStorageUrl(fileName);
+    }
+
+    if (this.currentBgm && !this.currentBgm.paused && this.currentBgm.loop === loop) {
+      if (this.currentBgmName === bgmName || this.currentBgmUrl === targetUrl) {
+        return;
+      }
     }
 
     this.stopBgm();
 
-    // ファイル名が http で始まる場合はそのまま
-    // / で始まる場合はローカルパスとして扱う（publicフォルダ直下）
-    // それ以外は Storage URL を取得
-    let url: string;
-    if (fileName.startsWith("http")) {
-        url = fileName;
-    } else if (fileName.startsWith("/")) {
-        url = fileName;
-    } else {
-        url = getStorageUrl(fileName);
-    }
-    console.log(`Playing BGM: ${bgmName} (loop: ${loop}) (${url})`);
+    console.log(`Playing BGM: ${bgmName} (loop: ${loop}) (${targetUrl})`);
 
-    this.currentBgm = new Audio(url);
+    this.currentBgm = new Audio(targetUrl);
     this.currentBgmName = bgmName;
+    this.currentBgmUrl = targetUrl;
     this.currentBgm.loop = loop;
     this.currentBgm.volume = this.isMuted ? 0 : this.volume;
 
@@ -125,6 +126,7 @@ class AudioManager {
       this.currentBgm.currentTime = 0;
       this.currentBgm = null;
       this.currentBgmName = null;
+      this.currentBgmUrl = null;
     }
   }
 
@@ -138,6 +140,7 @@ class AudioManager {
     // AudioManager上は再生停止扱いにする
     this.currentBgm = null;
     this.currentBgmName = null;
+    this.currentBgmUrl = null;
 
     const fade = () => {
       const elapsed = Date.now() - startTime;

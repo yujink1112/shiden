@@ -297,13 +297,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                    {stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！
                 </h2>
                 <button onClick={() => {
-                    if (chapter2SubStage === 1) {
-                        moveToNextStep();
-                    } else {
-                        clearBossAndNextCycle();
-                    }
+                    moveToNextStep();
                 }} style={{ padding: '15px 30px', fontSize: '20px', backgroundColor: '#fff', color: '#2e7d32', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
-                   {chapter2SubStage === 1 ? '次のストーリーへ' : '次へ進む'}
+                   次へ進む
                 </button>
               </div>
             )}

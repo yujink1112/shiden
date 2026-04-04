@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, runTransaction, serverTimestamp } from "firebase/database";
+import { getDatabase, ref, runTransaction, serverTimestamp, get, set } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
@@ -26,6 +26,31 @@ export const getStorageUrl = (path: string) => {
   return `${storageBaseUrl}${encodedPath}?alt=media`;
 };
 export const googleProvider = new GoogleAuthProvider();
+
+export const saveUserSkills = async (uid: string, skillAbbrs: string[]) => {
+  console.log(`[Firebase] Saving skills for ${uid}:`, skillAbbrs);
+  const userSkillsRef = ref(database, `profiles/${uid}/chapter2/ownedSkills`);
+  await set(userSkillsRef, skillAbbrs);
+};
+
+export const loadUserSkills = async (uid: string): Promise<string[] | null> => {
+  console.log(`[Firebase] Loading skills for ${uid}`);
+  const userSkillsRef = ref(database, `profiles/${uid}/chapter2/ownedSkills`);
+  const snapshot = await get(userSkillsRef);
+  if (snapshot.exists()) {
+    const skills = snapshot.val() as string[];
+    console.log(`[Firebase] Loaded skills:`, skills);
+    return skills;
+  }
+  console.log(`[Firebase] No skills found for ${uid}`);
+  return null;
+};
+
+export const resetUserSkills = async (uid: string, initialSkills: string[]) => {
+  console.log(`[Firebase] Resetting skills for ${uid}:`, initialSkills);
+  const userSkillsRef = ref(database, `profiles/${uid}/chapter2/ownedSkills`);
+  await set(userSkillsRef, initialSkills);
+};
 
 export const recordAccess = () => {
   const totalAccessRef = ref(database, 'totalAccess');
