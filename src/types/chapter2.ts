@@ -1,4 +1,4 @@
-export type Chapter2StepType = 'story' | 'battle' | 'reward' | 'title';
+export type Chapter2StepType = 'story' | 'battle' | 'reward' | 'title' | 'credits';
 
 export interface Chapter2FlowStep {
   type: Chapter2StepType;

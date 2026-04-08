@@ -144,7 +144,8 @@
       { "type": "reward", "choices": ["盾", "連"] },
       { "type": "story", "id": "12-2" },
       { "type": "battle", "subStage": 2},
-      { "type": "story", "id": "12-3" }
+      { "type": "story", "id": "12-3" },
+      { "type": "credits", "id": "/data/credits.json" }
     ]
   }
 ]

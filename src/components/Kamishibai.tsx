@@ -14,6 +14,7 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, text, onEnd }) => {
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [characterImages, setCharacterImages] = useState<{ [key: string]: string }>({});
   const [backgroundImages, setBackgroundImages] = useState<{ [key: string]: string }>({});
   const [activeCharacters, setActiveCharacters] = useState<{[key in "left" | "center" | "right"]?: { name: string; image: string; focus: boolean; } | null }>({});
@@ -25,61 +26,88 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, text, onEnd }) => {
       text: text
   }] : []);
 
+  useEffect(() => {
+    const preloadAssets = async () => {
+      if (effectiveScript.length === 0) {
+        setIsLoaded(true);
+        return;
+      }
+
+      setIsLoaded(false);
+      const bgImages: { [key: string]: string } = {};
+      const charImages: { [key: string]: string } = {};
+
+      const loadTask = effectiveScript.map(async (entry) => {
+        if (entry.background && entry.background !== "OFF" && entry.background !== "None") {
+          const bgKey = entry.background;
+          if (bgKey.startsWith("/")) {
+            bgImages[bgKey] = bgKey;
+          } else if (!bgImages[bgKey]) {
+            try {
+              const bgPathRef = ref(database, bgKey);
+              const snapshot = await get(bgPathRef);
+              const storagePath = snapshot.val();
+              if (storagePath) {
+                bgImages[bgKey] = getStorageUrl(storagePath);
+              }
+            } catch (error) {
+              console.error(`Error fetching bg path for ${bgKey}:`, error);
+            }
+          }
+        }
+
+        const imageKey = (entry.type === "character" && entry.characterImage) || (entry.type === "dialogue" && entry.icon);
+        if (imageKey && typeof imageKey === "string") {
+          if (!charImages[imageKey]) {
+            try {
+              const characterPathRef = ref(database, `images/character/${imageKey.split(".")[0]}`);
+              const snapshot = await get(characterPathRef);
+              const storagePath = snapshot.val();
+              if (storagePath) {
+                charImages[imageKey] = getStorageUrl(storagePath);
+              }
+            } catch (error) {
+              console.error(`Error fetching char path for ${imageKey}:`, error);
+            }
+          }
+        }
+      });
+
+      await Promise.all(loadTask);
+
+      // 実際の画像ファイルのロードを待機
+      const allImageUrls = [...Object.values(bgImages), ...Object.values(charImages)];
+      const imageLoadPromises = allImageUrls.map(url => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = url;
+          img.onload = () => resolve(url);
+          img.onerror = () => resolve(url);
+        });
+      });
+
+      await Promise.all(imageLoadPromises);
+      setBackgroundImages(bgImages);
+      setCharacterImages(charImages);
+      setIsLoaded(true);
+    };
+
+    preloadAssets();
+  }, [script, text]);
+
   const currentEntry = effectiveScript[currentEntryIndex];
 
   useEffect(() => {
-    if (!currentEntry) {
-      if (effectiveScript.length > 0) onEnd();
+    if (!isLoaded || !currentEntry) {
+      if (isLoaded && effectiveScript.length > 0 && !currentEntry) onEnd();
       return;
     }
 
-    // 背景画像のロード
-    const loadBackgroundImage = async (bgKey: string) => {
-      if (bgKey.startsWith("/")) {
-        setCurrentBackground(bgKey);
-        return;
-      }
-      if (!backgroundImages[bgKey]) {
-        try {
-          const bgPathRef = ref(database, bgKey);
-          const snapshot = await get(bgPathRef);
-          const storagePath = snapshot.val();
-          if (storagePath) {
-            const url = getStorageUrl(storagePath);
-            setBackgroundImages((prev) => ({ ...prev, [bgKey]: url }));
-            setCurrentBackground(url);
-          } else {
-            console.warn(`Background image path not found for key: ${bgKey}`);
-          }
-        } catch (error) {
-          console.error(`Error loading background image ${bgKey}:`, error);
-        }
-      } else {
-        setCurrentBackground(backgroundImages[bgKey]);
-      }
-    };
-
     if (currentEntry.background) {
-      loadBackgroundImage(currentEntry.background);
+      const url = backgroundImages[currentEntry.background];
+      if (url) setCurrentBackground(url);
+      else if (currentEntry.background.startsWith("/")) setCurrentBackground(currentEntry.background);
     }
-    const loadCharacterImage = async (imageKey: string) => {
-      if (!characterImages[imageKey]) {
-        try {
-          // Realtime Databaseのパスは拡張子なしのファイル名とする
-          const characterPathRef = ref(database, `images/character/${imageKey.split(".")[0]}`); 
-          const snapshot = await get(characterPathRef);
-          const storagePath = snapshot.val();
-          if (storagePath) {
-            const url = getStorageUrl(storagePath);
-            setCharacterImages((prev) => ({ ...prev, [imageKey]: url }));
-          } else {
-            console.warn(`Character image path not found in Realtime Database for key: ${imageKey}`);
-          }
-        } catch (error) {
-          console.error(`Error loading character image ${imageKey}:`, error);
-        }
-      }
-    };
 
     // activeCharacters の更新ロジック
     let newActiveCharacters = { ...activeCharacters };
@@ -89,14 +117,12 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, text, onEnd }) => {
     }
 
     if (currentEntry.type === "character" && currentEntry.characterImage && currentEntry.position) {
-      loadCharacterImage(currentEntry.characterImage);
       newActiveCharacters[currentEntry.position] = {
         name: currentEntry.name || "",
         image: currentEntry.characterImage,
         focus: currentEntry.focus === currentEntry.position,
       };
     } else if (currentEntry.type === "dialogue" && currentEntry.icon) {
-      loadCharacterImage(currentEntry.icon);
       // 会話の場合、アイコンを話者として扱う。位置が指定されていればその位置を優先、なければ中央。
       const targetPosition: "left" | "center" | "right" = currentEntry.position || "center";
       newActiveCharacters[targetPosition] = {
@@ -146,8 +172,15 @@ const Kamishibai: React.FC<KamishibaiProps> = ({ script, text, onEnd }) => {
     }
   };
 
-  if (!currentEntry) {
-    return null; // またはローディングスピナーなど
+  if (!isLoaded || !currentEntry) {
+    return (
+      <div className="kamishibai-container loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backgroundColor: '#000' }}>
+        <div style={{ textAlign: 'center' }}>
+          <img src="/images/title/sailing_loop_32x32_fixed.gif" alt="Loading" style={{ width: '32px', height: '32px', marginBottom: '10px' }} />
+          <div>読み込み中...</div>
+        </div>
+      </div>
+    );
   }
 
   // TODO: キャラクター画像、背景画像、フォーカス演出などの表示ロジックをここに追加

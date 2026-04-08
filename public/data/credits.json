@@ -1,0 +1,35 @@
+{
+  "bgm": "audio/Go-Against-the-Compass.mp3",
+  "scrollSpeed": 1.2,
+  "illustrations": [
+    { "image": "images/background/v2/pirate-ship-deck1.jpg", "startTime": 0 },
+    { "image": "images/background/v2/オルゴール.png", "startTime": 500 },
+    { "image": "images/background/v2/海賊船の襲来.png", "startTime": 1000 },
+    { "image": "images/background/v2/船が空を飛ぶ.png", "startTime": 1500 },
+    { "image": "images/background/v2/海妖.png", "startTime": 2000 },
+    { "image": "images/background/v2/ゴルゾアの胃袋.png", "startTime": 2500 },
+    { "image": "images/background/v2/深海1.png", "startTime": 3000 },
+    { "image": "images/background/v2/隠された船.png", "startTime": 3500 },
+    { "image": "images/background/v2/子供たちの冒険.png", "startTime": 4000 },
+    { "image": "images/background/v2/ジズ.png", "startTime": 4500 },
+    { "image": "images/background/v2/決闘.png", "startTime": 5000 },
+    { "image": "images/background/v2/グリザーベルク_真.png", "startTime": 5500 },
+    { "image": "images/background/v2/最強の二人.png", "startTime": 6000 },
+    { "image": "images/background/v2/ラストシーン.png", "startTime": 6500 }
+  ],
+  "sections": [
+    { "type": "space", "height": 300 },
+    { "type": "title", "content": "紫電一閃 第二章 「FLAG」" },
+    { "type": "space", "height": 100 },
+    { "type": "role", "role": "監督・シナリオ", "names": ["友人K"] },
+    { "type": "role", "role": "プログラム", "names": ["友人K"] },
+    { "type": "role", "role": "グラフィック", "names": ["AI Assets"] },
+    { "type": "space", "height": 150 },
+    { "type": "afterstory", "title": "後日談：友人K", "icon": "友人K", "text": "戦いの後、彼は静かな村で平穏な日々を過ごしていた。\n時折、空を見上げては、共闘した仲間たちのことを思い出している。" },
+    { "type": "space", "height": 100 },
+    { "type": "afterstory", "title": "後日談：ライフク", "icon": "ライフク", "text": "彼女は復興した街で新しい生活を始めた。\nいつか再会できる日を信じて、前向きに歩み続けている。" },
+    { "type": "space", "height": 200 },
+    { "type": "text", "content": "Thank you for playing!" },
+    { "type": "space", "height": 500 }
+  ]
+}

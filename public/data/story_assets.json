@@ -13,7 +13,7 @@
       "position": "center"
     },
     "ラスト・ウィッチ号": {
-      "image": ".png",
+      "image": "ラスト・ウィッチ号.png",
       "position": "center"
     },
     "？？？": {
@@ -87,7 +87,11 @@
     "竜宮城": "images/background/v2/竜宮城.png",
     "夕暮れの港": "images/background/v2/夕暮れの港.png",
     "教室": "images/background/v2/教室.png",
-    "食堂": "images/background/v2/食堂.png"
+    "食堂": "images/background/v2/食堂.png",
+    "隠された船": "images/background/v2/隠された船.png",
+    "孤児院": "images/background/v2/peaceful-village1.jpg",
+    "夕方の甲板": "images/background/v2/夕方の甲板.png",
+    "最後の甲板": "images/background/v2/最後の甲板.png"
     
     
   },
@@ -105,8 +109,12 @@
     "七つ道具：拳銃": "images/still/七つ道具：拳銃.png",
     "七つ道具：潜水藻": "images/still/七つ道具：潜水藻.png",
     "七つ道具：ランタン": "images/still/七つ道具：ランタン.png",
-    "七つ道具：フープ": "images/still/七つ道具：フープ.png"   
-
+    "七つ道具：フープ": "images/still/七つ道具：フープ.png",
+    "七つ道具：ラストウィッチ号": "images/still/七つ道具：ラストウィッチ号.png",
+    "七つ道具：指輪": "images/still/七つ道具：指輪.png",
+    "オルゴール": "images/still/オルゴール.png",
+    "十字架": "images/still/十字架.png"
+    
   },
   "bgm": {
     "港": "audio/VSQSE_0903_bird_05_sea.mp3",
@@ -140,6 +148,7 @@
     "オルゴール": "audio/星空の下で.mp3",
     "船室のひととき": "audio/空が茜に染まるまで.mp3",
     "船倉": "audio/Maison-Hantee.mp3",
+    "深海": "audio/spo_ge_suityu02.mp3",
     "戦闘：ルーサー": "audio/Seasick-Pirate.mp3",
     "戦闘：肉厚な魚": "audio/Seasick-Pirate.mp3",
     "戦闘：血に飢えたジョーズ": "audio/Battle04.mp3",

@@ -50,7 +50,8 @@ const BOSS_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   34: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
-  36: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } }
+  36: { pc: { height: '120%', width: '100%', position: 'absolute', top: '0%', left: '0%', transform: 'translate(-50%,-50%);'},
+   mobile: { height: '120%', width: '100%' , position: 'absolute', top: '0%', left: '0%', transform: 'translate(-50%,-50%);' }}
 };
 
 const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -89,7 +90,7 @@ const BOSS_BATTLE_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   34: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
-  36: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } }
+  36: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } }
 };
 
 const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
@@ -104,7 +105,31 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   9: { pc: { height: '50%', width: '50%' }, mobile: { height: '40%', width: '40%' } },
   10: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
   11: { pc: { height: '60%', width: '60%' }, mobile: { height: '60%', width: '60%' } },
-  12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} }
+  12: { pc: { height: '100%', width: '100%'}, mobile: { height: '100%', width: '100%'} },
+  13: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  14: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  15: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  16: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  17: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  18: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  19: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  20: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  21: { pc: { height: '80%', width: '80%' }, mobile: { height: '80%', width: '80%' } },
+  22: { pc: { height: '100%', width: '80%' }, mobile: { height: '100%', width: '60%' } },
+  23: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  24: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  25: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  26: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  27: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  28: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  29: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  30: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  31: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  32: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  34: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
+  36: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } }
 };
 
 const KENJU_BACK_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {

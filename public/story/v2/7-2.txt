@@ -192,10 +192,17 @@ $SLEEP 3
 [フェードアウト]
 $SLEEP 5
 @SEPIA OFF
+/消去/@left
+/消去/@center
+/消去/@right
 #OFF
-《深海2》
+《OFF》
 [フェードイン]
 $SLEEP 3
+
+#<深海>
+
+《深海2》
 
 アダム@center
 「ここは……。」

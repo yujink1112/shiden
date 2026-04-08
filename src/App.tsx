@@ -33,6 +33,7 @@ const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強"
 
 function App() {
   const [stagesLoaded, setStagesLoaded] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState({ current: 0, total: 0 });
   const [chapter2Flows, setChapter2Flows] = useState<Chapter2StageFlow[]>([]);
   const loadingImageUrl = getStorageUrl('/images/title/sailing_loop_32x32_fixed.gif');
 
@@ -78,23 +79,42 @@ function App() {
           if (k.image) imageUrls.add(k.image.startsWith('/') ? getStorageUrl(k.image) : k.image);
         });
 
+        // スキルアイコン (ALL_SKILLSから収集)
+        ALL_SKILLS.forEach(skill => {
+            if (skill.icon) imageUrls.add(getStorageUrl(`/images/icon/${skill.icon}`));
+        });
+
         // 共通リソース
         imageUrls.add(getStorageUrl('/images/background/background.jpg'));
         imageUrls.add(getStorageUrl('/images/title/titlelogo.png'));
+        imageUrls.add(getStorageUrl('/images/title/タイトルロゴ2.png'));
         imageUrls.add(getStorageUrl('/images/chapter/Chapter1.png'));
         imageUrls.add(getStorageUrl('/images/chapter/Chapter2.png'));
+        imageUrls.add(getStorageUrl('/images/title/sailing_loop_32x32_fixed.gif'));
+
+        const urlList = Array.from(imageUrls);
+        setPreloadProgress({ current: 0, total: urlList.length });
 
         // 画像のプリロード
+        let loadedCount = 0;
         const preloadImage = (url: string) => {
           return new Promise((resolve) => {
             const img = new Image();
             img.src = url;
-            img.onload = () => resolve(url);
-            img.onerror = () => resolve(url); // エラーでも続行
+            img.onload = () => {
+              loadedCount++;
+              setPreloadProgress({ current: loadedCount, total: urlList.length });
+              resolve(url);
+            };
+            img.onerror = () => {
+              loadedCount++;
+              setPreloadProgress({ current: loadedCount, total: urlList.length });
+              resolve(url);
+            };
           });
         };
 
-        await Promise.all(Array.from(imageUrls).map(url => preloadImage(url)));
+        await Promise.all(urlList.map(url => preloadImage(url)));
 
         setStagesLoaded(true);
       } catch (e) {
@@ -326,6 +346,10 @@ function App() {
         setChapter2FlowIndex(nextIndex);
         setStageMode('BOSS');
         handleResetGame();
+      } else if (nextStep.type === 'credits') {
+        setChapter2FlowIndex(nextIndex);
+        setCreditsUrl(nextStep.id || '/data/credits.json');
+        setShowStoryModal(true);
       }
     } else {
       // ステージクリア、次のサイクルへ
@@ -360,6 +384,7 @@ function App() {
   const [storyContent, setStoryContent] = useState<string | null>(null);
   const [storyContentV2, setStoryContentV2] = useState<any[] | null>(null);
   const [storyUrl, setStoryUrl] = useState<string | null>(null);
+  const [creditsUrl, setCreditsUrl] = useState<string | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [showChapterTitle, setShowChapterTitle] = useState(false);
   const [showChapter2Title, setShowChapter2Title] = useState(false);
@@ -2668,12 +2693,20 @@ const PLAYER_SKILL_COUNT = 5;
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
             <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444' }}>
               <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
-              <button onClick={() => {
-                setStoryUrl('story/v2/opening.txt');
-                setShowAdmin(false);
-                setIsAdminPreview(true);
-                setTimeout(() => setShowStoryModal(true), 50);
-              }} style={{ background: '#4527a0' }}>オープニング (opening.txt)</button>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button onClick={() => {
+                  setStoryUrl('story/v2/opening.txt');
+                  setShowAdmin(false);
+                  setIsAdminPreview(true);
+                  setTimeout(() => setShowStoryModal(true), 50);
+                }} style={{ background: '#4527a0' }}>オープニング (opening.txt)</button>
+                <button onClick={() => {
+                  setCreditsUrl('/data/credits.json');
+                  setShowAdmin(false);
+                  setIsAdminPreview(true);
+                  setTimeout(() => setShowStoryModal(true), 50);
+                }} style={{ background: '#2e7d32' }}>エンドロール (credits.json)</button>
+              </div>
             </div>
 
             {/* 第1章 (Stage 1-12) */}
@@ -2701,6 +2734,21 @@ const PLAYER_SKILL_COUNT = 5;
                     <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
                       <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>
                       
+                      <button onClick={() => { 
+                        const stageNo = n + 12;
+                        setStageCycle(stageNo); 
+                        setChapter2FlowIndex(0);
+                        setStageMode('BOSS');
+                        setIsTitle(false); 
+                        setShowAdmin(false); 
+                        const flow = chapter2Flows.find(f => f.stageNo === stageNo);
+                        if (flow) {
+                          moveToNextStep(flow, -1);
+                        }
+                      }} style={{ padding: '5px 10px', background: '#e91e63', border: '1px solid #c2185b', fontWeight: 'bold' }}>
+                        一気通貫TEST
+                      </button>
+
                       <div style={{ display: 'flex', gap: '5px' }}>
                         <button onClick={() => { 
                           const flow = chapter2Flows.find(f => f.stageNo === n + 12);
@@ -2776,17 +2824,19 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showStoryModal && (
-          (stageCycle >= 13 || stageCycle === 1 || storyUrl || (isAdmin && showAdmin === false)) ? (
+          (stageCycle >= 13 || stageCycle === 1 || storyUrl || creditsUrl || (isAdmin && showAdmin === false)) ? (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 15000, backgroundColor: '#000' }}>
               <StoryCanvas
                 script={storyContentV2 || undefined}
                 scriptUrl={storyUrl || undefined}
+                creditsUrl={creditsUrl || undefined}
                 loadingImageUrl={loadingImageUrl}
                 onOpenSettings={() => setShowSettings(true)}
                 onEnd={() => {
                   const isOpening = !!storyUrl;
                   setShowStoryModal(false);
                   setStoryUrl(null);
+                  setCreditsUrl(null);
                   setStoryContentV2(null);
                   setGameStarted(false);
                   
@@ -2903,10 +2953,20 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   if (!stagesLoaded) {
+    const progressPercent = preloadProgress.total > 0 
+      ? Math.round((preloadProgress.current / preloadProgress.total) * 100) 
+      : 0;
+
     return (
       <div style={{ backgroundColor: '#000', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: '20px' }}>
         <img src={loadingImageUrl} alt="Loading" style={{ width: '64px', height: '64px', imageRendering: 'pixelated' }} />
-        <div style={{ color: '#fff' }}>Loading...</div>
+        <div style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>Loading... {progressPercent}%</div>
+        <div style={{ width: '200px', height: '10px', backgroundColor: '#333', borderRadius: '5px', overflow: 'hidden' }}>
+          <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: '#00d2ff', transition: 'width 0.3s' }} />
+        </div>
+        <div style={{ fontSize: '0.8rem', color: '#888' }}>
+          {preloadProgress.current} / {preloadProgress.total} assets loaded
+        </div>
       </div>
     );
   }

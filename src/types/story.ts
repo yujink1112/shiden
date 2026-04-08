@@ -18,3 +18,27 @@ export interface StoryEntry {
 }
 
 export type StoryScript = StoryEntry[];
+
+export interface CreditIllustration {
+  image: string;
+  startTime: number; // スクロール開始からの経過時間(ms) または スクロールの位置
+  duration?: number; // 表示時間
+}
+
+export interface CreditSection {
+  type: "title" | "role" | "afterstory" | "text" | "space";
+  title?: string;
+  role?: string;
+  names?: string[];
+  content?: string;
+  text?: string;
+  icon?: string; // キャラクターアイコン
+  height?: number;
+}
+
+export interface CreditsData {
+  illustrations: CreditIllustration[];
+  sections: CreditSection[];
+  scrollSpeed?: number;
+  bgm?: string;
+}

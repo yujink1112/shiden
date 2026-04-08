@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StoryScript } from '../types/story';
+import { StoryScript, CreditsData, CreditIllustration, CreditSection } from '../types/story';
 import { getStorageUrl } from '../firebase';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
 import AudioManager from '../utils/audioManager';
@@ -7,6 +7,7 @@ import AudioManager from '../utils/audioManager';
 interface StoryCanvasProps {
   script?: StoryScript; // 以前の互換性のために残す
   scriptUrl?: string; // 新しいURL指定
+  creditsUrl?: string; // エンドロール用URL
   onEnd: () => void;
   onOpenSettings?: () => void;
   loadingImageUrl?: string;
@@ -83,10 +84,11 @@ const parseRubyText = (text: string): RubySegment[] => {
   return segments;
 };
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, onEnd, onOpenSettings, loadingImageUrl }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, loadingImageUrl }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
+  const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
-  const [displayedCharCount, setDisplayedCharCount] = useState(0); // ルビ対応用の表示文字数
+  const [displayedCharCount, setDisplayedCharCount] = useState(0); // ルび対応用の表示文字数
   const [isTyping, setIsTyping] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -108,6 +110,216 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
   const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedIndexRef = useRef<number>(-1);
   const [, setForceUpdate] = useState(false); // UI更新用
+
+  // エンドロール用
+  const scrollOffsetRef = useRef(0);
+  const lastTimeRef = useRef<number>(0);
+  const [showTheEnd, setShowTheEnd] = useState(false);
+  const [theEndAlpha, setTheEndAlpha] = useState(0);
+
+  const renderCredits = (ctx: CanvasRenderingContext2D, width: number, height: number, dpr: number) => {
+    if (!creditsData) return;
+
+    const now = Date.now();
+    if (lastTimeRef.current === 0) lastTimeRef.current = now;
+    const delta = now - lastTimeRef.current;
+    lastTimeRef.current = now;
+
+    const scrollSpeed = (creditsData.scrollSpeed || 1) * dpr * (delta / 16.6);
+    scrollOffsetRef.current += scrollSpeed;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+
+    // スマホ判定 (縦長または幅が狭い場合)
+    const isMobileMode = (width / dpr) < 800;
+
+    // --- レイアウト設定 ---
+    const illAreaWidth = isMobileMode ? width : width * 0.5;
+    const illAreaHeight = isMobileMode ? height * 0.45 : height; // スマホ時は約45%を画像エリアに
+    const creditsX = isMobileMode ? 0 : width * 0.5;
+    const creditsY = isMobileMode ? illAreaHeight : 0;
+    const creditsWidth = isMobileMode ? width : width * 0.5;
+    const creditsHeight = isMobileMode ? height - creditsY : height;
+
+    const illProgress = scrollOffsetRef.current; // スクロール量を時間軸として利用
+    
+    const fadeTime = 1000 * dpr;
+    let maxIllEndTime = 0;
+
+    // 背景描画
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+
+    // スマホ時のクレジット背景
+    if (isMobileMode) {
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(creditsX, creditsY, creditsWidth, creditsHeight);
+        
+        // 境界線
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(0, illAreaHeight);
+        ctx.lineTo(width, illAreaHeight);
+        ctx.stroke();
+    }
+
+    // --- 左側（または上部）: イラスト ---
+    creditsData.illustrations.forEach((ill) => {
+        const start = ill.startTime * dpr;
+        const duration = (ill.duration || 8000) * dpr; // デフォルト8秒
+        const end = start + duration;
+        maxIllEndTime = Math.max(maxIllEndTime, end);
+
+        if (illProgress >= start && illProgress <= end) {
+            let alpha = 0;
+            if (illProgress < start + fadeTime) {
+                alpha = (illProgress - start) / fadeTime;
+            } else if (illProgress > end - fadeTime) {
+                alpha = (end - illProgress) / fadeTime;
+            } else {
+                alpha = 1;
+            }
+            
+            const img = imagesRef.current[ill.image];
+            if (img) {
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                // スマホ時は枠いっぱいに表示しやすくするためスケールを微調整
+                const scale = Math.min(illAreaWidth / img.width, illAreaHeight / img.height) * (isMobileMode ? 1.0 : 0.95);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const x = (illAreaWidth - w) / 2;
+                const y = (isMobileMode ? (illAreaHeight - h) / 2 : (height - h) / 2);
+                
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
+                ctx.shadowBlur = 20 * dpr;
+                ctx.drawImage(img, x, y, w, h);
+                ctx.restore();
+            }
+        }
+    });
+
+    // --- 右側（または下部）: クレジットスクロール ---
+    ctx.save();
+    
+    // クレジット表示領域のクリッピング
+    ctx.beginPath();
+    ctx.rect(creditsX, creditsY, creditsWidth, creditsHeight);
+    ctx.clip();
+
+    const padding = (isMobileMode ? 15 : 40) * dpr;
+    const contentX = creditsX + padding;
+    const maxContentWidth = creditsWidth - padding * 2;
+
+    let currentY = creditsY + creditsHeight - scrollOffsetRef.current;
+    let lastSectionBottomY = currentY;
+
+    creditsData.sections.forEach(section => {
+        switch (section.type) {
+            case "title":
+                ctx.fillStyle = '#81d4fa';
+                ctx.font = `bold ${(isMobileMode ? 22 : 32) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.textAlign = 'center';
+                ctx.fillText(section.content || "", creditsX + creditsWidth / 2, currentY);
+                currentY += (isMobileMode ? 40 : 60) * dpr;
+                break;
+            case "role":
+                ctx.fillStyle = '#aaa';
+                ctx.font = `${(isMobileMode ? 13 : 18) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.textAlign = 'right';
+                ctx.fillText(section.role || "", creditsX + creditsWidth * 0.4, currentY);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${(isMobileMode ? 15 : 22) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.textAlign = 'left';
+                section.names?.forEach((name, i) => {
+                    ctx.fillText(name, creditsX + creditsWidth * 0.45, currentY + i * (isMobileMode ? 20 : 30) * dpr);
+                });
+                currentY += Math.max((isMobileMode ? 20 : 30), (section.names?.length || 1) * (isMobileMode ? 20 : 30)) * dpr + (isMobileMode ? 25 : 40) * dpr;
+                break;
+            case "afterstory":
+                const titleFontSize = (isMobileMode ? 15 : 20) * dpr;
+                const textFontSize = (isMobileMode ? 13 : 18) * dpr;
+                const iconSize = (isMobileMode ? 28 : 40) * dpr;
+
+                // アイコン描画
+                let titleX = contentX;
+                if (section.icon && imagesRef.current[section.icon]) {
+                    const iconImg = imagesRef.current[section.icon];
+                    ctx.drawImage(iconImg, contentX, currentY - titleFontSize * 0.2, iconSize, iconSize);
+                    titleX += iconSize + 8 * dpr;
+                }
+
+                ctx.fillStyle = '#ffd54f';
+                ctx.font = `bold ${titleFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.textAlign = 'left';
+                ctx.fillText(section.title || "", titleX, currentY + (section.icon ? (iconSize - titleFontSize) / 2 : 0));
+                
+                ctx.fillStyle = '#eee';
+                ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                const lines = section.text?.split('\n') || [];
+                const storyTextY = currentY + Math.max(iconSize, titleFontSize) + 10 * dpr;
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, contentX, storyTextY + i * (textFontSize * 1.4));
+                });
+                currentY = storyTextY + lines.length * (textFontSize * 1.4) + (isMobileMode ? 35 : 60) * dpr;
+                break;
+            case "text":
+                ctx.fillStyle = '#fff';
+                ctx.font = `${(isMobileMode ? 15 : 20) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.textAlign = 'center';
+                ctx.fillText(section.content || "", creditsX + creditsWidth / 2, currentY);
+                currentY += (isMobileMode ? 30 : 40) * dpr;
+                break;
+            case "space":
+                currentY += (section.height || 50) * (isMobileMode ? 0.7 : 1.0) * dpr;
+                break;
+        }
+        lastSectionBottomY = currentY;
+    });
+
+    ctx.restore();
+
+    // 終了判定
+    const scrollFinished = lastSectionBottomY < 0;
+    const illustrationsFinished = illProgress > maxIllEndTime + 2000 * dpr;
+
+    if (scrollFinished && illustrationsFinished) {
+        if (!showTheEnd) {
+            setShowTheEnd(true);
+        }
+    }
+
+    if (showTheEnd) {
+        if (theEndAlpha < 1 && !isEnding) {
+            setTheEndAlpha(prev => Math.min(1, prev + 0.01));
+        } else if (isEnding && theEndAlpha > 0) {
+            setTheEndAlpha(prev => Math.max(0, prev - 0.015));
+        }
+
+        ctx.save();
+        ctx.globalAlpha = theEndAlpha;
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${80 * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+        ctx.shadowBlur = 30 * dpr;
+        ctx.fillText("THE END", width / 2, height / 2);
+        ctx.restore();
+        
+        if (theEndAlpha >= 1 && !isEnding) {
+            ctx.save();
+            ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 500) * 0.3;
+            ctx.fillStyle = '#aaa';
+            ctx.font = `${20 * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+            ctx.textAlign = 'center';
+            ctx.fillText("- CLICK TO FINISH -", width / 2, height / 2 + 100 * dpr);
+            ctx.restore();
+        }
+    }
+  };
 
   const currentEntry = script[currentEntryIndex];
 
@@ -139,8 +351,23 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     const loadScriptAndAssets = async () => {
       try {
         let finalScript = initialScript;
+        const imageUrls = new Set<string>();
 
-        if (scriptUrl) {
+        if (creditsUrl) {
+          const creditsResponse = await fetch(creditsUrl);
+          const creditsData: CreditsData = await creditsResponse.json();
+          setCreditsData(creditsData);
+          
+          if (creditsData.bgm) {
+            AudioManager.getInstance().playBgm(creditsData.bgm, true);
+          }
+
+          creditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
+          creditsData.sections.forEach(sec => {
+            if (sec.icon) imageUrls.add(sec.icon);
+          });
+          setIsLoaded(false); // エンドロールモードでもロード待機
+        } else if (scriptUrl) {
           // アセット設定の読み込み
           const assetsResponse = await fetch('/data/story_assets.json');
           const assets: StoryAssets = await assetsResponse.json();
@@ -156,17 +383,17 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           }
         }
 
-        if (!finalScript) return;
-        setScript(finalScript);
-        
-        // 画像のプリロード
-        const imageUrls = new Set<string>();
-        for (const entry of finalScript) {
-          if (entry.background) imageUrls.add(entry.background);
-          if (entry.characterImage) imageUrls.add(entry.characterImage);
-          if (entry.icon) imageUrls.add(entry.icon);
-          if (entry.still) imageUrls.add(entry.still); // スチルのプリロード追加
+        if (finalScript) {
+          setScript(finalScript);
+          for (const entry of finalScript) {
+            if (entry.background) imageUrls.add(entry.background);
+            if (entry.characterImage) imageUrls.add(entry.characterImage);
+            if (entry.icon) imageUrls.add(entry.icon);
+            if (entry.still) imageUrls.add(entry.still);
+          }
         }
+
+        if (imageUrls.size === 0 && !creditsUrl && !finalScript) return;
 
         const loadPromises = Array.from(imageUrls).map(async (key) => {
           if (imagesRef.current[key]) return;
@@ -218,7 +445,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     };
 
     loadScriptAndAssets();
-  }, [scriptUrl, initialScript]);
+  }, [scriptUrl, initialScript, creditsUrl]);
 
   // シーン管理
   useEffect(() => {
@@ -422,6 +649,13 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       const width = canvas.width;
       const height = canvas.height;
       const dpr = window.devicePixelRatio || 1;
+
+      if (creditsData) {
+        renderCredits(ctx, width, height, dpr);
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+
       const isMobileMode = (width / dpr) < 800;
       const conf = isMobileMode ? CONFIG.MOBILE : CONFIG.PC;
 
@@ -657,7 +891,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLoaded, currentEntryIndex, displayedCharCount, isEnding, shakeAmount, CONFIG.PC, CONFIG.MOBILE]);
+  }, [isLoaded, currentEntryIndex, displayedCharCount, isEnding, shakeAmount, CONFIG.PC, CONFIG.MOBILE, creditsData]);
 
 const getDisplayedSegments = (fullSegments: RubySegment[], count: number): RubySegment[] => {
   const result: RubySegment[] = [];
@@ -747,6 +981,21 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
 
   const handleNext = () => {
     if (isEnding || !isLoaded) return;
+
+    // エンドロール中はクリックでスキップ確認
+    if (creditsData) {
+        if (showTheEnd) {
+            if (theEndAlpha >= 0.8 && !isEnding) {
+                setIsEnding(true);
+            }
+            return;
+        }
+
+        if (window.confirm('エンドロールをスキップしますか？')) {
+            setIsEnding(true);
+        }
+        return;
+    }
 
     // 自動進行（duration指定）中はクリックによる進行を無効化する
     if (currentEntry?.duration) return;
