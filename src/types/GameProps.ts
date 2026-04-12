@@ -21,6 +21,7 @@ export interface GameProps {
   chapter: number;
   stageCycle: number;
   stageMode: StageMode;
+  setStageCycle: (stageCycle: number) => void;
   setStageMode: (mode: StageMode) => void;
   gameStarted: boolean;
   setGameStarted: (started: boolean) => void;
@@ -38,6 +39,7 @@ export interface GameProps {
   isLargeScreen: boolean;
   isLoungeMode: boolean; // Added
   showEpilogue: boolean; // Added
+  setShowEpilogue: (showEpilogue: boolean) => void;
   // State setters and handlers
   handleResetGame: () => void;
   handleStartGame: () => void;
@@ -113,4 +115,8 @@ export interface GameProps {
   stageVictorySkills: { [key: string]: string[] };
   PLAYER_SKILL_COUNT: number;
   ALL_SKILLS: SkillDetail[];
+  showStage1Tutorial:  boolean;
+  setShowStage1Tutorial: (setShowStage1Tutorial : boolean) => void;
+  epilogueContent: string | null;
+  backToTitle: () => void;
 }

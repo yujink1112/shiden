@@ -39,7 +39,9 @@ const StoryTitle: React.FC<StoryTitleProps> = ({ chapter, stage, title, onComple
             transition: 'opacity 2s ease-in-out',
             color: '#fff',
             fontFamily: '"Times New Roman", serif',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none'
         }}>
             <div style={{
                 position: 'relative',

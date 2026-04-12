@@ -221,6 +221,7 @@ function App() {
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
   const [hasChapter2Save, setHasChapter2Save] = useState(false);
   const [showStage1Tutorial, setShowStage1Tutorial] = useState(false);
+  
 
   useEffect(() => {
     const loadChapter2Data = async () => {
@@ -575,6 +576,10 @@ const PLAYER_SKILL_COUNT = 5;
       const getAvailableOwnedSkills = () => {
         const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
         return owned.sort((a, b) => {
+          // 神業スキルを最優先
+          if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
+          if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
+
           const indexA = ALL_SKILLS.findIndex(s => s.abbr === a.abbr);
           const indexB = ALL_SKILLS.findIndex(s => s.abbr === b.abbr);
           return indexA - indexB;
@@ -1146,6 +1151,17 @@ const PLAYER_SKILL_COUNT = 5;
       }
     }
     setShowChapterSelect({ mode: 'CONTINUE' });
+  };
+
+  const backToTitle = () => {
+    // タイトルに戻る際に最新の状態を同期するためにUpdatedAtを更新
+    if (user) {
+      const now = Date.now();
+      localStorage.setItem('shiden_updated_at', now.toString());
+      set(ref(database, `profiles/${user.uid}/updatedAt`), now);
+    }
+    setIsTitle(true);
+    setStageMode(getLastGameMode());
   };
 
   const handleChapterSelect = async (chapter: number, isNewGame: boolean = false) => {
@@ -1823,6 +1839,10 @@ const PLAYER_SKILL_COUNT = 5;
       const skill = getSkillByAbbr(abbr);
       if (skill?.name === "無想" && selectedPlayerSkills.some(s => getSkillByAbbr(s)?.name === "無想")) {
         alert("「無想」は編成に1つしか入れられません。");
+        return;
+      }
+      if (skill?.kamiwaza === 1 && selectedPlayerSkills.some(s => getSkillByAbbr(s)?.kamiwaza === 1)) {
+        alert("「神業」カテゴリのスキルは編成に1つしか入れられません。");
         return;
       }
       setSelectedPlayerSkills([...selectedPlayerSkills, abbr]);
@@ -3160,7 +3180,7 @@ const PLAYER_SKILL_COUNT = 5;
                           moveToNextStep(flow, -1);
                         }
                       }} style={{ padding: '5px 10px', background: '#e91e63', border: '1px solid #c2185b', fontWeight: 'bold' }}>
-                        一気通貫TEST
+                        TEST
                       </button>
 
                       <div style={{ display: 'flex', gap: '5px' }}>
@@ -3283,6 +3303,7 @@ const PLAYER_SKILL_COUNT = 5;
   const gameProps: GameProps = {
     chapter,
     stageCycle,
+    setStageCycle,
     stageMode,
     setStageMode,
     gameStarted,
@@ -3356,14 +3377,21 @@ const PLAYER_SKILL_COUNT = 5;
     myProfile,
     isLoungeMode,
     showEpilogue,
+    setShowEpilogue,
     isAdmin,
     showAdmin,
     chapter2SubStage,
     chapter2FlowIndex,
     chapter2Flows,
     moveToNextStep,
-    loadingImageUrl
+    loadingImageUrl,
+    showStage1Tutorial,
+    setShowStage1Tutorial,
+    epilogueContent,
+    backToTitle
   };
+
+
 
   if (!stagesLoaded) {
     const progressPercent = preloadProgress.total > 0 
@@ -3456,7 +3484,9 @@ const PLAYER_SKILL_COUNT = 5;
             cursor: 'pointer',
             opacity: isTitleFadingOut ? 0 : 1,
             transition: 'opacity 3s ease-in-out',
-            pointerEvents: isTitleFadingOut ? 'none' : 'auto'
+            pointerEvents: isTitleFadingOut ? 'none' : 'auto',
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none'
           }}
           onClick={() => {
             setIsTitleFadingOut(true);

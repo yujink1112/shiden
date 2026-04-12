@@ -98,7 +98,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
             <div style={{ height: isMobile ? 'calc(100vh - 150px)' : '450px', overflowY: 'auto', paddingRight: '10px' }}>
 
             
-              {ALL_SKILLS.map(skill => (
+              {ALL_SKILLS.filter(skill => skill.ruleDisplay !== false).map(skill => (
                 <div key={skill.abbr} style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
                     <img src={getStorageUrl(skill.icon)} alt="" style={{ width: '40px', height: '40px' }} />

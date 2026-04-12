@@ -15,6 +15,8 @@ export interface StoryEntry {
   duration?: number; // 演出の持続時間 (ミリ秒)
   fadeDuration?: number; // BGMなどのフェードアウト時間 (ミリ秒)
   sepia?: boolean; // セピア調にするかどうか
+  scale?: number; // キャラクターやスチルの拡大率上書き
+  offsetY?: number; // キャラクターのY位置オフセット
 }
 
 export type StoryScript = StoryEntry[];

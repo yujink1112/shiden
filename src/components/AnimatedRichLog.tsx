@@ -181,7 +181,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                 <img
                   src={bossImage}
                   alt={bossName}
-                  className={`boss-battle-image image-fade-in boss-anim-${bossAnim}`}
+                  className={`boss-battle-image boss-anim-${bossAnim}`}
                   style={{
                       ...processor.getBossImageStyle({ ...stageContext, stageCycle: battleStageCycle }, isMobile, 'battle')
                   }}
@@ -212,7 +212,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
             `}</style> */}
           </div>
         )}
-        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 'auto', height: isMobile ? '400px' : 0, boxSizing: 'border-box', overflow: 'hidden' }}>
+        <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 0, height: isMobile ? '400px' : '1px', boxSizing: 'border-box', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
             <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
             <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>

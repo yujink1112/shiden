@@ -13,7 +13,7 @@
       "崩技"
     ],
     "bossSkillAbbrs": "空一刺一刺",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 2,
@@ -28,7 +28,7 @@
       "果断"
     ],
     "bossSkillAbbrs": "搦崩搦刺刺",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 3,
@@ -43,7 +43,7 @@
       "＋速"
     ],
     "bossSkillAbbrs": "崩待待果速",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 4,
@@ -59,7 +59,7 @@
       "＋盾"
     ],
     "bossSkillAbbrs": "空空刺硬空空刺硬",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 5,
@@ -75,7 +75,7 @@
       "＋強"
     ],
     "bossSkillAbbrs": "崩待防果速",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 6,
@@ -91,7 +91,7 @@
       "＋反"
     ],
     "bossSkillAbbrs": "搦搦果反一強",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 7,
@@ -107,7 +107,7 @@
       "隠刃"
     ],
     "bossSkillAbbrs": "一交裏一裏剣",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 8,
@@ -123,7 +123,7 @@
       "覚悟"
     ],
     "bossSkillAbbrs": "疫硬搦硬刺怒硬",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 9,
@@ -139,7 +139,7 @@
       "連撃"
     ],
     "bossSkillAbbrs": "先待待封連雷雷",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 10,
@@ -155,7 +155,7 @@
       "玉響"
     ],
     "bossSkillAbbrs": "逆逆逆",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 11,
@@ -171,7 +171,7 @@
       "燐光"
     ],
     "bossSkillAbbrs": "無覚交果反玉連紫盾",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 12,
@@ -183,7 +183,7 @@
     "backgroundImage": "/images/background/12.jpg",
     "shopSkills": [],
     "bossSkillAbbrs": "影影硬逆燐一雷反交怒",
-    "bgm": "BossBattle"
+    "bgm": ""
   },
   {
     "no": 13,
@@ -261,7 +261,7 @@
     "stage": 3,
     "battle": 2,
     "name": "第2章-3 (大ボス)",
-    "bossName": "キャプテン・エーヴィス",
+    "bossName": "エーヴィス",
     "bossImage": "/images/monster/v2/3-2.png",
     "bossDescription": "壊し、奪い、蹂躙する。すべての船に恐れられる、邪悪な男。",
     "backgroundImage": "/images/background/v2/pirate-ship-deck2.jpg",
@@ -319,7 +319,7 @@
     "name": "第2章-5 (ボス)",
     "bossName": "エルダゾルゲイド",
     "bossImage": "/images/monster/v2/5-2.png",
-    "bossDescription": "■■■■が■■■■■を■■■■■■するために■■■■■■した■■の■■。",
+    "bossDescription": "■■■■が■■■■を■■■■■す■ために■■■■■■した■■の■■。",
     "backgroundImage": "/images/background/v2/船倉の深部.png",
     "shopSkills": [],
     "bossSkillAbbrs": "転転疫疫毒瘴盾",
@@ -350,7 +350,7 @@
     "bossDescription": "暴食。\\nそれは、生あるものが犯せし冒涜の罪なり。\\n徒に命を奪ひて舌根を潤し、本能のまま甘露の杯を満たして、堕落の限りを尽くさん。\\n純然たる欲望は、筆舌に尽くしがたき馳走を求めて、膨張と収縮を繰り返す。\\n使ひ切れぬ命が腫となり、己が身を残酷に滅ぼさんとも。\\n",
     "backgroundImage": "/images/background/v2/ゴルゾアの海.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "食待待礁礁礁怒硬",
+    "bossSkillAbbrs": "搦罠速礁礁礁怒硬",
     "bgm": "戦闘：ゴルゾアの胃袋"
   },
   {

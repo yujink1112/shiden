@@ -10,6 +10,7 @@ import { SkillDetail } from './skillsData';
 const GameChapter1: React.FC<GameProps> = (props) => {
   const {
     stageCycle,
+    setStageCycle,
     stageMode,
     gameStarted,
     battleResults,
@@ -23,6 +24,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     isMobile,
     isLoungeMode,
     showEpilogue,
+    setShowEpilogue,
     handleResetGame,
     handleStartGame,
     handleBattleLogComplete,
@@ -66,6 +68,10 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     myProfile,
     setShowBossClearPanel,
     ownedSkillAbbrs,
+    showStage1Tutorial,
+    setShowStage1Tutorial,
+    epilogueContent,
+    backToTitle
   } = props;
 
   // 敵のスキル数に応じたスケール計算
@@ -77,11 +83,12 @@ const GameChapter1: React.FC<GameProps> = (props) => {
                          skillCount >= 9 ? 'scale(0.7)' : 'none';
 
   return (
-    <div style={{ 
+    <div className="AppContainer"
+    style={{ 
       display: 'flex', 
       flexDirection: isMobile ? 'column' : 'row', 
       width: '100%', 
-      minHeight: '100dvh', 
+      height: isMobile ? 'auto' : '100dvh', 
       backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -89,6 +96,73 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       backgroundColor: '#000',
       overflow: 'hidden'
     }}>
+
+{showStage1Tutorial && (
+        <div className="ChangelogModalOverlay" style={{ zIndex: 20000 }} onClick={() => setShowStage1Tutorial(false)}>
+          <div className="ChangelogModal" style={{ maxWidth: '480px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
+            <div className="ChangelogHeader" style={{ background: '#00d2ff' }}>
+              <span style={{ color: '#000', fontWeight: 'bold' }}>おめでとうございます！</span>
+              <button onClick={() => setShowStage1Tutorial(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
+              <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0, textAlign: 'left' }}>
+                このゲームは、こんな風にスキルを5つ編成して相手のスキルを全て破壊するゲームです。<br /><br />
+                左上の📖のアイコンから、ルールを確認することができます。<br /><br />
+                ゲームログをじっくり読むと、何かが掴めるかも？<br /><br />
+                ステージに勝っても負けても、報酬としてスキルを得ることができます。<br />
+                （過去のステージのスキルももらえるので安心！）<br /><br />
+                それでは、『紫電一閃』の世界をお楽しみください。
+              </p>
+            </div>
+            <button className="ChangelogCloseButton" style={{ background: '#00d2ff', color: '#000', fontWeight: 'bold' }} onClick={() => setShowStage1Tutorial(false)}>閉じる</button>
+          </div>
+        </div>
+      )}
+      {showEpilogue && (
+        <div className="EpilogueContainer">
+          <div className="EpilogueBackground"></div>
+          <div className="EpilogueStars"></div>
+          <div className="EpilogueContent">
+            <h1 className="EpilogueTitle">エピローグ</h1>
+            <div className="EpilogueText">
+              {(epilogueContent || '').split('\n').map((line, idx) => (
+                <span
+                  key={idx}
+                  className="EpilogueLine"
+                  style={{
+                    animationDelay: `${idx * 1.2}s`,
+                    display: 'block',
+                    width: '100%',
+                    minHeight: line.trim() === '' ? '1.5rem' : 'auto'
+                  }}
+                >
+                  {line}
+                </span>
+              ))}
+            </div>
+            <div style={{
+                opacity: 0,
+                animation: 'epilogueFadeIn 3s forwards',
+                animationDelay: `${((epilogueContent || '').split('\n').length + 2) * 1.2}s`,
+                textAlign: 'center',
+                marginTop: '100px',
+                marginBottom: '100px'
+            }}>
+                <div style={{ fontSize: '3rem', color: '#ffd700', fontFamily: 'serif', letterSpacing: '0.5rem' }}>完</div>
+            </div>
+            <div style={{
+              textAlign: 'center',
+              marginTop: '40px',
+              opacity: 0,
+              animation: 'epilogueFadeIn 2s forwards',
+              animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
+            }}>
+              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); backToTitle(); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>

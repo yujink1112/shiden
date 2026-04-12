@@ -51,6 +51,18 @@
     "マルトー" : {
       "image": "副船長.png",
       "position": "center"
+    },
+    "レッド子爵" : {
+      "image": "パパ.png",
+      "position": "center"
+    },
+    "院長" : {
+      "image": "院長.png",
+      "position": "center"
+    },
+    "グウィン" : {
+      "image": "グウィン.png",
+      "position": "center"
     }
 
   },
@@ -90,8 +102,20 @@
     "食堂": "images/background/v2/食堂.png",
     "隠された船": "images/background/v2/隠された船.png",
     "孤児院": "images/background/v2/peaceful-village1.jpg",
+    "夕方の草原": "images/background/v2/grassland-evening-1.jpg",
     "夕方の甲板": "images/background/v2/夕方の甲板.png",
-    "最後の甲板": "images/background/v2/最後の甲板.png"
+    "最後の甲板": "images/background/v2/最後の甲板.png",
+    "子供たちの冒険": "images/background/v2/子供たちの冒険.png",
+    "ブライニクルの海": "images/background/v2/ブライニクルの海.png",
+    "ブライニクル1": "images/background/v2/ブライニクル1.png",
+    "ブライニクル2": "images/background/v2/ブライニクル2.png",
+    "ジズ": "images/background/v2/ジズ.png",
+    "船とポータル": "images/background/v2/船とポータル.png",
+    "夕方の海賊船": "images/background/v2/夕方の海賊船.png",
+    "追悼": "images/background/v2/追悼.png",
+    "決闘": "images/background/v2/決闘.png",
+    "最強の二人": "images/background/v2/最強の二人.png"
+    
     
     
   },
@@ -113,7 +137,8 @@
     "七つ道具：ラストウィッチ号": "images/still/七つ道具：ラストウィッチ号.png",
     "七つ道具：指輪": "images/still/七つ道具：指輪.png",
     "オルゴール": "images/still/オルゴール.png",
-    "十字架": "images/still/十字架.png"
+    "十字架": "images/still/十字架.png",
+    "深海のキス": "images/still/深海のキス.png"
     
   },
   "bgm": {
@@ -167,11 +192,13 @@
     "戦闘：ブライニクル": "audio/pandem04.ogg",
     "戦闘：グウィン": "audio/cyrf_freezing_point.mp3",
     "戦闘：ジズ": "audio/Blaze_a_Trail.mp3",
-    "戦闘：ゾルゲイドクイーン": "audio/The-Depth.mp3",
+    "戦闘：ゾルゲイドクイーン": "audio/Abyssal-Stagnation.mp3",
     "戦闘：デザインド・エッグ号2": "audio/Pirate_Attack_loop.ogg",
     "戦闘：エーヴィス海賊団": "audio/天使殲滅戦.mp3",
     "戦闘：エーヴィス2": "audio/月下の死闘.ogg",
     "戦闘：リザベル": "audio/Knight_in_the_wind.ogg",
-    "戦闘：グリザーベルク": "audio/Will_you_still_cry.mp3"
+    "戦闘：グリザーベルク": "audio/鳴神の魔女.mp3",
+    "戦闘：グリザーベルク2": "audio/Will_you_still_cry.mp3"
+    
   }
 }

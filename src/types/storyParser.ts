@@ -219,6 +219,19 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
       let rawName = line;
       let position: "left" | "center" | "right" | undefined = undefined;
       let expression: string | undefined = undefined;
+      let scale: number | undefined = undefined;
+      let offsetY: number | undefined = undefined;
+
+      // 倍率とYオフセットの抽出 (*1.2,50 など)
+      if (rawName.includes('*')) {
+        const parts = rawName.split('*');
+        rawName = parts[0];
+        const scaleAndOffset = parts[1].split(',');
+        scale = parseFloat(scaleAndOffset[0]);
+        if (scaleAndOffset.length > 1) {
+          offsetY = parseFloat(scaleAndOffset[1]);
+        }
+      }
 
       // 位置の抽出 (@left など)
       if (rawName.includes('@')) {
@@ -251,7 +264,9 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           name: displayName,
           text: dialogue,
           background: currentBackground,
-          sepia: currentSepia
+          sepia: currentSepia,
+          scale: scale,
+          offsetY: offsetY
         };
       } else {
         // 【ト書き】のケース
@@ -275,7 +290,9 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           duration: duration,
           fadeDuration: fadeDuration,
           background: currentBackground,
-          sepia: currentSepia
+          sepia: currentSepia,
+          scale: scale,
+          offsetY: offsetY
         };
       }
 

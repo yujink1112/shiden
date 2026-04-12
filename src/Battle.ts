@@ -87,7 +87,7 @@ export class Battle {
         // 先攻決定フェイズ
         this.log("▼先攻決定フェイズ");
         this.log();
-        const { first, second } = this.phaseSpeed();
+        const { first, second } = this.phaseSpeed(true);
         this.log();
 
         // 攻撃フェイズ（先攻）
@@ -144,7 +144,7 @@ export class Battle {
             }
             return false;
         };
-        const { first } = this.phaseSpeed();
+        const { first } = this.phaseSpeed(true);
         const pc1IsFirst = (first === this.pc1);
         applyGouyoku(this.pc1, this.pc2, pc1IsFirst);
         applyGouyoku(this.pc2, this.pc1, !pc1IsFirst);
@@ -834,7 +834,7 @@ export class Battle {
 
     private reserveCounterEffects(attacker: Player, defender: Player, targetIdx: number): void {
         const s = defender.skill[targetIdx];
-        if (s === "罠" || s === "崩") attacker.stan = StatusFlag.RESERVED;
+        if (s === "崩") attacker.stan = StatusFlag.RESERVED;
         if (s === "搦") attacker.roubai = StatusFlag.RESERVED;
         if (s === "疫") attacker.ekibyo = StatusFlag.RESERVED;
         if (s === "紫") defender.stan = StatusFlag.RESERVED;

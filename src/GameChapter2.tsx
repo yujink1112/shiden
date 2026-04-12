@@ -123,7 +123,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       display: 'flex', 
       flexDirection: isMobile ? 'column' : 'row', 
       width: '100%', 
-      minHeight: '100dvh', 
+      height: isMobile ? 'auto' : '100dvh', 
       backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -234,7 +234,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                   <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
                     {battleResults.length > 0 && battleResults.every(r => r.winner === 1) ? '撃破！！' : '敗北……'}<br />
                     {currentStep?.skill ? '新しいスキルを獲得しました！' :
-                     currentStep?.choices ? 'どちらかのスキルを選んでください' :
+                     currentStep?.choices ? 'スキルを1つ選んでください' :
                      isChapter2Reward ? `スキルを${currentStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
                   </h2>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
@@ -244,7 +244,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                         if (!skill) return null;
                         return (
                           <div key={abbr} onClick={() => handleRewardSelection(abbr)} style={{ cursor: 'pointer', transition: 'transform 0.2s' }} className={selectedRewards.includes(abbr) ? 'selected-reward-card' : ''}>
-                            <SkillCard skill={skill} isSelected={selectedRewards.includes(abbr)} iconMode={iconMode} />
+                            <SkillCard skill={skill} isSelected={currentStep?.choices ? true : selectedRewards.includes(abbr)} iconMode={iconMode} />
                           </div>
                         );
                       })

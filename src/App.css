@@ -1009,3 +1009,9 @@
 .ChangelogCloseButton:hover {
   background: #444;
 }
+
+.selected-reward-card {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+  z-index: 10;
+}

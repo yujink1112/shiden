@@ -11,6 +11,10 @@ interface StoryCanvasProps {
   onEnd: () => void;
   onOpenSettings?: () => void;
   loadingImageUrl?: string;
+  charScalePC?: number;
+  charScaleMobile?: number;
+  offsetYPC?: number;
+  offsetYMobile?: number;
 }
 
 interface RubySegment {
@@ -84,7 +88,7 @@ const parseRubyText = (text: string): RubySegment[] => {
   return segments;
 };
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, loadingImageUrl }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
@@ -331,7 +335,8 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       margin: 40,
       paddingX: 30,
       paddingY: 25,
-      charScale: 0.85,
+      charScale: charScalePC || 0.85,
+      offsetY: offsetYPC || 0,
       lineSpacing: 1.6
     },
     MOBILE: {
@@ -341,7 +346,8 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       margin: 10,
       paddingX: 15,
       paddingY: 15,
-      charScale: 0.75,
+      charScale: charScaleMobile || 0.7,
+      offsetY: offsetYMobile || 0,
       lineSpacing: 1.4 // 行間を少し詰めて4行入りやすくする
     }
   };
@@ -693,7 +699,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
       if (currentBackgroundRef.current) {
         const bgImg = currentBackgroundRef.current;
-        const scale = Math.max(width / bgImg.width, height / bgImg.height);
+        let scale = Math.max(width / bgImg.width, height / bgImg.height);
+        
+        if (isMobileMode) {
+          // スマホ版（縦長画面）で背景が拡大されすぎて左右が削られすぎるのを防ぐため、
+          // 幅に合わせたスケーリングの1.2倍を上限とする。
+          // これにより、画像の一部がはみ出すのを抑え、より広い範囲を表示できる。
+          scale = Math.min(scale, (width / bgImg.width) * 1.5);
+        }
+
         const drawW = bgImg.width * scale;
         const drawH = bgImg.height * scale;
         const x = (width - drawW) / 2;
@@ -755,7 +769,10 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         }
 
         const charImg = char.img;
-        const charScale = (height * conf.charScale) / charImg.height;
+        let charScale = (height * conf.charScale) / charImg.height;
+        if (currentEntry?.scale) {
+          charScale *= currentEntry.scale;
+        }
         const charW = charImg.width * charScale;
         const charH = charImg.height * charScale;
         
@@ -776,7 +793,9 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         }
 
         const slideY = (1 - char.opacity) * 20 * dpr;
-        ctx.drawImage(charImg, charX, height - charH + slideY, charW, charH);
+        const entryOffsetY = (currentEntry?.offsetY || 0) * dpr;
+        const globalOffsetY = (conf.offsetY || 0) * dpr;
+        ctx.drawImage(charImg, charX, height - charH + slideY + entryOffsetY + globalOffsetY, charW, charH);
         ctx.restore();
       });
 
@@ -1046,7 +1065,9 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
         justifyContent: 'center',
         cursor: 'default',
         overflow: 'hidden',
-        pointerEvents: isEnding ? 'none' : 'auto'
+        pointerEvents: isEnding ? 'none' : 'auto',
+        WebkitTapHighlightColor: 'transparent',
+        userSelect: 'none'
       }}
     >
       <div 

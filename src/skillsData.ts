@@ -1,4 +1,4 @@
-export const ALL_SKILLS = [
+export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "一", name: "一閃", kana:"いっせん", icon: "/images/skill/a01.gif", type: "攻撃", speed: "LV", description: "相手に1点のダメージを与える。" },
   { abbr: "刺", name: "刺突", kana:"しとつ", icon: "/images/skill/a02.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルと最もLVが近いスキル（より高いLVを優先）に変更される。" },
   { abbr: "果", name: "果断", kana:"かだん", icon: "/images/skill/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。" },
@@ -66,19 +66,19 @@ export const ALL_SKILLS = [
   { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/v2/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。" },
 
   // 神業スキル
-  { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/v2/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。" },
-  { abbr: "解", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。" },
-  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「狼狽」「スタン」「忘却」を与える。" },
-  { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。" },
+  { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/v2/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。神業スキルは1つしか選択できない。", ruleDisplay:false },
+  { abbr: "解", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1,speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。神業スキルは1つしか選択できない。", ruleDisplay:false },
+  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「狼狽」「スタン」「忘却」を与える。神業スキルは1つしか選択できない。", ruleDisplay:false },
+  { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。神業スキルは1つしか選択できない。", ruleDisplay:false },
 
   // 敵専用スキル
-  { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。" },
-  { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/v2/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。" },
-  { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/v2/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。" },
-  { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/v2/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。" },
-  { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。" },
-  { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。" },
-  { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。" },
+  { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。", ruleDisplay: false },
+  { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/v2/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。", ruleDisplay: false },
+  { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/v2/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。", ruleDisplay: false },
+  { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/v2/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。", ruleDisplay: false },
+  { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。", ruleDisplay: false },
+  { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。", ruleDisplay: false },
+  { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。", ruleDisplay: false },
 ];
 
 export interface SkillDetail {
@@ -89,6 +89,8 @@ export interface SkillDetail {
   type: string;
   speed: string;
   description: string;
+  kamiwaza?: number;
+  ruleDisplay?: boolean;
 }
 
 export const getSkillByAbbr = (abbr: string): SkillDetail | undefined => {

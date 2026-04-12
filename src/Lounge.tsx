@@ -937,6 +937,13 @@ onPageChange,
         alert("剣獣のスキルは最大8つまでです。");
         return;
       }
+      
+      const skill = allSkills.find(s => s.abbr === abbr);
+      if (skill?.kamiwaza === 1 && newSkills.some(sAbbr => allSkills.find(s => s.abbr === sAbbr)?.kamiwaza === 1)) {
+        alert("「神業」カテゴリのスキルは1つしか編成できません。");
+        return;
+      }
+
       newSkills.push(abbr);
       setTempKenju({
         name: tempKenju?.name || myProfile.myKenju?.name || '',
@@ -1020,19 +1027,24 @@ onPageChange,
           <div style={{ marginBottom: '20px' }}>
             <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>好きなスキル</label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', maxHeight: '200px', overflowY: 'auto', padding: '10px', background: '#222', borderRadius: '5px', border: '1px solid #444' }}>
-              {allSkills.map(s => (
+              {[...allSkills].sort((a, b) => {
+                if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
+                if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
+                return 0;
+              }).map(s => (
                 <div
                   key={s.abbr}
                   onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
                   style={{
                     cursor: 'pointer',
-                    border: myProfile.favoriteSkill === s.abbr ? '2px solid #ffd700' : '1px solid #444',
+                    border: myProfile.favoriteSkill === s.abbr ? '2px solid #ffd700' : (s.kamiwaza === 1 ? '2px solid #de63fd' : '1px solid #444'),
                     borderRadius: '4px',
                     padding: '2px',
-                    background: myProfile.favoriteSkill === s.abbr ? '#333' : '#1a1a1a',
+                    background: myProfile.favoriteSkill === s.abbr ? '#333' : (s.kamiwaza === 1 ? '#2a1a3a' : '#1a1a1a'),
                     display: 'flex',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    boxShadow: s.kamiwaza === 1 ? '0 0 5px #de63fd' : 'none'
                   }}
                   title={s.name}
                 >
@@ -1197,7 +1209,11 @@ onPageChange,
                 </button>
               </div>
               <div id='deneiSkillPanel' style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '5px', maxHeight: '460px', overflowY: 'auto', padding: '10px', background: '#111', borderRadius: '8px', border: '1px solid #444', scrollbarWidth: 'thin' }}>
-                {allSkills.map(s => (
+                {[...allSkills].sort((a, b) => {
+                  if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
+                  if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
+                  return 0;
+                }).map(s => (
                   <div key={s.abbr} style={{ display: 'flex', justifyContent: 'center' }}>
                     <SkillCard
                       skill={s}

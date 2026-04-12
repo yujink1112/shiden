@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ALL_SKILLS, SkillDetail, STATUS_DATA } from '../skillsData';
 import { getStorageUrl } from '../firebase';
 
@@ -75,65 +76,79 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const cardRef = useRef<HTMLDivElement>(null);
   const [tooltipPos, setTooltipPos] = useState<'center' | 'left' | 'right'>('center');
   const [isTooltipBelow, setIsTooltipBelow] = useState(false);
+  const [cardRect, setCardRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
-    if (showTooltip && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const screenWidth = window.innerWidth;
-      const margin = 20;
-      const tooltipWidth = 220;
-      const estimatedTooltipHeight = 150;
+    const updatePosition = () => {
+      if (showTooltip && cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        setCardRect(rect);
+        const screenWidth = window.innerWidth;
+        const margin = 20;
+        const tooltipWidth = 220;
+        const estimatedTooltipHeight = 150;
 
-      const spaceAbove = rect.top;
-      if (spaceAbove < estimatedTooltipHeight) {
-        setIsTooltipBelow(true);
-      } else {
-        setIsTooltipBelow(false);
-      }
-
-      const deneiPanel = document.getElementById('deneiSkillPanel');
-      const bossPanel = document.querySelector('.BossSkillPreview');
-      const containerPanel = deneiPanel || bossPanel;
-
-      if (containerPanel) {
-        const panelRect = containerPanel.getBoundingClientRect();
-        const relativeLeft = rect.left - panelRect.left;
-        const relativeRight = panelRect.right - rect.right;
-
-        const spaceInPanelAbove = rect.top - panelRect.top;
-        if (spaceInPanelAbove < estimatedTooltipHeight) {
+        const spaceAbove = rect.top;
+        if (spaceAbove < estimatedTooltipHeight) {
           setIsTooltipBelow(true);
+        } else {
+          setIsTooltipBelow(false);
         }
 
-        if (relativeLeft < tooltipWidth / 2) {
-          setTooltipPos('left');
-        } else if (relativeRight < tooltipWidth / 2) {
-          setTooltipPos('right');
+        const deneiPanel = document.getElementById('deneiSkillPanel');
+        const bossPanel = document.querySelector('.BossSkillPreview');
+        const containerPanel = deneiPanel || bossPanel;
+
+        if (containerPanel) {
+          const panelRect = containerPanel.getBoundingClientRect();
+          const relativeLeft = rect.left - panelRect.left;
+          const relativeRight = panelRect.right - rect.right;
+
+          const spaceInPanelAbove = rect.top - panelRect.top;
+          if (spaceInPanelAbove < estimatedTooltipHeight) {
+            setIsTooltipBelow(true);
+          }
+
+          if (relativeLeft < tooltipWidth / 2) {
+            setTooltipPos('left');
+          } else if (relativeRight < tooltipWidth / 2) {
+            setTooltipPos('right');
+          } else {
+            setTooltipPos('center');
+          }
         } else {
-          setTooltipPos('center');
-        }
-      } else {
-        if (rect.left < tooltipWidth / 2 + margin) {
-          setTooltipPos('left');
-        } else if (screenWidth - rect.right < tooltipWidth / 2 + margin) {
-          setTooltipPos('right');
-        } else {
-          setTooltipPos('center');
+          if (rect.left < tooltipWidth / 2 + margin) {
+            setTooltipPos('left');
+          } else if (screenWidth - rect.right < tooltipWidth / 2 + margin) {
+            setTooltipPos('right');
+          } else {
+            setTooltipPos('center');
+          }
         }
       }
+    };
+
+    if (showTooltip) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
     }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
   }, [showTooltip]);
 
   const getTooltipStyle = (): React.CSSProperties => {
     const base: React.CSSProperties = {
-      position: 'absolute',
-      ...(isTooltipBelow ? { top: '105%' } : { bottom: '105%' }),
+      position: 'fixed',
       backgroundColor: 'rgba(30, 30, 30, 0.95)',
       color: 'white',
       padding: '12px',
       borderRadius: '8px',
       whiteSpace: 'normal',
-      zIndex: 2000,
+      zIndex: 9999,
       textAlign: 'left',
       boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
       minWidth: '220px',
@@ -144,12 +159,21 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       border: '1px solid #555',
     };
 
+    if (!cardRect) return { ...base, display: 'none' };
+
+    const top = isTooltipBelow ? cardRect.bottom + 5 : cardRect.top - 5;
+    let left = cardRect.left + cardRect.width / 2;
+    let transform = 'translate(-50%, ' + (isTooltipBelow ? '0' : '-100%') + ')';
+
     if (tooltipPos === 'left') {
-      return { ...base, left: '0', transform: 'none' };
+      left = cardRect.left;
+      transform = isTooltipBelow ? 'none' : 'translateY(-100%)';
     } else if (tooltipPos === 'right') {
-      return { ...base, right: '0', transform: 'none' };
+      left = cardRect.right;
+      transform = isTooltipBelow ? 'translateX(-100%)' : 'translate(-100%, -100%)';
     }
-    return { ...base, left: '50%', transform: 'translateX(-50%)' };
+
+    return { ...base, top, left, transform };
   };
 
   const renderIcon = () => {
@@ -201,17 +225,17 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
         }
       }}
       style={{
-        border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : '1px solid #444')),
+        border: isConnected ? '3px solid #ffeb3b' : (isDimmed ? '3px solid #333' : (isSelected ? '3px solid gold' : (skill.kamiwaza === 1 ? '3px solid #de63fd' : '1px solid #444'))),
         borderRadius: '8px',
         padding: '8px',
         margin: '2px',
         cursor: onClick ? 'pointer' : 'default',
-        backgroundColor: isConnected ? '#4a4a00' : (isSelected ? '#333300' : '#1a1a1a'),
+        backgroundColor: isConnected ? '#4a4a00' : (isSelected ? '#333300' : (skill.kamiwaza === 1 ? '#2a1a3a' : '#1a1a1a')),
         color: isDimmed ? '#666' : '#eee',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        boxShadow: isConnected ? '0 0 20px #ffeb3b, inset 0 0 15px #ffeb3b' : (isDimmed ? 'none' : (isSelected ? '0 0 10px rgba(255,215,0,0.7)' : '0 2px 4px rgba(0,0,0,0.3)')),
+        boxShadow: isConnected ? '0 0 20px #ffeb3b, inset 0 0 15px #ffeb3b' : (isDimmed ? 'none' : (skill.kamiwaza === 1 ? '0 0 15px #de63fd' : (isSelected ? '0 0 10px rgba(255,215,0,0.7)' : '0 2px 4px rgba(0,0,0,0.3)'))),
         position: 'relative',
         transition: 'all 0.3s ease',
         filter: isDimmed ? 'grayscale(80%)' : 'none',
@@ -220,7 +244,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
     >
       {renderIcon()}
       <span className="skill-name">{skill.name}</span>
-      {showTooltip && !isTooltipForceClosed && (
+      {showTooltip && !isTooltipForceClosed && createPortal(
         <div 
           style={getTooltipStyle()}
           onClick={(e) => e.stopPropagation()}
@@ -263,7 +287,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
               borderRadius: '5px',
               width: window.innerWidth < 600 ? '100%' : '200px',
               boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-              zIndex: 2001,
+              zIndex: 10000,
               border: '1px solid #ffd700',
               boxSizing: 'border-box'
             }}>
@@ -271,7 +295,8 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
               {STATUS_DATA.find(s => s.name === hoveredStatus)?.description}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
