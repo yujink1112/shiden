@@ -414,7 +414,7 @@
     "chapter": 2,
     "stage": 9,
     "battle": 1,
-    "name": "海に生き、海へと還るもの",
+    "name": "海に生き、海へと還る",
     "bossName": "廃都の守護者",
     "bossImage": "/images/monster/v2/9-1.png",
     "bossDescription": "",
@@ -518,7 +518,7 @@
     "bossDescription": "",
     "backgroundImage": "/images/background/v2/紫電の空.png",
     "shopSkills": [],
-    "bossSkillAbbrs": "怠水水水円凍硬",
+    "bossSkillAbbrs": ["無待速座熱反燐連砲錬","先封隠反隠弓罠燐砲錬","霊毒防防瘴硬円燐砲錬"],
     "bgm": "戦闘：グリザーベルク"
   }
 ]

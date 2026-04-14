@@ -15,10 +15,25 @@ export interface StageConfig {
   bgm?: string;
 }
 
+export interface RawStageConfig extends Omit<StageConfig, 'bossSkillAbbrs'> {
+  bossSkillAbbrs: string | string[];
+}
+
 let STAGE_DATA: StageConfig[] = [];
 
-export const setStageData = (data: StageConfig[]) => {
-  STAGE_DATA = data;
+const normalizeBossSkillAbbrs = (bossSkillAbbrs: string | string[]): string => {
+  if (Array.isArray(bossSkillAbbrs)) {
+    if (bossSkillAbbrs.length === 0) return '';
+    return bossSkillAbbrs[Math.floor(Math.random() * bossSkillAbbrs.length)] || '';
+  }
+  return bossSkillAbbrs;
+};
+
+export const setStageData = (data: RawStageConfig[]) => {
+  STAGE_DATA = data.map(stage => ({
+    ...stage,
+    bossSkillAbbrs: normalizeBossSkillAbbrs(stage.bossSkillAbbrs)
+  }));
 };
 
 export { STAGE_DATA };

@@ -75,11 +75,45 @@ const GameChapter2: React.FC<GameProps> = (props) => {
   // 第2章の報酬選択（flow type が reward の場合）
   const isChapter2Reward = currentStep?.type === 'reward';
 
-  // 報酬の選択肢を生成
-  const rewardChoices = React.useMemo(() => {
-    if (!isChapter2Reward) return [];
-    if (currentStep.skill) return [currentStep.skill];
-    if (!currentStep.choices) return [];
+  // 報酬の選択肢を生成して保存する。リロード時は同じ報酬ステップの候補を再利用する。
+  const [rewardChoices, setRewardChoices] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const storageKey = 'shiden_chapter2_reward_choices';
+
+    if (!isChapter2Reward || !currentStep) {
+      setRewardChoices([]);
+      localStorage.removeItem(storageKey);
+      return;
+    }
+
+    const rewardStepKey = `${stageCycle}:${chapter2FlowIndex}`;
+    const saved = localStorage.getItem(storageKey);
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.key === rewardStepKey && Array.isArray(parsed?.choices)) {
+          setRewardChoices(parsed.choices);
+          return;
+        }
+      } catch {
+        // 保存データが壊れている場合は下で作り直す
+      }
+    }
+
+    if (currentStep.skill) {
+      const choices = [currentStep.skill];
+      setRewardChoices(choices);
+      localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices }));
+      return;
+    }
+
+    if (!currentStep.choices) {
+      setRewardChoices([]);
+      localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices: [] }));
+      return;
+    }
 
     let choices = [...currentStep.choices];
     
@@ -104,8 +138,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       choices = [...choices, ...toAdd.map(s => s.abbr)];
     }
 
-    return choices;
-  }, [isChapter2Reward, currentStep, ownedSkillAbbrs, ALL_SKILLS]);
+    setRewardChoices(choices);
+    localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices }));
+  }, [isChapter2Reward, currentStep, stageCycle, chapter2FlowIndex, ownedSkillAbbrs, ALL_SKILLS]);
 
   // 報酬選択の表示判定を上書き
   const showRewardSelection = rewardSelectionMode || isChapter2Reward;

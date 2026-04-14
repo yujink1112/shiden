@@ -10,6 +10,8 @@ interface StoryCanvasProps {
   creditsUrl?: string; // エンドロール用URL
   onEnd: () => void;
   onOpenSettings?: () => void;
+  onToggleMute?: () => void;
+  isBgmEnabled?: boolean;
   loadingImageUrl?: string;
   charScalePC?: number;
   charScaleMobile?: number;
@@ -88,7 +90,7 @@ const parseRubyText = (text: string): RubySegment[] => {
   return segments;
 };
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
@@ -705,7 +707,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           // スマホ版（縦長画面）で背景が拡大されすぎて左右が削られすぎるのを防ぐため、
           // 幅に合わせたスケーリングの1.2倍を上限とする。
           // これにより、画像の一部がはみ出すのを抑え、より広い範囲を表示できる。
-          scale = Math.min(scale, (width / bgImg.width) * 1.5);
+          scale = Math.min(scale, (width / bgImg.width) * 3);
         }
 
         const drawW = bgImg.width * scale;
@@ -1128,6 +1130,35 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
                 title="設定"
               >
                 ⚙️
+              </button>
+            )}
+            {onToggleMute && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleMute();
+                }}
+                style={{
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  color: '#fff',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: '"Yu Gothic", "YuGothic", "sans-serif"',
+                  WebkitTapHighlightColor: 'transparent',
+                  minWidth: '45px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(50, 50, 50, 0.8)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'}
+                title={isBgmEnabled ? 'BGMをミュート' : 'ミュート解除'}
+              >
+                {isBgmEnabled ? '🔊' : '🔇'}
               </button>
             )}
             <button
