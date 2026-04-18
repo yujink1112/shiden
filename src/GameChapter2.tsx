@@ -2,6 +2,7 @@ import React from 'react';
 import SkillCard from './components/SkillCard';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import StoryCanvas from './components/StoryCanvas';
+import AudioManager from './utils/audioManager';
 import { GameProps, BattleResult } from './types/GameProps';
 import { getAvailableSkillsUntilStage } from './stageData';
 import { SkillDetail } from './skillsData';
@@ -38,6 +39,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     setSelectedRewards,
     handleRewardSelection,
     confirmRewards,
+    isRewardConfirming,
     clearBossAndNextCycle,
     iconMode,
     panelRef,
@@ -49,6 +51,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     setIsTitle,
     setShowRule,
     setShowSettings,
+    bgmEnabled,
     getSkillCardsFromAbbrs,
     winRateDisplay,
     stage11TrialActive,
@@ -74,6 +77,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
   // 第2章の報酬選択（flow type が reward の場合）
   const isChapter2Reward = currentStep?.type === 'reward';
+  const isFixedChapter2Reward = isChapter2Reward && !!currentStep?.skill;
 
   // 報酬の選択肢を生成して保存する。リロード時は同じ報酬ステップの候補を再利用する。
   const [rewardChoices, setRewardChoices] = React.useState<string[]>([]);
@@ -89,13 +93,34 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     const rewardStepKey = `${stageCycle}:${chapter2FlowIndex}`;
     const saved = localStorage.getItem(storageKey);
+    const isAvailableReward = (abbr: string) => {
+      const skill = ALL_SKILLS.find(s => s.abbr === abbr);
+      return !!skill &&
+        !ownedSkillAbbrs.includes(abbr) &&
+        (skill as SkillDetail).exclude !== 1 &&
+        skill.type !== "敵専用";
+    };
+    const pickRandomRewards = (count: number, currentChoices: string[]) => {
+      const used = new Set(currentChoices);
+      const availablePool = ALL_SKILLS.filter(skill =>
+        isAvailableReward(skill.abbr) &&
+        !used.has(skill.abbr)
+      );
+      return [...availablePool]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, count)
+        .map(skill => skill.abbr);
+    };
 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (parsed?.key === rewardStepKey && Array.isArray(parsed?.choices)) {
-          setRewardChoices(parsed.choices);
-          return;
+          const savedChoices = parsed.choices as string[];
+          if (savedChoices.every(abbr => isAvailableReward(abbr))) {
+            setRewardChoices(savedChoices);
+            return;
+          }
         }
       } catch {
         // 保存データが壊れている場合は下で作り直す
@@ -115,27 +140,24 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       return;
     }
 
-    let choices = [...currentStep.choices];
+    let choices: string[] = [];
+    currentStep.choices.forEach(abbr => {
+      if (isAvailableReward(abbr) && !choices.includes(abbr)) {
+        choices.push(abbr);
+        return;
+      }
+
+      const [rerolled] = pickRandomRewards(1, choices);
+      if (rerolled) choices.push(rerolled);
+    });
     
     // 選択肢が3個以下の場合、未所持スキルからランダムに追加
     if (choices.length <= 3) {
-      const additionalCount = 5 - choices.length; // 最大5個まで増やす、あるいは3個以下なら補充という指示だが、一般的によくある「3個以下なら補充して3個にする」か「3個以下なら追加して選択肢を増やす」か。
       // 指示は「choice要素に含まれるスキルが3個以下ならば、...ランダムにスキルを選び、選択肢に追加する」
       // 何個追加するかは明記されていないが、通常は3個や5個にする。ここでは「追加する」とあるので、未所持のものをいくつか足す。
-      
-      const availablePool = ALL_SKILLS.filter(skill => 
-        !ownedSkillAbbrs.includes(skill.abbr) && 
-        !choices.includes(skill.abbr) &&
-        (skill as SkillDetail).exclude !== 1 &&
-        skill.type !== "敵専用"
-      );
-
-      // ランダムにシャッフルして必要な分（例えば合計5個になるまで、あるいは適当な数）追加
-      const shuffled = [...availablePool].sort(() => Math.random() - 0.5);
       // 選択肢が3個以下の場合に追加するので、とりあえず合計5個くらいになるようにしてみる（あるいは単に3個追加するなど）
       // 指示通り「追加する」を実装。ここでは合計5個になるように補充してみる。
-      const toAdd = shuffled.slice(0, 5 - choices.length);
-      choices = [...choices, ...toAdd.map(s => s.abbr)];
+      choices = [...choices, ...pickRandomRewards(5 - choices.length, choices)];
     }
 
     setRewardChoices(choices);
@@ -144,6 +166,60 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
   // 報酬選択の表示判定を上書き
   const showRewardSelection = rewardSelectionMode || isChapter2Reward;
+  const isChapter2FinalBattle = stageCycle === 24 && (
+    chapter2SubStage === 3 ||
+    (currentStep?.type === 'battle' && currentStep.subStage === 3) ||
+    chapter2FlowIndex === 6
+  );
+  const isFinalBattleVictoryComplete = isChapter2FinalBattle &&
+    gameStarted &&
+    logComplete &&
+    battleResults.length > 0 &&
+    battleResults[0]?.winner === 1;
+  const [introEffectActive, setIntroEffectActive] = React.useState(false);
+  const [finalClearEffectActive, setFinalClearEffectActive] = React.useState(false);
+  const finalClearStartedRef = React.useRef(false);
+  const introEffectKeyRef = React.useRef('');
+  const moveToNextStepRef = React.useRef(moveToNextStep);
+
+  React.useEffect(() => {
+    moveToNextStepRef.current = moveToNextStep;
+  }, [moveToNextStep]);
+
+  React.useEffect(() => {
+    if (!isChapter2FinalBattle || showStoryModal) return;
+
+    const effectKey = `${stageCycle}:${chapter2FlowIndex}`;
+    if (introEffectKeyRef.current === effectKey) return;
+
+    introEffectKeyRef.current = effectKey;
+    setIntroEffectActive(true);
+
+    const timer = window.setTimeout(() => {
+      setIntroEffectActive(false);
+    }, 1100);
+
+    return () => window.clearTimeout(timer);
+  }, [isChapter2FinalBattle, showStoryModal, stageCycle, chapter2FlowIndex]);
+
+  React.useEffect(() => {
+    finalClearStartedRef.current = false;
+    setFinalClearEffectActive(false);
+  }, [stageCycle, chapter2SubStage, gameStarted]);
+
+  React.useEffect(() => {
+    if (!isFinalBattleVictoryComplete || finalClearStartedRef.current) return;
+
+    finalClearStartedRef.current = true;
+    AudioManager.getInstance().stopBgm();
+    setFinalClearEffectActive(true);
+
+    const timer = window.setTimeout(() => {
+      moveToNextStepRef.current();
+    }, 7000);
+
+    return () => window.clearTimeout(timer);
+  }, [isFinalBattleVictoryComplete]);
 
   // 敵のスキル数に応じたスケール計算
   const enemySkills = React.useMemo(() => stageProcessor.getEnemySkills(0, stageContext), [stageProcessor, stageContext]);
@@ -152,9 +228,20 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                          skillCount === 7 ? 'scale(0.9)' :
                          skillCount === 8 ? 'scale(0.8)' :
                          skillCount >= 9 ? 'scale(0.7)' : 'none';
+  const getEmberStyle = (index: number): React.CSSProperties & Record<'--ember-drift' | '--ember-size', string> => ({
+    left: `${(index * 29) % 100}%`,
+    animationDelay: `${(index % 17) * -0.22}s`,
+    animationDuration: `${2.4 + (index % 7) * 0.28}s`,
+    '--ember-drift': `${((index % 9) - 4) * 12}px`,
+    '--ember-size': `${3 + (index % 5)}px`
+  });
 
   return (
-    <div style={{ 
+    <div className={[
+      isChapter2FinalBattle ? 'chapter2-final-battle' : '',
+      introEffectActive ? 'chapter2-final-intro-effect' : '',
+      finalClearEffectActive ? 'chapter2-final-clear-effect' : ''
+    ].filter(Boolean).join(' ')} style={{
       display: 'flex', 
       flexDirection: isMobile ? 'column' : 'row', 
       width: '100%', 
@@ -166,16 +253,27 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       backgroundColor: '#000',
       overflow: 'hidden'
     }}>
+      {isChapter2FinalBattle && !showStoryModal && (
+        <div className="chapter2-final-embers" aria-hidden="true">
+          {Array.from({ length: 34 }).map((_, index) => (
+            <span key={index} style={getEmberStyle(index)} />
+          ))}
+        </div>
+      )}
+      {(introEffectActive || finalClearEffectActive) && (
+        <div className="chapter2-final-white-flash" aria-hidden="true" />
+      )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
-          <h1 style={{ margin: '0 20px', color: '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px', padding: isMobile ? '10px 76px 10px 58px' : '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: isMobile ? '6px' : '10px', top: isMobile ? '8px' : '10px', padding: isMobile ? '4px 7px' : '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <h1 style={{ margin: isMobile ? '0' : '0 20px', color: '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle(stageContext)}
           </h1>
           <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageProcessor.getStageDescription(stageContext)}</p>
-          <div style={{ position: 'absolute', right: '5px', top: '10px', display: 'flex', gap: '5px', zIndex: 11 }}>
-            <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
-            <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '2px' }} title="設定">⚙️</button>
+          <div style={{ position: 'absolute', right: isMobile ? '4px' : '5px', top: isMobile ? '7px' : '10px', display: 'flex', gap: isMobile ? '1px' : '5px', zIndex: 11 }}>
+            <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
+            <button onClick={() => AudioManager.getInstance().setMute(bgmEnabled)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: bgmEnabled ? '#888' : '#ffcc66', padding: isMobile ? '0px' : '2px' }} title={bgmEnabled ? '音声をミュート' : 'ミュート解除'}>{bgmEnabled ? '🔊' : '🔇'}</button>
+            <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: '#888', padding: isMobile ? '0px' : '2px' }} title="設定">⚙️</button>
           </div>
         </div>
 
@@ -278,8 +376,13 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                         const skill = getSkillCardsFromAbbrs([abbr])[0];
                         if (!skill) return null;
                         return (
-                          <div key={abbr} onClick={() => handleRewardSelection(abbr)} style={{ cursor: 'pointer', transition: 'transform 0.2s' }} className={selectedRewards.includes(abbr) ? 'selected-reward-card' : ''}>
-                            <SkillCard skill={skill} isSelected={currentStep?.choices ? true : selectedRewards.includes(abbr)} iconMode={iconMode} />
+                          <div
+                            key={abbr}
+                            onClick={isFixedChapter2Reward ? undefined : () => handleRewardSelection(abbr)}
+                            style={{ cursor: isFixedChapter2Reward ? 'default' : 'pointer', transition: 'transform 0.2s' }}
+                            className={(isFixedChapter2Reward || selectedRewards.includes(abbr)) ? 'selected-reward-card' : ''}
+                          >
+                            <SkillCard skill={skill} isSelected={isFixedChapter2Reward || currentStep?.choices ? true : selectedRewards.includes(abbr)} iconMode={iconMode} />
                           </div>
                         );
                       })
@@ -296,21 +399,22 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                   </div>
                   <button 
                     disabled={
-                      isChapter2Reward ? (
+                      isRewardConfirming || (isChapter2Reward ? (
                         currentStep?.skill ? false :
                         currentStep?.choices ? selectedRewards.length !== 1 :
                         selectedRewards.length !== (currentStep?.count || 1)
                       ) : (
                         selectedRewards.length === 0
-                      )
+                      ))
                     } 
                     onClick={() => {
                       if (isChapter2Reward && currentStep?.skill) {
-                        handleRewardSelection(currentStep.skill);
+                        confirmRewards([currentStep.skill]);
+                        return;
                       }
                       confirmRewards();
                     }} 
-                    style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isChapter2Reward ? (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : selectedRewards.length !== (currentStep?.count || 1)) : selectedRewards.length === 0) ? 0.5 : 1 }}
+                    style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isRewardConfirming || (isChapter2Reward ? (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : selectedRewards.length !== (currentStep?.count || 1)) : selectedRewards.length === 0)) ? 0.5 : 1 }}
                   >
                     {isChapter2Reward && currentStep?.skill ? '確認' : 'スキルを獲得する'}
                   </button>
@@ -326,7 +430,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                 </div>
               </div>
             )}
-            {canGoToBoss && !showRewardSelection && (
+            {canGoToBoss && !showRewardSelection && !isChapter2FinalBattle && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
                 <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>
                    {stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！

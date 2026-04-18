@@ -2,6 +2,7 @@ import React from 'react';
 import SkillCard from './components/SkillCard';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import Kamishibai from './components/Kamishibai';
+import AudioManager from './utils/audioManager';
 import { GameProps, BattleResult } from './types/GameProps';
 import { StageMode } from './components/AnimatedRichLog';
 import { getAvailableSkillsUntilStage } from './stageData';
@@ -44,6 +45,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     setSelectedRewards,
     handleRewardSelection,
     confirmRewards,
+    isRewardConfirming,
     clearBossAndNextCycle,
     goToBossStage,
     iconMode,
@@ -58,6 +60,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     setIsTitle,
     setShowRule,
     setShowSettings,
+    bgmEnabled,
     getSkillCardsFromAbbrs,
     winRateDisplay,
     stage11TrialActive,
@@ -164,15 +167,16 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       )}
 
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: '10px', top: '10px', padding: '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
-          <h1 style={{ margin: '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px', padding: isMobile ? '10px 76px 10px 58px' : '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: isMobile ? '6px' : '10px', top: isMobile ? '8px' : '10px', padding: isMobile ? '4px 7px' : '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
+          <h1 style={{ margin: isMobile ? '0' : '0 20px', color: (stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#4fc3f7' : '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
               {stageProcessor.getStageTitle(stageContext)}
           </h1>
           <p style={{ margin: '5px 0 0 0', color: '#aaa', fontSize: '0.8rem' }}>{stageProcessor.getStageDescription(stageContext)}</p>
-          <div style={{ position: 'absolute', right: '5px', top: '10px', display: 'flex', gap: '5px', zIndex: 11 }}>
-            <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
-            <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#888', padding: '2px' }} title="設定">⚙️</button>
+          <div style={{ position: 'absolute', right: isMobile ? '4px' : '5px', top: isMobile ? '7px' : '10px', display: 'flex', gap: isMobile ? '1px' : '5px', zIndex: 11 }}>
+            <button onClick={() => setShowRule(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: '#888', padding: '0px' }} title="ルール">📖</button>
+            <button onClick={() => AudioManager.getInstance().setMute(bgmEnabled)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: bgmEnabled ? '#888' : '#ffcc66', padding: isMobile ? '0px' : '2px' }} title={bgmEnabled ? '音声をミュート' : 'ミュート解除'}>{bgmEnabled ? '🔊' : '🔇'}</button>
+            <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: '#888', padding: isMobile ? '0px' : '2px' }} title="設定">⚙️</button>
           </div>
         </div>
 
@@ -267,7 +271,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
                   {getAvailableSkillsUntilStage(stageCycle).map((skill: SkillDetail) => { if (ownedSkillAbbrs.includes(skill.abbr)) return null; return <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}><SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} /></div>; })}
                 </div>
-                <button disabled={selectedRewards.length === 0} onClick={confirmRewards} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>スキルを獲得する</button>
+                <button disabled={selectedRewards.length === 0 || isRewardConfirming} onClick={() => confirmRewards()} style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>スキルを獲得する</button>
                 <div style={{ marginTop: '15px' }}><button onClick={() => { 
                     setSelectedRewards([]); 
                     setRewardSelectionMode(false); 

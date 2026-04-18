@@ -28,6 +28,7 @@ export class Battle {
     public text: string = "";
 
     private turn: number = 1;
+    private roundFirst: Player | null = null;
     public pc1: Player;
     public pc2: Player;
 
@@ -89,6 +90,7 @@ export class Battle {
         this.log("▼先攻決定フェイズ");
         this.log();
         const { first, second } = this.phaseSpeed(true);
+        this.roundFirst = first;
         this.log();
 
         // 攻撃フェイズ（先攻）
@@ -110,7 +112,8 @@ export class Battle {
         if (result !== BattleResult.CONTINUE) return result;
 
         // 連撃フェイズ
-        this.executeRengeki();
+        result = this.executeRengeki();
+        if (result !== BattleResult.CONTINUE) return result;
 
         // 終了フェイズ
         this.log("▼終了フェイズ");
@@ -363,7 +366,7 @@ export class Battle {
                 // 隣接付帯効果
                 if (i < pc.getSkillsLength() - 1) {
                     if (pc.skill[i + 1] === "速") speedBuf += 1;
-                    if (pc.skill[i + 1] === "弓") speedBuf += 3;
+                    if (pc.type[i] === Player.ATTACK && pc.skill[i + 1] === "弓") speedBuf += 3;
                 }
 
                 // 状態異常・バフ
@@ -465,65 +468,13 @@ export class Battle {
         // リミテッド処理
         if (attacker.limited[idx] === StatusFlag.ACTIVE) attacker.limited[idx] = StatusFlag.RESERVED;
         // ＋弓によるリミテッド化
-        for (let k = idx + 1; k < attacker.getSkillsLength(); k++) {
-            if (attacker.skill[k] === "弓") {
-                attacker.limited[idx] = StatusFlag.RESERVED;
-                break;
-            }
+        if (attacker.type[idx] === Player.ATTACK && idx < attacker.getSkillsLength() - 1 && attacker.skill[idx + 1] === "弓") {
+            attacker.limited[idx] = StatusFlag.RESERVED;
         }
 
         // ダメージと速度の計算
-        let damage = attacker.damage[idx];
+        let damage = this.calculateSkillDamage(attacker, defender, idx, isFirst, 0);
         let speed = attacker.speed[idx];
-
-        // スキル固有のダメージ計算
-        switch (attacker.skill[idx]) {
-            case "剣":
-                damage = 0;
-                for (let j = 0; j < attacker.getSkillsLength(); j++) {
-                    if (attacker.type[j] === Player.ATTACK && !(j < attacker.getSkillsLength() - 1 && attacker.skill[j + 1] === "反")) {
-                        damage++;
-                    }
-                }
-                break;
-            case "怒": damage = this.turn; break;
-            case "瘴":
-                damage = 0;
-                for (let j = 0; j < attacker.getSkillsLength(); j++) if (attacker.skill[j] === "疫") damage++;
-                for (let j = 0; j < defender.getSkillsLength(); j++) if (defender.skill[j] === "疫") damage++;
-                break;
-            case "拳":
-                if (isFirst) damage = 2;
-                else damage = 1;
-                break;
-            case "死":
-                damage = 1;
-                if (defender.stan > 0) damage++;
-                if (defender.roubai > 0) damage++;
-                if (defender.suijaku > 0) damage++;
-                if (defender.tyudoku > 0) damage++;
-                if (defender.yakedo > 0) damage++;
-                if (defender.shimon > 0) damage++;
-                if (defender.shitto > 0) damage++;
-                if (defender.shikiyoku > 0) damage++;
-                break;
-            case "狼":
-            case "爆":
-                damage = attacker.getSkillLevel(idx); // LV
-                break;
-            case "▽":
-                damage = 1; // 1 x 3 times
-                break;
-            case "魔":
-                damage = 1;
-                break;
-            case "憤":
-                damage = 0;
-                for (let k = 0; k < attacker.getSkillsLength(); k++) {
-                    if (attacker.type[k] === Player.NONE && attacker.skill[k] !== "空" && attacker.skill[k] !== "＿") damage++;
-                }
-                break;
-        }
 
         // 補助・付帯効果の適用
         let damageBuf = 0;
@@ -538,13 +489,17 @@ export class Battle {
             const nextSkill = attacker.skill[idx + 1];
             if (nextSkill === "強") { this.log(`＞【＋強】${idx + 2}の効果でダメージが1点上昇！`); damageBuf++; }
             if (nextSkill === "速") this.log(`＞【＋速】${idx + 2}の効果で速度に+1！`);
-            if (nextSkill === "錬") { this.log(`＞【＋錬】${idx + 2}の効果で迎撃スキルの発動を1回のみ無効に！`); attacker.limited[idx + 1] = StatusFlag.RESERVED; }
-            if (nextSkill === "盾") { this.log(`＞【＋盾】${idx + 2}の効果で防壁が2つ与えられる！`); attacker.limited[idx + 1] = StatusFlag.RESERVED; }
+            if (attacker.type[idx] === Player.ATTACK && nextSkill === "錬") { this.log(`＞【＋錬】${idx + 2}の効果で迎撃スキルの発動を1回のみ無効に！`); attacker.limited[idx + 1] = StatusFlag.RESERVED; }
+            if (nextSkill === "盾") {
+                this.log(`＞【＋盾】${idx + 2}の効果で防壁が2つ与えられる！`);
+                this.grantBouheki(attacker, 2);
+                attacker.limited[idx + 1] = StatusFlag.RESERVED;
+            }
             if (nextSkill === "光" && attacker.skill[idx] === "一") { this.log(`＞【＋光】${idx + 2}の効果でダメージが2点上昇！`); damageBuf += 2; }
         }
 
         if (attacker.kakugo === StatusFlag.ACTIVE) { this.log("＞覚悟の効果でダメージが1点上昇！速度に+2！"); damageBuf++; }
-        if (attacker.kyousou > 0) { this.log("＞協奏の効果でダメージが1点上昇！速度に+1！"); damageBuf++; }
+        if (attacker.kyousou > 0) { this.log(`＞協奏の効果でダメージが${attacker.kyousou}点上昇！速度に+${attacker.kyousou}！`); damageBuf += attacker.kyousou; }
         if (attacker.funnu > 0) { this.log("＞憤怒の効果でダメージが1点上昇！"); damageBuf++; }
         if (attacker.gekirin > 0) { this.log(`＞逆鱗の効果でダメージが${attacker.gekirin}点上昇！`); damageBuf += attacker.gekirin; attacker.gekirin = 0; }
         
@@ -561,12 +516,13 @@ export class Battle {
         if (idx < attacker.getSkillsLength() - 1 && attacker.skill[idx + 1] === "速" && !noEnchant) finalSpeed += 1;
         
         // ＋弓の効果
-        for (let k = idx + 1; k < attacker.getSkillsLength(); k++) {
-            if (attacker.skill[k] === "弓") { this.log(`＞【＋弓】${k + 2}の効果でリミテッド化！速度に+2！`); finalSpeed += 3; break; }
+        if (attacker.type[idx] === Player.ATTACK && idx < attacker.getSkillsLength() - 1 && attacker.skill[idx + 1] === "弓") {
+            this.log(`＞【＋弓】${idx + 2}の効果でリミテッド化！速度に+3！`);
+            finalSpeed += 3;
         }
 
         if (attacker.kakugo === StatusFlag.ACTIVE) finalSpeed += 2;
-        if (attacker.kyousou > 0) finalSpeed += 1;
+        if (attacker.kyousou > 0) finalSpeed += attacker.kyousou;
         if (attacker.gouman > 0) finalSpeed += 1;
 
         for (let k = 0; k < defender.getSkillsLength(); k++) {
@@ -586,10 +542,13 @@ export class Battle {
                     if (defender.skill[k] === "飛") {
                         this.log(`＞${defender.playerName}の【${defender.name[k]}】${k + 1}が発動！`);
                         this.log(`＞${defender.playerName}は速度0の攻撃を受けない！`);
+                        this.reserveSelfSkillEffects(attacker, idx);
                         return;
                     }
                 }
             }
+
+            if (attacker.skill[idx] === "滅") this.clearGoodStatuses(defender, "撃滅");
 
             for (let c = 0; c < count; c++) {
                 this.executeAttack(attacker, defender, idx, finalDamage, finalSpeed);
@@ -607,7 +566,7 @@ export class Battle {
         const skill = idx === -2 ? "影" : attacker.skill[idx];
         switch (skill) {
             case "奏":
-                attacker.kyousou = StatusFlag.RESERVED;
+                attacker.kyousou_ = StatusFlag.RESERVED;
                 attacker.suijaku = StatusFlag.RESERVED;
                 break;
             case "医":
@@ -623,15 +582,118 @@ export class Battle {
             case "防": attacker.bouheki_ = StatusFlag.RESERVED; break;
             case "毒": defender.tyudoku = StatusFlag.RESERVED; break;
             case "影":
-                for (let i = 0; i < defender.getSkillsLength(); i++) {
-                    if (defender.type[i] !== Player.NONE) {
-                        for (let j = 0; j < defender.getSkillsLength(); j++) {
-                            if (defender.skill[j] === defender.skill[i]) defender.kage[j] = StatusFlag.RESERVED;
-                        }
-                        break;
+                this.reserveKageuchi(defender);
+                break;
+        }
+    }
+
+    private calculateSkillDamage(attacker: Player, defender: Player, idx: number, isFirst: boolean, incomingSpeed: number): number {
+        switch (attacker.skill[idx]) {
+            case "剣": {
+                let damage = 0;
+                for (let j = 0; j < attacker.getSkillsLength(); j++) {
+                    if (attacker.type[j] === Player.ATTACK && !(j < attacker.getSkillsLength() - 1 && attacker.skill[j + 1] === "反")) {
+                        damage++;
                     }
                 }
-                break;
+                return damage;
+            }
+            case "怒":
+                return this.turn;
+            case "瘴": {
+                let damage = 0;
+                for (let j = 0; j < attacker.getSkillsLength(); j++) if (attacker.skill[j] === "疫") damage++;
+                for (let j = 0; j < defender.getSkillsLength(); j++) if (defender.skill[j] === "疫") damage++;
+                return damage;
+            }
+            case "拳":
+                return isFirst ? 2 : 1;
+            case "死": {
+                let damage = 1;
+                if (defender.stan > 0) damage++;
+                if (defender.roubai > 0) damage++;
+                if (defender.suijaku > 0) damage++;
+                if (defender.tyudoku > 0) damage++;
+                if (defender.yakedo > 0) damage++;
+                if (defender.shimon > 0) damage++;
+                if (defender.shitto > 0) damage++;
+                if (defender.shikiyoku > 0) damage++;
+                return damage;
+            }
+            case "狼":
+            case "爆":
+                return attacker.getSkillLevel(idx);
+            case "玉":
+                return incomingSpeed;
+            case "▽":
+            case "魔":
+                return 1;
+            case "憤": {
+                let damage = 0;
+                for (let k = 0; k < attacker.getSkillsLength(); k++) {
+                    if (attacker.type[k] === Player.NONE && attacker.skill[k] !== "空" && attacker.skill[k] !== "＿") damage++;
+                }
+                return damage;
+            }
+            default:
+                return attacker.damage[idx];
+        }
+    }
+
+    private grantBouheki(pc: Player, count: number): void {
+        if (pc.shitto > 0) {
+            this.log(`${pc.playerName}は嫉妬のため防壁を受け取れない！`);
+            return;
+        }
+        pc.bouheki += count;
+        this.log(`＞${pc.playerName}に防壁が${count}つ与えられた！`);
+    }
+
+    private clearGoodStatuses(pc: Player, sourceName: string): void {
+        const hadGoodStatus =
+            pc.kakugo === StatusFlag.ACTIVE ||
+            pc.bouheki > 0 ||
+            pc.musou === StatusFlag.ACTIVE ||
+            pc.sensei === StatusFlag.ACTIVE ||
+            pc.kaifuku > 0 ||
+            pc.kyousou > 0 ||
+            pc.reika > 0;
+
+        pc.kakugo = 0;
+        pc.bouheki = 0;
+        pc.musou = 0;
+        pc.sensei = 0;
+        pc.kaifuku = 0;
+        pc.kyousou = 0;
+        pc.reika = 0;
+
+        if (hadGoodStatus) this.log(`＞${sourceName}の効果で${pc.playerName}の良い状態が全て解除された！`);
+    }
+
+    private reserveSelfSkillEffects(attacker: Player, idx: number): void {
+        const s = attacker.skill[idx];
+        if (s === "紫") attacker.stan = StatusFlag.RESERVED;
+        if (s === "爆") {
+            attacker.roubai = StatusFlag.RESERVED;
+            attacker.stan = StatusFlag.RESERVED;
+            attacker.yakedo = StatusFlag.RESERVED;
+        }
+    }
+
+    private reserveKageuchi(defender: Player): void {
+        for (let i = 0; i < defender.getSkillsLength(); i++) {
+            if (defender.type[i] !== Player.NONE) {
+                if (defender.skill[i] === "Ｈ") {
+                    this.log(`＞${defender.playerName}の【ＨＰ】${i + 1}は【影討】の効果を受けない！`);
+                    return;
+                }
+                for (let j = 0; j < defender.getSkillsLength(); j++) {
+                    if (defender.skill[j] === defender.skill[i] && defender.skill[j] !== "Ｈ") {
+                        defender.kage[j] = StatusFlag.RESERVED;
+                    }
+                }
+                return;
+            }
         }
     }
 
@@ -644,8 +706,8 @@ export class Battle {
         if (damage > 0) this.log(`＞${defender.playerName}に${damage}点のダメージ！（速度：${speed}）`);
         this.log();
 
-        let penetrate = 0;
         let isSuspended = false;
+        const counterSuppressions = this.getCounterSuppressionSources(attacker, useIdx);
 
         for (let d = 0; d < damage; d++) {
             if (defender.musou === StatusFlag.ACTIVE) { this.log(`＞${defender.playerName}は無想の効果でダメージを受けない！`); break; }
@@ -672,7 +734,7 @@ export class Battle {
             defender.scar[targetIdx] = 2; // 適用前ダメージ
 
             // 迎撃判定
-            if (this.handleCounter(attacker, defender, useIdx, targetIdx, speed, penetrate)) {
+            if (this.handleCounter(attacker, defender, useIdx, targetIdx, speed, counterSuppressions)) {
                 if (d < damage - 1) {
                     this.log(`＞${attacker.playerName}の【${attacker.name[useIdx]}】${useIdx + 1}が強制中断された！`);
                     isSuspended = true;
@@ -705,6 +767,15 @@ export class Battle {
         this.finalizeDamage(defender);
     }
 
+    private getCounterSuppressionSources(attacker: Player, useIdx: number): number[] {
+        if (useIdx === -1) return [];
+
+        const sources: number[] = [];
+        if (attacker.skill[useIdx] === "狼") sources.push(useIdx);
+        if (attacker.type[useIdx] === Player.ATTACK && useIdx < attacker.getSkillsLength() - 1 && attacker.skill[useIdx + 1] === "錬") sources.push(useIdx + 1);
+        return sources;
+    }
+
     private selectTarget(attacker: Player, defender: Player, useIdx: number): number {
 
         // 刺突・艦砲の特殊ターゲット
@@ -734,14 +805,15 @@ export class Battle {
         return bestIdx;
     }
 
-    private handleCounter(attacker: Player, defender: Player, useIdx: number, targetIdx: number, attackerSpeed: number, penetrate: number): boolean {
+    private handleCounter(attacker: Player, defender: Player, useIdx: number, targetIdx: number, attackerSpeed: number, counterSuppressions: number[]): boolean {
         const isCounterSkill = (defender.type[targetIdx] === Player.COUNTER || 
                               (defender.type[targetIdx] === Player.ATTACK && targetIdx < defender.getSkillsLength() - 1 && defender.skill[targetIdx + 1] === "反"));
         if (!isCounterSkill) return false;
 
-        // ＋錬による無効化
-        if (useIdx !== -1 && useIdx < attacker.getSkillsLength() - 1 && attacker.skill[useIdx + 1] === "錬" && penetrate === 0) {
-            this.log(`＞【${attacker.name[useIdx + 1]}】${useIdx + 2}の効果で${defender.playerName}の【${defender.name[targetIdx]}】${targetIdx + 1}は発動しない！`);
+        // ＋錬・狼嵐による迎撃無効化（スキル使用ごとに1回ずつ）
+        if (counterSuppressions.length > 0) {
+            const sourceIdx = counterSuppressions.shift()!;
+            this.log(`＞【${attacker.name[sourceIdx]}】${sourceIdx + 1}の効果で${defender.playerName}の【${defender.name[targetIdx]}】${targetIdx + 1}は発動しない！`);
             return false;
         }
 
@@ -758,19 +830,11 @@ export class Battle {
             if (defender.limited[targetIdx] === StatusFlag.ACTIVE) defender.limited[targetIdx] = StatusFlag.RESERVED;
 
             // 反撃ダメージの処理
-            let cDamage = defender.damage[targetIdx];
-            if (defender.skill[targetIdx] === "玉") cDamage = attackerSpeed;
+            const defenderIsFirst = this.roundFirst === defender;
+            let cDamage = this.calculateSkillDamage(defender, attacker, targetIdx, defenderIsFirst, attackerSpeed);
             if (defender.kakugo === StatusFlag.ACTIVE) cDamage += 1;
 
             for (let i = 0; i < cDamage; i++) {
-                if (attacker.bouheki >= 1) {
-                    this.log(`＞＞${attacker.playerName}は防壁の効果でダメージを受けない！`);
-                    const rem = Math.ceil(attacker.bouheki / 2);
-                    this.log(`＞＞${attacker.playerName}の防壁が${rem}個解除された！`);
-                    attacker.bouheki -= rem;
-                    break;
-                }
-                
                 let cTarget = -1;
                 if (defender.skill[targetIdx] === "交") {
                     if (useIdx === -1) { this.log(`＞＞${attacker.playerName}の【弱撃】0はダメージの対象にならない！`); break; }
@@ -825,32 +889,8 @@ export class Battle {
         if (s === "覚") attacker.kakugo = StatusFlag.RESERVED;
         if (s === "防") attacker.bouheki_ = StatusFlag.RESERVED;
         if (s === "封") { defender.stan = StatusFlag.RESERVED; defender.roubai = StatusFlag.RESERVED; defender.suijaku = StatusFlag.RESERVED; }
+        if (s === "紫") attacker.stan = StatusFlag.RESERVED;
         if (s === "呪") defender.suijaku = StatusFlag.RESERVED;
-        if (s === "影") {
-             for (let i = 0; i < defender.getSkillsLength(); i++) {
-                 if (defender.type[i] !== Player.NONE) {
-                    if (defender.skill[i] == "Ｈ"){
-                        this.log(`＞${defender.playerName}の【ＨＰ】${i + 1}は【影討】の効果を受けない！`);
-                    }
-                    // 連鎖破壊
-                    for (let j = 0; j < defender.getSkillsLength(); j++) {
-                        if (defender.skill[j] === defender.skill[i]) defender.kage[j] = StatusFlag.RESERVED;
-                    }
-                     break;
-                 }
-             }
-        }
-
-        if (s === "滅") {
-            defender.kakugo = 0;
-            defender.bouheki = 0;
-            defender.musou = 0;
-            defender.sensei = 0;
-            defender.kaifuku = 0;
-            defender.kyousou = 0;
-            defender.reika = 0;
-            this.log(`＞撃滅の効果で${defender.playerName}の良い状態が全て解除された！`);
-        }
         if (s === "魔") {
             defender.shimon++;
             this.log(`＞魔弾の効果で${defender.playerName}に死紋が刻まれた！`);
@@ -869,7 +909,7 @@ export class Battle {
             if (defender.musou === StatusFlag.ACTIVE) { attacker.musou = StatusFlag.ACTIVE; defender.musou = 0; }
             if (defender.sensei === StatusFlag.ACTIVE) { attacker.sensei = StatusFlag.ACTIVE; defender.sensei = 0; }
             if (defender.kaifuku > 0) { attacker.kaifuku = StatusFlag.ACTIVE; defender.kaifuku = 0; }
-            if (defender.kyousou > 0) { attacker.kyousou = StatusFlag.ACTIVE; defender.kyousou = 0; }
+            if (defender.kyousou > 0) { attacker.kyousou += defender.kyousou; defender.kyousou = 0; }
             if (defender.reika > 0) { attacker.reika = StatusFlag.ACTIVE; defender.reika = 0; }
             attacker.tozoku = 0;
         }
@@ -882,6 +922,7 @@ export class Battle {
         if (s === "疫") attacker.ekibyo = StatusFlag.RESERVED;
         if (s === "紫") defender.stan = StatusFlag.RESERVED;
         if (s === "呪") attacker.suijaku = StatusFlag.RESERVED;
+        if (s === "水") this.grantBouheki(defender, 1);
         if (s === "転") defender.roubai = StatusFlag.RESERVED;
         if (s === "受") {
             // 自分の悪い状態を相手に、相手の悪い状態を自分に？
@@ -944,9 +985,10 @@ export class Battle {
             if (hasShitto) this.log(`${pc1.playerName}は嫉妬のため回復状態を受け取れない！`);
             else { this.log(`${pc1.playerName}は回復状態になった！`); pc1.kaifuku = StatusFlag.ACTIVE; flag = 1; }
         }
-        if (pc1.kyousou === StatusFlag.RESERVED) { 
+        if (pc1.kyousou_ === StatusFlag.RESERVED) {
             if (hasShitto) this.log(`${pc1.playerName}は嫉妬のため協奏状態を受け取れない！`);
-            else { this.log(`${pc1.playerName}は協奏状態になった！`); pc1.kyousou = StatusFlag.ACTIVE; flag = 1; }
+            else { this.log(`${pc1.playerName}に協奏が1つ与えられた！`); pc1.kyousou += 1; flag = 1; }
+            pc1.kyousou_ = 0;
         }
         if (pc1.reika === StatusFlag.RESERVED) { 
             if (hasShitto) this.log(`${pc1.playerName}は嫉妬のため霊化状態を受け取れない！`);
@@ -986,7 +1028,7 @@ export class Battle {
 
         if (pc1.ekibyo === StatusFlag.RESERVED) {
             for (let i = 0; i < pc1.getSkillsLength(); i++) {
-                if (pc1.type[i] !== Player.NONE && pc1.limited[i] === 0) {
+                if (pc1.type[i] !== Player.NONE) {
                     this.log(`${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【疫病】${i + 1}に変化した！`);
                     pc1.skill[i] = "疫"; pc1.name[i] = "疫病"; pc1.type[i] = Player.COUNTER;
                     pc1.speed[i] = pc1.getSkillLevel(i); pc1.damage[i] = 0; pc1.limited[i] = 0;
@@ -1049,7 +1091,7 @@ export class Battle {
     /**
      * 連撃の実行
      */
-    private executeRengeki(): void {
+    private executeRengeki(): number {
         const applyRengeki = (pc: Player, opponent: Player, pNo: number, isFirst: boolean) => {
             for (let i = 0; i < pc.getSkillsLength(); i++) {
                 if (pc.skill[i] === "連") {
@@ -1070,12 +1112,13 @@ export class Battle {
 
         if (applyRengeki(this.pc1, this.pc2, 1, pc1IsFirst)) {
             const res = this.judge(2);
-            if (res !== BattleResult.CONTINUE) return;
+            if (res !== BattleResult.CONTINUE) return res;
         }
         if (applyRengeki(this.pc2, this.pc1, 2, !pc1IsFirst)) {
             const res = this.judge(1);
-            if (res !== BattleResult.CONTINUE) return;
+            if (res !== BattleResult.CONTINUE) return res;
         }
+        return BattleResult.CONTINUE;
     }
 
     /**

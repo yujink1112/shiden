@@ -5,6 +5,7 @@ class AudioManager {
   private currentBgm: HTMLAudioElement | null = null;
   private currentBgmName: string | null = null;
   private currentBgmUrl: string | null = null;
+  private currentBgmEndedListener: (() => void) | null = null;
   private audioData: { [key: string]: string } = {}; // BGM名 -> ファイル名
   private volume: number = 0.5;
   private isMuted: boolean = false;
@@ -62,7 +63,7 @@ class AudioManager {
     }
   }
 
-  public async playBgm(bgmName: string, loop: boolean = true) {
+  public async playBgm(bgmName: string, loop: boolean = true, onEnded?: () => void) {
     if (!this.isLoaded) {
       console.log(`Waiting for audio data to load before playing ${bgmName}...`);
       await this.loadAudioData();
@@ -97,7 +98,7 @@ class AudioManager {
         targetUrl = getStorageUrl(fileName);
     }
 
-    if (this.currentBgm && !this.currentBgm.paused && this.currentBgm.loop === loop) {
+    if (this.currentBgm && !this.currentBgm.paused && this.currentBgm.loop === loop && !onEnded) {
       if (this.currentBgmName === bgmName || this.currentBgmUrl === targetUrl) {
         return;
       }
@@ -112,6 +113,10 @@ class AudioManager {
     this.currentBgmUrl = targetUrl;
     this.currentBgm.loop = loop;
     this.currentBgm.volume = this.isMuted ? 0 : this.volume;
+    this.currentBgmEndedListener = onEnded || null;
+    if (this.currentBgmEndedListener) {
+      this.currentBgm.addEventListener('ended', this.currentBgmEndedListener);
+    }
 
     try {
       await this.currentBgm.play();
@@ -122,11 +127,15 @@ class AudioManager {
 
   public stopBgm() {
     if (this.currentBgm) {
+      if (this.currentBgmEndedListener) {
+        this.currentBgm.removeEventListener('ended', this.currentBgmEndedListener);
+      }
       this.currentBgm.pause();
       this.currentBgm.currentTime = 0;
       this.currentBgm = null;
       this.currentBgmName = null;
       this.currentBgmUrl = null;
+      this.currentBgmEndedListener = null;
     }
   }
 
@@ -136,11 +145,16 @@ class AudioManager {
     const audio = this.currentBgm;
     const startVolume = audio.volume;
     const startTime = Date.now();
+    const endedListener = this.currentBgmEndedListener;
+    if (endedListener) {
+      audio.removeEventListener('ended', endedListener);
+    }
 
     // AudioManager上は再生停止扱いにする
     this.currentBgm = null;
     this.currentBgmName = null;
     this.currentBgmUrl = null;
+    this.currentBgmEndedListener = null;
 
     const fade = () => {
       const elapsed = Date.now() - startTime;

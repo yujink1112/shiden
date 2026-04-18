@@ -149,9 +149,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     const creditsHeight = isMobileMode ? height - creditsY : height;
 
     const illProgress = scrollOffsetRef.current; // スクロール量を時間軸として利用
-    
-    const fadeTime = 1000 * dpr;
-    let maxIllEndTime = 0;
 
     // 背景描画
     ctx.fillStyle = '#000';
@@ -172,40 +169,45 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     }
 
     // --- 左側（または上部）: イラスト ---
-    creditsData.illustrations.forEach((ill) => {
+    const activeIllustration = creditsData.illustrations
+      .map((ill) => {
         const start = ill.startTime * dpr;
         const duration = (ill.duration || 8000) * dpr; // デフォルト8秒
+        const fadeTime = Math.min(1000 * dpr, duration * 0.3);
         const end = start + duration;
-        maxIllEndTime = Math.max(maxIllEndTime, end);
+        return { ill, start, fadeTime, end };
+      })
+      .filter(({ start, end }) => illProgress >= start && illProgress <= end)
+      .pop();
 
-        if (illProgress >= start && illProgress <= end) {
-            let alpha = 0;
-            if (illProgress < start + fadeTime) {
-                alpha = (illProgress - start) / fadeTime;
-            } else if (illProgress > end - fadeTime) {
-                alpha = (end - illProgress) / fadeTime;
-            } else {
-                alpha = 1;
-            }
-            
-            const img = imagesRef.current[ill.image];
-            if (img) {
-                ctx.save();
-                ctx.globalAlpha = alpha;
-                // スマホ時は枠いっぱいに表示しやすくするためスケールを微調整
-                const scale = Math.min(illAreaWidth / img.width, illAreaHeight / img.height) * (isMobileMode ? 1.0 : 0.95);
-                const w = img.width * scale;
-                const h = img.height * scale;
-                const x = (illAreaWidth - w) / 2;
-                const y = (isMobileMode ? (illAreaHeight - h) / 2 : (height - h) / 2);
-                
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
-                ctx.shadowBlur = 20 * dpr;
-                ctx.drawImage(img, x, y, w, h);
-                ctx.restore();
-            }
+    if (activeIllustration) {
+        const { ill, start, fadeTime, end } = activeIllustration;
+        let alpha = 0;
+        if (illProgress < start + fadeTime) {
+            alpha = (illProgress - start) / fadeTime;
+        } else if (illProgress > end - fadeTime) {
+            alpha = (end - illProgress) / fadeTime;
+        } else {
+            alpha = 1;
         }
-    });
+
+        const img = imagesRef.current[ill.image];
+        if (img) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            // スマホ時は枠いっぱいに表示しやすくするためスケールを微調整
+            const scale = Math.min(illAreaWidth / img.width, illAreaHeight / img.height) * (isMobileMode ? 1.0 : 0.95);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            const x = (illAreaWidth - w) / 2;
+            const y = (isMobileMode ? (illAreaHeight - h) / 2 : (height - h) / 2);
+
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
+            ctx.shadowBlur = 20 * dpr;
+            ctx.drawImage(img, x, y, w, h);
+            ctx.restore();
+        }
+    }
 
     // --- 右側（または下部）: クレジットスクロール ---
     ctx.save();
@@ -220,7 +222,6 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     const maxContentWidth = creditsWidth - padding * 2;
 
     let currentY = creditsY + creditsHeight - scrollOffsetRef.current;
-    let lastSectionBottomY = currentY;
 
     creditsData.sections.forEach(section => {
         switch (section.type) {
@@ -283,47 +284,63 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 currentY += (section.height || 50) * (isMobileMode ? 0.7 : 1.0) * dpr;
                 break;
         }
-        lastSectionBottomY = currentY;
     });
 
     ctx.restore();
 
-    // 終了判定
-    const scrollFinished = lastSectionBottomY < 0;
-    const illustrationsFinished = illProgress > maxIllEndTime + 2000 * dpr;
-
-    if (scrollFinished && illustrationsFinished) {
-        if (!showTheEnd) {
-            setShowTheEnd(true);
-        }
-    }
-
     if (showTheEnd) {
         if (theEndAlpha < 1 && !isEnding) {
             setTheEndAlpha(prev => Math.min(1, prev + 0.01));
-        } else if (isEnding && theEndAlpha > 0) {
-            setTheEndAlpha(prev => Math.max(0, prev - 0.015));
         }
 
         ctx.save();
         ctx.globalAlpha = theEndAlpha;
-        ctx.fillStyle = '#fff';
-        ctx.font = `bold ${80 * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
         ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-        ctx.shadowBlur = 30 * dpr;
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${(isMobileMode ? 72 : 132) * dpr}px "Cinzel", "Georgia", "Times New Roman", serif`;
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.strokeStyle = 'rgba(255, 224, 130, 0.9)';
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.95)';
+        ctx.shadowBlur = 34 * dpr;
+        ctx.strokeText("THE END", width / 2, height / 2);
+        ctx.fillStyle = '#fff8dc';
         ctx.fillText("THE END", width / 2, height / 2);
+        ctx.shadowBlur = 0;
+        ctx.font = `bold ${(isMobileMode ? 20 : 30) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+        ctx.fillStyle = 'rgba(129, 212, 250, 0.9)';
+        ctx.fillText("FLAG", width / 2, height / 2 + (isMobileMode ? 58 : 92) * dpr);
         ctx.restore();
         
         if (theEndAlpha >= 1 && !isEnding) {
             ctx.save();
             ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 500) * 0.3;
-            ctx.fillStyle = '#aaa';
-            ctx.font = `${20 * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+            ctx.fillStyle = '#ddd';
+            ctx.font = `${(isMobileMode ? 15 : 20) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
             ctx.textAlign = 'center';
-            ctx.fillText("- CLICK TO FINISH -", width / 2, height / 2 + 100 * dpr);
+            ctx.fillText("- CLICK TO TITLE -", width / 2, height / 2 + (isMobileMode ? 92 : 136) * dpr);
             ctx.restore();
         }
+    }
+
+    if (isEnding) {
+        if (endingAlphaRef.current > 0) {
+          endingAlphaRef.current -= 0.015;
+          if (endingAlphaRef.current < 0) endingAlphaRef.current = 0;
+        } else {
+          if (waitAfterEndingTimerRef.current === null) {
+            waitAfterEndingTimerRef.current = Date.now();
+          }
+          if (Date.now() - waitAfterEndingTimerRef.current > 500) {
+            onEnd();
+            return;
+          }
+        }
+
+        ctx.save();
+        ctx.globalAlpha = 1 - endingAlphaRef.current;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, width, height);
+        ctx.restore();
     }
   };
 
@@ -365,9 +382,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           const creditsResponse = await fetch(creditsUrl);
           const creditsData: CreditsData = await creditsResponse.json();
           setCreditsData(creditsData);
+          setShowTheEnd(false);
+          setTheEndAlpha(0);
+          endingAlphaRef.current = 1;
+          waitAfterEndingTimerRef.current = null;
           
           if (creditsData.bgm) {
-            AudioManager.getInstance().playBgm(creditsData.bgm, true);
+            AudioManager.getInstance().playBgm(creditsData.bgm, false, () => {
+              setShowTheEnd(true);
+            });
           }
 
           creditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
@@ -707,7 +730,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           // スマホ版（縦長画面）で背景が拡大されすぎて左右が削られすぎるのを防ぐため、
           // 幅に合わせたスケーリングの1.2倍を上限とする。
           // これにより、画像の一部がはみ出すのを抑え、より広い範囲を表示できる。
-          scale = Math.min(scale, (width / bgImg.width) * 3);
+          scale = Math.min(scale, (width / bgImg.width) * 100);
         }
 
         const drawW = bgImg.width * scale;
@@ -1003,7 +1026,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
   const handleNext = () => {
     if (isEnding || !isLoaded) return;
 
-    // エンドロール中はクリックでスキップ確認
+    // エンドロール中は THE END 表示後だけクリックで終了する
     if (creditsData) {
         if (showTheEnd) {
             if (theEndAlpha >= 0.8 && !isEnding) {
@@ -1012,9 +1035,6 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
             return;
         }
 
-        if (window.confirm('エンドロールをスキップしますか？')) {
-            setIsEnding(true);
-        }
         return;
     }
 

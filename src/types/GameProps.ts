@@ -75,7 +75,8 @@ export interface GameProps {
   selectedRewards: string[];
   setSelectedRewards: (rewards: string[]) => void;
   handleRewardSelection: (abbr: string) => void;
-  confirmRewards: () => void;
+  confirmRewards: (rewardOverride?: string[]) => void | Promise<void>;
+  isRewardConfirming: boolean;
   clearBossAndNextCycle: () => void;
   goToBossStage: () => void;
   

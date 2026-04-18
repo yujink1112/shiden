@@ -107,7 +107,7 @@
       { "type": "battle", "subStage": 1},
       { "type": "story", "id": "9-2" },
       { "type": "battle", "subStage": 2},
-      { "type": "reward", "skill": "撃" },
+      { "type": "reward", "skill": "滅" },
       { "type": "reward", "choices": ["受", "燐"] },
       { "type": "story", "id": "9-3" }
     ]
@@ -146,6 +146,7 @@
       { "type": "battle", "subStage": 2},
       { "type": "story", "id": "12-3" },
       { "type": "battle", "subStage": 3},
+      { "type": "story", "id": "12-4" },
       { "type": "credits", "id": "/data/credits.json" }
     ]
   }

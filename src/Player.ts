@@ -34,6 +34,7 @@ export class Player {
     yakedo: number = 0; // 火傷
     kaifuku: number = 0;
     kyousou: number = 0;
+    kyousou_: number = 0; // 協奏のフラグ用
     reika: number = 0;
     gouyoku: number = 0;
     gouman: number = 0;
@@ -85,6 +86,7 @@ export class Player {
         this.yakedo = 0;
         this.kaifuku = 0;
         this.kyousou = 0;
+        this.kyousou_ = 0;
         this.reika = 0;
         this.gouyoku = 0;
         this.gouman = 0;

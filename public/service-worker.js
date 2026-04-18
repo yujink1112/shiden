@@ -1,7 +1,5 @@
-const CACHE_NAME = 'shiden-cache-v1';
+const CACHE_NAME = 'shiden-cache-v2';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/favicon.ico',
   '/data/stages.json',
@@ -16,14 +14,32 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName))
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (event) => {
   // 外部(Firebase Storageなど)の画像や、ローカルの静的アセットをキャッシュ対象にする
   const url = new URL(event.request.url);
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   
   // キャッシュ対象の拡張子
-  const cacheableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.json', '.txt', '.mid', '.MID', '.csv'];
+  const cacheableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.json', '.txt', '.mid', '.csv'];
   const isCacheable = cacheableExtensions.some(ext => url.pathname.toLowerCase().endsWith(ext)) || url.href.includes('firebasestorage.googleapis.com');
 
   if (isCacheable) {
@@ -45,10 +61,6 @@ self.addEventListener('fetch', (event) => {
       })
     );
   } else {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
+    event.respondWith(fetch(event.request));
   }
 });

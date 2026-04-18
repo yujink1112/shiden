@@ -1051,3 +1051,151 @@
   filter: brightness(1.2);
   z-index: 10;
 }
+
+/* 第2章 Stage12-3 最終戦専用演出 */
+.chapter2-final-battle {
+  position: relative;
+}
+
+.chapter2-final-intro-effect {
+  animation: chapter2FinalScreenShake 0.9s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.chapter2-final-clear-effect {
+  animation: chapter2FinalClearShake 3.1s ease-in-out 2.25s forwards;
+}
+
+.chapter2-final-white-flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  pointer-events: none;
+  z-index: 12000;
+  opacity: 0;
+}
+
+.chapter2-final-intro-effect .chapter2-final-white-flash {
+  animation: chapter2FinalIntroFlash 0.95s ease-out forwards;
+}
+
+.chapter2-final-clear-effect .chapter2-final-white-flash {
+  animation: chapter2FinalDoubleFlash 2.25s ease-in-out forwards;
+}
+
+.chapter2-final-embers {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9500;
+}
+
+.chapter2-final-embers span {
+  position: absolute;
+  bottom: -18px;
+  width: var(--ember-size, 5px);
+  height: var(--ember-size, 5px);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7c4 0%, #ffb338 45%, rgba(255, 71, 26, 0) 72%);
+  box-shadow: 0 0 8px #ff9d2e, 0 0 16px rgba(255, 80, 20, 0.65);
+  opacity: 0;
+  animation: chapter2FinalEmberRise linear infinite;
+}
+
+.chapter2-final-clear-effect .MainGameArea > div,
+.chapter2-final-clear-effect .GameLogFrame,
+.chapter2-final-clear-effect .ResultsOverview > div,
+.chapter2-final-clear-effect .rich-log-modern .log-line,
+.chapter2-final-clear-effect .skill-card {
+  transform-origin: center bottom;
+  animation: chapter2FinalPanelCollapse 1.85s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation-delay: 2.55s;
+}
+
+.chapter2-final-clear-effect .MainGameArea > div:nth-child(2),
+.chapter2-final-clear-effect .GameLogFrame {
+  animation-delay: 2.72s;
+}
+
+.chapter2-final-clear-effect .MainGameArea > div:nth-child(3),
+.chapter2-final-clear-effect .ResultsOverview > div {
+  animation-delay: 2.9s;
+}
+
+.chapter2-final-clear-effect .skill-card:nth-child(odd),
+.chapter2-final-clear-effect .rich-log-modern .log-line:nth-child(odd) {
+  animation-delay: 3.05s;
+}
+
+.chapter2-final-clear-effect .skill-card:nth-child(even),
+.chapter2-final-clear-effect .rich-log-modern .log-line:nth-child(even) {
+  animation-delay: 3.18s;
+}
+
+@keyframes chapter2FinalIntroFlash {
+  0% { opacity: 0; }
+  7% { opacity: 1; }
+  34% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+@keyframes chapter2FinalDoubleFlash {
+  0%, 28%, 58%, 100% { opacity: 0; }
+  8%, 17%, 42%, 51% { opacity: 1; }
+}
+
+@keyframes chapter2FinalScreenShake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10%, 30%, 50%, 70%, 90% { transform: translate3d(-7px, 4px, 0); }
+  20%, 40%, 60%, 80% { transform: translate3d(8px, -4px, 0); }
+}
+
+@keyframes chapter2FinalClearShake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  8%, 24%, 40%, 56%, 72%, 88% { transform: translate3d(-10px, 5px, 0) rotate(-0.25deg); }
+  16%, 32%, 48%, 64%, 80%, 96% { transform: translate3d(11px, -5px, 0) rotate(0.25deg); }
+}
+
+@keyframes chapter2FinalEmberRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.6);
+  }
+  15% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ember-drift, 0), -42vh, 0) scale(1.25);
+  }
+}
+
+@keyframes chapter2FinalPanelCollapse {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    filter: none;
+  }
+  22% {
+    opacity: 1;
+    transform: translate3d(-4px, 8px, 0) rotate(-1.5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 120vh, 0) rotate(8deg);
+    filter: blur(2px);
+  }
+}
+
+@media (max-width: 600px) {
+  .chapter2-final-embers {
+    height: 52vh;
+  }
+
+  .chapter2-final-embers span {
+    box-shadow: 0 0 6px #ff9d2e, 0 0 12px rgba(255, 80, 20, 0.65);
+  }
+}

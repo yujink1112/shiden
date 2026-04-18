@@ -80,6 +80,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                     <p>特に記載がない場合、戦闘中常に効果を発揮しているスキルです。</p>
                     <p>効果を発揮するタイミングについて記載がある場合、その記述に従います。</p>
                     <p>破壊された時点でスキルの効果は発揮されなくなります。</p>
+                    <p>【＋反】によって攻撃スキルが迎撃スキルとして扱われる場合、そのスキルには攻撃スキルにのみ適用されるダメージ補正は適用されません。</p>
             </div>
 
             <div style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
@@ -127,7 +128,9 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                     <img src={getStorageUrl(status.icon)} alt="" style={{ width: '40px', height: '40px' }} />
                     <div>
                       <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: status.type == 0 ? '#4fc3f7' : '#ef5350'}}>{status.name}<span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{status.kana}</span></div>
-
+                      <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '2px' }}>
+                        {status.type == 0 ? '良い状態' : '悪い状態'} / {status.stackable ? '重複あり' : '重複なし'}
+                      </div>
                     </div>
                   </div>
                   <div style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>{status.description}</div>
@@ -138,7 +141,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
           </div>
         );
      case 4:
-        const slideImages = Array.from({ length: 6 }, (_, i) => getStorageUrl(`/images/rule/introduction/スライド${i + 1}.PNG`));
+        const slideImages = Array.from({ length: 6 }, (_, i) => getStorageUrl(`/images/rule/introduction/スライド${i + 1}.webp`));
         return (
           <div className="rule-content-section">
             <h2>戦闘の流れ</h2>
@@ -273,6 +276,15 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                   <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#4fc3f7' }}>BGM</div>
                     <div style={{ textAlign: 'left', marginTop: '30px', fontSize: '0.9rem', color: '#ccc' }}>
                       <p>あしなが☆おにいさん様</p>
+                      <p>3104様</p>
+                      <p>トラ猫様</p>
+                      <p>ゆう様</p>
+                      <p>まんぼう二等兵様</p>
+                      <p>氷石彩亜様</p>
+                      <p>南雲莉翠様</p>
+                      <p>Tスタ様</p>
+                      <p>VS Qplus+様</p>
+                      <p>デジファミ音楽堂様</p>
                     </div>
                   </div>
                 <p>© 2026 Shiden Games</p>

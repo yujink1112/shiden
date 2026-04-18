@@ -13,10 +13,10 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに2点のダメージを与える。", exclude: 0 },
   { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/v2/2011-12-23_3-067.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。迎撃スキルが発動しなければ、さらに上からスキルを1つ破壊する。", exclude: 0 },
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "1", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。", exclude: 1 },
-  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "0", description: "相手に2点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
-  { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/v2/2011-12-23_1-019.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、相手が持っている悪い状態の数である。", exclude: 0 },
+  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "0", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
+  { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/v2/2011-12-23_1-019.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、相手が持っている悪い状態の数+1である。", exclude: 1  },
   { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/v2/2011-12-23_3-049.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。相手に状態「火傷」を与える。", exclude: 1 },
-  { abbr: "弱", name: "弱撃", kana:"じゃくげき", icon: "/images/skill/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。", exclude: 0 },
+  { abbr: "弱", name: "弱撃", kana:"じゃくげき", icon: "/images/skill/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。", exclude: 1 },
 
   // 補助スキル
   { abbr: "覚", name: "覚悟", kana:"かくご", icon: "/images/skill/b01.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「覚悟」を与える。", exclude: 0 },
@@ -35,7 +35,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "待", name: "待伏", kana:"まちぶせ", icon: "/images/skill/c03.gif", type: "迎撃", speed: "1", description: "相手に2点のダメージを与える。", exclude: 0 },
   { abbr: "玉", name: "玉響", kana:"たまゆら", icon: "/images/skill/c04.gif", type: "迎撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、このスキルにダメージを与えた攻撃スキルの速度（最低0）である。", exclude: 0 },
   { abbr: "崩", name: "崩技", kana:"くずしわざ", icon: "/images/skill/c05.gif", type: "迎撃", speed: "LV", description: "相手に状態「スタン」を与える。", exclude: 0 },
-  { abbr: "疫", name: "疫病", kana:"えきびょう", icon: "/images/skill/c06.gif", type: "迎撃", speed: "LV", description: "相手の先頭のスキルがリミテッドでないならば、そのスキルを【疫病】に変化させる。", exclude: 0 },
+  { abbr: "疫", name: "疫病", kana:"えきびょう", icon: "/images/skill/c06.gif", type: "迎撃", speed: "LV", description: "相手の先頭のスキルを【疫病】に変化させる。", exclude: 0 },
   { abbr: "幻", name: "幻惑", kana:"げんわく", icon: "/images/skill/v2/2011-12-23_3-058.gif", type: "迎撃", speed: "LV", description: "このスキルが発動した場合、攻撃フェイズではなく終了フェイズに破壊される。", exclude: 0 },
   { abbr: "水", name: "水幕", kana:"すいまく", icon: "/images/skill/v2/2011-12-23_3-055.gif", type: "迎撃", speed: "LV-1", description: "あなたに状態「防壁」を1つ与える。", exclude: 0 },
   { abbr: "転", name: "転回", kana:"てんかい", icon: "/images/skill/v2/2011-12-23_3-065.gif", type: "迎撃", speed: "LV+2", description: "あなたに状態「狼狽」を与える。", exclude: 1 },
@@ -46,7 +46,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "強", name: "＋強", kana:"プラスきょう", icon: "/images/skill/d01.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルが与えるダメージは常に+1される。", exclude: 0 },
   { abbr: "硬", name: "＋硬", kana:"プラスこう", icon: "/images/skill/d02.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルが破壊される直前に効果を発揮する。そのスキルの破壊を無効にし、代わりにこのスキルを破壊する。", exclude: 0 },
   { abbr: "速", name: "＋速", kana:"プラスそく", icon: "/images/skill/d03.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルの速度は常に+1される。", exclude: 0 },
-  { abbr: "反", name: "＋反", kana:"プラスはん", icon: "/images/skill/d04.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルは、常に迎撃スキルとして扱われる。", exclude: 0 },
+  { abbr: "反", name: "＋反", kana:"プラスはん", icon: "/images/skill/d04.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルは、常に迎撃スキルとして扱われる。\n迎撃スキルとして扱われている間は、攻撃スキルにのみ適用されるダメージ補正は適用されない。", exclude: 0 },
   { abbr: "光", name: "＋光", kana:"プラスひかり", icon: "/images/skill/v2/2011-12-23_3-130.gif", type: "付帯", speed: "なし", description: "このスキルの直前の【一閃】が与えるダメージは常に+2される。", exclude: 0 },
   { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/v2/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルにリミテッドを与え、速度に+3する。", exclude: 1 },
 
@@ -62,7 +62,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "飛", name: "飛行", kana:"ひこう", icon: "/images/skill/v2/2011-12-23_1-294.gif", type: "付帯", speed: "なし", description: "【弱撃】以外の速度0の攻撃スキルによるダメージと効果を受けない。", exclude: 1 },
   { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/v2/2013-4-20_038.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直後に効果を発揮する。終了フェイズをもう一度行う。", exclude: 1 },
   { abbr: "礁", name: "座礁", kana:"ざしょう", icon: "/images/skill/v2/2011-12-23_3-094.gif", type: "付帯", speed: "なし", description: "互いの攻撃スキルの速度に-1する(最低0)。複数存在する場合、効果は重複する。", exclude: 1 },
-  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「霊化」を与える。", exclude: 1  },
+  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「防壁」を1つと状態「霊化」を与える。", exclude: 1  },
 
   { abbr: "空", name: "空白", kana:"くうはく", icon: "/images/skill/d13.gif", type: "付帯", speed: "なし", description: "何の効果も持たない。", exclude: 1  },
   { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/v2/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。", exclude: 1  },
@@ -78,13 +78,13 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "掌", name: "掌握", kana:"エアグライフェン", icon: "/images/skill/v2/hand.png", type: "付帯・敵専用", speed: "なし", description: "あなたは第20ラウンドの終了フェイズに勝利する。", ruleDisplay: false, exclude: 1  },
 
 
-  { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。", ruleDisplay: false, exclude: 1  },
-  { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/v2/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。", ruleDisplay: false, exclude: 1  },
-  { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/v2/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。", ruleDisplay: false, exclude: 1  },
-  { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/v2/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。", ruleDisplay: false, exclude: 1  },
-  { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。", ruleDisplay: false, exclude: 1  },
-  { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。", ruleDisplay: false, exclude: 1  },
-  { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "欲", name: "強欲", kana:"アヴァタリア", icon: "/images/skill/v2/avaritia.png", type: "敵専用", speed: "LV", description: "相手のスキルを2つ奪う。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "嫉", name: "嫉妬", kana:"インヴィディア", icon: "/images/skill/v2/invidia.png", type: "敵専用", speed: "LV", description: "相手と同じスキルを使用する。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "憤", name: "憤怒", kana:"イーラ", icon: "/images/skill/v2/ira.png", type: "敵専用", speed: "LV", description: "自身が受けたダメージの合計×1点のダメージを与える。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。", ruleDisplay: false, exclude: 1  },
+  // { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。", ruleDisplay: false, exclude: 1  },
 ];
 
 export interface SkillDetail {
@@ -109,34 +109,36 @@ export interface StatusDetail {
     type: number;
     kana: string;
     icon: string;
+    stackable: boolean;
     description: string;
 }
 
 export const STATUS_DATA: StatusDetail[] = [
-    { name: "覚悟", type: 0, kana: "かくご", icon: "/images/skill/b01.gif", description: "「覚悟」を受けているキャラクターの所持する攻撃・迎撃スキルは常に与えるダメージに+1、速度に+2される。" },
-    { name: "防壁", type: 0, kana: "ぼうへき", icon: "/images/skill/b02.gif", description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。" },
-    { name: "逆鱗", type: 0, kana: "げきりん", icon: "/images/skill/d07.gif", description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【弱撃】以外の攻撃スキルを使用した直後に解除される。" },
-    { name: "無想", type: 0, kana: "むそう", icon: "/images/skill/d08.gif", description: "攻撃スキルによるダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
-    { name: "先制", type: 0, kana: "せんせい", icon: "/images/skill/d10.gif", description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
-
-    { name: "スタン", type: 1, kana: "", icon: "/images/skill/x01.gif", description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。スキルの速度には影響しない。" },
-    { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。先攻決定フェイズには影響しない。他のあらゆる速度変化効果に対して優先される。" },
-    { name: "忘却", type: 1, kana: "ぼうきゃく", icon: "/images/skill/x03.gif", description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
+    { name: "覚悟", type: 0, kana: "かくご", icon: "/images/skill/b01.gif", stackable: false, description: "「覚悟」を受けているキャラクターの所持する攻撃・迎撃スキルは常に与えるダメージに+1、速度に+2される。" },
+    { name: "防壁", type: 0, kana: "ぼうへき", icon: "/images/skill/b02.gif", stackable: true, description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。" },
+    { name: "逆鱗", type: 0, kana: "げきりん", icon: "/images/skill/d07.gif", stackable: true, description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【弱撃】以外の攻撃スキルを使用した直後に解除される。" },
+    { name: "無想", type: 0, kana: "むそう", icon: "/images/skill/d08.gif", stackable: false, description: "攻撃スキルによるダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
+    { name: "先制", type: 0, kana: "せんせい", icon: "/images/skill/d10.gif", stackable: false, description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
 
     // 新規追加
-    { name: "回復", type: 0, kana: "かいふく", icon: "/images/skill/2011-12-23_3-140.gif", description: "終了フェイズに、あなたのスキルの末尾に【ＨＰ】を３つ追加する。" },
-    { name: "協奏", type: 0, kana: "きょうそう", icon: "/images/skill/2011-12-23_3-195.gif", description: "あなたが使用する攻撃スキルのダメージに+1、速度に+1する。" },
-    { name: "霊化", type: 0, kana: "れいか", icon: "/images/skill/2011-12-23_3-060.gif", description: "攻撃スキルを所持していない時、【弱撃】ではなく【影討】を使用する。LVは0とする。" },
-    { name: "強欲", type: 0, kana: "ごうよく", icon: "/images/skill/avaritia.png", description: "終了フェイズの直前に攻撃フェイズをもう一度行う。" },
-    { name: "傲慢", type: 0, kana: "ごうまん", icon: "/images/skill/superbia.png", description: "あなたの攻撃・迎撃スキルの速度に+1する。" },
-    { name: "憤怒", type: 0, kana: "ふんぬ", icon: "/images/skill/ira.png", description: "あなたの攻撃・迎撃スキルのダメージに+1する。" },
-    { name: "暴食", type: 0, kana: "ぼうしょく", icon: "/images/skill/gula.png", description: "あなたの攻撃スキルの効果に「自分のスキルの末尾に【ＨＰ】を追加する。」を追加する。" },
-    { name: "怠惰", type: 0, kana: "たいだ", icon: "/images/skill/luxuria.png", description: "終了フェイズに、あなたの所持している迎撃スキルの数だけ状態「防壁」を与える。" },
+    { name: "回復", type: 0, kana: "かいふく", icon: "/images/skill/v2/2011-12-23_3-140.gif", stackable: false, description: "終了フェイズに、あなたの破壊されたスキルを全て【ＨＰ】に変化させる。" },
+    { name: "協奏", type: 0, kana: "きょうそう", icon: "/images/skill/v2/2011-12-23_3-195.gif", stackable: true, description: "あなたが使用する攻撃スキルのダメージに、受けている協奏の数を加える。速度にも同じ数を加える。" },
+    { name: "霊化", type: 0, kana: "れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", stackable: false, description: "攻撃スキルを所持していない時、【弱撃】ではなく【影討】を使用する。LVは0とする。" },
+    // { name: "強欲", type: 0, kana: "ごうよく", icon: "/images/skill/avaritia.png", description: "終了フェイズの直前に攻撃フェイズをもう一度行う。" },
+    // { name: "傲慢", type: 0, kana: "ごうまん", icon: "/images/skill/superbia.png", description: "あなたの攻撃・迎撃スキルの速度に+1する。" },
+    // { name: "憤怒", type: 0, kana: "ふんぬ", icon: "/images/skill/ira.png", description: "あなたの攻撃・迎撃スキルのダメージに+1する。" },
+    // { name: "暴食", type: 0, kana: "ぼうしょく", icon: "/images/skill/gula.png", description: "あなたの攻撃スキルの効果に「自分のスキルの末尾に【ＨＰ】を追加する。」を追加する。" },
+    // { name: "怠惰", type: 0, kana: "たいだ", icon: "/images/skill/luxuria.png", description: "終了フェイズに、あなたの所持している迎撃スキルの数だけ状態「防壁」を与える。" },
 
-    { name: "毒", type: 1, kana: "どく", icon: "/images/skill/2011-12-23_3-136.gif", description: "終了フェイズにあなたの先頭のスキルを1つ破壊する。" },
-    { name: "火傷", type: 1, kana: "やけど", icon: "/images/skill/2011-12-23_3-142.gif", description: "あなたが与える攻撃スキルのダメージに-1する。(最低1)" },
-    { name: "死紋", type: 1, kana: "しもん", icon: "/images/skill/2011-12-24_007.gif", description: "あなたが攻撃スキルによって受けるダメージに、あなたが受けている死紋の数を加える。終了フェイズに、あなたが受けている死紋の数だけ状態「死紋」を与える。" },
-    { name: "嫉妬", type: 1, kana: "しっと", icon: "/images/skill/invidia.png", description: "あなたは良い状態を受けることができない。" },
-    { name: "色欲", type: 1, kana: "しきよく", icon: "/images/skill/luxuria.png", description: "あなたが与える攻撃・迎撃スキルのダメージに-1する。(最低1)" },
+
+    { name: "スタン", type: 1, kana: "", icon: "/images/skill/x01.gif", stackable: false, description: "先攻決定フェイズにおいて常に後攻となる。他のあらゆる速度変化効果に対して優先される。スキルの速度には影響しない。" },
+    { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", stackable: false, description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。先攻決定フェイズには影響しない。他のあらゆる速度変化効果に対して優先される。" },
+    { name: "忘却", type: 1, kana: "ぼうきゃく", icon: "/images/skill/x03.gif", stackable: false, description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
+
+    { name: "毒", type: 1, kana: "どく", icon: "/images/skill/v2/2011-12-23_3-136.gif", stackable: false, description: "終了フェイズにあなたの先頭のスキルを1つ破壊する。" },
+    { name: "火傷", type: 1, kana: "やけど", icon: "/images/skill/v2/2011-12-23_3-142.gif", stackable: false, description: "あなたが与える攻撃スキルのダメージに-1する。(最低1)" },
+    { name: "死紋", type: 1, kana: "しもん", icon: "/images/skill/v2/2011-12-24_007.gif", stackable: true, description: "あなたが攻撃スキルによって受けるダメージに、あなたが受けている死紋の数を加える。終了フェイズに、あなたが受けている死紋の数だけ状態「死紋」を与える。" },
+    // { name: "嫉妬", type: 1, kana: "しっと", icon: "/images/skill/invidia.png", description: "あなたは良い状態を受けることができない。" },
+    // { name: "色欲", type: 1, kana: "しきよく", icon: "/images/skill/luxuria.png", description: "あなたが与える攻撃・迎撃スキルのダメージに-1する。(最低1)" },
 
 ];
