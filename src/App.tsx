@@ -149,7 +149,24 @@ function App() {
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isAdminPreview, setIsAdminPreview] = useState(false);
+  const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
+  const getAllDebugSkillAbbrs = () => Array.from(new Set(ALL_SKILLS.map(skill => skill.abbr)));
+  const isDebugAllSkillSet = (skills: string[] | undefined) => {
+    if (!skills) return false;
+    const skillSet = new Set(skills);
+    return getAllDebugSkillAbbrs().every(abbr => skillSet.has(abbr));
+  };
+  const getRegularSkills = (skills: string[] | undefined, targetChapter: number) => {
+    if (!skills || isDebugAllSkillSet(skills)) {
+      return targetChapter === 2 ? CHAPTER2_INITIAL_SKILLS : CHAPTER1_INITIAL_SKILLS;
+    }
+    return skills;
+  };
+  const applyAdminDebugSkills = () => {
+    setIsAdminDebugSkillsActive(true);
+    setSelectedPlayerSkills([]);
+  };
 
   // タイトル画面表示中（F5等）の進行状況最新同期
   useEffect(() => {
@@ -271,7 +288,11 @@ function App() {
       return CHAPTER2_INITIAL_SKILLS;
     }
     const saved = localStorage.getItem('shiden_owned_skills');
-    return saved ? JSON.parse(saved) : ["一"];
+    if (saved) {
+      const savedSkills = JSON.parse(saved);
+      return isDebugAllSkillSet(savedSkills) ? CHAPTER1_INITIAL_SKILLS : savedSkills;
+    }
+    return ["一"];
   });
 
   const [lastActiveProfiles, setLastActiveProfiles] = useState<{[uid: string]: number}>({});
@@ -344,7 +365,7 @@ function App() {
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
 
   // 第2章の次のステップへ進む
-  const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number, ignoreTitle: boolean = false) => {
+  const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number, ignoreTitle: boolean = false): Promise<void> => {
     // 遷移開始時に一旦ストーリーモーダルを閉じる状態にする
     setShowStoryModal(false);
     
@@ -369,7 +390,7 @@ function App() {
           setShowStoryModal(true);
         } else {
           // ストーリーが無い場合はさらに次へ
-          moveToNextStep(flow, nextIndex);
+          return moveToNextStep(flow, nextIndex);
         }
       } else if (nextStep.type === 'title') {
         setChapter2FlowIndex(nextIndex);
@@ -431,6 +452,8 @@ function App() {
   const [creditsUrl, setCreditsUrl] = useState<string | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [showChapterTitle, setShowChapterTitle] = useState(false);
+  const [isStoryTransitioning, setIsStoryTransitioning] = useState(false);
+  const [isAdminTitlePreview, setIsAdminTitlePreview] = useState(false);
   const [showChapter2Title, setShowChapter2Title] = useState(false);
   const [isTitleFadingOut, setIsTitleFadingOut] = useState(false);
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
@@ -574,7 +597,8 @@ const PLAYER_SKILL_COUNT = 5;
 
     if (!gameStarted) {
       const getAvailableOwnedSkills = () => {
-        const owned = ownedSkillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
+        const skillAbbrs = isAdminDebugSkillsActive ? getAllDebugSkillAbbrs() : ownedSkillAbbrs;
+        const owned = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
         return owned.sort((a, b) => {
           // 神業スキルを最優先
           if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
@@ -597,7 +621,7 @@ const PLAYER_SKILL_COUNT = 5;
         setCanGoToBoss(false);
       }
     }
-  }, [gameStarted, ownedSkillAbbrs, stageCycle, stageMode, chapter2FlowIndex]);
+  }, [gameStarted, ownedSkillAbbrs, isAdminDebugSkillsActive, stageCycle, stageMode, chapter2FlowIndex]);
 
   useEffect(() => {
     if (stageMode === 'BOSS' && stagesLoaded) {
@@ -1087,6 +1111,7 @@ const PLAYER_SKILL_COUNT = 5;
   const handleNewGame = async () => {
     //if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
     
+    setIsAdminDebugSkillsActive(false);
     setShowChapterSelect({ mode: 'NEW' });
     
     // const now = Date.now();
@@ -1134,6 +1159,7 @@ const PLAYER_SKILL_COUNT = 5;
   };
 
   const handleContinue = async () => {
+    setIsAdminDebugSkillsActive(false);
     if (user) {
       const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
       const snapshot = await get(chapter2Ref);
@@ -1145,7 +1171,7 @@ const PLAYER_SKILL_COUNT = 5;
           setChapterProgress(prev => ({ ...prev, 2: data.stageCycle }));
         }
         if (data.flowIndex !== undefined) setChapter2FlowIndex(data.flowIndex);
-        if (data.ownedSkills) setOwnedSkillAbbrs(data.ownedSkills);
+        if (data.ownedSkills) setOwnedSkillAbbrs(getRegularSkills(data.ownedSkills, 2));
       } else {
         setHasChapter2Save(false);
       }
@@ -1160,11 +1186,13 @@ const PLAYER_SKILL_COUNT = 5;
       localStorage.setItem('shiden_updated_at', now.toString());
       set(ref(database, `profiles/${user.uid}/updatedAt`), now);
     }
+    setIsAdminDebugSkillsActive(false);
     setIsTitle(true);
     setStageMode(getLastGameMode());
   };
 
   const handleChapterSelect = async (chapter: number, isNewGame: boolean = false) => {
+    setIsAdminDebugSkillsActive(false);
     // 第2章はログイン必須
     if (chapter === 2 && !user) {
       alert("第2章をプレイするにはユーザー登録（ログイン）が必要です。タイトル画面の「修行・交流（ログイン）」から登録を行ってください。");
@@ -1238,10 +1266,10 @@ const PLAYER_SKILL_COUNT = 5;
         
         const dbSkills = await loadUserSkills(user.uid);
         if (dbSkills) {
-          setOwnedSkillAbbrs(dbSkills);
+          setOwnedSkillAbbrs(getRegularSkills(dbSkills, 2));
         } else if (data.ownedSkills) {
           // 移行期間用
-          setOwnedSkillAbbrs(data.ownedSkills);
+          setOwnedSkillAbbrs(getRegularSkills(data.ownedSkills, 2));
         } else {
           setOwnedSkillAbbrs(CHAPTER2_INITIAL_SKILLS);
         }
@@ -1402,9 +1430,9 @@ const PLAYER_SKILL_COUNT = 5;
               if (data.flowIndex !== undefined) setChapter2FlowIndex(data.flowIndex);
               const dbSkills = await loadUserSkills(authenticatedUser.uid);
               if (dbSkills) {
-                setOwnedSkillAbbrs(dbSkills);
+                setOwnedSkillAbbrs(getRegularSkills(dbSkills, 2));
               } else if (data.ownedSkills) {
-                setOwnedSkillAbbrs(data.ownedSkills);
+                setOwnedSkillAbbrs(getRegularSkills(data.ownedSkills, 2));
               } else {
                 setOwnedSkillAbbrs(CHAPTER2_INITIAL_SKILLS);
               }
@@ -1475,8 +1503,8 @@ const PLAYER_SKILL_COUNT = 5;
               }
 
             // 所持スキルの同期
-            const firebaseOwnedSkills = data.ownedSkills || ["一"];
-            const localOwnedSkills = JSON.parse(localStorage.getItem('shiden_owned_skills') || '["一"]');
+            const firebaseOwnedSkills = getRegularSkills(data.ownedSkills || ["一"], 1);
+            const localOwnedSkills = getRegularSkills(JSON.parse(localStorage.getItem('shiden_owned_skills') || '["一"]'), 1);
             
             // 日時が同じか、どちらも0（初回など）の場合は和集合を取るが、
             // Firebaseの方が新しい場合はFirebaseのスキルセットで上書きする
@@ -1774,6 +1802,12 @@ const PLAYER_SKILL_COUNT = 5;
           } else {
             hasSynergy = false; // その他の＋スキルはデフォルトでシナジーなし
           }
+
+          // 無条件でシナジーなしのスキル
+          if (prev.name === "▽解") {
+            hasSynergy = false;
+          }
+
           if (hasSynergy) {
             newConnections.push({ fromId: `selected-skill-${i - 1}`, toId: `selected-skill-${i}` });
           } else {
@@ -1974,7 +2008,11 @@ const PLAYER_SKILL_COUNT = 5;
       for (let i = 0; i < battleCount; i++) {
         const enemyName = stageProcessor.getEnemyName(i, context);
         const currentComputerSkills = stageProcessor.getEnemySkills(i, context);
-        const game = new Game(selectedPlayerSkills.join("") + "／あなた", currentComputerSkills.map(s => s.abbr).join("") + "／" + enemyName);
+        const currentStageInfo = context.chapter2SubStage !== undefined && stageCycle >= 13
+          ? STAGE_DATA.find(s => s.chapter === 2 && s.stage === stageCycle - 12 && s.battle === context.chapter2SubStage)
+          : STAGE_DATA.find(s => s.no === stageCycle);
+        const playerName = currentStageInfo?.chapter === 2 ? (currentStageInfo.playerName || "あなた") : "あなた";
+        const game = new Game(selectedPlayerSkills.join("") + "／" + playerName, currentComputerSkills.map(s => s.abbr).join("") + "／" + enemyName);
         const winner = game.startGame();
         if (winner === 1) winCountTotal++;
         results.push({ playerSkills: playerSkillDetails, computerSkills: currentComputerSkills, winner, resultText: winner === 1 ? "Win!" : winner === 2 ? "Lose" : "Draw", gameLog: game.gameLog, battleInstance: game.battle });
@@ -3150,7 +3188,7 @@ const PLAYER_SKILL_COUNT = 5;
                 {STAGE_DATA.filter(s => s.no <= 12).map(s => (
                   <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
                     <div style={{ minWidth: '80px', fontWeight: 'bold', color: '#eee' }}>Stage {s.no}</div>
-                    <button onClick={() => { setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#333', color: '#fff', border: '1px solid #555' }}>
+                    <button onClick={() => { applyAdminDebugSkills(); setStageCycle(s.no); setStageMode('MID'); localStorage.setItem('shiden_stage_cycle', s.no.toString()); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#333', color: '#fff', border: '1px solid #555' }}>
                       開始
                     </button>
                   </div>
@@ -3164,18 +3202,22 @@ const PLAYER_SKILL_COUNT = 5;
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                 {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
                   const n = s.stage!;
+                  const stageNo = n + 12;
+                  const flow = chapter2Flows.find(f => f.stageNo === stageNo);
+                  const battleSteps = flow?.flow
+                    .map((step, index) => ({ step, index }))
+                    .filter(({ step }) => step.type === 'battle') || [];
                   return (
                     <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
                       <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>
                       
                       <button onClick={() => { 
-                        const stageNo = n + 12;
+                        applyAdminDebugSkills();
                         setStageCycle(stageNo); 
                         setChapter2FlowIndex(0);
                         setStageMode('BOSS');
                         setIsTitle(false); 
                         setShowAdmin(false); 
-                        const flow = chapter2Flows.find(f => f.stageNo === stageNo);
                         if (flow) {
                           moveToNextStep(flow, -1);
                         }
@@ -3183,35 +3225,47 @@ const PLAYER_SKILL_COUNT = 5;
                         TEST
                       </button>
 
+                      <button onClick={() => {
+                        setStageCycle(stageNo);
+                        setChapter2FlowIndex(0);
+                        setStageMode('BOSS');
+                        setGameStarted(false);
+                        setShowStoryModal(false);
+                        setShowChapter2Title(false);
+                        setIsTitle(false);
+                        setShowAdmin(false);
+                        setIsAdminTitlePreview(true);
+                        setShowChapterTitle(true);
+                      }} style={{ padding: '5px 10px', background: '#6a1b9a', border: '1px solid #ab47bc', fontWeight: 'bold' }}>
+                        TITLE
+                      </button>
+
                       <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={() => { 
-                          const flow = chapter2Flows.find(f => f.stageNo === n + 12);
-                          const midStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 1);
-                          if (midStepIndex !== undefined && midStepIndex !== -1) {
-                            setChapter2FlowIndex(midStepIndex);
-                          }
-                          setStageCycle(n + 12); 
-                          setStageMode('BOSS'); 
-                          localStorage.setItem('shiden_stage_cycle', (n + 12).toString()); 
-                          setIsTitle(false); 
-                          setShowAdmin(false); 
-                        }} style={{ padding: '5px 10px', background: '#1a237e', border: '1px solid #534bae' }}>
-                          MID
-                        </button>
-                        <button onClick={() => { 
-                          const flow = chapter2Flows.find(f => f.stageNo === n + 12);
-                          const bossStepIndex = flow?.flow.findIndex(step => step.type === 'battle' && step.subStage === 2);
-                          if (bossStepIndex !== undefined && bossStepIndex !== -1) {
-                            setChapter2FlowIndex(bossStepIndex);
-                          }
-                          setStageCycle(n + 12); 
-                          setStageMode('BOSS'); 
-                          localStorage.setItem('shiden_stage_cycle', (n + 12).toString()); 
-                          setIsTitle(false); 
-                          setShowAdmin(false); 
-                        }} style={{ padding: '5px 10px', background: '#b71c1c', border: '1px solid #f05545' }}>
-                          BOSS
-                        </button>
+                        {battleSteps.map(({ step, index }) => {
+                          const subStage = step.subStage || 1;
+                          const label = subStage === 1 ? 'MID' : subStage === 2 ? 'BOSS' : `BATTLE ${subStage}`;
+                          const background = subStage === 1 ? '#1a237e' : subStage === 2 ? '#b71c1c' : '#4a148c';
+                          const border = subStage === 1 ? '#534bae' : subStage === 2 ? '#f05545' : '#7b1fa2';
+
+                          return (
+                            <button key={`${stageNo}-${subStage}`} onClick={() => {
+                              applyAdminDebugSkills();
+                              setChapter2FlowIndex(index);
+                              setStageCycle(stageNo);
+                              setStageMode('BOSS');
+                              setGameStarted(false);
+                              setCanGoToBoss(false);
+                              setBattleResults([]);
+                              setShowLogForBattleIndex(-1);
+                              localStorage.setItem('shiden_stage_cycle', stageNo.toString());
+                              localStorage.setItem('shiden_chapter2_flow_index', index.toString());
+                              setIsTitle(false);
+                              setShowAdmin(false);
+                            }} style={{ padding: '5px 10px', background, border: `1px solid ${border}` }}>
+                              {label}
+                            </button>
+                          );
+                        })}
                       </div>
 
                       <div style={{ width: '1px', height: '20px', background: '#555', margin: '0 5px' }}></div>
@@ -3328,7 +3382,7 @@ const PLAYER_SKILL_COUNT = 5;
     selectedPlayerSkills,
     setSelectedPlayerSkills,
     availablePlayerCards,
-    ownedSkillAbbrs,
+    ownedSkillAbbrs: isAdminDebugSkillsActive ? getAllDebugSkillAbbrs() : ownedSkillAbbrs,
     setOwnedSkillAbbrs,
     storyContent,
     storyContentV2,
@@ -3356,7 +3410,10 @@ const PLAYER_SKILL_COUNT = 5;
     kenjuBoss,
     currentKenjuBattle,
     setKenjuBoss,
-    setIsTitle,
+    setIsTitle: (value: boolean) => {
+      if (value) setIsAdminDebugSkillsActive(false);
+      setIsTitle(value);
+    },
     setShowRule,
     setShowSettings,
     bgmEnabled,
@@ -3412,22 +3469,33 @@ const PLAYER_SKILL_COUNT = 5;
     );
   }
 
+  const storyTitleStage = stageCycle >= 13 ? stageCycle - 12 : stageCycle;
+  const storyTitleName = stageCycle >= 13
+    ? STAGE_DATA.find(s => s.chapter === 2 && s.stage === storyTitleStage && s.battle === 1)?.name || ""
+    : STAGE_DATA.find(s => s.no === stageCycle)?.name || "";
   const gameContent = isChapter2 ? <GameChapter2 {...gameProps} /> : <GameChapter1 {...gameProps} />;
   
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
-      {!showChapter2Title && !showStoryModal && !showChapterTitle && gameContent}
+      {!showChapter2Title && !showStoryModal && !showChapterTitle && !isStoryTransitioning && gameContent}
 
       {showChapterTitle && (
         <StoryTitle 
           chapter={chapter}
-          stage={stageCycle >= 13 ? stageCycle - 12 : stageCycle}
-          title={STAGE_DATA.find(s => s.no === stageCycle)?.name || ""}
-          onComplete={() => {
+          stage={storyTitleStage}
+          title={storyTitleName}
+          onComplete={async () => {
             setShowChapterTitle(false);
+            if (isAdminTitlePreview) {
+              setIsAdminTitlePreview(false);
+              setIsTitle(true);
+              return;
+            }
+            setIsStoryTransitioning(true);
             // タイトル表示後、改めて現在のステップ（ストーリー）を表示する
             // chapter2FlowIndex は既に更新済みなので、引数を調整
-            moveToNextStep(undefined, chapter2FlowIndex - 1, true);
+            await moveToNextStep(undefined, chapter2FlowIndex - 1, true);
+            setIsStoryTransitioning(false);
           }}
         />
       )}
@@ -3590,6 +3658,8 @@ const PLAYER_SKILL_COUNT = 5;
             </div>
           </div>
         )}
+
+      {showRule && <Rule onClose={() => setShowRule(false)} />}
     </div>
   );
 }

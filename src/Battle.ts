@@ -6,7 +6,8 @@ import { Player } from './Player';
 enum StatusFlag {
     NONE = 0,
     ACTIVE = 1,
-    RESERVED = 2
+    RESERVED = 2,
+    FROZEN = 3
 }
 
 /**
@@ -123,6 +124,9 @@ export class Battle {
         // 強欲の処理
         this.executeGouyoku();
 
+        const masteryResult = this.judgeMastery();
+        if (masteryResult !== BattleResult.CONTINUE) return masteryResult;
+
         result = this.judge(3);
         if (result !== BattleResult.CONTINUE) return result;
 
@@ -144,7 +148,7 @@ export class Battle {
             }
             return false;
         };
-        const { first } = this.phaseSpeed(true);
+        const { first } = this.phaseSpeed(false);
         const pc1IsFirst = (first === this.pc1);
         applyGouyoku(this.pc1, this.pc2, pc1IsFirst);
         applyGouyoku(this.pc2, this.pc1, !pc1IsFirst);
@@ -159,16 +163,20 @@ export class Battle {
         const pc2Enkan = hasEnkan(this.pc2);
         if (pc1Enkan != 0) {
             this.log();
-            this.log(this.pc1.name + `の【円環】${pc1Enkan}によって終了フェイズが繰り返される……。`);
+            this.log(this.pc1.playerName + `の【円環】${pc1Enkan}によって終了フェイズが繰り返される……。`);
             this.log();
             this.phaseEnd();
         }
         if (pc2Enkan != 0) {
             this.log();
-            this.log(this.pc2.name + `の【円環】${pc2Enkan}によって終了フェイズが繰り返される……。`);
+            this.log(this.pc2.playerName + `の【円環】${pc2Enkan}によって終了フェイズが繰り返される……。`);
             this.log();
             this.phaseEnd();
         }
+
+        // 凍結予約の解除
+        this.clearTouketsu(this.pc1);
+        this.clearTouketsu(this.pc2);
         
     }
 
@@ -178,37 +186,40 @@ export class Battle {
     private showPlayerStatus(pc: Player): void {
         let skillsText = "";
         for (let i = 0; i < pc.getSkillsLength(); i++) {
-            skillsText += (Battle.SHORT === 0) ? `【${pc.name[i]}】` : pc.skill[i];
+            if (Battle.SHORT === 0) {
+                const extremeHp = pc.skill[i] === "極" ? `${pc.extremeHpRemaining[i]}` : "";
+                skillsText += `【${pc.name[i]}】${extremeHp}`;
+            } else {
+                skillsText += pc.skill[i];
+            }
         }
 
         let statusText = "";
-        if (pc.stan === StatusFlag.ACTIVE) statusText += "ス";
-        if (pc.roubai === StatusFlag.ACTIVE) statusText += "狼";
-        if (pc.suijaku === StatusFlag.ACTIVE) statusText += "忘";
-        if (pc.kakugo === StatusFlag.ACTIVE) statusText += "覚";
-        if (pc.bouheki >= 1) {
-            for (let i = 0; i < pc.bouheki; i++) statusText += "防";
-        }
-        if (pc.gekirin >= 1) {
-            for (let i = 0; i < pc.gekirin; i++) statusText += "逆";
-        }
-        if (pc.musou === StatusFlag.ACTIVE) statusText += "無";
-        if (pc.sensei === StatusFlag.ACTIVE) statusText += "先";
-        if (pc.tyudoku === StatusFlag.ACTIVE) statusText += "毒";
-        if (pc.yakedo === StatusFlag.ACTIVE) statusText += "火";
-        if (pc.kaifuku === StatusFlag.ACTIVE) statusText += "回";
-        if (pc.kyousou === StatusFlag.ACTIVE) statusText += "奏";
-        if (pc.reika === StatusFlag.ACTIVE) statusText += "霊";
-        if (pc.gouyoku === StatusFlag.ACTIVE) statusText += "欲";
-        if (pc.gouman === StatusFlag.ACTIVE) statusText += "傲";
-        if (pc.funnu === StatusFlag.ACTIVE) statusText += "憤";
-        if (pc.boushoku === StatusFlag.ACTIVE) statusText += "暴";
-        if (pc.taida === StatusFlag.ACTIVE) statusText += "怠";
-        if (pc.shitto === StatusFlag.ACTIVE) statusText += "嫉";
-        if (pc.shikiyoku === StatusFlag.ACTIVE) statusText += "色";
-        if (pc.shimon > 0) {
-            for (let i = 0; i < pc.shimon; i++) statusText += "紋";
-        }
+        const appendStatus = (label: string, count: number) => {
+            if (count > 0) statusText += `${label}x${count}`;
+        };
+
+        appendStatus("ス", pc.stan === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("狼", pc.roubai === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("忘", pc.suijaku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("覚", pc.kakugo === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("防", pc.bouheki);
+        appendStatus("逆", pc.gekirin);
+        appendStatus("無", pc.musou === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("先", pc.sensei === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("毒", pc.tyudoku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("火", pc.yakedo === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("回", pc.kaifuku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("奏", pc.kyousou);
+        appendStatus("霊", pc.reika === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("欲", pc.gouyoku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("傲", pc.gouman === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("憤", pc.funnu === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("暴", pc.boushoku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("怠", pc.taida === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("嫉", pc.shitto === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("色", pc.shikiyoku === StatusFlag.ACTIVE ? 1 : 0);
+        appendStatus("紋", pc.shimon);
 
         this.log(`${skillsText}／${pc.playerName}${statusText ? `〔${statusText}〕` : ""}`);
     }
@@ -236,9 +247,13 @@ export class Battle {
             if (pc.skill[i] === "燐") {
                 this.log(`${pc.playerName}の【${pc.name[i]}】${i + 1}が発動！`);
                 if (pc.stan === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}のスタンが解除された！`); pc.stan = StatusFlag.NONE; }
+                if (pc.roubai === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の狼狽が解除された！`); pc.roubai = StatusFlag.NONE; }
                 if (pc.suijaku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の忘却が解除された！`); pc.suijaku = StatusFlag.NONE; }
                 if (pc.tyudoku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の毒が解除された！`); pc.tyudoku = StatusFlag.NONE; }
                 if (pc.yakedo === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の火傷が解除された！`); pc.yakedo = StatusFlag.NONE; }
+                if (pc.shimon > 0) { this.log(`＞${pc.playerName}の死紋が解除された！`); pc.shimon = StatusFlag.NONE; }
+                if (pc.shitto === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の嫉妬が解除された！`); pc.shitto = StatusFlag.NONE; }
+                if (pc.shikiyoku === StatusFlag.ACTIVE) { this.log(`＞${pc.playerName}の色欲が解除された！`); pc.shikiyoku = StatusFlag.NONE; }
                 this.log();
                 break;
             }
@@ -279,24 +294,31 @@ export class Battle {
             }
         }
 
-        if (this.turn > pc.getSkillsLength()) return 0;
-        const skillIdx = this.turn - 1;
+        const skillIdx = this.findSkillByLevel(pc, this.turn);
+        if (skillIdx === -1) return 0;
         const skill = pc.skill[skillIdx];
         
         if (skill === "無") {
-            this.log(`${pc.playerName}の【${pc.name[skillIdx]}】${this.turn}が発動！`);
+            this.log(`${pc.playerName}の【${pc.name[skillIdx]}】${pc.getSkillLevel(skillIdx)}が発動！`);
             this.log(`＞${pc.playerName}に無想が与えられた！`);
             pc.musou = StatusFlag.ACTIVE;
             pc.limited[skillIdx] = StatusFlag.RESERVED;
             return 1;
         }
         if (skill === "先") {
-            this.log(`${pc.playerName}の【${pc.name[skillIdx]}】${this.turn}が発動！`);
+            this.log(`${pc.playerName}の【${pc.name[skillIdx]}】${pc.getSkillLevel(skillIdx)}が発動！`);
             this.log(`＞${pc.playerName}に先制が与えられた！`);
             pc.sensei = StatusFlag.ACTIVE;
             return 1;
         }
         return 0;
+    }
+
+    private findSkillByLevel(pc: Player, level: number): number {
+        for (let i = 0; i < pc.getSkillsLength(); i++) {
+            if (pc.getSkillLevel(i) === level) return i;
+        }
+        return -1;
     }
 
     /**
@@ -341,12 +363,7 @@ export class Battle {
                 // 隣接付帯効果
                 if (i < pc.getSkillsLength() - 1) {
                     if (pc.skill[i + 1] === "速") speedBuf += 1;
-                    if (pc.skill[i + 1] === "光") speedBuf += 2;
-                }
-                
-                // 全体付帯効果（＋弓）
-                for (let k = i + 1; k < pc.getSkillsLength(); k++) {
-                    if (pc.skill[k] === "弓") speedBuf += 2;
+                    if (pc.skill[i + 1] === "弓") speedBuf += 3;
                 }
 
                 // 状態異常・バフ
@@ -492,9 +509,9 @@ export class Battle {
                 break;
             case "狼":
             case "爆":
-                damage = idx + 1; // LV
+                damage = attacker.getSkillLevel(idx); // LV
                 break;
-            case "解":
+            case "▽":
                 damage = 1; // 1 x 3 times
                 break;
             case "魔":
@@ -510,7 +527,7 @@ export class Battle {
 
         // 補助・付帯効果の適用
         let damageBuf = 0;
-        const noEnchant = (attacker.skill[idx] === "烈" || attacker.skill[idx] === "砲");
+        const noEnchant = (attacker.skill[idx] === "▽");
 
         if (attacker.nextLvUp === 1) {
             this.log("＞協奏の効果でLVが+1された！");
@@ -545,7 +562,7 @@ export class Battle {
         
         // ＋弓の効果
         for (let k = idx + 1; k < attacker.getSkillsLength(); k++) {
-            if (attacker.skill[k] === "弓") { this.log(`＞【＋弓】${k + 2}の効果でリミテッド化！速度に+2！`); finalSpeed += 2; break; }
+            if (attacker.skill[k] === "弓") { this.log(`＞【＋弓】${k + 2}の効果でリミテッド化！速度に+2！`); finalSpeed += 3; break; }
         }
 
         if (attacker.kakugo === StatusFlag.ACTIVE) finalSpeed += 2;
@@ -561,7 +578,7 @@ export class Battle {
         if (attacker.type[idx] === Player.BUFF) {
             this.handleBuffSkill(attacker, defender, idx);
         } else {
-            const count = attacker.skill[idx] === "解" ? 3 : 1;
+            const count = attacker.skill[idx] === "▽" ? 3 : 1;
 
             // 飛行の確認
             if (finalSpeed === 0 && attacker.skill[idx] != "弱") {
@@ -598,7 +615,7 @@ export class Battle {
                 break;
             case "凍":
                 defender.roubai = StatusFlag.RESERVED;
-                if (idx >= 0) attacker.limited[idx] = StatusFlag.RESERVED; // 終了フェイズ処理のため
+                if (idx >= 0) attacker.limited[idx] = StatusFlag.FROZEN; // 終了フェイズ処理のため
                 break;
             case "魚": this.log(`＞${defender.playerName}に1点のダメージ！（迎撃不可）`); attacker.gyogun = 1; break;
             case "盗": this.log("＞盗賊の効果！"); attacker.tozoku = 1; break;
@@ -644,6 +661,12 @@ export class Battle {
             let targetIdx = this.selectTarget(attacker, defender, useIdx);
             if (targetIdx === -1) break;
 
+            if (defender.skill[targetIdx] === "極" && defender.extremeHpRemaining[targetIdx] > 1) {
+                const absorbed = this.applyExtremeHpDamage(defender, targetIdx, damage - d, "＞");
+                d += absorbed - 1;
+                continue;
+            }
+
             // ダメージ適用
             this.log(`＞${defender.playerName}の【${defender.name[targetIdx]}】${targetIdx + 1}にダメージを与えた！`);
             defender.scar[targetIdx] = 2; // 適用前ダメージ
@@ -662,8 +685,15 @@ export class Battle {
         // 烈風によるスキル破壊
         if (!isSuspended){
             if (useIdx !== -1 && (attacker.skill[useIdx] === "烈")) {
-                for (let d = 0; d < 2; d++) {
+                const damage = 1;
+                for (let d = 0; d < damage; d++) {
                     let targetIdx = this.selectTarget(attacker, defender, useIdx);
+                    if (targetIdx === -1) break;
+                    if (defender.skill[targetIdx] === "極" && defender.extremeHpRemaining[targetIdx] > 1) {
+                        defender.extremeHpRemaining[targetIdx]--;
+                        this.log(`＞烈風の効果を${defender.playerName}の【極限】${targetIdx + 1}が【ＨＰ】として受け止めた！（残り${defender.extremeHpRemaining[targetIdx]}）`);
+                        continue;
+                    }
                     this.log(`＞烈風の効果で、さらに【${defender.name[targetIdx]}】${targetIdx + 1}が破壊される！`);
                     defender.scar[targetIdx] = 2; // 適用前ダメージ
                 }
@@ -679,7 +709,7 @@ export class Battle {
 
         // 刺突・艦砲の特殊ターゲット
         if (useIdx !== -1 && (attacker.skill[useIdx] === "刺" || attacker.skill[useIdx] === "砲")) {
-            return this.selectPiercingTarget(defender, useIdx + 1);
+            return this.selectPiercingTarget(defender, attacker.getSkillLevel(useIdx));
         }
 
         for (let i = 0; i < defender.getSkillsLength(); i++) {
@@ -694,7 +724,7 @@ export class Battle {
         let bestIdx = -1;
         for (let i = 0; i < defender.getSkillsLength(); i++) {
             if (defender.type[i] !== Player.NONE && defender.scar[i] !== 2) {
-                const diff = Math.abs(level - (i + 1));
+                const diff = Math.abs(level - defender.getSkillLevel(i));
                 if (diff < bestDiff || (diff === bestDiff && i > bestIdx)) {
                     bestDiff = diff;
                     bestIdx = i;
@@ -746,7 +776,7 @@ export class Battle {
                     if (useIdx === -1) { this.log(`＞＞${attacker.playerName}の【弱撃】0はダメージの対象にならない！`); break; }
                     cTarget = useIdx;
                 } else if (defender.skill[targetIdx] === "刺" || defender.skill[targetIdx] === "砲") {
-                    cTarget = this.selectPiercingTarget(attacker, targetIdx + 1);
+                    cTarget = this.selectPiercingTarget(attacker, defender.getSkillLevel(targetIdx));
                 } else {
                     for (let j = 0; j < attacker.getSkillsLength(); j++) {
                         if (attacker.type[j] !== Player.NONE && attacker.scar[j] !== 2) { cTarget = j; break; }
@@ -754,6 +784,11 @@ export class Battle {
                 }
 
                 if (cTarget !== -1) {
+                    if (attacker.skill[cTarget] === "極" && attacker.extremeHpRemaining[cTarget] > 1) {
+                        const absorbed = this.applyExtremeHpDamage(attacker, cTarget, cDamage - i, "＞＞");
+                        i += absorbed - 1;
+                        continue;
+                    }
                     this.log(`＞＞${attacker.playerName}の【${attacker.name[cTarget]}】${cTarget + 1}にダメージを与えた！`);
                     attacker.scar[cTarget] = 2;
                 }
@@ -773,6 +808,14 @@ export class Battle {
         }
 
         return false;
+    }
+
+    private applyExtremeHpDamage(pc: Player, targetIdx: number, damage: number, logPrefix: string): number {
+        const absorbed = Math.min(damage, pc.extremeHpRemaining[targetIdx] - 1);
+        pc.extremeHpRemaining[targetIdx] -= absorbed;
+        const damageText = absorbed === 1 ? "ダメージ" : `${absorbed}点のダメージ`;
+        this.log(`${logPrefix}${pc.playerName}の【極限】${targetIdx + 1}が【ＨＰ】として${damageText}を受けた！（残り${pc.extremeHpRemaining[targetIdx]}）`);
+        return absorbed;
     }
 
     private reserveSkillEffects(attacker: Player, defender: Player, idx: number): void {
@@ -815,7 +858,7 @@ export class Battle {
         if (s === "爆") {
             attacker.roubai = StatusFlag.RESERVED;
             attacker.stan = StatusFlag.RESERVED;
-            attacker.suijaku = StatusFlag.RESERVED;
+            attacker.yakedo = StatusFlag.RESERVED;
         }
         
         // 盗賊の効果
@@ -884,7 +927,16 @@ export class Battle {
         }
         if (pc1.stan === StatusFlag.RESERVED) { this.log(`${pc1.playerName}はスタンを受けた！`); pc1.stan = StatusFlag.ACTIVE; flag = 1; }
         if (pc1.roubai === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は狼狽を受けた！`); pc1.roubai = StatusFlag.ACTIVE; flag = 1; }
-        if (pc1.suijaku === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は忘却を受けた！`); pc1.suijaku = StatusFlag.ACTIVE; flag = 1; }
+        if (pc1.suijaku === StatusFlag.RESERVED) {
+            if (this.hasActiveSkill(pc1, "極")) {
+                this.log(`${pc1.playerName}は【極限】により忘却を受けない！`);
+                pc1.suijaku = StatusFlag.NONE;
+            } else {
+                this.log(`${pc1.playerName}は忘却を受けた！`);
+                pc1.suijaku = StatusFlag.ACTIVE;
+                flag = 1;
+            }
+        }
         if (pc1.tyudoku === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は毒を受けた！`); pc1.tyudoku = StatusFlag.ACTIVE; flag = 1; }
         if (pc1.yakedo === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は火傷を受けた！`); pc1.yakedo = StatusFlag.ACTIVE; flag = 1; }
         
@@ -937,7 +989,7 @@ export class Battle {
                 if (pc1.type[i] !== Player.NONE && pc1.limited[i] === 0) {
                     this.log(`${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【疫病】${i + 1}に変化した！`);
                     pc1.skill[i] = "疫"; pc1.name[i] = "疫病"; pc1.type[i] = Player.COUNTER;
-                    pc1.speed[i] = i + 1; pc1.damage[i] = 0; pc1.limited[i] = 0;
+                    pc1.speed[i] = pc1.getSkillLevel(i); pc1.damage[i] = 0; pc1.limited[i] = 0;
                     break;
                 }
             }
@@ -953,6 +1005,14 @@ export class Battle {
         let flag = 0;
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if (pc.scar[i] === 1) {
+                if (pc.skill[i] === "極" && pc.extremeHpRemaining[i] > 1) {
+                    pc.extremeHpRemaining[i]--;
+                    this.log(`${pc.playerName}の【極限】${i + 1}が【ＨＰ】として破壊を受け止めた！（残り${pc.extremeHpRemaining[i]}）`);
+                    pc.scar[i] = 0;
+                    flag = 1;
+                    continue;
+                }
+
                 // ＋硬による保護
                 if (pc.type[i] !== Player.ENCHANT && i < pc.getSkillsLength() - 1 && pc.skill[i + 1] === "硬") {
                     this.log(`${pc.playerName}の【＋硬】${i + 2}によって【${pc.name[i]}】${i + 1}の破壊が無効化された！`);
@@ -1040,8 +1100,18 @@ export class Battle {
         endFlag |= this.applyTaida(this.pc2);
 
         // 死紋の増殖
-        if (this.pc1.shimon > 0) { this.log(`${this.pc1.playerName}の死紋が刻まれていく……（+1）`); this.pc1.shimon++; endFlag = 1; }
-        if (this.pc2.shimon > 0) { this.log(`${this.pc2.playerName}の死紋が刻まれていく……（+1）`); this.pc2.shimon++; endFlag = 1; }
+        if (this.pc1.shimon > 0) {
+            const addCount = this.pc1.shimon;
+            this.log(`${this.pc1.playerName}の死紋が刻まれていく……（+${addCount}）`);
+            this.pc1.shimon += addCount;
+            endFlag = 1;
+        }
+        if (this.pc2.shimon > 0) {
+            const addCount = this.pc2.shimon;
+            this.log(`${this.pc2.playerName}の死紋が刻まれていく……（+${addCount}）`);
+            this.pc2.shimon += addCount;
+            endFlag = 1;
+        }
 
         // 凍結の処理
         endFlag |= this.applyTouketsu(this.pc1);
@@ -1099,7 +1169,7 @@ export class Battle {
     private applyTouketsu(pc: Player): number {
         // 凍結スキルの有無をチェック
         for (let i = 0; i < pc.getSkillsLength(); i++) {
-            if (pc.skill[i] === "凍" && pc.limited[i] === StatusFlag.RESERVED) {
+            if (pc.skill[i] === "凍" && pc.limited[i] === StatusFlag.FROZEN) {
                  // 相手の先頭スキルを破壊
                  const opponent = (pc === this.pc1 ? this.pc2 : this.pc1);
                  for (let j = 0; j < opponent.getSkillsLength(); j++) {
@@ -1115,8 +1185,19 @@ export class Battle {
         return 0;
     }
 
+    private clearTouketsu(pc: Player): number {
+        // 凍結スキルの予約を解除
+        for (let i = 0; i < pc.getSkillsLength(); i++) {
+            if (pc.skill[i] === "凍" && pc.limited[i] === StatusFlag.FROZEN) {
+                 pc.limited[i] = StatusFlag.NONE;
+            }
+        }
+        return 0;
+    }
+
     private applySuijaku(pc: Player): number {
         if (pc.suijaku !== StatusFlag.ACTIVE) return 0;
+        if (this.hasActiveSkill(pc, "極")) return 0;
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if (pc.type[i] !== Player.NONE && pc.skill[i] !== "空") {
                 this.log(`忘却の効果で${pc.playerName}の【${pc.name[i]}】${i + 1}が【空白】${i + 1}に変化した！`);
@@ -1126,6 +1207,42 @@ export class Battle {
             }
         }
         return 0;
+    }
+
+    private judgeMastery(): number {
+        if (this.turn !== 20) return BattleResult.CONTINUE;
+
+        const pc1Mastery = this.hasActiveSkill(this.pc1, "掌");
+        const pc2Mastery = this.hasActiveSkill(this.pc2, "掌");
+        if (!pc1Mastery && !pc2Mastery) return BattleResult.CONTINUE;
+
+        this.log();
+        this.log("【掌握】");
+        this.log();
+
+        let result = BattleResult.CONTINUE;
+        if (pc1Mastery && pc2Mastery) {
+            result = BattleResult.DRAW;
+        } else if (pc1Mastery) {
+            result = BattleResult.PC1_WIN;
+        } else {
+            result = BattleResult.PC2_WIN;
+        }
+
+        if (result === BattleResult.PC1_WIN) this.log(`${this.pc1.playerName}の【掌握】により、第20ラウンドの終了フェイズに勝利！`);
+        else if (result === BattleResult.PC2_WIN) this.log(`${this.pc2.playerName}の【掌握】により、第20ラウンドの終了フェイズに勝利！`);
+        else this.log("互いの【掌握】により、引き分け！");
+
+        this.log();
+        this.log("=============================================");
+        return result;
+    }
+
+    private hasActiveSkill(pc: Player, skill: string): boolean {
+        for (let i = 0; i < pc.getSkillsLength(); i++) {
+            if (pc.skill[i] === skill && pc.type[i] !== Player.NONE) return true;
+        }
+        return false;
     }
 
     /**

@@ -81,8 +81,8 @@
       { "type": "story", "id": "7-2" },
       { "type": "reward", "skill": "狼" },
       { "type": "battle", "subStage": 2},
-      { "type": "reward", "skill": "水" },
-      { "type": "reward", "choices": ["瘴", "封"] },
+      { "type": "reward", "skill": "霊" },
+      { "type": "reward", "choices": ["水", "封"] },
       { "type": "story", "id": "7-3" }
     ]
   },
@@ -145,6 +145,7 @@
       { "type": "story", "id": "12-2" },
       { "type": "battle", "subStage": 2},
       { "type": "story", "id": "12-3" },
+      { "type": "battle", "subStage": 3},
       { "type": "credits", "id": "/data/credits.json" }
     ]
   }

@@ -11,8 +11,10 @@ export interface StageConfig {
   bossDescription: string;
   shopSkills: string[]; // スキル名
   bossSkillAbbrs: string; // 略称文字列
+  bossSkillTitle?: string;
   backgroundImage?: string;
   bgm?: string;
+  playerName?: string;
 }
 
 export interface RawStageConfig extends Omit<StageConfig, 'bossSkillAbbrs'> {

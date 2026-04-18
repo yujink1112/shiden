@@ -17,6 +17,14 @@ interface AnimatedRichLogProps {
   getStorageUrl: (path: string) => string;
 }
 
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const getDestroyedSkillIndex = (line: string, name: string): number | null => {
+    const escapedName = escapeRegExp(name);
+    const m = line.match(new RegExp(`${escapedName}の【.*?】(\\d+).*破壊された`));
+    return m ? parseInt(m[1], 10) - 1 : null;
+};
+
 const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor, stageMode, stageContext, getStorageUrl }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
@@ -27,6 +35,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
     const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
     const scrollRef = useRef<HTMLDivElement>(null);
     const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
+    const playerName = battleInstance?.pc1?.playerName || 'あなた';
     
     useEffect(() => {
         if (!roundFinished[currentRoundIdx]) {
@@ -34,23 +43,21 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
             if (currentLineIdx < currentRoundLines.length) {
                 const line = currentRoundLines[currentLineIdx];
                 if (line.includes('破壊された')) {
-                    if (line.includes('あなたの')) {
-                      const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
-                      if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    if (line.includes(`${playerName}の`)) {
+                      const idx = getDestroyedSkillIndex(line, playerName);
+                      if (idx !== null) setCurrentPc1Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
                     } else if (bossName && line.includes(`${bossName}の`)) {
-                      const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                      const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                      if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                      const idx = getDestroyedSkillIndex(line, bossName);
+                      if (idx !== null) setCurrentPc2Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
                     }
                 }
                 if (line.includes('リミテッド') && line.includes('破壊された')) {
-                    if (line.includes('あなたの')) {
-                        const m = line.match(/あなたの【.*?】(\d+)が破壊された/);
-                        if (m) setCurrentPc1Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                    if (line.includes(`${playerName}の`)) {
+                        const idx = getDestroyedSkillIndex(line, playerName);
+                        if (idx !== null) setCurrentPc1Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
                     } else if (bossName && line.includes(`${bossName}の`)) {
-                        const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                        if (m) setCurrentPc2Scar(prev => { const next = [...prev]; next[parseInt(m[1], 10) - 1] = 1; return next; });
+                        const idx = getDestroyedSkillIndex(line, bossName);
+                        if (idx !== null) setCurrentPc2Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
                     }
                 }
                 if (bossName) {
@@ -61,7 +68,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                 }
             }
         }
-    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished]);
+    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished, playerName]);
 
     useEffect(() => {
       if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
@@ -102,19 +109,17 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
         let newPc1Scar = [...currentPc1Scar], newPc2Scar = [...currentPc2Scar];
         fullLines.forEach(line => {
             if (line.includes('破壊された')) {
-                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
+                if (line.includes(`${playerName}の`)) { const idx = getDestroyedSkillIndex(line, playerName); if (idx !== null) newPc1Scar[idx] = 1; }
                 else if (bossName && line.includes(`${bossName}の`)) {
-                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
+                    const idx = getDestroyedSkillIndex(line, bossName);
+                    if (idx !== null) newPc2Scar[idx] = 1;
                 }
             }
             if (line.includes('リミテッド') && line.includes('破壊された')) {
-                if (line.includes('あなたの')) { const m = line.match(/あなたの【.*?】(\d+)が破壊された/); if (m) newPc1Scar[parseInt(m[1], 10) - 1] = 1; }
+                if (line.includes(`${playerName}の`)) { const idx = getDestroyedSkillIndex(line, playerName); if (idx !== null) newPc1Scar[idx] = 1; }
                 else if (bossName && line.includes(`${bossName}の`)) {
-                    const escapedBossName = bossName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const m = line.match(new RegExp(`${escapedBossName}の【.*?】(\\d+)が破壊された`));
-                    if (m) newPc2Scar[parseInt(m[1], 10) - 1] = 1;
+                    const idx = getDestroyedSkillIndex(line, bossName);
+                    if (idx !== null) newPc2Scar[idx] = 1;
                 }
             }
         });

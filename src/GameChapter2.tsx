@@ -126,7 +126,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       const availablePool = ALL_SKILLS.filter(skill => 
         !ownedSkillAbbrs.includes(skill.abbr) && 
         !choices.includes(skill.abbr) &&
-        (skill as any).exclude !== 1 &&
+        (skill as SkillDetail).exclude !== 1 &&
         skill.type !== "敵専用"
       );
 
