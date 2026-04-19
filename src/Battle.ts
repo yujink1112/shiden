@@ -615,7 +615,7 @@ export class Battle {
                 if (defender.suijaku > 0) damage++;
                 if (defender.tyudoku > 0) damage++;
                 if (defender.yakedo > 0) damage++;
-                if (defender.shimon > 0) damage++;
+                if (defender.shimon > 0) damage += defender.shimon;
                 if (defender.shitto > 0) damage++;
                 if (defender.shikiyoku > 0) damage++;
                 return damage;

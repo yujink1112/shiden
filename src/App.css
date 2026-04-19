@@ -1053,6 +1053,12 @@
 }
 
 /* 第2章 Stage12-3 最終戦専用演出 */
+/* 手動調整ポイント:
+   - chapter2FinalDoubleFlash: 勝利時の白フラッシュ間隔
+   - .chapter2-final-clear-effect: 崩落前のシェイク開始タイミング
+   - chapter2FinalPanelCollapse と各 animation-delay: パネル崩落の速度と余韻
+   - chapter2FinalEmberRise: 火の粉の上昇速度
+*/
 .chapter2-final-battle {
   position: relative;
 }
@@ -1062,7 +1068,7 @@
 }
 
 .chapter2-final-clear-effect {
-  animation: chapter2FinalClearShake 3.1s ease-in-out 2.25s forwards;
+  animation: chapter2FinalClearShake 3.6s ease-in-out 2.75s forwards;
 }
 
 .chapter2-final-white-flash {
@@ -1079,7 +1085,7 @@
 }
 
 .chapter2-final-clear-effect .chapter2-final-white-flash {
-  animation: chapter2FinalDoubleFlash 2.25s ease-in-out forwards;
+  animation: chapter2FinalDoubleFlash 2.75s ease-in-out forwards;
 }
 
 .chapter2-final-embers {
@@ -1111,28 +1117,28 @@
 .chapter2-final-clear-effect .rich-log-modern .log-line,
 .chapter2-final-clear-effect .skill-card {
   transform-origin: center bottom;
-  animation: chapter2FinalPanelCollapse 1.85s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  animation-delay: 2.55s;
+  animation: chapter2FinalPanelCollapse 2.15s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation-delay: 3.15s;
 }
 
 .chapter2-final-clear-effect .MainGameArea > div:nth-child(2),
 .chapter2-final-clear-effect .GameLogFrame {
-  animation-delay: 2.72s;
+  animation-delay: 3.35s;
 }
 
 .chapter2-final-clear-effect .MainGameArea > div:nth-child(3),
 .chapter2-final-clear-effect .ResultsOverview > div {
-  animation-delay: 2.9s;
+  animation-delay: 3.55s;
 }
 
 .chapter2-final-clear-effect .skill-card:nth-child(odd),
 .chapter2-final-clear-effect .rich-log-modern .log-line:nth-child(odd) {
-  animation-delay: 3.05s;
+  animation-delay: 3.75s;
 }
 
 .chapter2-final-clear-effect .skill-card:nth-child(even),
 .chapter2-final-clear-effect .rich-log-modern .log-line:nth-child(even) {
-  animation-delay: 3.18s;
+  animation-delay: 3.9s;
 }
 
 @keyframes chapter2FinalIntroFlash {
@@ -1143,8 +1149,8 @@
 }
 
 @keyframes chapter2FinalDoubleFlash {
-  0%, 28%, 58%, 100% { opacity: 0; }
-  8%, 17%, 42%, 51% { opacity: 1; }
+  0%, 31%, 61%, 100% { opacity: 0; }
+  9%, 19%, 45%, 55% { opacity: 1; }
 }
 
 @keyframes chapter2FinalScreenShake {

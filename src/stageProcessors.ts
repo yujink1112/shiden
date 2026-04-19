@@ -138,7 +138,7 @@ const BOSS_SIDEBAR_IMAGE_CONFIGS: Record<number, BossImageStyleConfig> = {
   33: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
   34: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
   35: { pc: { height: '80%', width: '80%' }, mobile: { height: '60%', width: '60%' } },
-  36: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
+  36: { pc: { height: '90%', width: '90%' }, mobile: { height: '100%', width: '100%' } },
 37: { pc: { height: '100%', width: '100%' }, mobile: { height: '100%', width: '100%' } },
 };
 

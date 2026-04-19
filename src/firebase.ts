@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, runTransaction, serverTimestamp, get, set } from "firebase/database";
+import { getDatabase, ref, runTransaction, get, set } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
@@ -31,10 +31,196 @@ export const getStorageUrl = (path: string) => {
 };
 export const googleProvider = new GoogleAuthProvider();
 
+type Chapter2ProgressPatch = {
+  stageCycle?: number;
+  flowIndex?: number;
+  ownedSkills?: string[];
+  claimedRewardSteps?: string[];
+  canGoToBoss?: boolean;
+  lastUpdated?: number;
+};
+
+type ProfileProgressPatch = {
+  stageCycle?: number;
+  lastGameMode?: string;
+  canGoToBoss?: boolean;
+  ownedSkills?: string[];
+  updatedAt?: number;
+};
+
+type Chapter2RewardClaim = {
+  rewardStepKey: string;
+  rewards: string[];
+  stageCycle: number;
+  flowIndex: number;
+  lastUpdated?: number;
+};
+
+const uniqueStrings = (values: unknown[]): string[] => {
+  return Array.from(new Set(values.filter((v): v is string => typeof v === 'string')));
+};
+
+const toNumber = (value: unknown, fallback: number): number => {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+};
+
+const isProgressAhead = (
+  nextStage: number,
+  nextFlow: number,
+  currentStage: number,
+  currentFlow: number
+): boolean => {
+  return nextStage > currentStage || (nextStage === currentStage && nextFlow > currentFlow);
+};
+
+export const saveChapter2Progress = async (uid: string, patch: Chapter2ProgressPatch) => {
+  const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
+  const now = Date.now();
+
+  await runTransaction(chapter2Ref, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    const merged = { ...current };
+
+    if (patch.ownedSkills) {
+      merged.ownedSkills = uniqueStrings([...(Array.isArray(current.ownedSkills) ? current.ownedSkills : []), ...patch.ownedSkills]);
+    }
+
+    if (patch.claimedRewardSteps) {
+      merged.claimedRewardSteps = uniqueStrings([...(Array.isArray(current.claimedRewardSteps) ? current.claimedRewardSteps : []), ...patch.claimedRewardSteps]);
+    }
+
+    const currentStage = toNumber(current.stageCycle, toNumber(patch.stageCycle, 13));
+    const currentFlow = toNumber(current.flowIndex, 0);
+    const hasPatchProgress = patch.stageCycle !== undefined || patch.flowIndex !== undefined;
+    const patchStage = toNumber(patch.stageCycle, currentStage);
+    const patchFlow = toNumber(patch.flowIndex, patch.stageCycle !== undefined && patch.stageCycle !== currentStage ? 0 : currentFlow);
+    const patchIsAhead = isProgressAhead(patchStage, patchFlow, currentStage, currentFlow);
+
+    if (hasPatchProgress && (current.stageCycle === undefined || patchIsAhead || (patchStage === currentStage && patchFlow === currentFlow))) {
+      merged.stageCycle = patchIsAhead || current.stageCycle === undefined ? patchStage : currentStage;
+      merged.flowIndex = patchIsAhead || current.flowIndex === undefined ? patchFlow : currentFlow;
+    } else if (current.stageCycle !== undefined) {
+      merged.stageCycle = currentStage;
+      merged.flowIndex = currentFlow;
+    }
+
+    if (patch.canGoToBoss !== undefined) {
+      const sameProgress = patchStage === currentStage && patchFlow === currentFlow;
+      if (current.stageCycle === undefined || patchIsAhead) {
+        merged.canGoToBoss = patch.canGoToBoss;
+      } else if (sameProgress) {
+        merged.canGoToBoss = Boolean(current.canGoToBoss || patch.canGoToBoss);
+      }
+    }
+
+    merged.lastUpdated = Math.max(toNumber(current.lastUpdated, 0), patch.lastUpdated ?? now);
+    return merged;
+  });
+};
+
+export const claimChapter2Reward = async (uid: string, claim: Chapter2RewardClaim) => {
+  const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
+  const now = Date.now();
+
+  const result = await runTransaction(chapter2Ref, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    const claimedRewardSteps = Array.isArray(current.claimedRewardSteps) ? current.claimedRewardSteps : [];
+    const serverStage = toNumber(current.stageCycle, claim.stageCycle);
+    const serverFlow = toNumber(current.flowIndex, claim.flowIndex);
+
+    if (!claim.rewardStepKey || claimedRewardSteps.includes(claim.rewardStepKey)) {
+      return undefined;
+    }
+
+    // サーバ側がすでに先へ進んでいる画面からの報酬確定は、古いタブからの操作として拒否する。
+    if (isProgressAhead(serverStage, serverFlow, claim.stageCycle, claim.flowIndex)) {
+      return undefined;
+    }
+
+    return {
+      ...current,
+      stageCycle: isProgressAhead(claim.stageCycle, claim.flowIndex, serverStage, serverFlow) ? claim.stageCycle : serverStage,
+      flowIndex: isProgressAhead(claim.stageCycle, claim.flowIndex, serverStage, serverFlow) ? claim.flowIndex : serverFlow,
+      ownedSkills: uniqueStrings([...(Array.isArray(current.ownedSkills) ? current.ownedSkills : []), ...claim.rewards]),
+      claimedRewardSteps: uniqueStrings([...claimedRewardSteps, claim.rewardStepKey]),
+      lastUpdated: Math.max(toNumber(current.lastUpdated, 0), claim.lastUpdated ?? now)
+    };
+  });
+
+  return {
+    claimed: result.committed,
+    data: result.snapshot.val()
+  };
+};
+
+export const saveProfileProgress = async (uid: string, patch: ProfileProgressPatch) => {
+  const profileRef = ref(database, `profiles/${uid}`);
+  const now = Date.now();
+
+  await runTransaction(profileRef, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    const merged = { ...current };
+
+    if (patch.ownedSkills) {
+      merged.ownedSkills = uniqueStrings([...(Array.isArray(current.ownedSkills) ? current.ownedSkills : []), ...patch.ownedSkills]);
+    }
+
+    const currentStage = toNumber(current.stageCycle, 1);
+    const patchStage = toNumber(patch.stageCycle, currentStage);
+    const patchIsAhead = patchStage > currentStage;
+
+    if (patch.stageCycle !== undefined && (current.stageCycle === undefined || patchIsAhead || patchStage === currentStage)) {
+      merged.stageCycle = Math.max(currentStage, patchStage);
+    }
+
+    if (patch.lastGameMode !== undefined && (patchIsAhead || patchStage === currentStage || current.lastGameMode === undefined)) {
+      merged.lastGameMode = patch.lastGameMode;
+    }
+
+    if (patch.canGoToBoss !== undefined) {
+      if (patchIsAhead || patchStage === currentStage || current.canGoToBoss === undefined) {
+        merged.canGoToBoss = patchIsAhead ? patch.canGoToBoss : Boolean(current.canGoToBoss || patch.canGoToBoss);
+      }
+    }
+
+    merged.updatedAt = Math.max(toNumber(current.updatedAt, 0), patch.updatedAt ?? now);
+    return merged;
+  });
+};
+
+export const resetChapter1Progress = async (uid: string, initialSkills: string[]) => {
+  const now = Date.now();
+  const profileRef = ref(database, `profiles/${uid}`);
+  await runTransaction(profileRef, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    return {
+      ...current,
+      stageCycle: 1,
+      lastGameMode: 'MID',
+      canGoToBoss: false,
+      ownedSkills: uniqueStrings(initialSkills),
+      updatedAt: now
+    };
+  });
+};
+
+export const resetChapter2Progress = async (uid: string, initialSkills: string[]) => {
+  const now = Date.now();
+  const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
+  await set(chapter2Ref, {
+    stageCycle: 13,
+    flowIndex: 0,
+    ownedSkills: uniqueStrings(initialSkills),
+    claimedRewardSteps: [],
+    canGoToBoss: false,
+    lastUpdated: now
+  });
+  await saveProfileProgress(uid, { updatedAt: now });
+};
+
 export const saveUserSkills = async (uid: string, skillAbbrs: string[]) => {
   console.log(`[Firebase] Saving skills for ${uid}:`, skillAbbrs);
-  const userSkillsRef = ref(database, `profiles/${uid}/chapter2/ownedSkills`);
-  await set(userSkillsRef, skillAbbrs);
+  await saveChapter2Progress(uid, { ownedSkills: skillAbbrs });
 };
 
 export const loadUserSkills = async (uid: string): Promise<string[] | null> => {

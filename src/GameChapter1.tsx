@@ -5,8 +5,39 @@ import Kamishibai from './components/Kamishibai';
 import AudioManager from './utils/audioManager';
 import { GameProps, BattleResult } from './types/GameProps';
 import { StageMode } from './components/AnimatedRichLog';
-import { getAvailableSkillsUntilStage } from './stageData';
+import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName } from './stageData';
 import { SkillDetail } from './skillsData';
+
+const getSkillStrengthTip = (skill: SkillDetail): string => {
+  const strengthTips: { [abbr: string]: string } = {
+    "防": "守りを一気に固められるので、強い一撃を受けても崩れにくくなります。ボスの大技を受ける時に頼れる守備札です。",
+    "硬": "大事なスキルの身代わりになります。主力の攻撃や迎撃のすぐ右に置くと、編成の要を守れます。",
+    "盾": "攻撃や補助を使いながら防壁も得られます。攻めるターンを守りの準備にも変えられるのが強みです。",
+    "剣": "攻撃スキルを多く積むほど威力が伸びます。攻撃寄りの編成で、後ろのLVに置くと決定力を作りやすいです。",
+    "交": "攻撃してきた相手のスキルへ反撃できます。相手の主力攻撃を受け止めながら壊せるのが魅力です。",
+    "強": "直前の攻撃スキルを素直に強くします。分かりやすく火力を足せるので、主力攻撃の右に置くと扱いやすいです。",
+    "怒": "ラウンドが進むほど大きな一撃になります。長引く相手や守りが厚い相手を押し切る切り札になります。",
+    "裏": "後ろに置いた攻撃や補助を先に使えるようになります。強いスキルを後ろのLVで使いたい時に編成の幅が広がります。",
+    "反": "直前の攻撃を迎撃として構えられます。攻撃カードを守りにも使えるようになり、相手の攻めを逆利用できます。",
+    "呪": "相手に忘却を与えて、放っておいてもスキルを空白化できます。硬い相手や長期戦でじわじわ効きます。",
+    "疫": "相手の先頭スキルを疫病に変えて、行動の流れを崩せます。厄介な先頭スキル対策として便利です。",
+    "隠": "偶数ラウンドに高めの打点を通せます。毎ターン動かない代わりに、相手の速度計算をずらしやすい攻撃札です。",
+    "先": "狙ったラウンドで先攻を取りやすくなります。先に動いて相手の主力を壊したいボス戦で強力です。",
+    "逆": "壊されることを火力に変えられます。守り切るより、壊されながら反撃する編成で光ります。",
+    "覚": "攻撃と迎撃のダメージと速度をまとめて底上げできます。短期決戦にも迎撃主体にも合う万能バフです。",
+    "雷": "リミテッドですが2点をすぐ出せます。ここぞという場面で相手の重要スキルをまとめて削る役に向いています。",
+    "封": "相手に複数の悪い状態をまとめて押し付けます。強い行動を遅らせたり弱めたりする妨害札です。",
+    "連": "攻撃フェイズを増やせるので、攻めの手数が大きく伸びます。火力札と合わせると勝ち筋を一気に太くできます。",
+    "紫": "速度が高く、先に1点を通しやすい攻撃です。自分にスタンが付くので、決めたい相手を先に壊す用途に向きます。",
+    "影": "相手の先頭付近をまとめて狙えます。同名スキルが並ぶ敵や、厄介な先頭スキルを処理したい時に刺さります。",
+    "玉": "速い攻撃を受けた時ほど反撃が大きくなります。高速アタッカーへの迎撃として頼りになります。",
+    "錬": "直前の攻撃が迎撃に止められにくくなります。相手の迎撃を突破して本命の攻撃を通したい時に使えます。",
+    "無": "狙ったラウンドの攻撃ダメージを防げます。敵の大技タイミングに合わせると、一気に生存力が上がります。",
+    "燐": "悪い状態を毎ラウンド掃除できます。毒・忘却・スタンなどに苦しむ相手への安定札です。"
+  };
+
+  return strengthTips[skill.abbr] || "編成の選択肢を広げられます。敵のスキルと見比べて、攻めに使うか守りに使うか試してみましょう。";
+};
 
 const GameChapter1: React.FC<GameProps> = (props) => {
   const {
@@ -84,6 +115,131 @@ const GameChapter1: React.FC<GameProps> = (props) => {
                          skillCount === 7 ? 'scale(0.9)' :
                          skillCount === 8 ? 'scale(0.8)' :
                          skillCount >= 9 ? 'scale(0.7)' : 'none';
+  const stageSkillTip = React.useMemo(() => {
+    if (stageCycle < 4) return null;
+    const currentStage = STAGE_DATA.find(stage => stage.no === stageCycle);
+    const stageSkills = (currentStage?.shopSkills || [])
+      .map(name => getSkillByName(name))
+      .filter(Boolean) as SkillDetail[];
+
+    if (stageSkills.length === 0) return null;
+
+    const skill = stageSkills[Math.floor(Math.random() * stageSkills.length)];
+    return `このステージで得られる【${skill.name}】の強み: ${getSkillStrengthTip(skill)}`;
+  }, [stageCycle]);
+
+  const beginnerTips = React.useMemo(() => {
+    if (gameStarted || stageMode === 'KENJU' || stageMode === 'DENEI') return [];
+
+    if (stageCycle === 1 && stageMode === 'MID') {
+      return [
+        '同じスキルは複数回選べます。最初は【一閃】を5回選ぶだけでも戦えます。',
+        'スキルは左からLV1、LV2と数えます。後ろに置くほど強くなるスキルがあります。'
+      ];
+    }
+
+    if (stageCycle === 2 && stageMode === 'MID') {
+      return [
+        'ここからは、攻撃スキルだけだと苦しくなります。',
+        '【搦手】や【崩技】などの迎撃スキルを混ぜると、相手の攻撃を止めながら反撃できます。'
+      ];
+    }
+
+    if (stageCycle >= 3 && stageCycle <= 4 && stageMode === 'MID') {
+      const tips = [
+        '【＋速】【＋硬】などの付帯スキルは、基本的に一つ左のスキルを強化します。',
+        'シナジーのあるスキル同士は、黄色い線でつながります。'
+      ];
+      //if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    if (stageCycle == 4 && stageMode === 'MID' && stageSkillTip) {
+      const tips = [
+        '第1章では、勝敗の結果にかかわらず、それまで登場したスキルを取得することができます。',
+        'スキルを取り逃して今後手に入らないということはありませんので、ご安心ください。'
+      ];
+      //if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    if (stageCycle == 5 && stageMode === 'MID' && stageSkillTip) {
+      const tips = [
+        '新しいスキルは、勝敗の結果にかかわらず、それまで登場したスキルを取得することができます。',
+        '優しすぎると思われた方、あなたはゲームというジャンルそのものに特に精通しています。'
+      ];
+      //if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    if (stageCycle >= 6 && stageCycle >= 6 && stageMode === 'MID' && stageSkillTip) {
+      return [
+        'ここからは、ボスがぐっと強くなります。必ず弱点がありますので、敵をよく観察してみましょう。'
+      ];
+    }
+
+    if (stageMode === 'BOSS' && stageCycle <= 3) {
+      return [
+        'ボス戦では編成を組み直せます。敵のスキルを見てから選び直しましょう。',
+        '相手のスキルに合わせて、迎撃・付帯スキルの位置を調整してから挑みましょう。'
+      ];
+    }
+
+    return [];
+  }, [gameStarted, stageMode, stageCycle, stageSkillTip]);
+  const defeatTips = React.useMemo(() => {
+    if (stageMode === 'BOSS') {
+      if (stageCycle <= 3) {
+        return [
+          '再挑戦すると編成画面に戻ります。ボスの公開スキルを見て、迎撃スキルの位置を変えてみましょう。',
+          '相手より速い迎撃スキルがあると、攻撃を止めながら反撃できます。'
+        ];
+      }
+      const tips = [
+        '再挑戦すると編成画面に戻ります。MIDで使った編成にこだわらず、ボス専用に組み直して大丈夫です。',
+        '公開されている敵スキルのうち、先頭の行動や大きな攻撃を止めるカードを優先して置いてみましょう。'
+      ];
+      if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    if (stageCycle === 1) {
+      return [
+        'スキルは同じものを何度も選べます。まずは【一閃】を5つ並べて、5枚編成に慣れてみましょう。'
+      ];
+    }
+
+    if (stageCycle === 2) {
+      return [
+        '攻撃だけで押し切れない時は、【搦手】や【崩技】を混ぜて相手の攻撃を受け止めてみましょう。'
+      ];
+    }
+
+    if (stageCycle >= 3 && stageCycle <= 4) {
+      const tips = [
+        '【＋速】【＋硬】はすぐ左のスキルを助けます。黄色い線が出る置き方にすると、働きが見えやすくなります。',
+        '負けた相手の結果を開いて、どの攻撃を止められなかったか確認してみましょう。'
+      ];
+      if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    if (stageCycle === 11) {
+      const tips = [
+        'ここは100戦の勝率80%以上で突破です。少し勝つ編成より、迎撃と防御を混ぜた安定編成を探しましょう。',
+        '勝率が足りない時は、連続で倒されている相手のスキルを結果一覧から確認すると調整しやすいです。'
+      ];
+      if (stageSkillTip) tips.push(stageSkillTip);
+      return tips;
+    }
+
+    const tips = [
+      '負けた相手の結果を開くと敵スキルを確認できます。よく負ける相手に合わせて、迎撃や付帯の位置を変えてみましょう。',
+      'MID用の安定編成とボス用の対策編成は別物です。ボス前では遠慮なく組み直しましょう。'
+    ];
+    if (stageSkillTip) tips.push(stageSkillTip);
+    return tips;
+  }, [stageMode, stageCycle, stageSkillTip]);
 
   return (
     <div className="AppContainer"
@@ -110,6 +266,9 @@ const GameChapter1: React.FC<GameProps> = (props) => {
             <div className="ChangelogContent" style={{ textAlign: 'center', padding: '30px 20px' }}>
               <p style={{ fontSize: '1.1rem', color: '#eee', lineHeight: '1.6', margin: 0, textAlign: 'left' }}>
                 このゲームは、こんな風にスキルを5つ編成して相手のスキルを全て破壊するゲームです。<br /><br />
+                同じスキルを何度も選ぶことができます。最初は【一閃】を5つ並べるだけでも大丈夫です。<br /><br />
+                次のステージからは【搦手】や【崩技】などの迎撃スキルが頼りになります。相手の攻撃を受け止めながら、こちらの勝ち筋を作っていきましょう。<br /><br />
+                【＋速】【＋硬】などの付帯スキルは、基本的にすぐ左のスキルを助けます。選択中に黄色い線が出たら、つながりを確認してみてください。<br /><br />
                 左上の📖のアイコンから、ルールを確認することができます。<br /><br />
                 ゲームログをじっくり読むと、何かが掴めるかも？<br /><br />
                 ステージに勝っても負けても、報酬としてスキルを得ることができます。<br />
@@ -179,6 +338,17 @@ const GameChapter1: React.FC<GameProps> = (props) => {
             <button onClick={() => setShowSettings(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: isMobile ? '16px' : '18px', color: '#888', padding: isMobile ? '0px' : '2px' }} title="設定">⚙️</button>
           </div>
         </div>
+
+        {beginnerTips.length > 0 && (
+          <div style={{ width: '100%', maxWidth: '800px', marginBottom: '16px', padding: '14px 16px', border: '1px solid #4fc3f7', borderRadius: '8px', background: 'rgba(0, 24, 36, 0.88)', boxSizing: 'border-box', color: '#e7f7ff' }}>
+            <div style={{ color: '#4fc3f7', fontWeight: 'bold', marginBottom: '8px' }}>攻略メモ</div>
+            <ul style={{ margin: 0, paddingLeft: '1.2rem', lineHeight: 1.6 }}>
+              {beginnerTips.map((tip, index) => (
+                <li key={index}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className={(gameStarted && isMobile && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI')) ? 'hidden-on-mobile-battle' : ''} style={{ position: 'relative', width: '100%', maxWidth: '800px', marginBottom: '20px', flexShrink: 0 }}>
           <div style={{
@@ -301,6 +471,16 @@ const GameChapter1: React.FC<GameProps> = (props) => {
                 {!stage11TrialActive && (
                   <>
                     <div style={{ color: '#ff5252', marginBottom: '10px', fontWeight: 'bold' }}>{battleResults.every((r: BattleResult) => r.winner === 2) ? "次こそは！" : "再挑戦しましょう。"}</div>
+                    {defeatTips.length > 0 && (
+                      <div style={{ maxWidth: '760px', margin: '0 auto 14px auto', padding: '12px 14px', border: '1px solid #8a3b3b', borderRadius: '8px', background: 'rgba(60, 10, 10, 0.78)', color: '#ffecec', textAlign: 'left', boxSizing: 'border-box' }}>
+                        <div style={{ color: '#ffb3b3', fontWeight: 'bold', marginBottom: '6px' }}>見直しポイント</div>
+                        <ul style={{ margin: 0, paddingLeft: '1.2rem', lineHeight: 1.6 }}>
+                          {defeatTips.map((tip, index) => (
+                            <li key={index}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <button onClick={handleResetGame} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>再挑戦</button>
                   </>
                 )}

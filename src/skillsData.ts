@@ -74,8 +74,8 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
 
   // 敵専用スキル
-  { abbr: "極", name: "極限", kana:"グランツヴァルト", icon: "/images/skill/v2/infinity.png", type: "付帯・敵専用", speed: "なし", description: "【ＨＰ】1000個分として扱う。以降のスキルのLVは1001から数える。【極限】を持っているキャラクターは状態「忘却」の効果を受けない。", ruleDisplay: false, exclude: 1  },
-  { abbr: "掌", name: "掌握", kana:"エアグライフェン", icon: "/images/skill/v2/hand.png", type: "付帯・敵専用", speed: "なし", description: "あなたは第20ラウンドの終了フェイズに勝利する。", ruleDisplay: false, exclude: 1  },
+  { abbr: "極", name: "極限", kana:"グランツヴァルト", icon: "/images/skill/v2/infinity.png", type: "付帯・敵専用", speed: "なし", description: "【ＨＰ】1000個分として扱う。以降のスキルのLVは1001から数える。あなたは状態「忘却」の効果を受けない。", ruleDisplay: false, exclude: 1  },
+  { abbr: "掌", name: "掌握", kana:"エアグライフェン", icon: "/images/skill/v2/hand.png", type: "付帯・敵専用", speed: "なし", description: "あなたは第9ラウンドの終了フェイズに勝利する。", ruleDisplay: false, exclude: 1  },
 
 
   // { abbr: "傲", name: "傲慢", kana:"スペルビア", icon: "/images/skill/v2/superbia.png", type: "敵専用", speed: "LV", description: "相手の補助スキルを全て破壊する。", ruleDisplay: false, exclude: 1  },
