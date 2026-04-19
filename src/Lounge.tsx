@@ -547,7 +547,7 @@ onPageChange,
   }, [allProfiles.length, mutedUids, refreshSeed]); // allProfiles全体ではなくlengthを監視して、いいね更新で走らないようにする
 
   if (stageMode === 'LOUNGE') {
-    if (!isDeneiStatsLoaded) {
+    if (user && !isDeneiStatsLoaded) {
       return (
         <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
           <div className="loading-spinner" style={{

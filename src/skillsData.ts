@@ -10,7 +10,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "怒", name: "怒濤", kana:"どとう", icon: "/images/skill/a09.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手にX点のダメージを与える。\nXは、現在のラウンド数である。", exclude: 0 },
   // 攻撃スキル
   { abbr: "瘴", name: "瘴気", kana:"しょうき", icon: "/images/skill/v2/2011-12-23_3-189.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、互いが所持している【疫病】の数である。", exclude: 0 },
-  { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに2点のダメージを与える。", exclude: 0 },
+  { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに2点のダメージを与える。", exclude: 1 },
   { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/v2/2011-12-23_3-067.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。迎撃スキルが発動しなければ、さらに上からスキルを1つ破壊する。", exclude: 0 },
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "1", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。", exclude: 1 },
   { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "0", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
@@ -38,7 +38,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "疫", name: "疫病", kana:"えきびょう", icon: "/images/skill/c06.gif", type: "迎撃", speed: "LV", description: "相手の先頭のスキルを【疫病】に変化させる。", exclude: 0 },
   { abbr: "幻", name: "幻惑", kana:"げんわく", icon: "/images/skill/v2/2011-12-23_3-058.gif", type: "迎撃", speed: "LV", description: "このスキルが発動した場合、攻撃フェイズではなく終了フェイズに破壊される。", exclude: 0 },
   { abbr: "水", name: "水幕", kana:"すいまく", icon: "/images/skill/v2/2011-12-23_3-055.gif", type: "迎撃", speed: "LV-1", description: "あなたに状態「防壁」を1つ与える。", exclude: 0 },
-  { abbr: "転", name: "転回", kana:"てんかい", icon: "/images/skill/v2/2011-12-23_3-065.gif", type: "迎撃", speed: "LV+2", description: "あなたに状態「狼狽」を与える。", exclude: 1 },
+  { abbr: "転", name: "転回", kana:"てんかい", icon: "/images/skill/v2/2011-12-23_3-065.gif", type: "迎撃", speed: "LV+2", description: "あなたに状態「狼狽」を与える。", exclude: 0 },
   { abbr: "罠", name: "罠師", kana:"わなし", icon: "/images/skill/v2/2011-12-23_3-182.gif", type: "迎撃", speed: "0", description: "相手に3点のダメージを与える。", exclude: 0 },
   { abbr: "受", name: "受難", kana:"じゅなん", icon: "/images/skill/v2/2021-7-17_100.gif", type: "迎撃", speed: "LV", description: "あなたが受けている悪い状態を全て解除し、相手に同じ状態を全て与える。", exclude: 0 },
 

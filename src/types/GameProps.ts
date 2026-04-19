@@ -119,5 +119,5 @@ export interface GameProps {
   showStage1Tutorial:  boolean;
   setShowStage1Tutorial: (setShowStage1Tutorial : boolean) => void;
   epilogueContent: string | null;
-  backToTitle: () => void;
+  onEpilogueComplete: () => void;
 }

@@ -22,6 +22,17 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const openTooltip = () => {
+    if (disableTooltip) return;
+
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
+    setShowTooltip(true);
+    setIsTooltipForceClosed(false);
+  };
+
   const handleClick = () => {
     if (onClick) {
       onClick(skill.abbr);
@@ -207,16 +218,12 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       ref={cardRef}
       className={(isConnected ? 'synergy-active ' : '') + 'skill-card'}
       onClick={handleClick}
-      onMouseEnter={() => {
-        if (!disableTooltip) {
-          if (tooltipTimeoutRef.current) {
-            clearTimeout(tooltipTimeoutRef.current);
-            tooltipTimeoutRef.current = null;
-          }
-          setShowTooltip(true);
-          setIsTooltipForceClosed(false);
+      onPointerDown={(e) => {
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+          openTooltip();
         }
       }}
+      onMouseEnter={openTooltip}
       onMouseLeave={() => {
         if (!disableTooltip) {
           tooltipTimeoutRef.current = setTimeout(() => {

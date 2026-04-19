@@ -90,6 +90,48 @@ const parseRubyText = (text: string): RubySegment[] => {
   return segments;
 };
 
+const wrapCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+  const lines: string[] = [];
+  const paragraphs = text.split('\n');
+
+  paragraphs.forEach((paragraph) => {
+    if (paragraph === '') {
+      lines.push('');
+      return;
+    }
+
+    let currentLine = '';
+    Array.from(paragraph).forEach((char) => {
+      const nextLine = currentLine + char;
+      if (currentLine && ctx.measureText(nextLine).width > maxWidth) {
+        lines.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = nextLine;
+      }
+    });
+
+    lines.push(currentLine);
+  });
+
+  return lines;
+};
+
+const drawWrappedText = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number
+): number => {
+  const lines = wrapCanvasText(ctx, text, maxWidth);
+  lines.forEach((line, i) => {
+    ctx.fillText(line, x, y + i * lineHeight);
+  });
+  return lines.length;
+};
+
 const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
@@ -122,6 +164,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
   const lastTimeRef = useRef<number>(0);
   const [showTheEnd, setShowTheEnd] = useState(false);
   const [theEndAlpha, setTheEndAlpha] = useState(0);
+  const creditsBgmStartedRef = useRef(false);
 
   const renderCredits = (ctx: CanvasRenderingContext2D, width: number, height: number, dpr: number) => {
     if (!creditsData) return;
@@ -229,22 +272,35 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 ctx.fillStyle = '#81d4fa';
                 ctx.font = `bold ${(isMobileMode ? 22 : 32) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
                 ctx.textAlign = 'center';
-                ctx.fillText(section.content || "", creditsX + creditsWidth / 2, currentY);
-                currentY += (isMobileMode ? 40 : 60) * dpr;
+                currentY += drawWrappedText(ctx, section.content || "", creditsX + creditsWidth / 2, currentY, maxContentWidth, (isMobileMode ? 30 : 42) * dpr) * (isMobileMode ? 30 : 42) * dpr;
+                currentY += (isMobileMode ? 10 : 18) * dpr;
                 break;
             case "role":
                 ctx.fillStyle = '#aaa';
                 ctx.font = `${(isMobileMode ? 13 : 18) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
-                ctx.textAlign = 'right';
-                ctx.fillText(section.role || "", creditsX + creditsWidth * 0.4, currentY);
+                const roleX = isMobileMode ? contentX : creditsX + creditsWidth * 0.4;
+                const namesX = isMobileMode ? contentX : creditsX + creditsWidth * 0.45;
+                const roleMaxWidth = isMobileMode ? maxContentWidth : Math.max(20 * dpr, roleX - contentX);
+                const namesMaxWidth = Math.max(20 * dpr, creditsX + creditsWidth - padding - namesX);
+                const roleLineHeight = (isMobileMode ? 18 : 24) * dpr;
+                const nameLineHeight = (isMobileMode ? 21 : 31) * dpr;
+
+                ctx.textAlign = isMobileMode ? 'left' : 'right';
+                const roleLines = drawWrappedText(ctx, section.role || "", roleX, currentY, roleMaxWidth, roleLineHeight);
                 
                 ctx.fillStyle = '#fff';
                 ctx.font = `bold ${(isMobileMode ? 15 : 22) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
                 ctx.textAlign = 'left';
-                section.names?.forEach((name, i) => {
-                    ctx.fillText(name, creditsX + creditsWidth * 0.45, currentY + i * (isMobileMode ? 20 : 30) * dpr);
+                const namesStartY = currentY + (isMobileMode ? roleLines * roleLineHeight + 6 * dpr : 0);
+                let namesHeight = 0;
+                section.names?.forEach((name) => {
+                    const lineCount = drawWrappedText(ctx, name, namesX, namesStartY + namesHeight, namesMaxWidth, nameLineHeight);
+                    namesHeight += lineCount * nameLineHeight;
                 });
-                currentY += Math.max((isMobileMode ? 20 : 30), (section.names?.length || 1) * (isMobileMode ? 20 : 30)) * dpr + (isMobileMode ? 25 : 40) * dpr;
+                const roleBlockHeight = isMobileMode
+                    ? roleLines * roleLineHeight + 6 * dpr + (namesHeight || nameLineHeight)
+                    : Math.max(roleLines * roleLineHeight, namesHeight || nameLineHeight);
+                currentY += roleBlockHeight + (isMobileMode ? 25 : 40) * dpr;
                 break;
             case "afterstory":
                 const titleFontSize = (isMobileMode ? 15 : 20) * dpr;
@@ -262,23 +318,25 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 ctx.fillStyle = '#ffd54f';
                 ctx.font = `bold ${titleFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
                 ctx.textAlign = 'left';
-                ctx.fillText(section.title || "", titleX, currentY + (section.icon ? (iconSize - titleFontSize) / 2 : 0));
+                const titleLineHeight = titleFontSize * 1.25;
+                const titleMaxWidth = Math.max(20 * dpr, creditsX + creditsWidth - padding - titleX);
+                const titleLines = drawWrappedText(ctx, section.title || "", titleX, currentY + (section.icon ? (iconSize - titleFontSize) / 2 : 0), titleMaxWidth, titleLineHeight);
                 
                 ctx.fillStyle = '#eee';
                 ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
-                const lines = section.text?.split('\n') || [];
-                const storyTextY = currentY + Math.max(iconSize, titleFontSize) + 10 * dpr;
-                lines.forEach((line, i) => {
-                    ctx.fillText(line, contentX, storyTextY + i * (textFontSize * 1.4));
-                });
-                currentY = storyTextY + lines.length * (textFontSize * 1.4) + (isMobileMode ? 35 : 60) * dpr;
+                const textLineHeight = textFontSize * 1.4;
+                const titleHeight = titleLines * titleLineHeight;
+                const storyTextY = currentY + Math.max(iconSize, titleHeight) + 10 * dpr;
+                const textLines = drawWrappedText(ctx, section.text || "", contentX, storyTextY, maxContentWidth, textLineHeight);
+                currentY = storyTextY + textLines * textLineHeight + (isMobileMode ? 35 : 60) * dpr;
                 break;
             case "text":
                 ctx.fillStyle = '#fff';
                 ctx.font = `${(isMobileMode ? 15 : 20) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
                 ctx.textAlign = 'center';
-                ctx.fillText(section.content || "", creditsX + creditsWidth / 2, currentY);
-                currentY += (isMobileMode ? 30 : 40) * dpr;
+                const simpleTextLineHeight = (isMobileMode ? 22 : 30) * dpr;
+                currentY += drawWrappedText(ctx, section.content || "", creditsX + creditsWidth / 2, currentY, maxContentWidth, simpleTextLineHeight) * simpleTextLineHeight;
+                currentY += (isMobileMode ? 8 : 10) * dpr;
                 break;
             case "space":
                 currentY += (section.height || 50) * (isMobileMode ? 0.7 : 1.0) * dpr;
@@ -307,8 +365,8 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         ctx.fillText("THE END", width / 2, height / 2);
         ctx.shadowBlur = 0;
         ctx.font = `bold ${(isMobileMode ? 20 : 30) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
-        ctx.fillStyle = 'rgba(129, 212, 250, 0.9)';
-        ctx.fillText("FLAG", width / 2, height / 2 + (isMobileMode ? 58 : 92) * dpr);
+        // ctx.fillStyle = 'rgba(129, 212, 250, 0.9)';
+        // ctx.fillText("FLAG", width / 2, height / 2 + (isMobileMode ? 58 : 92) * dpr);
         ctx.restore();
         
         if (theEndAlpha >= 1 && !isEnding) {
@@ -386,12 +444,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           setTheEndAlpha(0);
           endingAlphaRef.current = 1;
           waitAfterEndingTimerRef.current = null;
-          
-          if (creditsData.bgm) {
-            AudioManager.getInstance().playBgm(creditsData.bgm, false, () => {
-              setShowTheEnd(true);
-            });
-          }
+          creditsBgmStartedRef.current = false;
 
           creditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
           creditsData.sections.forEach(sec => {
@@ -477,6 +530,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
     loadScriptAndAssets();
   }, [scriptUrl, initialScript, creditsUrl]);
+
+  useEffect(() => {
+    if (!isLoaded || !creditsData?.bgm || creditsBgmStartedRef.current) return;
+
+    creditsBgmStartedRef.current = true;
+    AudioManager.getInstance().playBgm(creditsData.bgm, false, () => {
+      setShowTheEnd(true);
+    });
+  }, [isLoaded, creditsData]);
 
   // シーン管理
   useEffect(() => {
@@ -1207,7 +1269,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
             </button>
           </div>
         )}
-        {!isLoaded && (
+        {!isLoaded && !creditsUrl && (
           <div style={{
             position: 'absolute',
             top: '50%',

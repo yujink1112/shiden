@@ -42,7 +42,6 @@ const getSkillStrengthTip = (skill: SkillDetail): string => {
 const GameChapter1: React.FC<GameProps> = (props) => {
   const {
     stageCycle,
-    setStageCycle,
     stageMode,
     gameStarted,
     battleResults,
@@ -105,7 +104,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     showStage1Tutorial,
     setShowStage1Tutorial,
     epilogueContent,
-    backToTitle
+    onEpilogueComplete
   } = props;
 
   // 敵のスキル数に応じたスケール計算
@@ -319,7 +318,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
               animation: 'epilogueFadeIn 2s forwards',
               animationDelay: `${((epilogueContent || '').split('\n').length + 5) * 1.2}s`
             }}>
-              <button className="TitleButton neon-gold" onClick={() => { setShowEpilogue(false); backToTitle(); setStageCycle(12); localStorage.removeItem('shiden_stage_mode'); }}>タイトルへ戻る</button>
+              <button className="TitleButton neon-gold" onClick={onEpilogueComplete}>エンドロールへ</button>
             </div>
           </div>
         </div>

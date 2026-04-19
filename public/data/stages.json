@@ -214,7 +214,7 @@
     "name": "第2章-1 (大ボス)",
     "bossName": "肉厚な魚",
     "bossImage": "/images/monster/v2/1-2.webp",
-    "bossDescription": "やぁ、また会ったね。",
+    "bossDescription": "やぁ、また会ったね。\n第2章から始めた人は初めまして。\n今日は僕の名前だけでも覚えて帰ってください。\nこの釣り針を外してから……ね。",
     "backgroundImage": "/images/background/v2/pirate-ship-deck2.webp",
     "shopSkills": [],
     "bossSkillAbbrs": "待果反一強",
@@ -232,7 +232,7 @@
     "bossDescription": "血の匂いに引き付けられてやってきた、極めて獰猛なサメ。",
     "backgroundImage": "/images/background/v2/Calm-lake-surface1.webp",
     "shopSkills": [""],
-    "bossSkillAbbrs": "逆交隠罠剣",
+    "bossSkillAbbrs": "交交隠罠剣",
     "bgm": "戦闘：血に飢えたジョーズ",
     "playerName": "レミエル"
   },

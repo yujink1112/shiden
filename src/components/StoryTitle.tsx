@@ -4,13 +4,17 @@ interface StoryTitleProps {
     chapter: number;
     stage: number;
     title: string;
+    stageLabelOverride?: string;
+    metaOverride?: string;
+    separator?: string;
     onComplete: () => void;
 }
 
-const StoryTitle: React.FC<StoryTitleProps> = ({ chapter, stage, title, onComplete }) => {
+const StoryTitle: React.FC<StoryTitleProps> = ({ chapter, stage, title, stageLabelOverride, metaOverride, separator = '―', onComplete }) => {
     const [phase, setPhase] = useState<'fadein' | 'visible' | 'fadeout'>('fadein');
     const onCompleteRef = useRef(onComplete);
-    const stageLabel = stage === 12 ? '最終節' : `第${stage}節`;
+    const stageLabel = stageLabelOverride || (stage === 12 ? '最終節' : `第${stage}節`);
+    const metaText = metaOverride || `第${chapter}章 ${separator} ${stageLabel}`;
 
     useEffect(() => {
         onCompleteRef.current = onComplete;
@@ -61,7 +65,7 @@ const StoryTitle: React.FC<StoryTitleProps> = ({ chapter, stage, title, onComple
                     opacity: phase === 'fadein' ? 0 : 1,
                     transition: 'opacity 1s ease-in-out 0.5s'
                 }}>
-                    第{chapter}章 ― {stageLabel}
+                    {metaText}
                 </div>
                 
                 <div style={{

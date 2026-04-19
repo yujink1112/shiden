@@ -90,6 +90,8 @@ const GameChapter2: React.FC<GameProps> = (props) => {
   React.useEffect(() => {
     const storageKey = 'shiden_chapter2_reward_choices';
 
+    if (isRewardConfirming) return;
+
     if (!isChapter2Reward || !currentStep) {
       setRewardChoices([]);
       localStorage.removeItem(storageKey);
@@ -98,17 +100,20 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     const rewardStepKey = `${stageCycle}:${chapter2FlowIndex}`;
     const saved = localStorage.getItem(storageKey);
-    const isAvailableReward = (abbr: string) => {
+    const canOfferReward = (abbr: string) => {
       const skill = ALL_SKILLS.find(s => s.abbr === abbr);
       return !!skill &&
         !ownedSkillAbbrs.includes(abbr) &&
-        (skill as SkillDetail).exclude !== 1 &&
         skill.type !== "敵専用";
+    };
+    const isAvailableRandomReward = (abbr: string) => {
+      const skill = ALL_SKILLS.find(s => s.abbr === abbr);
+      return canOfferReward(abbr) && (skill as SkillDetail).exclude !== 1;
     };
     const pickRandomRewards = (count: number, currentChoices: string[]) => {
       const used = new Set(currentChoices);
       const availablePool = ALL_SKILLS.filter(skill =>
-        isAvailableReward(skill.abbr) &&
+        isAvailableRandomReward(skill.abbr) &&
         !used.has(skill.abbr)
       );
       return [...availablePool]
@@ -122,7 +127,9 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         const parsed = JSON.parse(saved);
         if (parsed?.key === rewardStepKey && Array.isArray(parsed?.choices)) {
           const savedChoices = parsed.choices as string[];
-          if (savedChoices.every(abbr => isAvailableReward(abbr))) {
+          const expectedChoices = currentStep.choices || (currentStep.skill ? [currentStep.skill] : []);
+          const includesFixedChoices = expectedChoices.every(abbr => savedChoices.includes(abbr));
+          if (savedChoices.every(abbr => canOfferReward(abbr)) && includesFixedChoices) {
             setRewardChoices(savedChoices);
             return;
           }
@@ -147,7 +154,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     let choices: string[] = [];
     currentStep.choices.forEach(abbr => {
-      if (isAvailableReward(abbr) && !choices.includes(abbr)) {
+      if (canOfferReward(abbr) && !choices.includes(abbr)) {
         choices.push(abbr);
         return;
       }
@@ -167,10 +174,21 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     setRewardChoices(choices);
     localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices }));
-  }, [isChapter2Reward, currentStep, stageCycle, chapter2FlowIndex, ownedSkillAbbrs, ALL_SKILLS]);
+  }, [isChapter2Reward, currentStep, stageCycle, chapter2FlowIndex, ownedSkillAbbrs, ALL_SKILLS, isRewardConfirming]);
+
+  const previousChapter2BattleStep = React.useMemo(() => {
+    if (!isChapter2Reward) return null;
+    const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+    return [...(flow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle') || null;
+  }, [isChapter2Reward, chapter2Flows, stageCycle, chapter2FlowIndex]);
+  const hasCurrentBattleResults = battleResults.length > 0;
+  const hasCurrentBattleVictory = battleResults.some(result => result.winner === 1);
+  const hasChapter2BattleVictory = hasCurrentBattleVictory || (!hasCurrentBattleResults && canGoToBoss);
 
   // 報酬選択の表示判定を上書き
-  const showRewardSelection = rewardSelectionMode || isChapter2Reward;
+  const showRewardSelection = (rewardSelectionMode || isChapter2Reward) &&
+    !(isChapter2Reward && previousChapter2BattleStep && !hasChapter2BattleVictory);
+  const showChapter2VictoryPanel = canGoToBoss && (!hasCurrentBattleResults || hasCurrentBattleVictory);
   const isChapter2FinalBattle = stageCycle === 24 && (
     chapter2SubStage === 3 ||
     (currentStep?.type === 'battle' && currentStep.subStage === 3) ||
@@ -429,12 +447,12 @@ const GameChapter2: React.FC<GameProps> = (props) => {
               }}>
                 <div className="RewardSelection" style={{ textAlign: 'center', padding: '30px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '15px', maxWidth: '90%', maxHeight: '90%', overflowY: 'auto', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
                   <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
-                    {battleResults.length > 0 && battleResults.every(r => r.winner === 1) ? '撃破！！' : '敗北……'}<br />
+                    撃破！！<br />
                     {currentStep?.skill ? '新しいスキルを獲得しました！' :
                      currentStep?.choices ? 'スキルを1つ選んでください' :
                      isChapter2Reward ? `スキルを${currentStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
                   </h2>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
                     {currentStep?.type === 'reward' ? (
                       rewardChoices.map((abbr: string) => {
                         const skill = getSkillCardsFromAbbrs([abbr])[0];
@@ -494,7 +512,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
                 </div>
               </div>
             )}
-            {canGoToBoss && !showRewardSelection && !isChapter2FinalBattle && (
+            {showChapter2VictoryPanel && !showRewardSelection && !isChapter2FinalBattle && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
                 <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>
                    {stageProcessor.getEnemyName(0, stageContext)}撃破！<br />素晴らしいです！！

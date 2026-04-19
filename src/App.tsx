@@ -29,7 +29,7 @@ import './App.css';
 
 const CHAPTER1_INITIAL_SKILLS = ["一"];
 //const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "雷", "呪", "覚", "防", "影", "交", "搦", "崩", "疫", "強", "硬", "速", "逆", "裏", "先"];
-const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強", "速"];
+const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "交", "搦", "玉", "強", "速"];
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
@@ -138,6 +138,11 @@ function App() {
     const savedMode = localStorage.getItem('shiden_stage_mode');
     const loungeModes = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'];
     if (savedMode && loungeModes.includes(savedMode)) return false;
+
+    const gameModes = ['MID', 'BOSS', 'KENJU', 'DENEI'];
+    if (localStorage.getItem(STORY_CANVAS_STATE_KEY) || (savedMode && gameModes.includes(savedMode))) {
+      return true;
+    }
     
     // shiden_is_title のデフォルトを true にして、明示的に開始されるまでタイトルを維持
     const saved = localStorage.getItem('shiden_is_title');
@@ -423,6 +428,27 @@ function App() {
     return nextStage > currentStage || (nextStage === currentStage && nextFlow > currentFlow);
   };
 
+  const getChapter2SubStageForDisplay = (stageNo: number, flowIndex: number): number => {
+    const flow = chapter2Flows.find(f => f.stageNo === stageNo);
+    if (!flow) return 1;
+
+    const currentStep = flow.flow[flowIndex];
+    if (currentStep?.type === 'battle' && currentStep.subStage) return currentStep.subStage;
+
+    const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find(step => step.type === 'battle');
+    if (nextBattleStep?.subStage) return nextBattleStep.subStage;
+
+    const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find(step => step.type === 'battle');
+    return previousBattleStep?.subStage || 1;
+  };
+
+  const getChapter2StageLabel = (stageNo: number, flowIndex: number): string => {
+    const chapterStage = Math.max(stageNo - 12, 1);
+    return `Stage${chapterStage}-${getChapter2SubStageForDisplay(stageNo, flowIndex)}`;
+  };
+
+  const suppressChapter2ProgressSaveRef = useRef(false);
+
   const haveSameItems = (a: string[], b: string[]) => {
     return a.length === b.length && a.every(item => b.includes(item));
   };
@@ -435,7 +461,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (isAdminDebugSkillsActiveRef.current) return;
+    if (isAdminDebugSkillsActiveRef.current || suppressChapter2ProgressSaveRef.current) return;
     localStorage.setItem('shiden_chapter2_flow_index', chapter2FlowIndex.toString());
     if (isChapter2) {
       if (user) {
@@ -449,7 +475,9 @@ function App() {
     const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
     if (!flow) return 1;
     const step = flow.flow[chapter2FlowIndex];
-    return step?.subStage || 1;
+    if (step?.subStage) return step.subStage;
+    const previousBattleStep = [...flow.flow.slice(0, chapter2FlowIndex + 1)].reverse().find(s => s.type === 'battle');
+    return previousBattleStep?.subStage || 1;
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
 
   // 第2章の次のステップへ進む
@@ -554,6 +582,7 @@ function App() {
   const [isStoryTransitioning, setIsStoryTransitioning] = useState(false);
   const [isAdminTitlePreview, setIsAdminTitlePreview] = useState(false);
   const [showChapter2Title, setShowChapter2Title] = useState(false);
+  const [showPrologueTitle, setShowPrologueTitle] = useState(false);
   const [isTitleFadingOut, setIsTitleFadingOut] = useState(false);
   const [epilogueContent, setEpilogueContent] = useState<string | null>(null);
   const [showEpilogue, setShowEpilogue] = useState(false);
@@ -614,75 +643,82 @@ const PLAYER_SKILL_COUNT = 5;
     return null;
   };
 
+  const startPrologue = (stage: number, flowIndex: number = 0) => {
+    setStoryContent(null);
+    setStoryContentV2(null);
+    setCreditsUrl(null);
+    setStoryUrl('story/v2/prologue.txt');
+    saveStoryCanvasState({ kind: 'storyUrl', stageCycle: stage, flowIndex, id: 'story/v2/prologue.txt' });
+    setShowStoryModal(true);
+  };
+
+  const resumeStoryCanvasState = async (state: StoryCanvasState): Promise<boolean> => {
+    if (!state.kind) return false;
+
+    if (state.stageCycle) {
+      setStageCycle(state.stageCycle);
+      localStorage.setItem('shiden_stage_cycle', state.stageCycle.toString());
+      if (state.stageCycle >= 13) setStageMode('BOSS');
+    }
+    if (state.flowIndex !== undefined) {
+      setChapter2FlowIndex(state.flowIndex);
+      localStorage.setItem('shiden_chapter2_flow_index', state.flowIndex.toString());
+    }
+
+    setGameStarted(false);
+    setShowChapterSelect(null);
+    setStoryContent(null);
+    setStoryContentV2(null);
+    setStoryUrl(null);
+    setCreditsUrl(null);
+
+    if (state.kind === 'storyUrl' && state.id) {
+      setStoryUrl(state.id);
+      setShowStoryModal(true);
+      setIsTitle(false);
+      return true;
+    }
+
+    if (state.kind === 'credits') {
+      const flow = chapter2Flows.find(f => f.stageNo === state.stageCycle);
+      const step = state.flowIndex !== undefined ? flow?.flow[state.flowIndex] : undefined;
+      setCreditsUrl(state.id || step?.id || '/data/credits.json');
+      setShowStoryModal(true);
+      setIsTitle(false);
+      return true;
+    }
+
+    const flow = chapter2Flows.find(f => f.stageNo === state.stageCycle);
+    const step = state.flowIndex !== undefined ? flow?.flow[state.flowIndex] : undefined;
+    const storyId = state.id || step?.id;
+    if (storyId) {
+      const data = await loadV2Story(storyId);
+      if (data) {
+        setStoryContentV2(data);
+        setShowStoryModal(true);
+        setIsTitle(false);
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const restoredStoryCanvasRef = useRef(false);
 
   useEffect(() => {
-    if (restoredStoryCanvasRef.current || !stagesLoaded || chapter2Flows.length === 0) return;
+    if (restoredStoryCanvasRef.current || !stagesLoaded) return;
     restoredStoryCanvasRef.current = true;
 
-    const saved = localStorage.getItem(STORY_CANVAS_STATE_KEY);
-    if (!saved) return;
-
-    const restoreStoryCanvas = async () => {
-      try {
-        const state = JSON.parse(saved) as StoryCanvasState;
-        if (!state.kind) return;
-
-        if (state.stageCycle) {
-          setStageCycle(state.stageCycle);
-          localStorage.setItem('shiden_stage_cycle', state.stageCycle.toString());
-          if (state.stageCycle >= 13) setStageMode('BOSS');
-        }
-        if (state.flowIndex !== undefined) {
-          setChapter2FlowIndex(state.flowIndex);
-          localStorage.setItem('shiden_chapter2_flow_index', state.flowIndex.toString());
-        }
-
-        setGameStarted(false);
-        setIsTitle(false);
-        setStoryContent(null);
-
-        if (state.kind === 'storyUrl' && state.id) {
-          setStoryUrl(state.id);
-          setCreditsUrl(null);
-          setStoryContentV2(null);
-          setShowStoryModal(true);
-          return;
-        }
-
-        if (state.kind === 'credits') {
-          const flow = chapter2Flows.find(f => f.stageNo === state.stageCycle);
-          const step = state.flowIndex !== undefined ? flow?.flow[state.flowIndex] : undefined;
-          setStoryUrl(null);
-          setCreditsUrl(state.id || step?.id || '/data/credits.json');
-          setStoryContentV2(null);
-          setShowStoryModal(true);
-          return;
-        }
-
-        const flow = chapter2Flows.find(f => f.stageNo === state.stageCycle);
-        const step = state.flowIndex !== undefined ? flow?.flow[state.flowIndex] : undefined;
-        const storyId = state.id || step?.id;
-        if (storyId) {
-          const data = await loadV2Story(storyId);
-          if (data) {
-            setStoryUrl(null);
-            setCreditsUrl(null);
-            setStoryContentV2(data);
-            setShowStoryModal(true);
-            return;
-          }
-        }
-
-        clearStoryCanvasState();
-      } catch (e) {
-        console.error("Story restore error:", e);
-        clearStoryCanvasState();
-      }
-    };
-
-    restoreStoryCanvas();
-  }, [chapter2Flows, stagesLoaded]);
+    if (localStorage.getItem(STORY_CANVAS_STATE_KEY)) {
+      setGameStarted(false);
+      setShowStoryModal(false);
+      setStoryUrl(null);
+      setCreditsUrl(null);
+      setStoryContentV2(null);
+      setIsTitle(true);
+    }
+  }, [stagesLoaded]);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -696,7 +732,7 @@ const PLAYER_SKILL_COUNT = 5;
            return;
         }
 
-        // オープニング表示中（storyUrlがセットされている）ならfetchをスキップ
+        // プロローグなどのStoryCanvas表示中（storyUrlがセットされている）ならfetchをスキップ
         if (storyUrl) {
             setStoryContent(null);
             setStoryContentV2(null);
@@ -733,7 +769,7 @@ const PLAYER_SKILL_COUNT = 5;
         }
       } else {
         // ゲーム中や他のモードではストーリーデータをクリア
-        if (!storyUrl && !showStoryModal && !localStorage.getItem(STORY_CANVAS_STATE_KEY)) { // オープニング・StoryCanvas表示中以外
+        if (!storyUrl && !showStoryModal && !localStorage.getItem(STORY_CANVAS_STATE_KEY)) { // プロローグ・StoryCanvas表示中以外
             setStoryContent(null);
             setStoryContentV2(null);
         }
@@ -887,6 +923,7 @@ const PLAYER_SKILL_COUNT = 5;
 
   useEffect(() => {
     if (isAdminDebugSkillsActiveRef.current) return;
+    if (suppressChapter2ProgressSaveRef.current) return;
     if (isChapter2) {
       if (user) {
         saveChapter2Progress(user.uid, { stageCycle, flowIndex: chapter2FlowIndex, canGoToBoss });
@@ -1382,23 +1419,21 @@ const PLAYER_SKILL_COUNT = 5;
     setShowChapterSelect({ mode: 'CONTINUE' });
   };
 
-  const backToTitle = () => {
-    // タイトルに戻る際に最新の状態を同期するためにUpdatedAtを更新
-    if (user) {
-      const now = Date.now();
-      localStorage.setItem('shiden_updated_at', now.toString());
-      saveProfileProgress(user.uid, { updatedAt: now });
-    }
-    setIsAdminDebugSkillsActive(false);
-    setIsTitle(true);
-    setStageMode(getLastGameMode());
+  const handleEpilogueComplete = () => {
+    setShowEpilogue(false);
+    setStoryUrl(null);
+    setStoryContentV2(null);
+    setCreditsUrl('/data/credits.json');
+    saveStoryCanvasState({ kind: 'credits', stageCycle: 12, id: '/data/credits.json' });
+    setShowStoryModal(true);
+    setGameStarted(false);
+    setIsTitle(false);
   };
 
   const handleChapterSelect = async (chapter: number, isNewGame: boolean = false) => {
     setIsAdminDebugSkillsActive(false);
     // 第2章はログイン必須
     if (chapter === 2 && !user) {
-      alert("第2章をプレイするにはユーザー登録（ログイン）が必要です。タイトル画面の「修行・交流（ログイン）」から登録を行ってください。");
       setStageMode('LOUNGE');
       setIsTitle(false);
       setShowChapterSelect(null);
@@ -1417,8 +1452,18 @@ const PLAYER_SKILL_COUNT = 5;
 
     let stage = isNewGame ? (chapter === 2 ? 13 : 1) : (chapterProgress[chapter] || (chapter === 2 ? 13 : 1));
     let flowIndex = 0;
+    let savedStoryCanvasState: StoryCanvasState | null = null;
+    if (!isNewGame && chapter === 2) {
+      try {
+        const saved = localStorage.getItem(STORY_CANVAS_STATE_KEY);
+        savedStoryCanvasState = saved ? JSON.parse(saved) as StoryCanvasState : null;
+      } catch {
+        savedStoryCanvasState = null;
+      }
+    }
     
     if (isNewGame) {
+      clearStoryCanvasState();
       const now = Date.now();
       if (chapter === 1) {
         localStorage.setItem('shiden_owned_skills', JSON.stringify(CHAPTER1_INITIAL_SKILLS));
@@ -1433,8 +1478,9 @@ const PLAYER_SKILL_COUNT = 5;
         }
         setChapterProgress(prev => ({ ...prev, 1: 1 }));
       } else {
-        localStorage.removeItem('shiden_chapter2_stage');
-        localStorage.removeItem('shiden_chapter2_flow_index');
+        suppressChapter2ProgressSaveRef.current = true;
+        localStorage.setItem('shiden_chapter2_stage', '13');
+        localStorage.setItem('shiden_chapter2_flow_index', '0');
         localStorage.setItem('shiden_stage_cycle', '13');
         localStorage.setItem('shiden_stage_mode', 'BOSS');
         localStorage.setItem('shiden_last_game_mode', 'BOSS');
@@ -1445,6 +1491,7 @@ const PLAYER_SKILL_COUNT = 5;
         setChapter2FlowIndex(0);
         saveClaimedRewardSteps([]);
         localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(CHAPTER2_INITIAL_SKILLS));
+        localStorage.removeItem('shiden_chapter2_reward_choices');
 
         // 第2章のデータをFirebaseにもリセット
         if (user) {
@@ -1457,6 +1504,11 @@ const PLAYER_SKILL_COUNT = 5;
       setOwnedSkillAbbrs(initialSkills);
       if (chapter === 1) {
         localStorage.setItem('shiden_owned_skills', JSON.stringify(initialSkills));
+      }
+      if (chapter === 2) {
+        window.setTimeout(() => {
+          suppressChapter2ProgressSaveRef.current = false;
+        }, 0);
       }
     } else if (chapter === 1) {
       const chapter1Skills = getStoredChapter1Skills(stage);
@@ -1522,6 +1574,12 @@ const PLAYER_SKILL_COUNT = 5;
       }
     }
 
+    if (savedStoryCanvasState) {
+      const resumed = await resumeStoryCanvasState(savedStoryCanvasState);
+      if (resumed) return;
+      clearStoryCanvasState();
+    }
+
     setStageCycle(stage);
     if (chapter === 2) {
       // CONTINUEの場合は保存された flowIndex を使う。NEW GAME の場合は 0。
@@ -1535,12 +1593,13 @@ const PLAYER_SKILL_COUNT = 5;
     
     // NEW GAME時、または初回の開始時
     if (isNewGame && chapter === 2) {
-      // 第2章の新規開始時のみオープニングを流す
+      // 第2章の新規開始時のみプロローグを流す
       setStoryContent(null);
       setStoryContentV2(null);
-      setStoryUrl('story/v2/opening.txt');
-      saveStoryCanvasState({ kind: 'storyUrl', stageCycle: stage, flowIndex: 0, id: 'story/v2/opening.txt' });
-      setShowStoryModal(true);
+      setCreditsUrl(null);
+      setStoryUrl(null);
+      setShowPrologueTitle(true);
+      setIsTitle(false);
     } else if (isNewGame && chapter === 1) {
         // 第1章の開始時はテキストストーリーを読み込んでサイドバーに表示し、StoryCanvasは出さない
         const fetchFirstStory = async () => {
@@ -2311,6 +2370,8 @@ const PLAYER_SKILL_COUNT = 5;
                   }
                 }
               }
+            } else if (isChapter2) {
+              setCanGoToBoss(false);
             }
 
             if (result.showReward && !isChapter2 && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
@@ -2445,6 +2506,17 @@ const PLAYER_SKILL_COUNT = 5;
       const rewardStepKey = getRewardStepKey();
 
       if (isChapter2Reward && currentStep?.type === 'reward') {
+        const previousBattleStep = [...(flow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle');
+        const hasCurrentBattleResults = battleResults.length > 0;
+        const hasCurrentBattleVictory = battleResults.some(result => result.winner === 1);
+        const hasChapter2BattleVictory = hasCurrentBattleVictory || (!hasCurrentBattleResults && canGoToBoss);
+        if (previousBattleStep && !hasChapter2BattleVictory) {
+          alert("第2章の報酬は、直前の戦闘に勝利した時だけ獲得できます。");
+          setSelectedRewards([]);
+          setRewardSelectionMode(false);
+          return;
+        }
+
         if (claimedRewardSteps.includes(rewardStepKey)) {
           setSelectedRewards([]);
           setRewardSelectionMode(false);
@@ -2635,7 +2707,7 @@ const PLAYER_SKILL_COUNT = 5;
     if (nextStageInfo?.chapter) {
       const chapterKey = `shiden_chapter${nextStageInfo.chapter}_stage`;
       if (nextStageInfo.chapter >= 2) {
-        // 第2章以降はFirebaseに保存（上記で実施済み）
+        localStorage.setItem(chapterKey, nextCycle.toString());
         setChapterProgress(prev => ({ ...prev, [nextStageInfo.chapter!]: nextCycle }));
       } else {
         localStorage.setItem(chapterKey, nextCycle.toString());
@@ -2703,7 +2775,8 @@ const PLAYER_SKILL_COUNT = 5;
 
         if (isChapter2) {
             // 第2章の場合、自動遷移はせず、GameChapter2 の「次へ進む」ボタンに任せる
-            // 報酬はフローの type: "reward" ステップで行うため、ここでは何もしない
+            // 報酬はフローの type: "reward" ステップで行うため、ここでは次へ進むパネルだけ出す
+            setCanGoToBoss(true);
             return;
         }
 
@@ -2763,7 +2836,7 @@ const PLAYER_SKILL_COUNT = 5;
     const playSceneBgm = async () => {
       if (showStoryModal || showChapter2Title) return;
       
-      if (showChapterTitle) {
+      if (showChapterTitle || showPrologueTitle) {
         audioManager.stopBgm();
         return;
       }
@@ -2812,7 +2885,7 @@ const PLAYER_SKILL_COUNT = 5;
 
     playSceneBgm();
 
-  }, [isTitle, stageMode, showStoryModal, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex, gameStarted, stagesLoaded]);
+  }, [isTitle, stageMode, showStoryModal, showChapterTitle, showChapter2Title, showPrologueTitle, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex, gameStarted, stagesLoaded]);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -3120,7 +3193,7 @@ const PLAYER_SKILL_COUNT = 5;
           width: '100%',
           marginTop: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '5dvh' : '0'
         }}>
-          <div className="TitleLogoWrapper" style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px' : '20px' }}>
+          <div className="TitleLogoWrapper" style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px' : '0px' }}>
             <img
               src={getStorageUrl('/images/title/titlelogo.png')}
               alt="紫電一閃"
@@ -3136,12 +3209,8 @@ const PLAYER_SKILL_COUNT = 5;
           <div className="TitleMenu" style={{
             gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '12px'
           }}>
-            {!showChapterSelect && (
-              <>
-                <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
-                <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-              </>
-            )}
+            <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
+            <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
             <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
             <button
               className="TitleButton neon-purple"
@@ -3248,30 +3317,40 @@ const PLAYER_SKILL_COUNT = 5;
                 </div>
 
                 {/* 第2章 */}
+                {(() => {
+                  const needsChapter2Login = !user;
+                  const isChapter2ContinueUnavailable = showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save && !needsChapter2Login;
+                  const isChapter2PanelDimmed = needsChapter2Login || isChapter2ContinueUnavailable;
+
+                  return (
                 <div 
                   onClick={() => {
-                    if (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) return;
+                    if (needsChapter2Login) {
+                      handleChapterSelect(2, showChapterSelect.mode === 'NEW');
+                      return;
+                    }
+                    if (isChapter2ContinueUnavailable) return;
                     handleChapterSelect(2, showChapterSelect.mode === 'NEW');
                   }}
                   style={{ 
                     flex: 1,
-                    cursor: (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) ? 'default' : 'pointer',
-                    border: (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) ? '1px solid #333' : '1px solid #ff5252',
+                    cursor: isChapter2ContinueUnavailable ? 'default' : 'pointer',
+                    border: isChapter2PanelDimmed ? '1px solid #333' : '1px solid #ff5252',
                     borderRadius: '8px',
                     overflow: 'hidden',
                     background: '#1a1a1a',
                     transition: 'transform 0.2s',
                     position: 'relative',
-                    opacity: (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) ? 0.4 : 1,
-                    filter: (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) ? 'grayscale(1)' : 'none'
+                    opacity: isChapter2PanelDimmed ? 0.45 : 1,
+                    filter: isChapter2PanelDimmed ? 'grayscale(1)' : 'none'
                   }}
                   onMouseEnter={(e) => {
-                    if (!(showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save)) {
+                    if (!isChapter2ContinueUnavailable) {
                       e.currentTarget.style.transform = 'scale(1.02)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (!(showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save)) {
+                    if (!isChapter2ContinueUnavailable) {
                       e.currentTarget.style.transform = 'scale(1)';
                     }
                   }}
@@ -3282,20 +3361,19 @@ const PLAYER_SKILL_COUNT = 5;
                     style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
                   />
                   <div style={{ padding: '15px', textAlign: 'center' }}>
-                    <div style={{ color: (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save) ? '#666' : '#ff5252', fontSize: '1.2rem', fontWeight: 'bold' }}>第2章 FLAG</div>
+                    <div style={{ color: isChapter2PanelDimmed ? '#666' : '#ff5252', fontSize: '1.2rem', fontWeight: 'bold' }}>第2章 FLAG</div>
                     <div style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '5px' }}>
-                      {showChapterSelect.mode === 'NEW' ? '最初から開始' : 
+                      {needsChapter2Login ? 'LOUNGEでユーザ登録が必要です' :
+                        showChapterSelect.mode === 'NEW' ? '最初から開始' : 
                         !hasChapter2Save ? '未プレイ' : (() => {
                         const stage = chapterProgress[2] || 13;
-                        const flow = chapter2Flows.find(f => f.stageNo === stage);
-                        // 現在のインデックス以降で、最初に見つかる battle ステップを探す
-                        const nextBattleStep = flow?.flow.slice(chapter2FlowIndex).find(s => s.type === 'battle');
-                        const subStage = nextBattleStep?.subStage;
-                        return `現在進行中: Stage ${stage - 12}${subStage ? `-${subStage}` : ''}`;
+                        return `現在進行中: ${getChapter2StageLabel(stage, chapter2FlowIndex)}`;
                       })()}
                     </div>
                   </div>
                 </div>
+                  );
+                })()}
               </div>
               
               <button 
@@ -3602,11 +3680,14 @@ const PLAYER_SKILL_COUNT = 5;
               <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button onClick={() => {
-                  setStoryUrl('story/v2/opening.txt');
+                  setStoryContentV2(null);
+                  setCreditsUrl(null);
+                  setStoryUrl(null);
                   setShowAdmin(false);
                   setIsAdminPreview(true);
-                  setTimeout(() => setShowStoryModal(true), 50);
-                }} style={{ background: '#4527a0' }}>オープニング (opening.txt)</button>
+                  setIsTitle(false);
+                  setShowPrologueTitle(true);
+                }} style={{ background: '#4527a0' }}>プロローグ (prologue.txt)</button>
                 <button onClick={() => {
                   setCreditsUrl('/data/credits.json');
                   setShowAdmin(false);
@@ -3757,8 +3838,14 @@ const PLAYER_SKILL_COUNT = 5;
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
                 isBgmEnabled={bgmEnabled}
                 onEnd={() => {
-                  const isOpening = !!storyUrl;
+                  const isPrologue = !!storyUrl;
                   const isCredits = !!creditsUrl;
+                  let completedStoryState: StoryCanvasState | null = null;
+                  try {
+                    completedStoryState = JSON.parse(localStorage.getItem(STORY_CANVAS_STATE_KEY) || 'null');
+                  } catch {
+                    completedStoryState = null;
+                  }
                   clearStoryCanvasState();
                   setShowStoryModal(false);
                   setStoryUrl(null);
@@ -3779,8 +3866,13 @@ const PLAYER_SKILL_COUNT = 5;
                     if (isTitle) setIsTitle(false);
                     const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
                     if (currentStage?.chapter === 2) {
-                      if (isOpening) {
+                      if (isPrologue) {
                         moveToNextStep(undefined, -1);
+                      } else if (completedStoryState?.kind === 'story' && completedStoryState.flowIndex !== undefined) {
+                        const completedStageCycle = completedStoryState.stageCycle;
+                        const completedFlowIndex = completedStoryState.flowIndex;
+                        const completedFlow = chapter2Flows.find(f => f.stageNo === completedStageCycle);
+                        moveToNextStep(completedFlow, completedFlowIndex);
                       } else {
                         moveToNextStep();
                       }
@@ -3890,7 +3982,7 @@ const PLAYER_SKILL_COUNT = 5;
     showStage1Tutorial,
     setShowStage1Tutorial,
     epilogueContent,
-    backToTitle
+    onEpilogueComplete: handleEpilogueComplete
   };
 
 
@@ -3914,7 +4006,14 @@ const PLAYER_SKILL_COUNT = 5;
     );
   }
 
-  const storyTitleStage = stageCycle >= 13 ? stageCycle - 12 : stageCycle;
+  const currentChapter2Flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+  const currentChapter2Step = currentChapter2Flow?.flow[chapter2FlowIndex];
+  const chapter2TitleStageFromStep = currentChapter2Step?.type === 'story'
+    ? Number(currentChapter2Step.id?.match(/^(\d+)-1$/)?.[1])
+    : NaN;
+  const storyTitleStage = stageCycle >= 13
+    ? (Number.isFinite(chapter2TitleStageFromStep) ? chapter2TitleStageFromStep : stageCycle - 12)
+    : stageCycle;
   const storyTitleName = stageCycle >= 13
     ? STAGE_DATA.find(s => s.chapter === 2 && s.stage === storyTitleStage && s.battle === 1)?.name || ""
     : STAGE_DATA.find(s => s.no === stageCycle)?.name || "";
@@ -3923,7 +4022,21 @@ const PLAYER_SKILL_COUNT = 5;
   
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
-      {!showChapter2Title && !shouldRenderStoryCanvas && !showChapterTitle && !isStoryTransitioning && gameContent}
+      {!showChapter2Title && !shouldRenderStoryCanvas && !showChapterTitle && !showPrologueTitle && !isStoryTransitioning && gameContent}
+
+      {showPrologueTitle && (
+        <StoryTitle
+          chapter={2}
+          stage={0}
+          stageLabelOverride="プロローグ"
+          metaOverride="第2章"
+          title="プロローグ"
+          onComplete={() => {
+            setShowPrologueTitle(false);
+            startPrologue(stageCycle >= 13 ? stageCycle : 13, chapter2FlowIndex);
+          }}
+        />
+      )}
 
       {showChapterTitle && (
         <StoryTitle 
@@ -3958,8 +4071,14 @@ const PLAYER_SKILL_COUNT = 5;
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
                 isBgmEnabled={bgmEnabled}
                 onEnd={() => {
-                  const isOpening = !!storyUrl;
+                  const isPrologue = !!storyUrl;
                   const isCredits = !!creditsUrl;
+                  let completedStoryState: StoryCanvasState | null = null;
+                  try {
+                    completedStoryState = JSON.parse(localStorage.getItem(STORY_CANVAS_STATE_KEY) || 'null');
+                  } catch {
+                    completedStoryState = null;
+                  }
                   clearStoryCanvasState();
                   setShowStoryModal(false);
                   setStoryUrl(null);
@@ -3980,8 +4099,13 @@ const PLAYER_SKILL_COUNT = 5;
                     if (isTitle) setIsTitle(false);
                     const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
                     if (currentStage?.chapter === 2) {
-                      if (isOpening) {
+                      if (isPrologue) {
                         moveToNextStep(undefined, -1);
+                      } else if (completedStoryState?.kind === 'story' && completedStoryState.flowIndex !== undefined) {
+                        const completedStageCycle = completedStoryState.stageCycle;
+                        const completedFlowIndex = completedStoryState.flowIndex;
+                        const completedFlow = chapter2Flows.find(f => f.stageNo === completedStageCycle);
+                        moveToNextStep(completedFlow, completedFlowIndex);
                       } else {
                         moveToNextStep();
                       }
