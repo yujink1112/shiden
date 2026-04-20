@@ -22,6 +22,18 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const closeTooltip = (forceClosed = false) => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
+    setHoveredStatus(null);
+    setShowTooltip(false);
+    if (forceClosed) {
+      setIsTooltipForceClosed(true);
+    }
+  };
+
   const openTooltip = () => {
     if (disableTooltip) return;
 
@@ -34,6 +46,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   };
 
   const handleClick = () => {
+    if (disableTooltip) {
+      closeTooltip();
+    }
     if (onClick) {
       onClick(skill.abbr);
     }
@@ -151,6 +166,12 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
     };
   }, [showTooltip]);
 
+  useEffect(() => {
+    if (disableTooltip) {
+      closeTooltip();
+    }
+  }, [disableTooltip]);
+
   const getTooltipStyle = (): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'fixed',
@@ -227,7 +248,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       onMouseLeave={() => {
         if (!disableTooltip) {
           tooltipTimeoutRef.current = setTimeout(() => {
-            setShowTooltip(false);
+            closeTooltip();
           }, 200);
         }
       }}
@@ -263,7 +284,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
           }}
           onMouseLeave={() => {
             tooltipTimeoutRef.current = setTimeout(() => {
-              setShowTooltip(false);
+              closeTooltip();
             }, 300);
           }}
         >
@@ -273,7 +294,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
                 <span style={{ fontSize: '10px', color: '#aaa', marginLeft: '8px' }}>{skill.kana}</span>
             </div>
             <button 
-              onClick={(e) => { e.stopPropagation(); setIsTooltipForceClosed(true); }}
+              onClick={(e) => { e.stopPropagation(); closeTooltip(true); }}
               style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', padding: '2px 6px' }}
             >
               閉じる

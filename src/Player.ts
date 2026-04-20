@@ -148,6 +148,7 @@ export class Player {
                     this.type[i] = Player.ATTACK;
                     this.speed[i] = level - 2;
                     this.damage[i] = 1;
+                    this.limited[i] = 1;
                     if (this.speed[i] < 0) this.speed[i] = 0;
                     break;
                 case "雷":
@@ -342,8 +343,10 @@ export class Player {
                 case "焦":
                     this.name[i] = "焦熱";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
+                    this.speed[i] = level - 2;
                     this.damage[i] = 1;
+                    this.limited[i] = 1;
+                    if (this.speed[i] < 0) this.speed[i] = 0;
                     break;
                 case "毒":
                     this.name[i] = "蟲毒";

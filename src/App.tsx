@@ -29,7 +29,7 @@ import './App.css';
 
 const CHAPTER1_INITIAL_SKILLS = ["一"];
 //const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "雷", "呪", "覚", "防", "影", "交", "搦", "崩", "疫", "強", "硬", "速", "逆", "裏", "先"];
-const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "交", "搦", "玉", "強", "速"];
+const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強", "速"];
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';

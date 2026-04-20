@@ -4,7 +4,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "果", name: "果断", kana:"かだん", icon: "/images/skill/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。", exclude: 0 },
   { abbr: "剣", name: "剣舞", kana:"けんばい", icon: "/images/skill/a04.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、あなたが所持している攻撃スキルの数である。", exclude: 0 },
   { abbr: "紫", name: "紫電", kana:"しでん", icon: "/images/skill/a05.gif", type: "攻撃", speed: "LV+2", description: "相手に1点のダメージを与える。\nあなたに状態「スタン」を与える。", exclude: 0 },
-  { abbr: "呪", name: "呪詛", kana:"じゅそ", icon: "/images/skill/a06.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。相手に状態「忘却」を与える。", exclude: 0 },
+  { abbr: "呪", name: "呪詛", kana:"じゅそ", icon: "/images/skill/a06.gif", type: "攻撃（リミテッド）", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。相手に状態「忘却」を与える。", exclude: 0 },
   { abbr: "雷", name: "雷火", kana:"らいか", icon: "/images/skill/a07.gif", type: "攻撃（リミテッド）", speed: "LV", description: "相手に2点のダメージを与える。", exclude: 0 },
   { abbr: "隠", name: "隠刃", kana:"かくしやいば", icon: "/images/skill/a08.gif", type: "攻撃", speed: "LV", description: "相手に2点のダメージを与える。\nこのスキルは奇数ラウンドの時、先攻決定フェイズで速度を比較するスキルの対象にならず、また、攻撃フェイズで使用するスキルにも選択されない。", exclude: 0 },
   { abbr: "怒", name: "怒濤", kana:"どとう", icon: "/images/skill/a09.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手にX点のダメージを与える。\nXは、現在のラウンド数である。", exclude: 0 },
@@ -15,7 +15,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "1", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。", exclude: 1 },
   { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "0", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
   { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/v2/2011-12-23_1-019.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、相手が持っている悪い状態の数+1である。", exclude: 1  },
-  { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/v2/2011-12-23_3-049.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。相手に状態「火傷」を与える。", exclude: 1 },
+  { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/v2/2011-12-23_3-049.gif", type: "攻撃（リミテッド）", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。相手に状態「火傷」を与える。", exclude: 1 },
   { abbr: "弱", name: "弱撃", kana:"じゃくげき", icon: "/images/skill/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。", exclude: 1 },
 
   // 補助スキル
@@ -24,7 +24,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "封", name: "封印", kana:"ふういん", icon: "/images/skill/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「忘却」を与える。", exclude: 0 },
   { abbr: "影", name: "影討", kana:"かげうち", icon: "/images/skill/b04.gif", type: "補助", speed: "LV", description: "相手が所持している先頭のスキルを1つ指定する。\nこのスキルを使用したラウンドの終了フェイズに、相手が所持している指定したスキルと同名のスキルを全て破壊する。", exclude: 0 },
   { abbr: "毒", name: "蟲毒", kana:"こどく", icon: "/images/skill/v2/2011-12-23_2-009.gif", type: "補助", speed: "0", description: "相手に状態「毒」を与える。", exclude: 0 },
-  { abbr: "医", name: "医術", kana:"いじゅつ", icon: "/images/skill/v2/2014-8-31_024.gif", type: "補助", speed: "LV", description: "あなたに状態「回復」を与える。", exclude: 0 },
+  { abbr: "医", name: "医術", kana:"いじゅつ", icon: "/images/skill/v2/2014-8-31_021.gif", type: "補助", speed: "LV", description: "あなたに状態「回復」を与える。", exclude: 0 },
   { abbr: "凍", name: "凍結", kana:"とうけつ", icon: "/images/skill/v2/2011-12-23_3-052.gif", type: "補助", speed: "LV", description: "相手に状態「狼狽」を与える。このスキルを使用したラウンドの終了フェイズに、相手が所持している先頭のスキルを1つ破壊する。", exclude: 0 },
   { abbr: "奏", name: "協奏", kana:"きょうそう", icon: "/images/skill/v2/2011-12-23_3-199.gif", type: "補助", speed: "LV", description: "あなたに状態「協奏」1つと「忘却」を与える。", exclude: 1 },
   { abbr: "盗", name: "盗賊", kana:"とうぞく", icon: "/images/skill/v2/2011-12-23_1-115.gif", type: "補助(リミテッド)", speed: "0", description: "相手が持っている良い状態を全て解除し、あなたに同じ状態を全て与える。", exclude: 0 },
