@@ -213,6 +213,7 @@ export class Battle {
         appendStatus("毒", pc.tyudoku === StatusFlag.ACTIVE ? 1 : 0);
         appendStatus("火", pc.yakedo === StatusFlag.ACTIVE ? 1 : 0);
         appendStatus("回", pc.kaifuku === StatusFlag.ACTIVE ? 1 : 0);
+        pc.chiyu.forEach(round => { statusText += `癒${round}`; });
         appendStatus("奏", pc.kyousou);
         appendStatus("霊", pc.reika === StatusFlag.ACTIVE ? 1 : 0);
         appendStatus("欲", pc.gouyoku === StatusFlag.ACTIVE ? 1 : 0);
@@ -371,7 +372,6 @@ export class Battle {
 
                 // 状態異常・バフ
                 if (pc.kakugo === StatusFlag.ACTIVE) speedBuf += 2;
-                if (pc.kyousou > 0) speedBuf += pc.kyousou;
                 if (pc.gouman > 0) speedBuf += 1;
                 
                 // 相手の座礁チェック
@@ -569,8 +569,8 @@ export class Battle {
                 attacker.kyousou_ = StatusFlag.RESERVED;
                 attacker.suijaku = StatusFlag.RESERVED;
                 break;
-            case "医":
-                attacker.kaifuku = StatusFlag.RESERVED;
+            case "癒":
+                if (idx >= 0) attacker.chiyuReserved.push(Math.max(attacker.getSkillLevel(idx) - 1, 0));
                 break;
             case "凍":
                 defender.roubai = StatusFlag.RESERVED;
@@ -656,6 +656,7 @@ export class Battle {
             pc.musou === StatusFlag.ACTIVE ||
             pc.sensei === StatusFlag.ACTIVE ||
             pc.kaifuku > 0 ||
+            pc.chiyu.length > 0 ||
             pc.kyousou > 0 ||
             pc.reika > 0;
 
@@ -664,6 +665,8 @@ export class Battle {
         pc.musou = 0;
         pc.sensei = 0;
         pc.kaifuku = 0;
+        pc.chiyu = [];
+        pc.chiyuReserved = [];
         pc.kyousou = 0;
         pc.reika = 0;
 
@@ -909,6 +912,11 @@ export class Battle {
             if (defender.musou === StatusFlag.ACTIVE) { attacker.musou = StatusFlag.ACTIVE; defender.musou = 0; }
             if (defender.sensei === StatusFlag.ACTIVE) { attacker.sensei = StatusFlag.ACTIVE; defender.sensei = 0; }
             if (defender.kaifuku > 0) { attacker.kaifuku = StatusFlag.ACTIVE; defender.kaifuku = 0; }
+            if (defender.chiyu.length > 0) {
+                if (attacker.chiyu.length === 0) attacker.chiyu = [defender.chiyu[0]];
+                defender.chiyu = [];
+                defender.chiyuReserved = [];
+            }
             if (defender.kyousou > 0) { attacker.kyousou += defender.kyousou; defender.kyousou = 0; }
             if (defender.reika > 0) { attacker.reika = StatusFlag.ACTIVE; defender.reika = 0; }
             attacker.tozoku = 0;
@@ -984,6 +992,20 @@ export class Battle {
         if (pc1.kaifuku === StatusFlag.RESERVED) { 
             if (hasShitto) this.log(`${pc1.playerName}は嫉妬のため回復状態を受け取れない！`);
             else { this.log(`${pc1.playerName}は回復状態になった！`); pc1.kaifuku = StatusFlag.ACTIVE; flag = 1; }
+        }
+        if (pc1.chiyuReserved.length > 0) {
+            if (hasShitto) {
+                this.log(`${pc1.playerName}は嫉妬のため治癒状態を受け取れない！`);
+            } else if (pc1.chiyu.length > 0) {
+                this.log(`${pc1.playerName}はすでに治癒(${pc1.chiyu[0]})状態のため、新たな治癒を受け取れない！`);
+                flag = 1;
+            } else {
+                const round = pc1.chiyuReserved[0];
+                pc1.chiyu.push(round);
+                this.log(`${pc1.playerName}は治癒(${round})状態になった！`);
+                flag = 1;
+            }
+            pc1.chiyuReserved = [];
         }
         if (pc1.kyousou_ === StatusFlag.RESERVED) {
             if (hasShitto) this.log(`${pc1.playerName}は嫉妬のため協奏状態を受け取れない！`);
@@ -1170,6 +1192,10 @@ export class Battle {
         endFlag |= this.applyKaifuku(this.pc1);
         endFlag |= this.applyKaifuku(this.pc2);
 
+        // 治癒の処理
+        endFlag |= this.applyChiyu(this.pc1);
+        endFlag |= this.applyChiyu(this.pc2);
+
         // 忘却の処理
         endFlag |= this.applySuijaku(this.pc1);
         endFlag |= this.applySuijaku(this.pc2);
@@ -1193,6 +1219,44 @@ export class Battle {
         this.log(`＞${pc.playerName}の回復が解除された！`);
         pc.kaifuku = 0;
         return 1;
+    }
+
+    private applyChiyu(pc: Player): number {
+        if (pc.chiyu.length === 0) return 0;
+
+        let flag = 0;
+        const restoredIdx = this.restoreFirstDestroyedSkillAsHp(pc);
+        if (restoredIdx >= 0) {
+            this.log(`＞治癒の効果で${pc.playerName}の【${pc.name[restoredIdx]}】${restoredIdx + 1}が復元された！`);
+            flag = 1;
+        }
+
+        const beforeCount = pc.chiyu.length;
+        const expired = pc.chiyu.filter(round => this.turn >= round);
+        pc.chiyu = pc.chiyu.filter(round => this.turn < round);
+        for (const round of expired) {
+            this.log(`＞${pc.playerName}の治癒(${round})が解除された！`);
+        }
+        if (pc.chiyu.length !== beforeCount) flag = 1;
+
+        return flag;
+    }
+
+    private restoreFirstDestroyedSkillAsHp(pc: Player): number {
+        for (let idx = 0; idx < pc.getSkillsLength(); idx++) {
+            if (pc.type[idx] === Player.NONE && pc.skill[idx] === "＿") {
+                pc.skill[idx] = "Ｈ";
+                pc.name[idx] = "ＨＰ";
+                pc.type[idx] = Player.ENCHANT;
+                pc.speed[idx] = 0;
+                pc.damage[idx] = 0;
+                pc.scar[idx] = 0;
+                pc.limited[idx] = 0;
+                pc.kage[idx] = 0;
+                return idx;
+            }
+        }
+        return -1;
     }
 
     private applyTaida(pc: Player): number {

@@ -33,6 +33,8 @@ export class Player {
     tyudoku: number = 0; // 中毒
     yakedo: number = 0; // 火傷
     kaifuku: number = 0;
+    chiyu: number[] = [];
+    chiyuReserved: number[] = [];
     kyousou: number = 0;
     kyousou_: number = 0; // 協奏のフラグ用
     reika: number = 0;
@@ -85,6 +87,8 @@ export class Player {
         this.tyudoku = 0;
         this.yakedo = 0;
         this.kaifuku = 0;
+        this.chiyu = [];
+        this.chiyuReserved = [];
         this.kyousou = 0;
         this.kyousou_ = 0;
         this.reika = 0;
@@ -353,10 +357,11 @@ export class Player {
                     this.type[i] = Player.BUFF;
                     this.speed[i] = 0;
                     break;
-                case "医":
-                    this.name[i] = "医術";
+                case "癒":
+                    this.name[i] = "治癒";
                     this.type[i] = Player.BUFF;
-                    this.speed[i] = level;
+                    this.speed[i] = 0;
+                    this.limited[i] = 1;
                     break;
                 case "凍":
                     this.name[i] = "凍結";

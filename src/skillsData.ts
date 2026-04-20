@@ -24,7 +24,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "封", name: "封印", kana:"ふういん", icon: "/images/skill/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「忘却」を与える。", exclude: 0 },
   { abbr: "影", name: "影討", kana:"かげうち", icon: "/images/skill/b04.gif", type: "補助", speed: "LV", description: "相手が所持している先頭のスキルを1つ指定する。\nこのスキルを使用したラウンドの終了フェイズに、相手が所持している指定したスキルと同名のスキルを全て破壊する。", exclude: 0 },
   { abbr: "毒", name: "蟲毒", kana:"こどく", icon: "/images/skill/v2/2011-12-23_2-009.gif", type: "補助", speed: "0", description: "相手に状態「毒」を与える。", exclude: 0 },
-  { abbr: "医", name: "医術", kana:"いじゅつ", icon: "/images/skill/v2/2014-8-31_021.gif", type: "補助", speed: "LV", description: "あなたに状態「回復」を与える。", exclude: 0 },
+  { abbr: "癒", name: "治癒", kana:"ちゆ", icon: "/images/skill/v2/2014-8-31_021.gif", type: "補助(リミテッド)", speed: "0", description: "あなたに状態「治癒(LV-1)」を与える。", exclude: 0 },
   { abbr: "凍", name: "凍結", kana:"とうけつ", icon: "/images/skill/v2/2011-12-23_3-052.gif", type: "補助", speed: "LV", description: "相手に状態「狼狽」を与える。このスキルを使用したラウンドの終了フェイズに、相手が所持している先頭のスキルを1つ破壊する。", exclude: 0 },
   { abbr: "奏", name: "協奏", kana:"きょうそう", icon: "/images/skill/v2/2011-12-23_3-199.gif", type: "補助", speed: "LV", description: "あなたに状態「協奏」1つと「忘却」を与える。", exclude: 1 },
   { abbr: "盗", name: "盗賊", kana:"とうぞく", icon: "/images/skill/v2/2011-12-23_1-115.gif", type: "補助(リミテッド)", speed: "0", description: "相手が持っている良い状態を全て解除し、あなたに同じ状態を全て与える。", exclude: 0 },
@@ -114,7 +114,7 @@ export interface StatusDetail {
 }
 
 export const STATUS_DATA: StatusDetail[] = [
-    { name: "覚悟", type: 0, kana: "かくご", icon: "/images/skill/b01.gif", stackable: false, description: "「覚悟」を受けているキャラクターの所持する攻撃・迎撃スキルは常に与えるダメージに+1、速度に+2される。" },
+    { name: "覚悟", type: 0, kana: "かくご", icon: "/images/skill/b01.gif", stackable: false, description: "所持する攻撃・迎撃スキルは常に与えるダメージに+1、速度に+2される。先攻決定フェイズには影響しない。" },
     { name: "防壁", type: 0, kana: "ぼうへき", icon: "/images/skill/b02.gif", stackable: true, description: "攻撃スキルによるダメージを受ける時、付与された半分(端数切り上げ)を解除してそのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。" },
     { name: "逆鱗", type: 0, kana: "げきりん", icon: "/images/skill/d07.gif", stackable: true, description: "所持する攻撃スキルが与えるダメージに+1される。複数受けている場合、効果は重複する。【弱撃】以外の攻撃スキルを使用した直後に解除される。" },
     { name: "無想", type: 0, kana: "むそう", icon: "/images/skill/d08.gif", stackable: false, description: "攻撃スキルによるダメージを受ける時、そのダメージを全て無効にする。ダメージ以外の効果は通常通り受ける。毎ラウンドの終了フェイズに解除される。" },
@@ -122,7 +122,8 @@ export const STATUS_DATA: StatusDetail[] = [
 
     // 新規追加
     { name: "回復", type: 0, kana: "かいふく", icon: "/images/skill/v2/2011-12-23_3-140.gif", stackable: false, description: "終了フェイズに、あなたの破壊されたスキルを全て【ＨＰ】に変化させる。" },
-    { name: "協奏", type: 0, kana: "きょうそう", icon: "/images/skill/v2/2011-12-23_3-195.gif", stackable: true, description: "あなたが使用する攻撃スキルのダメージに、受けている協奏の数を加える。速度にも同じ数を加える。" },
+    { name: "治癒(X)", type: 0, kana: "ちゆ", icon: "/images/skill/v2/2014-8-31_021.gif", stackable: false, description: "終了フェイズに、破壊された先頭のスキル1個を【ＨＰ】に変化させる。第Xラウンドの効果発生後に消滅する。Xが異なる場合でも、後から付与された治癒に上書きされない。" },
+    { name: "協奏", type: 0, kana: "きょうそう", icon: "/images/skill/v2/2011-12-23_3-195.gif", stackable: true, description: "所持する攻撃スキルのダメージと速度に、受けている協奏の数を加える。先攻決定フェイズには影響しない。" },
     { name: "霊化", type: 0, kana: "れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", stackable: false, description: "攻撃スキルを所持していない時、【弱撃】ではなく【影討】を使用する。LVは0とする。" },
     // { name: "強欲", type: 0, kana: "ごうよく", icon: "/images/skill/avaritia.png", description: "終了フェイズの直前に攻撃フェイズをもう一度行う。" },
     // { name: "傲慢", type: 0, kana: "ごうまん", icon: "/images/skill/superbia.png", description: "あなたの攻撃・迎撃スキルの速度に+1する。" },
