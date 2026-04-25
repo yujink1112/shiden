@@ -595,10 +595,10 @@
   justify-content: flex-start;
   align-items: center;
   position: relative;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   font-family: 'Arial Black', sans-serif;
-  padding: 40px 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -608,8 +608,10 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
-  opacity: 0.8;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 18%),
+    linear-gradient(180deg, rgba(12, 64, 132, 0.18) 0%, rgba(4, 37, 84, 0.42) 48%, rgba(2, 16, 39, 0.82) 100%);
+  opacity: 1;
 }
 
 .TitleBackgroundEffect::before {
@@ -619,10 +621,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  background-size: 100% 2px, 3px 100%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 28%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
   pointer-events: none;
 }
 
@@ -633,6 +634,100 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
+}
+
+.TitleContentRenewed {
+  width: 100%;
+  height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.TitleHeroFrame {
+  position: relative;
+  width: min(calc(100vw - 72px), 1320px);
+  height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.TitleHeroBackdrop {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  object-fit: cover;
+  object-position: center center;
+  filter: blur(20px) saturate(1.05);
+  transform: scale(1.06);
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.TitleHeroImage {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  -webkit-user-drag: none;
+}
+
+.TitleOverlayLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 36px 28px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.TitleHeroShade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 24%),
+    linear-gradient(180deg, rgba(6, 40, 78, 0.06) 0%, rgba(6, 40, 78, 0) 42%, rgba(6, 20, 38, 0.54) 100%);
+  pointer-events: none;
+}
+
+@media (min-width: 601px) {
+  .TitleScreenContainer {
+    background-color: #000 !important;
+    background-image: none !important;
+  }
+}
+
+.TitleHeroLight {
+  position: absolute;
+  z-index: 1;
+  inset: auto auto 7% 50%;
+  width: min(58vw, 620px);
+  height: 110px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.2) 28%, rgba(255, 255, 255, 0) 72%);
+  filter: blur(14px);
+  pointer-events: none;
 }
 
 .TitleLogoWrapper {
@@ -653,21 +748,31 @@
   width: 280px;
 }
 
+.TitleMenuRenewed {
+  width: min(420px, 100%);
+  gap: 12px;
+}
+
 .TitleButton {
-  padding: 10px 20px;
-  font-size: 1.2rem;
+  padding: 14px 20px;
+  font-size: 1.08rem;
   font-weight: bold;
-  background: transparent;
-  border: 2px solid;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid;
+  border-radius: 999px;
   cursor: pointer;
   transition: all 0.3s ease;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  outline: none;
+  touch-action: manipulation;
 }
 
 .TitleButton:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
   border-color: #444 !important;
   color: #444 !important;
@@ -675,57 +780,195 @@
 }
 
 .TitleButton.neon-blue {
-  color: #00d2ff;
-  border-color: #00d2ff;
-  box-shadow: 0 0 10px rgba(0, 210, 255, 0.2), inset 0 0 10px rgba(0, 210, 255, 0.2);
+  color: #edf9ff;
+  border-color: rgba(145, 222, 255, 0.95);
+  box-shadow: 0 10px 24px rgba(0, 83, 132, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .TitleButton.neon-blue:hover:not(:disabled) {
-  background: #00d2ff;
-  color: #000;
-  box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+  background: rgba(111, 209, 255, 0.28);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(53, 164, 221, 0.28);
+  transform: translateY(-1px);
 }
 
 .TitleButton.neon-gold {
-  color: #ffd700;
-  border-color: #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+  color: #fff8d6;
+  border-color: rgba(255, 226, 136, 0.98);
+  box-shadow: 0 10px 24px rgba(148, 108, 17, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .TitleButton.neon-gold:hover:not(:disabled) {
-  background: #ffd700;
-  color: #000;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  background: rgba(255, 220, 113, 0.28);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(205, 164, 55, 0.28);
+  transform: translateY(-1px);
 }
 
 .TitleButton.neon-green {
-  color: #00ff99;
-  border-color: #00ff99;
-  box-shadow: 0 0 10px rgba(0, 255, 153, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+  color: #ebfff5;
+  border-color: rgba(128, 247, 198, 0.95);
+  box-shadow: 0 10px 24px rgba(16, 118, 84, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .TitleButton.neon-green:hover:not(:disabled) {
-  background: #00ff99;
-  color: #000;
-  box-shadow: 0 0 30px rgba(0, 255, 153, 0.6);
+  background: rgba(87, 225, 171, 0.26);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(51, 183, 142, 0.28);
+  transform: translateY(-1px);
 }
 
 .TitleButton.neon-purple {
-  color: #ff00ff;
-  border-color: #ff00ff;
-  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.2);
+  color: #fff2ff;
+  border-color: rgba(225, 173, 255, 0.95);
+  box-shadow: 0 10px 24px rgba(89, 56, 148, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .TitleButton.neon-purple:hover:not(:disabled) {
-  background: #ff00ff;
-  color: #000;
-  box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+  background: rgba(189, 136, 255, 0.24);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(140, 88, 212, 0.3);
+  transform: translateY(-1px);
 }
 
 .TitleFooter {
-  color: #444;
+  color: #d7ecff;
   font-size: 0.8rem;
   margin-top: 10px;
+}
+
+.TitleFooterRenewed {
+  width: min(720px, 100%);
+  padding: 18px 22px 10px;
+  margin-bottom: 10px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(8, 34, 65, 0.08), rgba(8, 34, 65, 0.28));
+  text-shadow: 0 1px 10px rgba(7, 36, 66, 0.45);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.TitleFooterStat {
+  text-align: center;
+  color: #00d2ff;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.TitleFooterCopyright {
+  text-align: center;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.TitleFooterLinks {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.TitleUserName {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #f8f4d8;
+  text-shadow: 0 1px 10px rgba(7, 36, 66, 0.45);
+}
+
+.TitleUserNameLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  opacity: 0.78;
+}
+
+.TitleUserNameValue {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.TitleTapStart {
+  margin-bottom: 18px;
+  color: #ffffff;
+  font-family: "Cinzel", "Trajan Pro", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 1.16rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.3em;
+  text-indent: 0.22em;
+  text-shadow: 0 2px 18px rgba(5, 34, 68, 0.7), 0 0 22px rgba(255, 255, 255, 0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.TitleTapStart.is-blinking {
+  animation: tapStartBlink 0.18s step-end 4;
+}
+
+.TitleTapStart.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.TitleStartModalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(8px);
+  z-index: 220;
+}
+
+.TitleStartModal {
+  width: min(460px, calc(100vw - 32px));
+  padding: 20px 20px 22px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 28px 60px rgba(3, 14, 32, 0.28);
+}
+
+.TitleHeroFrame:focus,
+.TitleHeroFrame:active,
+.TitleHeroFrame:focus-visible {
+  outline: none;
+  background: transparent;
+}
+
+.TitleStartModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+.TitleStartModalClose {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+@keyframes tapStartBlink {
+  0% { opacity: 1; }
+  50% { opacity: 0.15; }
+  100% { opacity: 1; }
 }
 
 @keyframes logoEntry {
@@ -740,15 +983,118 @@
 }
 
 @media (max-width: 600px) {
+  .TitleContentRenewed {
+    padding: 0;
+    height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+  }
+
+  .TitleHeroFrame {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .TitleOverlayLayer {
+    padding: 0;
+  }
+
+  .TitleHeroLight {
+    width: 82vw;
+    bottom: 10%;
+  }
+
   .TitleLogo {
     max-width: 90vw;
   }
+
   .TitleMenu {
     width: 220px;
   }
+
+  .TitleMenuRenewed {
+    width: 100%;
+  }
+
   .TitleButton {
     font-size: 1rem;
-    padding: 12px 20px;
+    padding: 13px 18px;
+  }
+
+  .TitleTapStart {
+    position: absolute;
+    left: 50%;
+    bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    margin-bottom: 0;
+    font-size: 0.84rem;
+    letter-spacing: 0.16em;
+    text-indent: 0.14em;
+    white-space: nowrap;
+  }
+
+  .TitleUserName {
+    gap: 5px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+    line-height: 1.15;
+  }
+
+  .TitleUserNameLabel {
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+  }
+
+  .TitleUserNameValue {
+    font-size: 0.76rem;
+  }
+
+  .TitleStartModalOverlay {
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  .TitleStartModal {
+    width: min(420px, calc(100vw - 28px));
+    margin: 0 auto;
+    border-radius: 26px;
+    padding: 18px 16px 18px;
+  }
+
+  .TitleFooterRenewed {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    max-width: none;
+    padding: 12px 12px 8px;
+    margin-bottom: 0;
+    border-radius: 20px;
+  }
+
+  .TitleFooterStat {
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+    line-height: 1.15;
+  }
+
+  .TitleFooterCopyright {
+    font-size: 0.68rem;
+    margin-bottom: 6px;
+    line-height: 1.15;
+  }
+
+  .TitleFooterLinks {
+    gap: 6px;
+    font-size: 0.68rem;
+    margin-bottom: 0;
+    line-height: 1.15;
+    flex-wrap: wrap;
   }
 }
 
@@ -1053,10 +1399,34 @@
   margin: 15px;
   align-self: center;
   transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  outline: none;
+  touch-action: manipulation;
 }
 
 .ChangelogCloseButton:hover {
   background: #444;
+}
+
+.ChapterSelectCard {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  outline: none;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.ChapterSelectCard:focus,
+.ChapterSelectCard:active,
+.ChapterSelectCard:focus-visible,
+.TitleButton:focus,
+.TitleButton:active,
+.TitleButton:focus-visible,
+.ChangelogCloseButton:focus,
+.ChangelogCloseButton:active,
+.ChangelogCloseButton:focus-visible {
+  outline: none;
 }
 
 .selected-reward-card {

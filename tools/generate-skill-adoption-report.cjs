@@ -3,9 +3,9 @@ const path = require("path");
 
 const repoRoot = path.resolve(__dirname, "..");
 const flowPath = path.join(repoRoot, "public", "data", "chapter2_flow.json");
-const resultsPath = path.join(repoRoot, "tools", "balance-search-results.json");
-const outJsonPath = path.join(repoRoot, "tools", "skill-adoption-summary.json");
-const outMdPath = path.join(repoRoot, "tools", "skill-adoption-report.md");
+const defaultResultsPath = path.join(repoRoot, "tools", "balance-search-results.json");
+const defaultOutJsonPath = path.join(repoRoot, "tools", "skill-adoption-summary.json");
+const defaultOutMdPath = path.join(repoRoot, "tools", "skill-adoption-report.md");
 
 const INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強", "速"];
 const KAMIWAZA_SUGGESTIONS = {
@@ -17,6 +17,42 @@ const KAMIWAZA_SUGGESTIONS = {
 
 function loadJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function parseArgs(argv) {
+  const args = {
+    resultsPath: defaultResultsPath,
+    outJsonPath: defaultOutJsonPath,
+    outMdPath: defaultOutMdPath,
+    title: "Chapter2 Skill Adoption Report",
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--results-path") {
+      args.resultsPath = path.resolve(repoRoot, String(argv[++i] || ""));
+    } else if (arg === "--out-json-path") {
+      args.outJsonPath = path.resolve(repoRoot, String(argv[++i] || ""));
+    } else if (arg === "--out-md-path") {
+      args.outMdPath = path.resolve(repoRoot, String(argv[++i] || ""));
+    } else if (arg === "--title") {
+      args.title = String(argv[++i] || "").trim() || args.title;
+    } else if (arg === "--help" || arg === "-h") {
+      args.help = true;
+    } else {
+      throw new Error(`Unknown option: ${arg}`);
+    }
+  }
+
+  return args;
+}
+
+function usage() {
+  console.log([
+    "Usage:",
+    "  node tools/generate-skill-adoption-report.cjs",
+    "  node tools/generate-skill-adoption-report.cjs --results-path tools/balance-search-deep-results.json --out-json-path tools/skill-power-summary-deep.json --out-md-path tools/skill-power-report-deep.md --title \"Chapter2 Skill Power Report (Deep Search)\"",
+  ].join("\n"));
 }
 
 function stageKeyOrder(a, b) {
@@ -185,7 +221,7 @@ function buildReplacementSuggestions(summary, rewardOrder) {
   return suggestions;
 }
 
-function buildMarkdown(summary, rewardOrder, replacementSuggestions) {
+function buildMarkdown(summary, rewardOrder, replacementSuggestions, title) {
   const totalSamples = summary.length > 0
     ? Math.max(...summary.map((entry) => entry.totalSamplesWhenAvailable))
     : 0;
@@ -201,7 +237,7 @@ function buildMarkdown(summary, rewardOrder, replacementSuggestions) {
     .slice(0, 8);
 
   const lines = [];
-  lines.push("# Chapter2 Skill Adoption Report");
+  lines.push(`# ${title}`);
   lines.push("");
   lines.push(`- 集計対象サンプル数: ${totalSamples}`);
   lines.push(`- reward.skill の出現順: ${rewardOrder.join(" -> ")}`);
@@ -258,18 +294,25 @@ function buildMarkdown(summary, rewardOrder, replacementSuggestions) {
 }
 
 function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    usage();
+    return;
+  }
+
   const flows = loadJson(flowPath);
-  const results = loadJson(resultsPath);
+  const results = loadJson(args.resultsPath);
   const rewardOrder = collectRewardSkills(flows);
   const skillUniverse = collectSkillUniverse(results, rewardOrder);
   const summary = computeSummary(results, rewardOrder, skillUniverse);
   const replacementSuggestions = buildReplacementSuggestions(summary, rewardOrder);
 
   fs.writeFileSync(
-    outJsonPath,
+    args.outJsonPath,
     JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
+        sourceResultsPath: path.relative(repoRoot, args.resultsPath),
         rewardOrder,
         summary,
         replacementSuggestions,
@@ -281,13 +324,13 @@ function main() {
   );
 
   fs.writeFileSync(
-    outMdPath,
-    buildMarkdown(summary, rewardOrder, replacementSuggestions),
+    args.outMdPath,
+    buildMarkdown(summary, rewardOrder, replacementSuggestions, args.title),
     "utf8"
   );
 
-  console.log(`Wrote ${path.relative(repoRoot, outJsonPath)}`);
-  console.log(`Wrote ${path.relative(repoRoot, outMdPath)}`);
+  console.log(`Wrote ${path.relative(repoRoot, args.outJsonPath)}`);
+  console.log(`Wrote ${path.relative(repoRoot, args.outMdPath)}`);
 }
 
 main();

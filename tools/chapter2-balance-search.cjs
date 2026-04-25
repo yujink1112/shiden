@@ -4,8 +4,8 @@ const ts = require("typescript");
 
 const repoRoot = path.resolve(__dirname, "..");
 const buildDir = path.join(__dirname, ".battle-sim-build");
-const resultsPath = path.join(__dirname, "balance-search-results.json");
-const progressLogPath = path.join(__dirname, "balance-search-progress.log");
+const defaultResultsPath = path.join(__dirname, "balance-search-results.json");
+const defaultProgressLogPath = path.join(__dirname, "balance-search-progress.log");
 
 const INITIAL = ["一", "刺", "果", "待", "搦", "玉", "強", "速"];
 const ALLOWED_KAMIWAZA = {
@@ -57,6 +57,11 @@ function parseArgs(argv) {
     includeCleared: true,
     requireSkills: [],
     bossIndexes: null,
+    maxChecks: null,
+    resultsPath: defaultResultsPath,
+    progressLogPath: defaultProgressLogPath,
+    winLogLimit: 20,
+    winLogInterval: 1000,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -79,6 +84,16 @@ function parseArgs(argv) {
         .split(",")
         .map((v) => Number(v.trim()))
         .filter((v) => Number.isInteger(v) && v > 0);
+    } else if (arg === "--max-checks") {
+      args.maxChecks = Number(argv[++i] || "0");
+    } else if (arg === "--results-path") {
+      args.resultsPath = path.resolve(repoRoot, String(argv[++i] || ""));
+    } else if (arg === "--progress-log-path") {
+      args.progressLogPath = path.resolve(repoRoot, String(argv[++i] || ""));
+    } else if (arg === "--win-log-limit") {
+      args.winLogLimit = Number(argv[++i] || "20");
+    } else if (arg === "--win-log-interval") {
+      args.winLogInterval = Number(argv[++i] || "1000");
     } else if (arg === "--help" || arg === "-h") {
       args.help = true;
     } else {
@@ -98,22 +113,30 @@ function usage() {
     "Options:",
     "  --targets <keys>       Stage keys like 6-2,7-2",
     "  --sample-limit <n>     Max winning samples per stage",
+    "                        Set 0 to keep searching without sample cap",
     "  --uncleared-only       Search only stages without stored clear samples",
     "  --require-skills <s>   Comma-separated required skills like 毒,霊",
     "  --boss-indexes <n>     1-based boss pattern indexes like 1 or 1,3",
+    "  --max-checks <n>       Stop each stage after this many checked lineups",
+    "  --results-path <path>  Write results JSON to a custom path",
+    "  --progress-log-path <path>  Write progress log to a custom path",
+    "  --win-log-limit <n>    Log every win until this count",
+    "  --win-log-interval <n> After the limit, log every nth win",
   ].join("\n"));
 }
 
-function readExistingResults() {
+function readExistingResults(resultsPath) {
   if (!fs.existsSync(resultsPath)) return [];
   return JSON.parse(fs.readFileSync(resultsPath, "utf8"));
 }
 
-function writeResults(results) {
+function writeResults(resultsPath, results) {
+  fs.mkdirSync(path.dirname(resultsPath), { recursive: true });
   fs.writeFileSync(resultsPath, JSON.stringify(results, null, 2), "utf8");
 }
 
-function appendProgress(message) {
+function appendProgress(progressLogPath, message) {
+  fs.mkdirSync(path.dirname(progressLogPath), { recursive: true });
   const line = `[${new Date().toISOString()}] ${message}\n`;
   fs.appendFileSync(progressLogPath, line, "utf8");
   console.log(message);
@@ -225,9 +248,14 @@ function main() {
   const { Battle } = require(path.join(buildDir, "Battle.js"));
   const chapter2Flows = loadJson("public/data/chapter2_flow.json");
   const stages = loadJson("public/data/stages.json");
-  const existingResults = readExistingResults();
+  const existingResults = readExistingResults(args.resultsPath);
   const existingMap = new Map(existingResults.map((entry) => [entry.key, entry]));
   const results = [];
+  const hasSampleCap = args.sampleLimit > 0;
+  const hasCheckCap = Number.isFinite(args.maxChecks) && args.maxChecks > 0;
+  const shouldLogWin = (count) =>
+    count <= args.winLogLimit ||
+    (args.winLogInterval > 0 && count % args.winLogInterval === 0);
 
   const shouldSearch = (baseKey, key) => {
     if (args.targets && !args.targets.includes(baseKey) && !args.targets.includes(key)) return false;
@@ -289,13 +317,14 @@ function main() {
           bossIndexes: selectedBossIndexes,
         };
         results.push(entryResult);
-        writeResults(results);
-        appendProgress(`${key} ${entry.bossName}: reused ${entryResult.samples.length} stored samples.`);
+        writeResults(args.resultsPath, results);
+        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: reused ${entryResult.samples.length} stored samples.`);
         continue;
       }
 
       const samples = [];
       let checked = 0;
+      let stopReason = "exhausted";
       if (missingRequiredSkills.length > 0) {
         const entryResult = {
           key,
@@ -307,20 +336,30 @@ function main() {
           pool: pool.join(""),
           requireSkills: args.requireSkills,
           bossIndexes: selectedBossIndexes,
+          stopReason: "missing-required-skills",
         };
         results.push(entryResult);
-        writeResults(results);
-        appendProgress(`${key} ${entry.bossName}: skipped because required skills are missing from pool (${missingRequiredSkills.join(",")}).`);
+        writeResults(args.resultsPath, results);
+        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: skipped because required skills are missing from pool (${missingRequiredSkills.join(",")}).`);
         continue;
       }
-      appendProgress(`${key} ${entry.bossName}: search start (pool=${pool.join("")}, bosses=${bosses.length}, bossIndexes=${selectedBossIndexes ? selectedBossIndexes.join(",") : "all"}, kamiwazaLimit=1, seeds=${seedSamples.length}, require=${args.requireSkills.join(",") || "-" }).`);
+      appendProgress(args.progressLogPath, `${key} ${entry.bossName}: search start (pool=${pool.join("")}, bosses=${bosses.length}, bossIndexes=${selectedBossIndexes ? selectedBossIndexes.join(",") : "all"}, kamiwazaLimit=1, seeds=${seedSamples.length}, require=${args.requireSkills.join(",") || "-"}, sampleLimit=${hasSampleCap ? args.sampleLimit : "unbounded"}, maxChecks=${hasCheckCap ? args.maxChecks : "none"}).`);
       for (const lineup of seededCandidates(pool, 5, seedSamples)) {
         if (!lineupContainsRequiredSkills(lineup, args.requireSkills)) continue;
         checked++;
         if (bosses.every((boss) => win(lineup, boss))) {
           samples.push(lineup);
-          appendProgress(`${key} ${entry.bossName}: found #${samples.length} ${lineup} after ${checked} checks.`);
-          if (samples.length >= args.sampleLimit) break;
+          if (shouldLogWin(samples.length)) {
+            appendProgress(args.progressLogPath, `${key} ${entry.bossName}: found #${samples.length} ${lineup} after ${checked} checks.`);
+          }
+          if (hasSampleCap && samples.length >= args.sampleLimit) {
+            stopReason = "sample-limit";
+            break;
+          }
+        }
+        if (hasCheckCap && checked >= args.maxChecks) {
+          stopReason = "max-checks";
+          break;
         }
         if (checked % 250000 === 0) {
           const snapshot = {
@@ -333,10 +372,11 @@ function main() {
           pool: pool.join(""),
           requireSkills: args.requireSkills,
           bossIndexes: selectedBossIndexes,
+          stopReason,
         };
           const nextResults = results.filter((r) => r.key !== key).concat(snapshot);
-          writeResults(nextResults);
-          appendProgress(`${key} ${entry.bossName}: progress ${checked} checks, wins=${samples.length}.`);
+          writeResults(args.resultsPath, nextResults);
+          appendProgress(args.progressLogPath, `${key} ${entry.bossName}: progress ${checked} checks, wins=${samples.length}.`);
         }
       }
 
@@ -350,10 +390,11 @@ function main() {
         pool: pool.join(""),
         requireSkills: args.requireSkills,
         bossIndexes: selectedBossIndexes,
+        stopReason,
       };
       results.push(entryResult);
-      writeResults(results);
-      appendProgress(`${key} ${entry.bossName}: done (${checked} checks, wins=${samples.length}).`);
+      writeResults(args.resultsPath, results);
+      appendProgress(args.progressLogPath, `${key} ${entry.bossName}: done (${checked} checks, wins=${samples.length}, stopReason=${stopReason}).`);
     }
   }
 }

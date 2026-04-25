@@ -34,6 +34,7 @@ export const googleProvider = new GoogleAuthProvider();
 type Chapter2ProgressPatch = {
   stageCycle?: number;
   flowIndex?: number;
+  loopCount?: number;
   ownedSkills?: string[];
   claimedRewardSteps?: string[];
   canGoToBoss?: boolean;
@@ -73,6 +74,18 @@ const isProgressAhead = (
   return nextStage > currentStage || (nextStage === currentStage && nextFlow > currentFlow);
 };
 
+const inferChapter2LoopCount = (data: any): number => {
+  const storedLoopCount = toNumber(data?.loopCount, -1);
+  if (storedLoopCount >= 0) return storedLoopCount;
+
+  const hasClearedFinalBoss =
+    toNumber(data?.stageCycle, 13) === 24 &&
+    toNumber(data?.flowIndex, 0) === 5 &&
+    Boolean(data?.canGoToBoss);
+
+  return hasClearedFinalBoss ? 1 : 0;
+};
+
 export const saveChapter2Progress = async (uid: string, patch: Chapter2ProgressPatch) => {
   const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
   const now = Date.now();
@@ -80,6 +93,7 @@ export const saveChapter2Progress = async (uid: string, patch: Chapter2ProgressP
   await runTransaction(chapter2Ref, (currentData) => {
     const current = currentData && typeof currentData === 'object' ? currentData as any : {};
     const merged = { ...current };
+    const currentLoopCount = inferChapter2LoopCount(current);
 
     if (patch.ownedSkills) {
       merged.ownedSkills = uniqueStrings([...(Array.isArray(current.ownedSkills) ? current.ownedSkills : []), ...patch.ownedSkills]);
@@ -112,6 +126,11 @@ export const saveChapter2Progress = async (uid: string, patch: Chapter2ProgressP
         merged.canGoToBoss = Boolean(current.canGoToBoss || patch.canGoToBoss);
       }
     }
+
+    merged.loopCount = Math.max(
+      currentLoopCount,
+      patch.loopCount !== undefined ? toNumber(patch.loopCount, currentLoopCount) : currentLoopCount
+    );
 
     merged.lastUpdated = Math.max(toNumber(current.lastUpdated, 0), patch.lastUpdated ?? now);
     return merged;
@@ -207,13 +226,23 @@ export const resetChapter1Progress = async (uid: string, initialSkills: string[]
 export const resetChapter2Progress = async (uid: string, initialSkills: string[]) => {
   const now = Date.now();
   const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
-  await set(chapter2Ref, {
-    stageCycle: 13,
-    flowIndex: 0,
-    ownedSkills: uniqueStrings(initialSkills),
-    claimedRewardSteps: [],
-    canGoToBoss: false,
-    lastUpdated: now
+  await runTransaction(chapter2Ref, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    const hasClearedFinalBoss =
+      current.stageCycle === 24 &&
+      current.flowIndex === 5 &&
+      Boolean(current.canGoToBoss);
+    const currentLoopCount = inferChapter2LoopCount(current);
+
+    return {
+      stageCycle: 13,
+      flowIndex: 0,
+      loopCount: hasClearedFinalBoss ? currentLoopCount + 1 : currentLoopCount,
+      ownedSkills: uniqueStrings(initialSkills),
+      claimedRewardSteps: [],
+      canGoToBoss: false,
+      lastUpdated: now
+    };
   });
   await saveProfileProgress(uid, { updatedAt: now });
 };

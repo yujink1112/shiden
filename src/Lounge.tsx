@@ -3,6 +3,7 @@ import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
 import { AdminAnalytics } from './AdminAnalytics';
 import { getStorageUrl, uploadDeneiImage } from './firebase';
+import type { Chapter2StageFlow } from './types/chapter2';
 
 export interface UserProfile {
   uid: string;
@@ -18,6 +19,7 @@ export interface UserProfile {
   points?: number;
   lastKenjuDate?: string;
   winCount?: number;
+  stageCycle?: number;
   medals?: string[];
   myKenju?: {
     name: string;
@@ -42,6 +44,7 @@ export interface UserProfile {
   chapter2?: {
     stageCycle?: number;
     flowIndex?: number;
+    loopCount?: number;
     canGoToBoss?: boolean;
     ownedSkills?: string[];
     claimedRewardSteps?: string[];
@@ -49,8 +52,189 @@ export interface UserProfile {
   };
 }
 
+const CHAPTER2_FINAL_STAGE_NO = 24;
+const CHAPTER2_FINAL_BATTLE_FLOW_INDEX = 5;
+
+const getChapter2SubStageForDisplay = (chapter2Flows: Chapter2StageFlow[], stageNo: number, flowIndex: number): number => {
+  const flow = chapter2Flows.find((entry) => entry.stageNo === stageNo);
+  if (!flow) return 1;
+
+  const currentStep = flow.flow[flowIndex];
+  if (currentStep?.type === 'battle' && currentStep.subStage) return currentStep.subStage;
+
+  const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find((step) => step.type === 'battle');
+  if (nextBattleStep?.subStage) return nextBattleStep.subStage;
+
+  const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find((step) => step.type === 'battle');
+  return previousBattleStep?.subStage || 1;
+};
+
+const getChapter2StageLabel = (chapter2Flows: Chapter2StageFlow[], stageNo?: number, flowIndex?: number): string => {
+  if (typeof stageNo !== 'number') return '未到達';
+  const chapterStage = Math.max(stageNo - 12, 1);
+  const subStage = getChapter2SubStageForDisplay(chapter2Flows, stageNo, typeof flowIndex === 'number' ? flowIndex : 0);
+  return `Stage${chapterStage}-${subStage}`;
+};
+
+const getChapter2LoopCount = (profile: UserProfile): number => {
+  const loopCount = profile.chapter2?.loopCount;
+  if (typeof loopCount === 'number' && loopCount > 0) return loopCount;
+
+  const stageCycle = profile.chapter2?.stageCycle;
+  const flowIndex = profile.chapter2?.flowIndex;
+  if (
+    stageCycle === CHAPTER2_FINAL_STAGE_NO &&
+    flowIndex === CHAPTER2_FINAL_BATTLE_FLOW_INDEX &&
+    profile.chapter2?.canGoToBoss
+  ) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const getChapter2ProgressScore = (profile: UserProfile): number => {
+  if (!profile.chapter2 || typeof profile.chapter2.stageCycle !== 'number') return -1;
+  const loopScore = getChapter2LoopCount(profile) * 1000;
+  return loopScore + profile.chapter2.stageCycle * 10 + (profile.chapter2.flowIndex || 0);
+};
+
+const getLatestChapter1ClearedStage = (profile: UserProfile): number => {
+  const victorySkills = profile.victorySkills || {};
+  const clearedStages = Object.keys(victorySkills)
+    .map((key) => {
+      const match = key.match(/^BOSS_(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    })
+    .filter((stage) => Number.isFinite(stage) && stage > 0);
+
+  if (clearedStages.length === 0) return 0;
+  return Math.max(...clearedStages);
+};
+
+const getChapter1ProgressScore = (profile: UserProfile): number => {
+  return getLatestChapter1ClearedStage(profile);
+};
+
+const getChapter1StageLabel = (profile: UserProfile): string => {
+  const clearedStage = getLatestChapter1ClearedStage(profile);
+  return clearedStage > 0 ? `Stage${clearedStage}` : '-';
+};
+
+const ChapterRankingCards: React.FC<{
+  profiles: UserProfile[];
+  chapter2Flows: Chapter2StageFlow[];
+  mode: 'chapter1' | 'chapter2';
+  currentUserUid?: string;
+}> = ({ profiles, chapter2Flows, mode, currentUserUid }) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+  const chapter2Profiles = profiles
+    .filter((profile) => profile.uid !== process.env.REACT_APP_ADMIN_UID && profile.chapter2 && typeof profile.chapter2.stageCycle === 'number')
+    .sort((a, b) => {
+      const scoreDiff = getChapter2ProgressScore(b) - getChapter2ProgressScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
+      return (b.lastActive || 0) - (a.lastActive || 0);
+    });
+
+  const chapter1Profiles = profiles.filter(
+    (profile) => profile.uid !== process.env.REACT_APP_ADMIN_UID && profile.displayName && profile.displayName.trim() !== ''
+  );
+
+  const rankingProfiles = (mode === 'chapter2' ? chapter2Profiles : chapter1Profiles)
+    .sort((a, b) => {
+      const scoreDiff = mode === 'chapter2'
+        ? getChapter2ProgressScore(b) - getChapter2ProgressScore(a)
+        : getChapter1ProgressScore(b) - getChapter1ProgressScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
+      return (b.lastActive || 0) - (a.lastActive || 0);
+    })
+    .slice(0, 10);
+
+  if (rankingProfiles.length === 0) {
+    return (
+      <div style={{ background: '#1a1a1a', padding: isMobile ? '16px' : '20px', borderRadius: '15px', border: '2px solid #4fc3f7', marginBottom: '20px' }}>
+        <h2 style={{ color: '#4fc3f7', margin: '0 0 10px 0', fontSize: isMobile ? '1rem' : '1.15rem', textAlign: 'center' }}>
+          {mode === 'chapter2' ? '第2章ランキング' : '第1章ランキング'}
+        </h2>
+        <p style={{ color: '#888', margin: 0, textAlign: 'center', fontSize: isMobile ? '0.8rem' : '0.95rem' }}>
+          {mode === 'chapter2' ? '第2章を進めているプレイヤーがまだいません' : '第1章のランキング対象プレイヤーがまだいません'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: '#111822', padding: isMobile ? '14px' : '20px', borderRadius: '18px', border: '2px solid #4fc3f7', marginBottom: '20px', boxShadow: '0 0 20px rgba(79, 195, 247, 0.18)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
+        <h2 style={{ color: '#4fc3f7', margin: 0, fontSize: isMobile ? '1.05rem' : '1.2rem' }}>{mode === 'chapter2' ? '第2章ランキング' : '第1章ランキング'}</h2>
+        <div style={{ color: '#9bb7c9', fontSize: isMobile ? '0.68rem' : '0.75rem' }}>
+          {mode === 'chapter2' ? '周回数 → 現在進行中Stage の順で表示' : '現在進行中Stage の順で表示'}
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          gap: isMobile ? '10px' : '12px',
+          overflowX: 'auto',
+          paddingBottom: '6px',
+          scrollSnapType: isMobile ? 'x proximity' : undefined
+        }}
+      >
+        {rankingProfiles.map((profile, index) => {
+          const isMe = profile.uid === currentUserUid;
+          return (
+            <div
+              key={profile.uid}
+              style={{
+                minWidth: isMobile ? '132px' : '145px',
+                flex: isMobile ? '0 0 132px' : '0 0 145px',
+                background: isMe ? 'linear-gradient(180deg, rgba(79,195,247,0.2), rgba(17,24,34,0.95))' : 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(17,24,34,0.95))',
+                border: isMe ? '1px solid #4fc3f7' : '1px solid #35506a',
+                borderRadius: '14px',
+                padding: isMobile ? '12px 10px' : '14px 12px',
+                boxSizing: 'border-box',
+                scrollSnapAlign: isMobile ? 'start' : undefined
+              }}
+            >
+              <div style={{ color: index === 0 ? '#ffd700' : '#c7d7e5', fontWeight: 'bold', fontSize: isMobile ? '0.78rem' : '0.85rem', marginBottom: '8px' }}>
+                {index + 1}位
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '10px', marginBottom: '10px' }}>
+                <img
+                  src={((profile.photoURL || '').startsWith('/') ? getStorageUrl(profile.photoURL) : (profile.photoURL || 'https://via.placeholder.com/48'))}
+                  alt={profile.displayName}
+                  style={{ width: isMobile ? '36px' : '42px', height: isMobile ? '36px' : '42px', borderRadius: '12px', objectFit: 'cover', background: '#222', border: isMe ? '2px solid #4fc3f7' : '1px solid #4f6d86', flexShrink: 0 }}
+                />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ color: '#fff', fontWeight: 'bold', fontSize: isMobile ? '0.78rem' : '0.9rem', lineHeight: 1.25, whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                    {profile.displayName}
+                  </div>
+                  {isMe && <div style={{ color: '#4fc3f7', fontSize: '0.65rem', fontWeight: 'bold' }}>YOU</div>}
+                </div>
+              </div>
+              <div style={{ color: '#cfe8f7', fontSize: isMobile ? '0.72rem' : '0.78rem', lineHeight: 1.45 }}>
+                <div>
+                  周回数: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{mode === 'chapter2' ? getChapter2LoopCount(profile) : '-'}</span>
+                </div>
+                <div>
+                  現在: <span style={{ color: '#fff', fontWeight: 'bold' }}>
+                    {mode === 'chapter2'
+                      ? getChapter2StageLabel(chapter2Flows, profile.chapter2?.stageCycle, profile.chapter2?.flowIndex)
+                      : getChapter1StageLabel(profile)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 interface UserListTableProps {
   profiles: UserProfile[];
+  chapter2Flows: Chapter2StageFlow[];
   lastActiveProfiles: {[uid: string]: number};
   getSkillByAbbr: (abbr: string) => SkillDetail | undefined;
   allSkills: SkillDetail[];
@@ -63,6 +247,7 @@ interface UserListTableProps {
 
 const UserListTable: React.FC<UserListTableProps> = ({
   profiles,
+  chapter2Flows,
   lastActiveProfiles,
   getSkillByAbbr,
   allSkills,
@@ -72,6 +257,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
   currentPage,
   onPageChange
 }) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
   const [spoilerVisibility, setSpoilerVisibility] = useState<{[uid: string]: boolean}>({});
 
   const toggleSpoiler = (uid: string) => {
@@ -84,15 +270,16 @@ const UserListTable: React.FC<UserListTableProps> = ({
   return (
     <>
       <h2 style={{ color: '#ffd700', marginTop: '30px' }}>参加者</h2>
-      <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+      <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a', borderRadius: '10px', border: '1px solid #444', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? '680px' : '760px' }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: '0.75rem' }}>
-              <th style={{ padding: '12px 5px', textAlign: 'left', width: '22%' }}>名前</th>
+            <tr style={{ borderBottom: '2px solid #444', color: '#ffd700', fontSize: isMobile ? '0.68rem' : '0.75rem' }}>
+              <th style={{ padding: isMobile ? '10px 4px' : '12px 5px', textAlign: 'left', width: isMobile ? '28%' : '24%' }}>名前</th>
               <th style={{ padding: '12px 2px', textAlign: 'center', width: '45px' }}>電影</th>
               <th style={{ padding: '12px 2px', textAlign: 'center', width: '45px' }}>💖</th>
-              <th style={{ padding: '12px 5px', textAlign: 'left', width: '22%', whiteSpace: 'nowrap' }}>無人島に持ってく</th>
-              <th style={{ padding: '12px 5px', textAlign: 'left' }}>ひとこと</th>
+              <th style={{ padding: isMobile ? '10px 4px' : '12px 5px', textAlign: 'center', width: isMobile ? '80px' : '96px', whiteSpace: 'nowrap' }}>第1章</th>
+              <th style={{ padding: isMobile ? '10px 4px' : '12px 5px', textAlign: 'center', width: isMobile ? '96px' : '110px', whiteSpace: 'nowrap' }}>第2章</th>
+              <th style={{ padding: isMobile ? '10px 4px' : '12px 5px', textAlign: 'left' }}>ひとこと</th>
             </tr>
           </thead>
           <tbody>
@@ -114,43 +301,48 @@ const UserListTable: React.FC<UserListTableProps> = ({
                   onMouseEnter={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.25)' : '#222'}
                   onMouseLeave={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent'}
                 >
-                  <td style={{ padding: '8px 5px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: '32px', height: '32px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: isMe ? '2px solid #4fc3f7' : '1px solid #444' }} />
+                  <td style={{ padding: isMobile ? '8px 4px' : '8px 5px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '8px' }}>
+                      <img src={((p.photoURL || '').startsWith('/') ? getStorageUrl(p.photoURL) : (p.photoURL || 'https://via.placeholder.com/40'))} alt={p.displayName} style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', borderRadius: '10%', background: '#222', objectFit: 'cover', border: isMe ? '2px solid #4fc3f7' : '1px solid #444', flexShrink: 0 }} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ color: isMe ? '#4fc3f7' : '#FFFFFF', fontWeight: 'bold', fontSize: p.displayName.length > 9 ? '0.65rem' : (p.displayName.length > 7 ? '0.75rem' : '0.85rem'), display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <span style={{ whiteSpace: 'nowrap' }}>{p.displayName}</span>
+                        <div style={{ color: isMe ? '#4fc3f7' : '#FFFFFF', fontWeight: 'bold', fontSize: isMobile ? '0.68rem' : (p.displayName.length > 9 ? '0.65rem' : (p.displayName.length > 7 ? '0.75rem' : '0.85rem')), display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ whiteSpace: isMobile ? 'normal' : 'nowrap', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: 1.2 }}>{p.displayName}</span>
                           {isMe && <span style={{ fontSize: '0.65rem', background: '#4fc3f7', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: 'bold', flexShrink: 0 }}>YOU</span>}
                         </div>
-                        {p.title && <div style={{ fontSize: '0.6rem', color: '#ffd700', whiteSpace: 'nowrap' }}>{p.title}</div>}
+                        {p.title && <div style={{ fontSize: isMobile ? '0.55rem' : '0.6rem', color: '#ffd700', whiteSpace: isMobile ? 'normal' : 'nowrap', overflowWrap: 'anywhere' }}>{p.title}</div>}
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '8px 2px', textAlign: 'center' }}>
+                  <td style={{ padding: isMobile ? '8px 1px' : '8px 2px', textAlign: 'center' }}>
                     {p.myKenju?.name ? (
                       <span title={p.myKenju.name} style={{ cursor: 'help' }}>✅</span>
                     ) : (
                       <span style={{ color: '#444' }}>-</span>
                     )}
                   </td>
-                  <td style={{ padding: '8px 2px', textAlign: 'center' }}>
+                  <td style={{ padding: isMobile ? '8px 1px' : '8px 2px', textAlign: 'center' }}>
                     {favSkill && (
                       <img
                         src={getStorageUrl(favSkill.icon)}
                         alt={favSkill.name}
                         title={favSkill.name}
-                        style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #ffd700' }}
+                        style={{ width: isMobile ? '22px' : '24px', height: isMobile ? '22px' : '24px', borderRadius: '4px', border: '1px solid #ffd700' }}
                       />
                     )}
                   </td>
-                  <td style={{ padding: '8px 5px', fontSize: (p.oneThing || '').length > 10 ? '0.55rem' : ((p.oneThing || '').length > 7 ? '0.65rem' : '0.85rem'), color: '#ccc' }}>
-                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>{p.oneThing || '-'}</div>
+                  <td style={{ padding: isMobile ? '8px 4px' : '8px 5px', textAlign: 'center', fontSize: isMobile ? '0.68rem' : '0.78rem', color: '#ccc', whiteSpace: 'nowrap' }}>
+                    {getChapter1StageLabel(p)}
                   </td>
-                  <td style={{ padding: '8px 5px', fontSize: '0.8rem', color: '#ccc' }}>
+                  <td style={{ padding: isMobile ? '8px 4px' : '8px 5px', textAlign: 'center', fontSize: isMobile ? '0.68rem' : '0.78rem', color: '#ccc', whiteSpace: 'nowrap' }}>
+                    {p.chapter2?.stageCycle
+                      ? getChapter2StageLabel(chapter2Flows, p.chapter2.stageCycle, p.chapter2.flowIndex)
+                      : '-'}
+                  </td>
+                  <td style={{ padding: isMobile ? '8px 4px' : '8px 5px', fontSize: isMobile ? '0.72rem' : '0.8rem', color: '#ccc' }}>
                     {p.isSpoiler && !spoilerVisibility[p.uid] ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleSpoiler(p.uid); }}
-                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.65rem', padding: '4px 8px', lineHeight: '1.2', width: '100%' }}
+                        style={{ background: '#555', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: isMobile ? '0.58rem' : '0.65rem', padding: isMobile ? '4px 6px' : '4px 8px', lineHeight: '1.2', width: '100%' }}
                       >
                         ネタバレ注意<br/>(クリックで表示)
                       </button>
@@ -173,18 +365,19 @@ const UserListTable: React.FC<UserListTableProps> = ({
         </table>
       </div>
       {/* ページング UI */}
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: isMobile ? '6px' : '10px', flexWrap: 'wrap' }}>
           {Array.from({ length: Math.ceil(allProfilesCount / 20) }, (_, i) => (
               <button
                   key={i}
                   onClick={() => onPageChange(i + 1)}
                   style={{
-                      padding: '5px 10px',
+                      padding: isMobile ? '5px 8px' : '5px 10px',
                       background: currentPage === i + 1 ? '#4fc3f7' : '#333',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '3px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      fontSize: isMobile ? '0.75rem' : '0.85rem'
                   }}
               >
                   {i + 1}
@@ -363,7 +556,9 @@ const CustomAlertModal: React.FC<{
 interface LoungeProps {
   user: User | null;
   myProfile: UserProfile | null;
+  profiles: UserProfile[];
   allProfiles: UserProfile[];
+  chapter2Flows: Chapter2StageFlow[];
   lastActiveProfiles: {[uid: string]: number};
   kenjuBoss: {name: string, image: string, skills: SkillDetail[]} | null;
   currentKenjuBattle: {name: string, image: string, skills: SkillDetail[]} | null;
@@ -406,7 +601,9 @@ SkillCard: React.FC<any>;
 export const Lounge: React.FC<LoungeProps> = ({
   user,
   myProfile,
+  profiles,
   allProfiles,
+  chapter2Flows,
   lastActiveProfiles,
   kenjuBoss,
   currentKenjuBattle,
@@ -446,6 +643,8 @@ onPageChange,
   loadingImageUrl
 }) => {
   const today = new Date().toLocaleDateString();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+  const loungeBackgroundUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-lounge.png`;
 
   const [email, setEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
@@ -557,7 +756,7 @@ onPageChange,
   if (stageMode === 'LOUNGE') {
     if (user && !isDeneiStatsLoaded) {
       return (
-        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: `linear-gradient(rgba(4, 18, 38, 0.45), rgba(4, 18, 38, 0.58)), url(${loungeBackgroundUrl})`, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
           <div className="loading-spinner" style={{
             width: '50px', height: '50px', border: '5px solid rgba(79, 195, 247, 0.3)',
             borderTop: '5px solid #4fc3f7', borderRadius: '50%',
@@ -575,7 +774,7 @@ onPageChange,
     }
 
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})` }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `linear-gradient(rgba(4, 18, 38, 0.42), rgba(4, 18, 38, 0.6)), url(${loungeBackgroundUrl})`, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',
@@ -631,18 +830,18 @@ onPageChange,
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '100px' : '0'  }}>
-          <button onClick={onBack} style={{ padding: '8px 15px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>戻る</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: !user ? '400px' : '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '100px' : '0'  }}>
+          <button onClick={onBack} style={{ padding: '8px 15px', background: 'rgba(8, 24, 48, 0.72)', color: '#fff', border: '1px solid rgba(137, 216, 255, 0.45)', borderRadius: '999px', cursor: 'pointer', fontSize: '0.8rem', backdropFilter: 'blur(10px)', boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)' }}>戻る</button>
           <h1 style={{ color: '#4fc3f7', margin: 0 }}>LOUNGE</h1>
           <div style={{ width: '60px' }}></div>
         </div>
         {!user ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '400px' }}>
-            <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '15px', border: '2px solid #4fc3f7', textAlign: 'center', width: '100%' }}>
+            <div style={{ background: 'linear-gradient(180deg, rgba(8, 24, 48, 0.78), rgba(8, 18, 36, 0.68))', padding: '30px', borderRadius: '24px', border: '1px solid rgba(137, 216, 255, 0.55)', textAlign: 'center', width: '100%', backdropFilter: 'blur(14px)', boxShadow: '0 24px 60px rgba(0, 0, 0, 0.22)' }}>
               <h2 style={{ color: '#fff' }}>{isSignUp ? "新規登録" : "サインイン"}</h2>
               <div style={{ marginBottom: '20px' }}>
-                  <input type="email" placeholder="メールアドレス" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }} />
-                  <input type="password" placeholder="パスワード" value={pass} onChange={e => setPass(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }} />
+                  <input type="email" placeholder="メールアドレス" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '10px', boxSizing: 'border-box', backdropFilter: 'blur(8px)' }} />
+                  <input type="password" placeholder="パスワード" value={pass} onChange={e => setPass(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '10px', boxSizing: 'border-box', backdropFilter: 'blur(8px)' }} />
                   {isSignUp ? (
                       <button className="TitleButton neon-blue" onClick={() => onEmailSignUp(email, pass)} style={{ width: '100%', marginBottom: '10px' }}>登録・確認メール送信</button>
                   ) : (
@@ -657,7 +856,7 @@ onPageChange,
               </div>
             </div>
             
-            <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '10px', border: '1px solid #ff5252', width: '100%', textAlign: 'center' }}>
+            <div style={{ background: 'linear-gradient(180deg, rgba(52, 14, 18, 0.82), rgba(36, 12, 16, 0.68))', padding: '15px', borderRadius: '18px', border: '1px solid rgba(255, 82, 82, 0.55)', width: '100%', textAlign: 'center', backdropFilter: 'blur(12px)', boxShadow: '0 18px 40px rgba(0, 0, 0, 0.18)' }}>
               <p style={{ color: '#ff5252', fontSize:
                  '0.8rem', margin: '0px 0px 10px 0px' }}>ログインできない・データをリセットしたい場合</p>
               <button
@@ -695,6 +894,20 @@ onPageChange,
                 <h2 style={{ color: '#888', margin: '0 0 10px 0', fontSize: '1.2rem' }}>剣獣戦</h2>
                 <p style={{ color: '#ccc', margin: 0 }}>近日中にコンテンツ追加予定です。お楽しみに！</p>
             </div>
+
+            <ChapterRankingCards
+              profiles={allProfiles}
+              chapter2Flows={chapter2Flows}
+              mode="chapter2"
+              currentUserUid={user?.uid}
+            />
+
+            <ChapterRankingCards
+              profiles={allProfiles}
+              chapter2Flows={chapter2Flows}
+              mode="chapter1"
+              currentUserUid={user?.uid}
+            />
 
             <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
               <div style={{  background: '#1a1a1a', padding: '20px', borderRadius: '15px', border: '2px solid #ff5252', textAlign: 'center', boxShadow: '0 0 15px rgba(255, 82, 82, 0.2)', display: 'flex', flexDirection: 'column' }}>
@@ -812,7 +1025,8 @@ onPageChange,
             )} */}
 
             <UserListTable
-              profiles={allProfiles}
+              profiles={profiles}
+              chapter2Flows={chapter2Flows}
               lastActiveProfiles={lastActiveProfiles}
               getSkillByAbbr={getSkillByAbbr}
               allSkills={allSkills}

@@ -1,6 +1,6 @@
 Chapter2 Balance Tools Guide
 
-更新日: 2026-04-24
+更新日: 2026-04-25
 
 このフォルダには、第2章の戦闘バランス確認用スクリプトが入っています。
 
@@ -39,6 +39,8 @@ Chapter2 Balance Tools Guide
   - 探索途中の進捗ログ
 - tools/balance-search-log.md
   - 手動メモ
+- tools/balance-search-deep-summary.md
+  - 深掘り探索結果の要約
 
 基本コマンド
 - 全体を回す
@@ -49,10 +51,16 @@ Chapter2 Balance Tools Guide
   - node tools/chapter2-balance-search.cjs --targets 6-2,7-2
 - 保存する勝ち編成数を減らす
   - node tools/chapter2-balance-search.cjs --targets 8-2 --sample-limit 3
+- 可能な限り多くの勝ち編成を集める
+  - node tools/chapter2-balance-search.cjs --sample-limit 0 --max-checks 1000000 --results-path tools/balance-search-deep-results.json --progress-log-path tools/balance-search-deep-progress.log
 - 特定スキルを必ず含める
   - node tools/chapter2-balance-search.cjs --targets 9-2 --require-skills 霊,礁
 - 複数ボス定義のうち特定パターンだけ回す
   - node tools/chapter2-balance-search.cjs --targets 12-2 --boss-indexes 1 --require-skills 狼
+- 深掘り結果から要約を作る
+  - node tools/generate-balance-search-summary.cjs --input tools/balance-search-deep-results.json --output tools/balance-search-deep-summary.md
+- 深掘り結果から難易度ランキングを作る
+  - node tools/generate-balance-difficulty-ranking.cjs --input tools/balance-search-deeper-results.json --out-json tools/balance-difficulty-ranking.json --out-md tools/balance-difficulty-ranking.md
 
 引数
 - --targets <keys>
@@ -60,6 +68,7 @@ Chapter2 Balance Tools Guide
   - 指定したステージだけ探索する
 - --sample-limit <n>
   - 勝ち編成の保存数
+  - 0 を指定すると、sample 数で打ち切らずに探索を続ける
 - --uncleared-only
   - 既に clearable=true のステージは再探索しない
 - --require-skills <skills>
@@ -68,6 +77,17 @@ Chapter2 Balance Tools Guide
 - --boss-indexes <indexes>
   - 例: 1 / 1,3
   - bossSkillAbbrs が配列の時、1始まりで対象パターンだけ探索する
+- --max-checks <n>
+  - ステージごとの探索候補数の上限
+  - 大きい値を入れるほど深掘りできる
+- --results-path <path>
+  - 結果 JSON の出力先を変える
+- --progress-log-path <path>
+  - 進捗ログの出力先を変える
+- --win-log-limit <n>
+  - 勝ち編成ログを細かく出す上限件数
+- --win-log-interval <n>
+  - 上限を超えた後、何件ごとに勝ち編成ログを出すか
 
 results.json の見方
 - key
@@ -89,6 +109,15 @@ results.json の見方
   - 勝ち編成のサンプル
 - pool
   - その時点で使用可能な所持プール
+- stopReason
+  - exhausted:
+    候補を最後まで調べ切った
+  - sample-limit:
+    sampleLimit に達した
+  - max-checks:
+    maxChecks に達した
+  - missing-required-skills:
+    必須スキルがプール内に無かった
 
 --------------------------------
 2. ボス調整候補探索
@@ -194,3 +223,49 @@ fixes の中身
   - node tools/chapter2-boss-tuning-search.cjs --targets 6-2
 - 11章後半を2文字差し替えまでで探す
   - node tools/chapter2-boss-tuning-search.cjs --targets 11-2 --max-replacements 2
+
+--------------------------------
+4. 12-2#1 難化分析
+--------------------------------
+
+ファイル
+- tools/analyze-12-2-1-hardening.cjs
+
+目的
+- 12-2 の1つ目スペックを、狼前提のまま少し難しくする候補を探す
+- 1文字差し替え候補を総当たりし、勝ち筋密度が下がる案を順位付けする
+- 途中経過をログへ出す
+
+主な出力先
+- tools/12-2-1-hardening-results.json
+- tools/12-2-1-hardening-progress.log
+
+基本コマンド
+- 既定条件で回す
+  - node tools/analyze-12-2-1-hardening.cjs
+- 探索上限を変える
+  - node tools/analyze-12-2-1-hardening.cjs --max-checks 651605 --top 30
+- ランダムに1～3文字差し替えて探す
+  - node tools/analyze-12-2-1-hardening.cjs --mode random --iterations 1000 --min-replacements 1 --max-replacements 3 --progress-every 20
+
+引数
+- --max-checks <n>
+  - 1候補ごとの探索上限
+- --out-path <path>
+  - 結果 JSON の出力先
+- --log-path <path>
+  - 進捗ログの出力先
+- --progress-every <n>
+  - 何候補ごとに途中経過を出すか
+- --top <n>
+  - 保存する上位候補数
+- --mode <type>
+  - exhaustive / random
+- --iterations <n>
+  - random モードの試行回数
+- --min-replacements <n>
+  - random モードの最小差し替え数
+- --max-replacements <n>
+  - random モードの最大差し替え数
+- --seed <n>
+  - random モードの乱数シード

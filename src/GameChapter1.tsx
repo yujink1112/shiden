@@ -146,7 +146,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       ];
     }
 
-    if (stageCycle >= 3 && stageCycle <= 4 && stageMode === 'MID') {
+    if (stageCycle == 3 && stageMode === 'MID') {
       const tips = [
         '【＋速】【＋硬】などの付帯スキルは、基本的に一つ左のスキルを強化します。',
         'シナジーのあるスキル同士は、黄色い線でつながります。'
@@ -173,7 +173,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       return tips;
     }
 
-    if (stageCycle >= 6 && stageCycle >= 6 && stageMode === 'MID' && stageSkillTip) {
+    if (stageCycle == 6 && stageMode === 'MID' && stageSkillTip) {
       return [
         'ここからは、ボスがぐっと強くなります。必ず弱点がありますので、敵をよく観察してみましょう。'
       ];

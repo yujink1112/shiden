@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, query, limitToLast, get, orderByChild } from "firebase/database";
+import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, get } from "firebase/database";
 import { database, auth, googleProvider, recordAccess, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
@@ -64,6 +64,8 @@ function App() {
   const [preloadProgress, setPreloadProgress] = useState({ current: 0, total: 0 });
   const [chapter2Flows, setChapter2Flows] = useState<Chapter2StageFlow[]>([]);
   const loadingImageUrl = getStorageUrl('/images/title/sailing_loop_32x32_fixed.gif');
+  const titleHeroPcUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-pc.png`;
+  const titleHeroMobileUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-mobile.png`;
 
   useEffect(() => {
     const loadData = async () => {
@@ -115,6 +117,8 @@ function App() {
         // 共通リソース
         imageUrls.add(getStorageUrl('/images/background/background.jpg'));
         imageUrls.add(getStorageUrl('/images/title/titlelogo.png'));
+        imageUrls.add(titleHeroPcUrl);
+        imageUrls.add(titleHeroMobileUrl);
         imageUrls.add(getStorageUrl('/images/title/タイトルロゴ2.png'));
         imageUrls.add(getStorageUrl('/images/chapter/Chapter1.png'));
         imageUrls.add(getStorageUrl('/images/chapter/Chapter2.png'));
@@ -302,6 +306,8 @@ function App() {
   const [showClearStats, setShowClearStats] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
   const [showYoutubeModal, setShowYoutubeModal] = useState(false);
+  const [showTitleMenuModal, setShowTitleMenuModal] = useState(false);
+  const [isTapStartBlinking, setIsTapStartBlinking] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
   const [hasChapter2Save, setHasChapter2Save] = useState(false);
@@ -616,6 +622,42 @@ function App() {
           setShowLogForBattleIndex(-1);
           setLogComplete(false);
           setShowBossClearPanel(false);
+        }
+        if (isPreBattleReward && nextStep.skill) {
+          const rewardsToClaim = [nextStep.skill].filter(abbr => !!getSkillByAbbr(abbr));
+          if (rewardsToClaim.length > 0) {
+            const now = Date.now();
+            if (user) {
+              const result = await claimChapter2Reward(user.uid, {
+                rewardStepKey,
+                rewards: rewardsToClaim,
+                stageCycle,
+                flowIndex: nextIndex,
+                lastUpdated: now
+              });
+              const serverData = result.data || {};
+              const newOwnedSkills = Array.isArray(serverData.ownedSkills)
+                ? getRegularSkills(serverData.ownedSkills, 2)
+                : Array.from(new Set([...ownedSkillAbbrs, ...rewardsToClaim]));
+              const newClaimedSteps = Array.isArray(serverData.claimedRewardSteps)
+                ? serverData.claimedRewardSteps
+                : saveClaimedRewardSteps([...claimedRewardSteps, rewardStepKey]);
+
+              setOwnedSkillAbbrs(newOwnedSkills);
+              saveClaimedRewardSteps(newClaimedSteps);
+              localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(newOwnedSkills));
+              localStorage.removeItem('shiden_chapter2_reward_choices');
+              await saveProfileProgress(user.uid, { updatedAt: now });
+            } else {
+              const newOwnedSkills = Array.from(new Set([...ownedSkillAbbrs, ...rewardsToClaim]));
+              setOwnedSkillAbbrs(newOwnedSkills);
+              saveClaimedRewardSteps([...claimedRewardSteps, rewardStepKey]);
+              localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(newOwnedSkills));
+            }
+          }
+          setSelectedRewards([]);
+          setRewardSelectionMode(false);
+          return moveToNextStep(flow, nextIndex);
         }
         setSelectedRewards([]); // 報酬選択前にリセット
         if (nextStep.skill) {
@@ -1869,6 +1911,15 @@ const PLAYER_SKILL_COUNT = 5;
           if (isAdminDebugSkillsActiveRef.current) return;
           if (snapshot.exists()) {
             const data = snapshot.val();
+            const inferredLoopCount =
+              data.stageCycle === 24 &&
+              data.flowIndex === 5 &&
+              Boolean(data.canGoToBoss)
+                ? 1
+                : 0;
+            if (data.loopCount === undefined) {
+              saveChapter2Progress(authenticatedUser.uid, { loopCount: inferredLoopCount });
+            }
             // 現在が第2章なら、Firebaseのデータで状態を上書き
             // (章選択画面などで「続きから」を選んだ時や、ページリロード時の対応)
             const currentStage = STAGE_DATA.find(s => s.no === (data.stageCycle || stageCycle));
@@ -2108,9 +2159,9 @@ const PLAYER_SKILL_COUNT = 5;
       }
     });
 
-    // 最近アクティブなユーザー100人を取得（これにより自分が更新された際もリストに含まれやすくなる）
-    const profilesQuery = query(ref(database, 'profiles'), orderByChild('lastActive'), limitToLast(100));
-    const unsubProfiles = onValue(profilesQuery, (snapshot) => {
+    // ランキング用に全プロフィールを取得する
+    const profilesRef = ref(database, 'profiles');
+    const unsubProfiles = onValue(profilesRef, (snapshot) => {
       if (snapshot.exists()) {
         try {
           const data = snapshot.val();
@@ -2210,7 +2261,8 @@ const PLAYER_SKILL_COUNT = 5;
     // 画像の事前読み込み
     const criticalImages = [
       getStorageUrl('/images/background/background.jpg'),
-      getStorageUrl('/images/title/titlelogo.png')
+      titleHeroPcUrl,
+      titleHeroMobileUrl
     ];
 
     const skillIcons = ALL_SKILLS.map(s => getStorageUrl(s.icon));
@@ -3013,6 +3065,23 @@ const PLAYER_SKILL_COUNT = 5;
   const isMobile = window.innerWidth < 768;
   const isLargeScreen = window.innerWidth > 1024;
   const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'].includes(stageMode);
+  const titleHeroUrl = isMobile ? titleHeroMobileUrl : titleHeroPcUrl;
+
+  const handleTapStart = () => {
+    if (showTitleMenuModal || isTapStartBlinking) return;
+    setIsTapStartBlinking(true);
+    window.setTimeout(() => {
+      setShowTitleMenuModal(true);
+      setIsTapStartBlinking(false);
+    }, 420);
+  };
+
+  useEffect(() => {
+    if (isTitle) {
+      setShowTitleMenuModal(false);
+      setIsTapStartBlinking(false);
+    }
+  }, [isTitle]);
 
   useEffect(() => {
     // BGMデータのロード
@@ -3218,7 +3287,9 @@ const PLAYER_SKILL_COUNT = 5;
       <Lounge
         user={user}
         myProfile={myProfile}
-        allProfiles={pagedProfiles}
+        profiles={pagedProfiles}
+        allProfiles={sortedProfiles}
+        chapter2Flows={chapter2Flows}
         lastActiveProfiles={lastActiveProfiles}
         kenjuBoss={kenjuBoss}
         kenjuClears={kenjuClears}
@@ -3243,41 +3314,24 @@ const PLAYER_SKILL_COUNT = 5;
 
         onDeleteAccount={handleDeleteAccount}
         onBack={() => {
+          clearStoryCanvasState();
+          setShowStoryModal(false);
+          setShowChapterTitle(false);
+          setShowChapter2Title(false);
+          setShowPrologueTitle(false);
+          setCreditsUrl(null);
+          setStoryUrl(null);
+          setStoryContent(null);
+          setStoryContentV2(null);
+          setGameStarted(false);
+          setBattleResults([]);
+          setShowLogForBattleIndex(-1);
+          setRewardSelectionMode(false);
+          setSelectedRewards([]);
+          setSelectedPlayerSkills([]);
+          setCanGoToBoss(false);
+          setStageMode('MID');
           setIsTitle(true);
-          // タイトルに戻る際は、次に CONTINUE した時のために進行モードに戻しておく
-          const lastMode = getLastGameMode();
-          setStageMode(lastMode);
-          
-          // 最新の進行状況を Firebase から再取得して同期
-          if (user) {
-            const profileRef = ref(database, `profiles/${user.uid}`);
-            get(profileRef).then((snapshot) => {
-              if (snapshot.exists()) {
-                const data = snapshot.val();
-                const firebaseUpdatedAt = data.updatedAt || 0;
-                const localUpdatedAt = parseInt(localStorage.getItem('shiden_updated_at') || '0', 10);
-                
-                if (firebaseUpdatedAt > localUpdatedAt) {
-                  let firebaseStageCycle = data.stageCycle || 1;
-                  if (firebaseStageCycle >= 13) firebaseStageCycle = 12;
-                  const firebaseStageMode = data.lastGameMode as StageMode;
-                  const firebaseCanGoToBoss = data.canGoToBoss || false;
-                  
-                  setStageCycle(firebaseStageCycle);
-                  localStorage.setItem('shiden_stage_cycle', firebaseStageCycle.toString());
-                  if (firebaseStageMode) {
-                    localStorage.setItem('shiden_last_game_mode', firebaseStageMode);
-                    localStorage.setItem('shiden_stage_mode', firebaseStageMode);
-                    setStageMode(firebaseStageMode);
-                  }
-                  setCanGoToBoss(firebaseCanGoToBoss);
-                  localStorage.setItem('shiden_can_go_to_boss', firebaseCanGoToBoss.toString());
-                  localStorage.setItem('shiden_updated_at', firebaseUpdatedAt.toString());
-                }
-              }
-            });
-          }
-          
           refreshKenju();
         }}
         onViewProfile={(p) => { setViewingProfile(p); setStageMode('PROFILE'); }}
@@ -3313,24 +3367,24 @@ const PLAYER_SKILL_COUNT = 5;
   }
 
   if (isTitle) {
-    if (!isAssetsLoaded || !stagesLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000', backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />;
+    if (!isAssetsLoaded || !stagesLoaded) return <div className="TitleScreenContainer" style={{ backgroundColor: '#000', backgroundImage: `url(${titleHeroUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />;
     const hasSaveData = !!localStorage.getItem('shiden_stage_cycle');
     return (
       <div className="TitleScreenContainer" style={{
         height: '100dvh', // 動的ビューポート単位を使用
         overflowX: 'hidden',
         overflowY: 'hidden',
-        padding: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '40px 0',
+        padding: '0',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'flex-start' : 'center',
+        justifyContent: 'flex-start',
         boxSizing: 'border-box',
         position: 'fixed', // スクロールを物理的に抑制
         top: 0,
         left: 0,
         width: '100%',
-        backgroundImage: `url(${getStorageUrl('/images/background/background.jpg')})`,
+        backgroundImage: `url(${titleHeroUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}>
@@ -3390,59 +3444,50 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
         <div className="TitleBackgroundEffect"></div>
-        <div className="TitleContent" style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '20px' : '10px', // スマホ版でも間隔を確保
+        <div className="TitleContent TitleContentRenewed" style={{
           width: '100%',
-          marginTop: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '5dvh' : '0'
+          marginTop: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '0' : '0'
         }}>
-          <div className="TitleLogoWrapper" style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px' : '0px' }}>
+          <div className="TitleHeroFrame" onClick={handleTapStart}>
             <img
-              src={getStorageUrl('/images/title/titlelogo.png')}
-              alt="紫電一閃"
-              className="TitleLogo"
-              style={{ maxHeight: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '25vh' : 'auto' }} // ロゴを少し小さくして間隔を稼ぐ
+              src={titleHeroUrl}
+              alt=""
+              aria-hidden="true"
+              className="TitleHeroBackdrop"
             />
-          </div>
-          {user && (
-            <div style={{ marginBottom: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '5px' : '10px', color: '#ffd700', fontSize: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '1.1rem' : '1.0rem', textShadow: '0 0 5px rgba(255, 215, 0, 0.5)', fontWeight: 'bold' }}>
-                ユーザ名: {myProfile?.displayName || "名もなき人"}
+            <img
+              src={titleHeroUrl}
+              alt="紫電一閃 タイトル"
+              className="TitleHeroImage"
+            />
+            <div className="TitleHeroShade"></div>
+            <div className="TitleHeroLight"></div>
+            <div className="TitleOverlayLayer">
+              <div
+                className={`TitleTapStart ${showTitleMenuModal ? 'is-hidden' : ''} ${isTapStartBlinking ? 'is-blinking' : ''}`}
+              >
+                Tap to Start
+              </div>
+
+              <div className="TitleFooter TitleFooterRenewed">
+                {user && (
+                  <div className="TitleUserName">
+                    <span className="TitleUserNameLabel">USER</span>
+                    <span className="TitleUserNameValue">{myProfile?.displayName || "名もなき人"}</span>
+                  </div>
+                )}
+                <div className="TitleFooterStat">{activeUsers}人がプレイ中です</div>
+                <div className="TitleFooterCopyright"> © 2026 Shiden Games </div>
+                <div className="TitleFooterLinks">
+                  <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); setShowLegal(true); }}>規約・運営情報</span>
+                  <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" style={{ color: '#888' }} onClick={(e) => e.stopPropagation()}>お問い合わせ</a>
+                </div>
+                {isAdmin && false &&(
+                  <button className="TitleButton neon-purple" onClick={(e) => { e.stopPropagation(); setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
+                )}
+                <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
+              </div>
             </div>
-          )}
-          <div className="TitleMenu" style={{
-            gap: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '12px' : '12px'
-          }}>
-            <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
-            <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-            <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
-            <button
-              className="TitleButton neon-purple"
-              onClick={() => {
-                if (hasSaveData) {
-                  setShowRule(true);
-                } else {
-                  setShowRuleHint(true);
-                }
-              }}
-              style={{ opacity: hasSaveData ? 1 : 0.5, cursor: 'pointer' }}
-            >
-              RULE
-            </button>
-            <button className="TitleButton neon-blue" onClick={() => {
-              const anonymousVictoriesRef = ref(database, 'anonymousVictories');
-              get(anonymousVictoriesRef).then((snap) => {
-                if (snap.exists()) {
-                  setAnonymousVictories(snap.val());
-                }
-                setShowClearStats(true);
-              }).catch(err => {
-                console.warn("Anonymous victories fetch failed (possibly permission denied):", err);
-                setShowClearStats(true);
-              });
-            }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
           </div>
 
           <div style={{ margin: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? '10px auto' : '40px auto 20px', display: 'none', maxWidth: '600px', background: 'rgba(0,0,0,0.7)', padding: '25px', borderRadius: '15px', border: '1px solid #444', textAlign: 'left', position: 'relative', zIndex: 1, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
@@ -3454,18 +3499,46 @@ const PLAYER_SKILL_COUNT = 5;
             </p>
           </div>
 
-          <div className="TitleFooter">
-            <div style={{ textAlign: 'center', padding: '0px 0px 0px 10px', marginBottom: '10px', color: '#00d2ff', fontSize: '0.9rem' }}>{activeUsers}人がプレイ中です</div>
-            <div style={{ textAlign: 'center', fontSize: '0.8rem', marginLeft: '5px', marginBottom: '10px' }}> © 2026 Shiden Games </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', fontSize: '0.75rem', color: '#888', marginBottom: '10px' }}>
-              <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={() => setShowLegal(true)}>規約・運営情報</span>
-              <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" style={{ color: '#888' }}>お問い合わせ</a>
+          {showTitleMenuModal && (
+            <div className="TitleStartModalOverlay" onClick={() => setShowTitleMenuModal(false)}>
+              <div className="TitleStartModal" onClick={(e) => e.stopPropagation()}>
+                <div className="TitleStartModalHeader">
+                  <span>MENU</span>
+                  <button onClick={() => setShowTitleMenuModal(false)} className="TitleStartModalClose">×</button>
+                </div>
+                <div className="TitleMenu TitleMenuRenewed">
+                  <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
+                  <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
+                  <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
+                  <button
+                    className="TitleButton neon-purple"
+                    onClick={() => {
+                      if (hasSaveData) {
+                        setShowRule(true);
+                      } else {
+                        setShowRuleHint(true);
+                      }
+                    }}
+                    style={{ opacity: hasSaveData ? 1 : 0.58, cursor: 'pointer' }}
+                  >
+                    RULE
+                  </button>
+                  <button className="TitleButton neon-blue" onClick={() => {
+                    const anonymousVictoriesRef = ref(database, 'anonymousVictories');
+                    get(anonymousVictoriesRef).then((snap) => {
+                      if (snap.exists()) {
+                        setAnonymousVictories(snap.val());
+                      }
+                      setShowClearStats(true);
+                    }).catch(err => {
+                      console.warn("Anonymous victories fetch failed (possibly permission denied):", err);
+                      setShowClearStats(true);
+                    });
+                  }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
+                </div>
+              </div>
             </div>
-            {isAdmin && false &&(
-              <button className="TitleButton neon-purple" onClick={() => { setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
-            )}
-            <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
-          </div>
+          )}
         </div>
         
         <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
@@ -3473,12 +3546,14 @@ const PLAYER_SKILL_COUNT = 5;
         </div>
 
         {showChapterSelect && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowChapterSelect(null)} style={{ zIndex: 11000 }}>
+          <div className="ChangelogModalOverlay" onClick={() => setShowChapterSelect(null)} style={{ zIndex: 11000, backgroundColor: 'rgba(0, 0, 0, 0.28)', backdropFilter: 'blur(8px)' }}>
             <div className="ChangelogModal" onClick={(e) => e.stopPropagation()} style={{ 
               maxWidth: '800px', 
               width: '90%', 
-              backgroundColor: '#000', 
-              border: '2px solid #4fc3f7',
+              background: 'linear-gradient(180deg, rgba(8, 26, 52, 0.68), rgba(8, 20, 40, 0.5))',
+              border: '1px solid rgba(137, 216, 255, 0.7)',
+              backdropFilter: 'blur(14px)',
+              boxShadow: '0 28px 60px rgba(3, 14, 32, 0.32)',
               padding: isMobile ? '10px' : '20px'
             }}>
               <div className="ChangelogHeader" style={{ background: '#4fc3f7', color: '#000', marginBottom: '20px' }}>
@@ -3495,6 +3570,7 @@ const PLAYER_SKILL_COUNT = 5;
               }}>
                 {/* 第1章 */}
                 <div 
+                  className="ChapterSelectCard"
                   onClick={() => handleChapterSelect(1, showChapterSelect.mode === 'NEW')}
                   style={{ 
                     flex: 1,
@@ -3530,6 +3606,7 @@ const PLAYER_SKILL_COUNT = 5;
 
                   return (
                 <div 
+                  className="ChapterSelectCard"
                   onClick={() => {
                     if (needsChapter2Login) {
                       handleChapterSelect(2, showChapterSelect.mode === 'NEW');
@@ -3738,8 +3815,8 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showRuleHint && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowRuleHint(false)}>
-            <div className="ChangelogModal" style={{ maxWidth: '440px', border: '2px solid #00d2ff' }} onClick={(e) => e.stopPropagation()}>
+          <div className="ChangelogModalOverlay" onClick={() => setShowRuleHint(false)} style={{ backgroundColor: 'rgba(0, 0, 0, 0.28)', backdropFilter: 'blur(8px)' }}>
+            <div className="ChangelogModal" style={{ maxWidth: '440px', border: '1px solid rgba(137, 216, 255, 0.7)', background: 'linear-gradient(180deg, rgba(8, 26, 52, 0.68), rgba(8, 20, 40, 0.5))', backdropFilter: 'blur(14px)', boxShadow: '0 28px 60px rgba(3, 14, 32, 0.32)' }} onClick={(e) => e.stopPropagation()}>
               <div className="ChangelogHeader" style={{ background: '#00d2ff' }}>
                 <span style={{ color: '#000', fontWeight: 'bold' }}>ご安心ください</span>
                 <button onClick={() => setShowRuleHint(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
@@ -3756,8 +3833,8 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showClearStats && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowClearStats(false)}>
-            <div className="ChangelogModal" style={{ maxWidth: '600px', border: '2px solid #ffd700' }} onClick={(e) => e.stopPropagation()}>
+          <div className="ChangelogModalOverlay" onClick={() => setShowClearStats(false)} style={{ backgroundColor: 'rgba(0, 0, 0, 0.28)', backdropFilter: 'blur(8px)' }}>
+            <div className="ChangelogModal" style={{ maxWidth: '600px', border: '1px solid rgba(255, 226, 136, 0.75)', background: 'linear-gradient(180deg, rgba(36, 28, 10, 0.68), rgba(20, 16, 6, 0.52))', backdropFilter: 'blur(14px)', boxShadow: '0 28px 60px rgba(3, 14, 32, 0.32)' }} onClick={(e) => e.stopPropagation()}>
               <div className="ChangelogHeader" style={{ background: '#ffd700' }}>
                 <span style={{ color: '#000', fontWeight: 'bold' }}>BATTLE STATS</span>
                 <button onClick={() => setShowClearStats(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
