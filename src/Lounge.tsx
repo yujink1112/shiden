@@ -645,6 +645,7 @@ onPageChange,
   const today = new Date().toLocaleDateString();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
   const loungeBackgroundUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-lounge.png`;
+  const loungeBackgroundImage = `radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0) 16%), radial-gradient(circle at 82% 18%, rgba(120, 210, 255, 0.18) 0%, rgba(120, 210, 255, 0) 22%), linear-gradient(180deg, rgba(4, 18, 38, 0.28), rgba(4, 18, 38, 0.5)), url(${loungeBackgroundUrl})`;
 
   const [email, setEmail] = React.useState("");
   const [pass, setPass] = React.useState("");
@@ -756,7 +757,7 @@ onPageChange,
   if (stageMode === 'LOUNGE') {
     if (user && !isDeneiStatsLoaded) {
       return (
-        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: `linear-gradient(rgba(4, 18, 38, 0.45), rgba(4, 18, 38, 0.58)), url(${loungeBackgroundUrl})`, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+        <div className="AppContainer" style={{ backgroundColor: '#000', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '20px', backgroundImage: loungeBackgroundImage, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
           <div className="loading-spinner" style={{
             width: '50px', height: '50px', border: '5px solid rgba(79, 195, 247, 0.3)',
             borderTop: '5px solid #4fc3f7', borderRadius: '50%',
@@ -774,7 +775,7 @@ onPageChange,
     }
 
     return (
-      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: `linear-gradient(rgba(4, 18, 38, 0.42), rgba(4, 18, 38, 0.6)), url(${loungeBackgroundUrl})`, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+      <div className="AppContainer" style={{ backgroundColor: '#000', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', overflowY: 'auto', backgroundImage: loungeBackgroundImage, backgroundSize: isMobile ? 'cover' : 'auto 108%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',

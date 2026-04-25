@@ -871,6 +871,26 @@
   margin-bottom: 10px;
 }
 
+.TitleAdminButton {
+  display: block;
+  margin: 0 auto 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(225, 173, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(82, 43, 118, 0.24);
+  color: #f5eaff;
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px rgba(35, 12, 61, 0.18);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.TitleAdminButton:hover {
+  background: rgba(110, 63, 156, 0.34);
+}
+
 .TitleUserName {
   display: flex;
   align-items: baseline;
@@ -1027,7 +1047,7 @@
   .TitleTapStart {
     position: absolute;
     left: 50%;
-    bottom: calc(156px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(206px + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     margin-bottom: 0;
     font-size: 0.84rem;
@@ -1069,7 +1089,7 @@
     position: absolute;
     left: 8px;
     right: 8px;
-    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     width: auto;
     max-width: none;
     padding: 12px 12px 8px;
@@ -1095,6 +1115,12 @@
     margin-bottom: 0;
     line-height: 1.15;
     flex-wrap: wrap;
+  }
+
+  .TitleAdminButton {
+    padding: 7px 12px;
+    font-size: 0.64rem;
+    margin-bottom: 4px;
   }
 }
 

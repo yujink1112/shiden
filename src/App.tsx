@@ -3482,9 +3482,12 @@ const PLAYER_SKILL_COUNT = 5;
                   <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); setShowLegal(true); }}>規約・運営情報</span>
                   <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" style={{ color: '#888' }} onClick={(e) => e.stopPropagation()}>お問い合わせ</a>
                 </div>
-                {isAdmin && false &&(
-                  <button className="TitleButton neon-purple" onClick={(e) => { e.stopPropagation(); setStageMode('ADMIN_ANALYTICS'); setIsTitle(false); }} style={{ marginTop: '10px' }}>Admin Analytics</button>
-                )}
+                <button
+                  className="TitleAdminButton"
+                  onClick={(e) => { e.stopPropagation(); setShowAdmin(true); }}
+                >
+                  管理者パネル
+                </button>
                 <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
               </div>
             </div>
