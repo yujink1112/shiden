@@ -8,6 +8,8 @@ export interface StoryEntry {
   expression?: string; // キャラクターの表情 (characterタイプで使用、例えば "normal", "smile", "angry" など)
   focus?: "none" | "left" | "center" | "right"; // どのキャラクターにフォーカスするか (中央アップ演出用)
   background?: string; // 背景画像ファイル名 (backgroundタイプで使用)
+  backgroundMobile?: string; // スマホ表示時だけ差し替える背景画像ファイル名
+  backgroundMobileOffsetX?: number; // スマホ表示時だけ背景を左右にずらす量(px)
   bgm?: string; // BGMファイル名 (effectタイプで使用)
   soundEffect?: string; // 効果音ファイル名 (effectタイプで使用)
   animation?: string; // アニメーション名
@@ -17,6 +19,9 @@ export interface StoryEntry {
   sepia?: boolean; // セピア調にするかどうか
   scale?: number; // キャラクターやスチルの拡大率上書き
   offsetY?: number; // キャラクターのY位置オフセット
+  textAlign?: "left" | "center"; // 発言パネル内のテキスト配置
+  typingSpeed?: number; // 1文字ごとの表示間隔 (ミリ秒)
+  letterSpacing?: number; // 発言パネル内の字間 (px)
 }
 
 export type StoryScript = StoryEntry[];

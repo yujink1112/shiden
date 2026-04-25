@@ -1,0 +1,1035 @@
+[2026-04-24T20:54:17.349Z] 7-1 バクバク: base boss=逆霊水硬燐死速
+[2026-04-24T20:54:17.393Z] 7-1 バクバク: with-狼 {"wins":10,"firstWinAt":86,"checked":730,"samples":["一一待刺狼","一一搦刺狼","一一玉刺狼","一一強刺狼","一一速刺狼"]}
+[2026-04-24T20:54:35.407Z] 7-1 バクバク: without-狼 {"wins":0,"firstWinAt":null,"checked":537824,"samples":[]}
+[2026-04-24T20:59:06.208Z] 7-1 バクバク: scanned index 1/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T20:59:27.057Z] 7-1 バクバク: scanned index 2/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:00:38.405Z] 7-1 バクバク: scanned index 3/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:02:29.509Z] 7-1 バクバク: scanned index 4/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:06:26.515Z] 7-1 バクバク: scanned index 5/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:06:59.639Z] 7-1 バクバク: scanned index 6/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:12:34.228Z] 7-1 バクバク: scanned index 7/7, current best={"tuned":"待霊水硬燐死速","change":{"index":1,"from":"逆","to":"待"},"with":{"wins":10,"firstWinAt":2,"checked":926,"samples":["一一一刺狼","一一一強狼","一一拳刺狼","一一拳強狼","一一毒刺狼"]},"without":{"wins":0,"firstWinAt":null,"checked":250000,"samples":[]}}
+[2026-04-24T21:12:34.229Z] 7-1 バクバク: top candidates=[
+  {
+    "tuned": "待霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "待"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 926,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一拳刺狼",
+        "一一拳強狼",
+        "一一毒刺狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "搦霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "搦"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 926,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一拳刺狼",
+        "一一拳強狼",
+        "一一毒刺狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "玉霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "玉"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 171,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "強霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "強"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 115,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "速霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "速"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 115,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "飛霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "飛"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 115,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "礁霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "礁"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 115,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  },
+  {
+    "tuned": "霊霊水硬燐死速",
+    "change": {
+      "index": 1,
+      "from": "逆",
+      "to": "霊"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2,
+      "checked": 115,
+      "samples": [
+        "一一一刺狼",
+        "一一一強狼",
+        "一一果一狼",
+        "一一果刺狼",
+        "一一果果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 0,
+      "firstWinAt": null,
+      "checked": 250000,
+      "samples": []
+    }
+  }
+]
+[2026-04-24T21:12:34.229Z] 8-1 死霊船 黒潮号: base boss=逆待待覚死砲弓
+[2026-04-24T21:12:34.233Z] 8-1 死霊船 黒潮号: with-爆 {"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]}
+[2026-04-24T21:12:38.544Z] 8-1 死霊船 黒潮号: without-爆 {"wins":10,"firstWinAt":162887,"checked":163790,"samples":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}
+[2026-04-24T21:13:22.441Z] 8-1 死霊船 黒潮号: scanned index 1/7, current best={"tuned":"罠待待覚死砲弓","change":{"index":1,"from":"逆","to":"罠"},"with":{"wins":10,"firstWinAt":15,"checked":285,"samples":["一一一霊爆","一一刺霊爆","一一果霊爆","一一待霊爆","一一搦霊爆"]},"without":{"wins":10,"firstWinAt":162887,"checked":163790,"samples":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}}
+[2026-04-24T21:13:56.534Z] 8-1 死霊船 黒潮号: scanned index 2/7, current best={"tuned":"逆罠待覚死砲弓","change":{"index":2,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":162887,"checked":164686,"samples":["待待待霊刺","待待搦霊刺","待待玉霊刺","待待強霊刺","待待速霊刺"]}}
+[2026-04-24T21:14:57.803Z] 8-1 死霊船 黒潮号: scanned index 3/7, current best={"tuned":"逆待罠覚死砲弓","change":{"index":3,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":163904,"checked":164919,"samples":["待待拳強礁","待待拳速果","待待拳礁果","待待焦刺霊","待待焦霊一"]}}
+[2026-04-24T21:14:59.545Z] 8-1 死霊船 黒潮号: scanned index 4/7, current best={"tuned":"逆待罠覚死砲弓","change":{"index":3,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":163904,"checked":164919,"samples":["待待拳強礁","待待拳速果","待待拳礁果","待待焦刺霊","待待焦霊一"]}}
+[2026-04-24T21:15:12.304Z] 8-1 死霊船 黒潮号: scanned index 5/7, current best={"tuned":"逆待罠覚死砲弓","change":{"index":3,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":163904,"checked":164919,"samples":["待待拳強礁","待待拳速果","待待拳礁果","待待焦刺霊","待待焦霊一"]}}
+[2026-04-24T21:17:10.941Z] 8-1 死霊船 黒潮号: scanned index 6/7, current best={"tuned":"逆待罠覚死砲弓","change":{"index":3,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":163904,"checked":164919,"samples":["待待拳強礁","待待拳速果","待待拳礁果","待待焦刺霊","待待焦霊一"]}}
+[2026-04-24T21:18:57.022Z] 8-1 死霊船 黒潮号: scanned index 7/7, current best={"tuned":"逆待罠覚死砲弓","change":{"index":3,"from":"待","to":"罠"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":163904,"checked":164919,"samples":["待待拳強礁","待待拳速果","待待拳礁果","待待焦刺霊","待待焦霊一"]}}
+[2026-04-24T21:18:57.022Z] 8-1 死霊船 黒潮号: top candidates=[
+  {
+    "tuned": "逆待罠覚死砲弓",
+    "change": {
+      "index": 3,
+      "from": "待",
+      "to": "罠"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 163904,
+      "checked": 164919,
+      "samples": [
+        "待待拳強礁",
+        "待待拳速果",
+        "待待拳礁果",
+        "待待焦刺霊",
+        "待待焦霊一"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚死烈弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "烈"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 163904,
+      "checked": 165157,
+      "samples": [
+        "待待拳強礁",
+        "待待拳速果",
+        "待待焦霊待",
+        "待待毒霊一",
+        "待待毒霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆罠待覚死砲弓",
+    "change": {
+      "index": 2,
+      "from": "待",
+      "to": "罠"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 164686,
+      "samples": [
+        "待待待霊刺",
+        "待待搦霊刺",
+        "待待玉霊刺",
+        "待待強霊刺",
+        "待待速霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待玉覚死砲弓",
+    "change": {
+      "index": 3,
+      "from": "待",
+      "to": "玉"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 36,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 164687,
+      "samples": [
+        "待待待霊刺",
+        "待待搦霊刺",
+        "待待玉霊刺",
+        "待待強霊刺",
+        "待待速霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待水覚死砲弓",
+    "change": {
+      "index": 3,
+      "from": "待",
+      "to": "水"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 36,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 164687,
+      "samples": [
+        "待待待霊刺",
+        "待待搦霊刺",
+        "待待玉霊刺",
+        "待待強霊刺",
+        "待待速霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚一砲弓",
+    "change": {
+      "index": 5,
+      "from": "死",
+      "to": "一"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 163790,
+      "samples": [
+        "待待待霊刺",
+        "待待待霊搦",
+        "待待搦霊刺",
+        "待待搦霊搦",
+        "待待玉霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚死果弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "果"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 164912,
+      "samples": [
+        "待待待霊刺",
+        "待待搦霊刺",
+        "待待玉霊刺",
+        "待待強霊刺",
+        "待待速霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚死拳弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "拳"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 164911,
+      "samples": [
+        "待待待霊刺",
+        "待待搦霊刺",
+        "待待玉霊刺",
+        "待待強霊刺",
+        "待待速霊刺"
+      ]
+    }
+  }
+]
+[2026-04-24T21:19:42.653Z] 7-1 バクバク: original boss=逆拳水硬燐刺速
+[2026-04-24T21:19:42.687Z] 7-1 バクバク: original with-? {"wins":10,"firstWinAt":90,"checked":678,"samples":["?拳飛礁礁","?拳礁飛礁","?拳礁礁飛","?飛拳礁礁","?飛礁拳礁"]}
+[2026-04-24T21:19:42.688Z] 7-1 バクバク: original without-? {"wins":10,"firstWinAt":1,"checked":10,"samples":["拳拳拳拳拳","拳拳拳拳飛","拳拳拳拳奏","拳拳拳拳焦","拳拳拳拳毒"]}
+[2026-04-24T21:19:42.689Z] 7-1 バクバク: recommended candidates=[]
+[2026-04-24T21:19:42.689Z] 8-1 死霊船 黒潮号: original boss=逆待待覚玉砲弓
+[2026-04-24T21:19:42.718Z] 8-1 死霊船 黒潮号: original with-? {"wins":10,"firstWinAt":587,"checked":1185,"samples":["?拳礁霊狼","?拳霊礁狼","?飛飛飛霊","?飛飛焦霊","?飛飛毒霊"]}
+[2026-04-24T21:19:42.757Z] 8-1 死霊船 黒潮号: original without-? {"wins":10,"firstWinAt":569,"checked":1857,"samples":["拳拳礁狼霊","拳拳礁霊狼","拳拳霊毒狼","拳拳霊礁狼","拳拳霊狼礁"]}
+[2026-04-24T21:19:42.757Z] 8-1 死霊船 黒潮号: recommended candidates=[]
+[2026-04-24T21:20:25.523Z] 7-1 バクバク: original boss=逆拳水硬燐刺速
+[2026-04-24T21:20:25.542Z] 7-1 バクバク: original with-狼 {"wins":10,"firstWinAt":76,"checked":174,"samples":["一一果狼玉","一一待搦狼","一一待玉狼","一一待狼玉","一一搦玉狼"]}
+[2026-04-24T21:20:25.557Z] 7-1 バクバク: original without-狼 {"wins":10,"firstWinAt":76,"checked":482,"samples":["一一一玉玉","一一一強玉","一一果一玉","一一果刺玉","一一果果玉"]}
+[2026-04-24T21:20:26.543Z] 7-1 バクバク: scanned index 1/7, best={"tuned":"一拳水硬燐刺速","change":{"index":1,"from":"逆","to":"一"},"with":{"wins":10,"firstWinAt":4,"checked":202,"samples":["一一一待狼","一一刺待狼","一一果待狼","一一待待狼","一一搦待狼"]},"without":{"wins":10,"firstWinAt":118,"checked":903,"samples":["一一一拳玉","一一一拳強","一一刺拳玉","一一刺拳強","一一果拳玉"]}}
+[2026-04-24T21:20:29.986Z] 7-1 バクバク: scanned index 2/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:30.452Z] 7-1 バクバク: scanned index 3/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:31.310Z] 7-1 バクバク: scanned index 4/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:32.274Z] 7-1 バクバク: scanned index 5/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:34.381Z] 7-1 バクバク: scanned index 6/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:35.197Z] 7-1 バクバク: scanned index 7/7, best={"tuned":"逆霊水硬燐刺速","change":{"index":2,"from":"拳","to":"霊"},"with":{"wins":10,"firstWinAt":146,"checked":4850,"samples":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"wins":10,"firstWinAt":1042,"checked":1059,"samples":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:20:35.198Z] 7-1 バクバク: recommended candidates=[
+  {
+    "tuned": "逆霊水硬燐刺速",
+    "change": {
+      "index": 2,
+      "from": "拳",
+      "to": "霊"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 146,
+      "checked": 4850,
+      "samples": [
+        "一一玉玉狼",
+        "一刺玉玉狼",
+        "一果玉玉狼",
+        "一待玉玉狼",
+        "一搦玉玉狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 1042,
+      "checked": 1059,
+      "samples": [
+        "一一玉搦玉",
+        "一一玉玉一",
+        "一一玉玉刺",
+        "一一玉玉果",
+        "一一玉玉待"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬紫刺速",
+    "change": {
+      "index": 5,
+      "from": "燐",
+      "to": "紫"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 89,
+      "checked": 202,
+      "samples": [
+        "一一待搦狼",
+        "一一待玉狼",
+        "一一待拳狼",
+        "一一搦玉狼",
+        "一一搦拳狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 808,
+      "checked": 916,
+      "samples": [
+        "一一搦刺飛",
+        "一一搦待飛",
+        "一一搦搦飛",
+        "一一搦玉飛",
+        "一一搦強飛"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐一速",
+    "change": {
+      "index": 6,
+      "from": "刺",
+      "to": "一"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 286,
+      "checked": 1974,
+      "samples": [
+        "一一奏玉狼",
+        "一一焦玉狼",
+        "一一毒玉狼",
+        "一刺奏玉狼",
+        "一刺焦玉狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 808,
+      "checked": 9040,
+      "samples": [
+        "一一搦刺飛",
+        "一一搦飛刺",
+        "一一玉速刺",
+        "一刺搦刺飛",
+        "一刺搦飛刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐紫速",
+    "change": {
+      "index": 6,
+      "from": "刺",
+      "to": "紫"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 286,
+      "checked": 1974,
+      "samples": [
+        "一一奏玉狼",
+        "一一焦玉狼",
+        "一一毒玉狼",
+        "一刺奏玉狼",
+        "一刺焦玉狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 808,
+      "checked": 9040,
+      "samples": [
+        "一一搦刺飛",
+        "一一搦飛刺",
+        "一一玉速刺",
+        "一刺搦刺飛",
+        "一刺搦飛刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐雷速",
+    "change": {
+      "index": 6,
+      "from": "刺",
+      "to": "雷"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 286,
+      "checked": 1974,
+      "samples": [
+        "一一奏玉狼",
+        "一一焦玉狼",
+        "一一毒玉狼",
+        "一刺奏玉狼",
+        "一刺焦玉狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 808,
+      "checked": 9040,
+      "samples": [
+        "一一搦刺飛",
+        "一一搦飛刺",
+        "一一玉速刺",
+        "一刺搦刺飛",
+        "一刺搦飛刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐烈速",
+    "change": {
+      "index": 6,
+      "from": "刺",
+      "to": "烈"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 286,
+      "checked": 1974,
+      "samples": [
+        "一一奏玉狼",
+        "一一焦玉狼",
+        "一一毒玉狼",
+        "一刺奏玉狼",
+        "一刺焦玉狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 808,
+      "checked": 9040,
+      "samples": [
+        "一一搦刺飛",
+        "一一搦飛刺",
+        "一一玉速刺",
+        "一刺搦刺飛",
+        "一刺搦飛刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐霊速",
+    "change": {
+      "index": 6,
+      "from": "刺",
+      "to": "霊"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 6,
+      "checked": 225,
+      "samples": [
+        "一一一玉狼",
+        "一一刺玉狼",
+        "一一果玉狼",
+        "一一待拳狼",
+        "一一搦果狼"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 707,
+      "checked": 3647,
+      "samples": [
+        "一一待拳強",
+        "一一搦拳強",
+        "一一搦飛刺",
+        "一一玉速果",
+        "一一玉拳強"
+      ]
+    }
+  },
+  {
+    "tuned": "逆拳水硬燐刺霊",
+    "change": {
+      "index": 7,
+      "from": "速",
+      "to": "霊"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 6,
+      "checked": 830,
+      "samples": [
+        "一一一玉狼",
+        "一一刺玉狼",
+        "一一果玉狼",
+        "一一拳狼待",
+        "一一拳狼玉"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 704,
+      "checked": 1574,
+      "samples": [
+        "一一待拳待",
+        "一一待拳玉",
+        "一一搦果待",
+        "一一搦果玉",
+        "一一搦飛刺"
+      ]
+    }
+  }
+]
+[2026-04-24T21:20:35.199Z] 8-1 死霊船 黒潮号: original boss=逆待待覚玉砲弓
+[2026-04-24T21:20:35.298Z] 8-1 死霊船 黒潮号: original with-爆 {"wins":10,"firstWinAt":411,"checked":2436,"samples":["一一礁爆玉","一一爆礁玉","一一爆霊待","一刺礁爆玉","一刺爆礁玉"]}
+[2026-04-24T21:20:35.334Z] 8-1 死霊船 黒潮号: original without-爆 {"wins":10,"firstWinAt":201,"checked":1114,"samples":["一一一礁玉","一一一霊待","一一刺礁玉","一一刺霊待","一一果礁玉"]}
+[2026-04-24T21:20:39.749Z] 8-1 死霊船 黒潮号: scanned index 1/7, best={"tuned":"紫待待覚玉砲弓","change":{"index":1,"from":"逆","to":"紫"},"with":{"wins":10,"firstWinAt":186,"checked":739,"samples":["一一強玉爆","一一強爆玉","一刺一刺爆","一刺一待爆","一刺一毒爆"]},"without":{"wins":10,"firstWinAt":890,"checked":1428,"samples":["一一待霊搦","一一強一玉","一一強刺玉","一一強果玉","一一強待搦"]}}
+[2026-04-24T21:20:42.161Z] 8-1 死霊船 黒潮号: scanned index 2/7, best={"tuned":"逆紫待覚玉砲弓","change":{"index":2,"from":"待","to":"紫"},"with":{"wins":10,"firstWinAt":186,"checked":878,"samples":["一一強玉爆","一一強爆玉","一刺強待爆","一刺強搦爆","一刺強玉爆"]},"without":{"wins":10,"firstWinAt":1356,"checked":1429,"samples":["一一強一玉","一一強刺玉","一一強果玉","一一強待搦","一一強待玉"]}}
+[2026-04-24T21:20:45.293Z] 8-1 死霊船 黒潮号: scanned index 3/7, best={"tuned":"逆待隠覚玉砲弓","change":{"index":3,"from":"待","to":"隠"},"with":{"wins":10,"firstWinAt":4701,"checked":13476,"samples":["一強爆礁玉","一礁礁玉爆","一礁爆玉速","一礁爆玉礁","一霊爆待搦"]},"without":{"wins":10,"firstWinAt":3008,"checked":9764,"samples":["一一礁玉速","一一礁玉礁","一一霊待搦","一一霊礁玉","一刺礁玉速"]}}
+[2026-04-24T21:20:46.055Z] 8-1 死霊船 黒潮号: scanned index 4/7, best={"tuned":"逆待待凍玉砲弓","change":{"index":4,"from":"覚","to":"凍"},"with":{"wins":10,"firstWinAt":2388,"checked":3081,"samples":["一待毒果爆","一待毒玉爆","一待毒拳爆","一待毒焦爆","一待毒爆玉"]},"without":{"wins":10,"firstWinAt":10821,"checked":11010,"samples":["一待待刺玉","一待待待刺","一待待待霊","一待待搦霊","一待待玉霊"]}}
+[2026-04-24T21:20:57.708Z] 8-1 死霊船 黒潮号: scanned index 5/7, best={"tuned":"逆待待覚一砲弓","change":{"index":5,"from":"玉","to":"一"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":162887,"checked":163790,"samples":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}}
+[2026-04-24T21:21:25.788Z] 8-1 死霊船 黒潮号: scanned index 6/7, best={"tuned":"逆待待覚一砲弓","change":{"index":5,"from":"玉","to":"一"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":162887,"checked":163790,"samples":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}}
+[2026-04-24T21:21:27.433Z] 8-1 死霊船 黒潮号: scanned index 7/7, best={"tuned":"逆待待覚一砲弓","change":{"index":5,"from":"玉","to":"一"},"with":{"wins":10,"firstWinAt":4,"checked":35,"samples":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"wins":10,"firstWinAt":162887,"checked":163790,"samples":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}}
+[2026-04-24T21:21:27.434Z] 8-1 死霊船 黒潮号: recommended candidates=[
+  {
+    "tuned": "逆待待覚一砲弓",
+    "change": {
+      "index": 5,
+      "from": "玉",
+      "to": "一"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4,
+      "checked": 35,
+      "samples": [
+        "一一一待爆",
+        "一一一搦爆",
+        "一一一玉爆",
+        "一一一強爆",
+        "一一一速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162887,
+      "checked": 163790,
+      "samples": [
+        "待待待霊刺",
+        "待待待霊搦",
+        "待待搦霊刺",
+        "待待搦霊搦",
+        "待待玉霊刺"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚玉毒弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "毒"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 42619,
+      "checked": 42630,
+      "samples": [
+        "待待待待爆",
+        "待待待搦爆",
+        "待待待玉爆",
+        "待待待強爆",
+        "待待待速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162735,
+      "checked": 162858,
+      "samples": [
+        "待待待待霊",
+        "待待待搦霊",
+        "待待待玉霊",
+        "待待待強霊",
+        "待待待速霊"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚玉凍弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "凍"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 42619,
+      "checked": 42631,
+      "samples": [
+        "待待待待爆",
+        "待待待搦爆",
+        "待待待玉爆",
+        "待待待強爆",
+        "待待待速爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 162735,
+      "checked": 162857,
+      "samples": [
+        "待待待待霊",
+        "待待待搦霊",
+        "待待待玉霊",
+        "待待待強霊",
+        "待待待速霊"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚烈砲弓",
+    "change": {
+      "index": 5,
+      "from": "玉",
+      "to": "烈"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 1,
+      "checked": 10,
+      "samples": [
+        "一一一一爆",
+        "一一一刺爆",
+        "一一一果爆",
+        "一一一待爆",
+        "一一一搦爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 47046,
+      "checked": 148337,
+      "samples": [
+        "一礁霊刺玉",
+        "一礁霊搦刺",
+        "一霊礁刺玉",
+        "一霊礁搦刺",
+        "刺礁霊刺玉"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚凍砲弓",
+    "change": {
+      "index": 5,
+      "from": "玉",
+      "to": "凍"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4063,
+      "checked": 4333,
+      "samples": [
+        "一強一毒爆",
+        "一強刺毒爆",
+        "一強果毒爆",
+        "一強待毒爆",
+        "一強搦毒爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 20431,
+      "checked": 20440,
+      "samples": [
+        "一強一毒一",
+        "一強一毒刺",
+        "一強一毒果",
+        "一強一毒待",
+        "一強一毒搦"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚玉封弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "封"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 4560,
+      "checked": 4715,
+      "samples": [
+        "一強爆待霊",
+        "一強爆搦霊",
+        "一強爆玉霊",
+        "一強爆強霊",
+        "一強爆速霊"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 20310,
+      "checked": 20465,
+      "samples": [
+        "一強一待霊",
+        "一強一搦霊",
+        "一強一玉霊",
+        "一強一強霊",
+        "一強一速霊"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚毒砲弓",
+    "change": {
+      "index": 5,
+      "from": "玉",
+      "to": "毒"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 1,
+      "checked": 10,
+      "samples": [
+        "一一一一爆",
+        "一一一刺爆",
+        "一一一果爆",
+        "一一一待爆",
+        "一一一搦爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 20253,
+      "checked": 21333,
+      "samples": [
+        "一強一一果",
+        "一強一毒果",
+        "一強刺一果",
+        "一強刺毒果",
+        "一強果一果"
+      ]
+    }
+  },
+  {
+    "tuned": "逆待待覚玉霊弓",
+    "change": {
+      "index": 6,
+      "from": "砲",
+      "to": "霊"
+    },
+    "withRes": {
+      "wins": 10,
+      "firstWinAt": 2117,
+      "checked": 2218,
+      "samples": [
+        "一待待刺爆",
+        "一待搦刺爆",
+        "一待搦奏爆",
+        "一待搦毒爆",
+        "一待玉刺爆"
+      ]
+    },
+    "withoutRes": {
+      "wins": 10,
+      "firstWinAt": 11208,
+      "checked": 12339,
+      "samples": [
+        "一待搦毒果",
+        "一待搦毒拳",
+        "一待玉毒果",
+        "一待玉毒拳",
+        "一待強毒果"
+      ]
+    }
+  }
+]
+[2026-04-24T21:22:06.493Z] final verify {"key":"7-1","boss":"逆霊水硬燐刺速","with":{"checked":2498,"wins":["一一玉玉狼","一刺玉玉狼","一果玉玉狼","一待玉玉狼","一搦玉玉狼"]},"without":{"checked":1054,"wins":["一一玉搦玉","一一玉玉一","一一玉玉刺","一一玉玉果","一一玉玉待"]}}
+[2026-04-24T21:22:27.710Z] final verify {"key":"7-2","boss":"霊崩転連封一盾","with":{"checked":39230,"wins":["待奏▽一刺","待奏▽一待","待奏▽刺刺","待奏▽刺待","待奏▽果刺"]},"without":{"checked":537824,"wins":[]}}
+[2026-04-24T21:22:31.659Z] final verify {"key":"8-1","boss":"逆待待覚一砲弓","with":{"checked":8,"wins":["一一一待爆","一一一搦爆","一一一玉爆","一一一強爆","一一一速爆"]},"without":{"checked":163337,"wins":["待待待霊刺","待待待霊搦","待待搦霊刺","待待搦霊搦","待待玉霊刺"]}}

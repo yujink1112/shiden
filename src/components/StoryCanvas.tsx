@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StoryScript, CreditsData, CreditIllustration, CreditSection } from '../types/story';
+import { StoryScript, StoryEntry, CreditsData, CreditIllustration, CreditSection } from '../types/story';
 import { getStorageUrl } from '../firebase';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
 import AudioManager from '../utils/audioManager';
@@ -17,6 +17,7 @@ interface StoryCanvasProps {
   charScaleMobile?: number;
   offsetYPC?: number;
   offsetYMobile?: number;
+  autoEndOnScriptEnd?: boolean;
 }
 
 interface RubySegment {
@@ -132,21 +133,90 @@ const drawWrappedText = (
   return lines.length;
 };
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile }) => {
+const getTypingSpeed = (entry?: StoryEntry): number => {
+  return entry?.typingSpeed && entry.typingSpeed > 0 ? entry.typingSpeed : 40;
+};
+
+const measureTextWithLetterSpacing = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  letterSpacing: number
+): number => {
+  const chars = Array.from(text);
+  if (chars.length === 0) return 0;
+  const textWidth = chars.reduce((sum, char) => sum + ctx.measureText(char).width, 0);
+  return textWidth + letterSpacing * Math.max(0, chars.length - 1);
+};
+
+const wrapTextWithLetterSpacing = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  letterSpacing: number
+): string[] => {
+  const lines: string[] = [];
+  const paragraphs = text.split('\n');
+
+  paragraphs.forEach((paragraph) => {
+    if (paragraph === '') {
+      lines.push('');
+      return;
+    }
+
+    let currentLine = '';
+    Array.from(paragraph).forEach((char) => {
+      const nextLine = currentLine + char;
+      const nextWidth = measureTextWithLetterSpacing(ctx, nextLine, letterSpacing);
+      if (currentLine && nextWidth > maxWidth) {
+        lines.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = nextLine;
+      }
+    });
+    lines.push(currentLine);
+  });
+
+  return lines;
+};
+
+const drawTextWithLetterSpacing = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  letterSpacing: number
+) => {
+  let currentX = x;
+  Array.from(text).forEach((char) => {
+    ctx.strokeText(char, currentX, y);
+    ctx.fillText(char, currentX, y);
+    currentX += ctx.measureText(char).width + letterSpacing;
+  });
+};
+
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile, autoEndOnScriptEnd = false }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
   const [displayedCharCount, setDisplayedCharCount] = useState(0); // ルび対応用の表示文字数
   const [isTyping, setIsTyping] = useState(false);
+  const [viewportSize, setViewportSize] = useState(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800
+  }));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const imagesRef = useRef<{ [key: string]: HTMLImageElement }>({});
   const activeCharactersRef = useRef<{ [key: string]: { img: HTMLImageElement; focus: boolean; position: string; opacity: number } }>({});
   const currentBackgroundRef = useRef<HTMLImageElement | null>(null);
+  const currentBackgroundMobileRef = useRef<HTMLImageElement | null>(null);
+  const currentBackgroundMobileOffsetXRef = useRef(0);
   const currentStillRef = useRef<HTMLImageElement | null>(null); // スチル画像用
   const bgOpacityRef = useRef(0);
   const screenFadeAlphaRef = useRef(0); // 演出用フェード
+  const whiteFlashAlphaRef = useRef(0); // 白フラッシュ演出
   
   const [isLoaded, setIsLoaded] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
@@ -174,14 +244,14 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     const delta = now - lastTimeRef.current;
     lastTimeRef.current = now;
 
-    const scrollSpeed = (creditsData.scrollSpeed || 1) * dpr * (delta / 16.6);
+    // スマホ判定 (縦長または幅が狭い場合)
+    const isMobileMode = (width / dpr) < 800;
+    const mobileScrollSpeedFactor = isMobileMode ? 0.55 : 1;
+    const scrollSpeed = (creditsData.scrollSpeed || 1) * mobileScrollSpeedFactor * dpr * (delta / 16.6);
     scrollOffsetRef.current += scrollSpeed;
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
-
-    // スマホ判定 (縦長または幅が狭い場合)
-    const isMobileMode = (width / dpr) < 800;
 
     // --- レイアウト設定 ---
     const illAreaWidth = isMobileMode ? width : width * 0.5;
@@ -471,6 +541,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           setScript(finalScript);
           for (const entry of finalScript) {
             if (entry.background) imageUrls.add(entry.background);
+            if (entry.backgroundMobile) imageUrls.add(entry.backgroundMobile);
             if (entry.characterImage) imageUrls.add(entry.characterImage);
             if (entry.icon) imageUrls.add(entry.icon);
             if (entry.still) imageUrls.add(entry.still);
@@ -560,9 +631,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     if (currentEntry.background) {
       if (currentEntry.background === "OFF" || currentEntry.background === "None") {
         currentBackgroundRef.current = null;
+        currentBackgroundMobileRef.current = null;
+        currentBackgroundMobileOffsetXRef.current = 0;
       } else if (imagesRef.current[currentEntry.background]) {
         const newBg = imagesRef.current[currentEntry.background];
-        if (currentBackgroundRef.current !== newBg) {
+        const newMobileBg = currentEntry.backgroundMobile ? imagesRef.current[currentEntry.backgroundMobile] || null : null;
+        const hasBackgroundChanged = currentBackgroundRef.current !== newBg || currentBackgroundMobileRef.current !== newMobileBg;
+        currentBackgroundMobileRef.current = newMobileBg;
+        currentBackgroundMobileOffsetXRef.current = currentEntry.backgroundMobileOffsetX || 0;
+        if (hasBackgroundChanged) {
           currentBackgroundRef.current = newBg;
           // もし画面が完全に暗い状態なら、背景は最初から表示しておく (フェードアウト演出用)
           bgOpacityRef.current = screenFadeAlphaRef.current >= 0.95 ? 1 : 0;
@@ -586,6 +663,22 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         if (currentEntry.animation === "shake") {
             setShakeAmount(15);
             setTimeout(() => setShakeAmount(0), 500);
+        } else if (currentEntry.animation === "flash") {
+            const duration = currentEntry.duration || 350;
+            const startTime = Date.now();
+            whiteFlashAlphaRef.current = 1;
+
+            const animateFlash = () => {
+                const now = Date.now();
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                whiteFlashAlphaRef.current = 1 - progress;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateFlash);
+                }
+            };
+            requestAnimationFrame(animateFlash);
         } else if (currentEntry.animation === "fadeOut" || currentEntry.animation === "fadeIn") {
             const isFadeOut = currentEntry.animation === "fadeOut";
             const duration = currentEntry.duration || 1000;
@@ -665,7 +758,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
           setIsTyping(false);
         }
-      }, 40);
+      }, getTypingSpeed(currentEntry));
     } else {
       setIsTyping(false);
     }
@@ -697,14 +790,26 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     );
 
     if (isAutoNext || isEffectOnly) {
-      const delay = currentEntry.duration || (currentEntry.animation === "shake" ? 600 : 50);
+      const getEffectDelay = () => {
+        if (currentEntry.duration) return currentEntry.duration;
+        if (currentEntry.animation === "shake") return 600;
+        if (currentEntry.animation === "flash") return 350;
+        if (currentEntry.animation === "fadeOut" || currentEntry.animation === "fadeIn") return 1000;
+        return 50;
+      };
+      const delay = getEffectDelay();
       autoNextTimerRef.current = setTimeout(() => {
-        setCurrentEntryIndex(prev => {
-          if (prev === lastProcessedIndexRef.current && prev < script.length - 1) {
-            return prev + 1;
+        if (currentEntryIndex >= script.length - 1) {
+          if (autoEndOnScriptEnd) {
+            onEnd();
+            return;
           }
-          return prev;
-        });
+          setIsEnding(true);
+          return;
+        }
+        if (currentEntryIndex === lastProcessedIndexRef.current) {
+          setCurrentEntryIndex(currentEntryIndex + 1);
+        }
       }, delay);
 
       // BGMフェードアウトの予約処理
@@ -785,20 +890,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       }
 
       if (currentBackgroundRef.current) {
-        const bgImg = currentBackgroundRef.current;
-        let scale = Math.max(width / bgImg.width, height / bgImg.height);
-        
-        if (isMobileMode) {
-          // スマホ版（縦長画面）で背景が拡大されすぎて左右が削られすぎるのを防ぐため、
-          // 幅に合わせたスケーリングの1.2倍を上限とする。
-          // これにより、画像の一部がはみ出すのを抑え、より広い範囲を表示できる。
-          scale = Math.min(scale, (width / bgImg.width) * 100);
-        }
+        const bgImg = isMobileMode && currentBackgroundMobileRef.current ? currentBackgroundMobileRef.current : currentBackgroundRef.current;
+        const scale = Math.max(width / bgImg.width, height / bgImg.height);
 
         const drawW = bgImg.width * scale;
         const drawH = bgImg.height * scale;
-        const x = (width - drawW) / 2;
-        const y = (height - drawH) / 2;
+        const mobileOffsetX = isMobileMode ? currentBackgroundMobileOffsetXRef.current * dpr : 0;
+        const x = (width - drawW) / 2 + mobileOffsetX;
+        const focalY = isMobileMode ? 0.42 : 0.32;
+        const y = drawH > height ? (height - drawH) * focalY : (height - drawH) / 2;
         
         ctx.save();
         if (currentEntry?.sepia) ctx.filter = "sepia(100%) brightness(90%)";
@@ -911,8 +1011,10 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       const paddingY = conf.paddingY * dpr;
       ctx.textBaseline = 'top';
 
+      const usesCenteredPanelText = currentEntry?.textAlign === "center";
+
       // 名前欄の表示 (dialogueタイプのみ、またはnameがありdirectionでない場合)
-      const shouldDisplayName = currentEntry?.name && currentEntry.type !== "direction";
+      const shouldDisplayName = currentEntry?.name && currentEntry.type !== "direction" && !usesCenteredPanelText;
       if (shouldDisplayName) {
         const nameFontSize = conf.nameFontSize * dpr;
         ctx.fillStyle = '#81d4fa';
@@ -931,6 +1033,28 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       if (lastProcessedIndexRef.current === currentEntryIndex && currentEntry?.text) {
           const fullSegments = parseRubyText(currentEntry.text);
           const currentSegments = getDisplayedSegments(fullSegments, displayedCharCount);
+          if (usesCenteredPanelText) {
+            ctx.font = `bold ${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+            const visibleText = currentSegments.map(seg => seg.text).join('');
+            const letterSpacing = (currentEntry.letterSpacing || 0) * dpr;
+            const centeredLines = wrapTextWithLetterSpacing(ctx, visibleText, maxWidth, letterSpacing);
+            const lineHeight = textFontSize * conf.lineSpacing;
+            const totalTextHeight = textFontSize + Math.max(0, centeredLines.length - 1) * lineHeight;
+            const centeredStartY = boxY + (boxHeight - totalTextHeight) / 2;
+
+            ctx.save();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 4 * dpr;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            centeredLines.forEach((line, index) => {
+              const lineWidth = measureTextWithLetterSpacing(ctx, line, letterSpacing);
+              const lineX = margin + boxW / 2 - lineWidth / 2;
+              const lineY = centeredStartY + index * lineHeight;
+              drawTextWithLetterSpacing(ctx, line, lineX, lineY, letterSpacing);
+            });
+            ctx.restore();
+          } else {
           const lines = wrapTextWithRuby(ctx, currentSegments, maxWidth);
           
           ctx.save();
@@ -968,6 +1092,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
             });
           });
           ctx.restore();
+          }
       }
 
       ctx.restore(); // 画面揺れ ctx.save() の対
@@ -977,6 +1102,14 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           ctx.save();
           ctx.globalAlpha = screenFadeAlphaRef.current;
           ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+      }
+
+      if (whiteFlashAlphaRef.current > 0) {
+          ctx.save();
+          ctx.globalAlpha = whiteFlashAlphaRef.current;
+          ctx.fillStyle = '#fff';
           ctx.fillRect(0, 0, width, height);
           ctx.restore();
       }
@@ -1119,6 +1252,10 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
 
   useEffect(() => {
     const resizeCanvas = () => {
+      setViewportSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
       const container = containerRef.current;
       const canvas = canvasRef.current;
       if (container && canvas) {
@@ -1132,6 +1269,20 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
     setTimeout(resizeCanvas, 100);
     return () => window.removeEventListener('resize', resizeCanvas);
   }, [isLoaded]);
+
+  const isCompactViewport = viewportSize.width < 800;
+  const storyContentStyle: React.CSSProperties = isCompactViewport
+    ? {
+        width: '95%',
+        maxWidth: '1200px',
+        height: '90%',
+        maxHeight: '800px'
+      }
+    : {
+        width: 'min(90vw, 1200px, calc(90dvh * 1.5))',
+        height: 'min(90dvh, 800px, calc(90vw / 1.5))',
+        aspectRatio: '3 / 2'
+      };
 
   return (
     <div 
@@ -1159,11 +1310,8 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
         className="story-modal-content"
         onClick={handleNext}
         style={{ 
+          ...storyContentStyle,
           position: 'relative',
-          width: '95%', 
-          maxWidth: '1200px',
-          height: '90%', 
-          maxHeight: '800px',
           backgroundColor: '#000',
           borderRadius: '16px',
           boxShadow: '0 0 30px rgba(0,0,0,0.5)',
@@ -1185,7 +1333,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
         />
         {isLoaded && !isEnding && (
           <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 10 }}>
-            {onOpenSettings && (
+            {onOpenSettings && !creditsData && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1214,7 +1362,7 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
                 ⚙️
               </button>
             )}
-            {onToggleMute && (
+            {onToggleMute && !creditsData && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

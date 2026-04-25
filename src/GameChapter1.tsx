@@ -58,6 +58,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
     setShowEpilogue,
     handleResetGame,
     handleStartGame,
+    handleDebugWin,
     handleBattleLogComplete,
     triggerVictoryConfetti,
     getStorageUrl,
@@ -114,6 +115,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
                          skillCount === 7 ? 'scale(0.9)' :
                          skillCount === 8 ? 'scale(0.8)' :
                          skillCount >= 9 ? 'scale(0.7)' : 'none';
+  const showDebugBattleButton = process.env.NODE_ENV !== 'production';
   const stageSkillTip = React.useMemo(() => {
     if (stageCycle < 4) return null;
     const currentStage = STAGE_DATA.find(stage => stage.no === stageCycle);
@@ -409,8 +411,11 @@ const GameChapter1: React.FC<GameProps> = (props) => {
         {!gameStarted && (
           <div style={{ width: '100%', maxWidth: '800px' }}>
             {selectedPlayerSkills.length === PLAYER_SKILL_COUNT && (
-              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button onClick={handleStartGame} style={{ padding: '10px 60px', fontSize: '20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 0 15px rgba(40, 167, 69, 0.5)', fontWeight: 'bold' }}>戦闘開始</button>
+                {showDebugBattleButton && (
+                  <button onClick={handleDebugWin} style={{ padding: '10px 24px', fontSize: '18px', backgroundColor: '#1565c0', color: 'white', border: '1px solid #64b5f6', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>[DEBUG] 勝利</button>
+                )}
               </div>
             )}
             <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>

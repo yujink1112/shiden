@@ -1,0 +1,73 @@
+Stage 36 / Chapter 2 Stage 12 Battle 2
+魔女 グリザーベルク 調整メモ
+
+Boss skill candidates:
+
+1. 罠硬待強玉速燐連砲錬
+   Theme: 狼嵐向け。迎撃を狼嵐で踏み越え、終盤の艦砲+錬を飛行で拒否する。
+
+   Winning build:
+   待霊飛速狼
+   【待伏】【霊化】【飛行】【＋速】【狼嵐】
+
+   Verified:
+   player win / round 8
+
+2. 紫速霊飛燐癒盾隠反雷
+   Theme: ▽解向け。先頭▽解の雑撃ちは紫電+速で落とし、無想で雷火を受け止めてから▽解を通す。
+
+   Winning build:
+   一刺無果▽
+   【一閃】【刺突】【無想】【果断】【▽解】
+
+   Guaranteed skills:
+   一 / 刺 / 果 / ▽
+
+   Manual slot:
+   無
+
+   Verified:
+   player win / round 4
+
+3. 紫速隠弓雷強燐連隠弓
+   Theme: 爆砕向け。飛行で拒否できない高速攻撃を置き、LV5爆砕で前半を吹き飛ばす意味を持たせる。
+
+   Winning build:
+   待搦玉飛爆
+   【待伏】【搦手】【玉響】【飛行】【爆砕】
+
+   Verified:
+   player win / round 3
+
+Regression checks:
+
+待霊飛速狼
+- vs 罠硬待強玉速燐連砲錬: win
+- vs 紫速霊飛燐癒盾隠反雷: lose
+- vs 紫速隠弓雷強燐連隠弓: lose
+
+一刺無果▽
+- vs 罠硬待強玉速燐連砲錬: lose
+- vs 紫速霊飛燐癒盾隠反雷: win
+- vs 紫速隠弓雷強燐連隠弓: lose
+
+待搦玉飛爆
+- vs 罠硬待強玉速燐連砲錬: lose
+- vs 紫速霊飛燐癒盾隠反雷: lose
+- vs 紫速隠弓雷強燐連隠弓: win
+
+Previously too-easy/general builds:
+
+▽一刺果飛
+- vs 罠硬待強玉速燐連砲錬: win
+- vs 紫速霊飛燐癒盾隠反雷: lose
+- vs 紫速隠弓雷強燐連隠弓: lose
+
+待拳強飛果
+- vs 罠硬待強玉速燐連砲錬: win
+- vs 紫速霊飛燐癒盾隠反雷: lose
+- vs 紫速隠弓雷強燐連隠弓: lose
+
+Simulation command:
+
+node tools\battle-sim.cjs --player 待霊飛速狼 --player 一刺無果▽ --player 待搦玉飛爆 --player ▽一刺果飛 --player 待拳強飛果 --stage 36

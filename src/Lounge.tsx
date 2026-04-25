@@ -39,6 +39,14 @@ export interface UserProfile {
     }
   };
   lifukuHighscore?: number;
+  chapter2?: {
+    stageCycle?: number;
+    flowIndex?: number;
+    canGoToBoss?: boolean;
+    ownedSkills?: string[];
+    claimedRewardSteps?: string[];
+    lastUpdated?: number;
+  };
 }
 
 interface UserListTableProps {

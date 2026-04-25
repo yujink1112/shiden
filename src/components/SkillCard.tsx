@@ -5,6 +5,8 @@ import { getStorageUrl } from '../firebase';
 
 export type IconMode = 'ORIGINAL' | 'ABBR' | 'PHONE';
 
+const SKILL_TOOLTIP_OPEN_EVENT = 'shiden-skill-tooltip-open';
+
 interface SkillCardProps {
   skill: SkillDetail;
   isSelected?: boolean;
@@ -21,17 +23,32 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const [isTooltipForceClosed, setIsTooltipForceClosed] = useState(false);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const tooltipInstanceIdRef = useRef(`${skill.abbr}-${Math.random()}`);
 
   const closeTooltip = (forceClosed = false) => {
     if (tooltipTimeoutRef.current) {
       clearTimeout(tooltipTimeoutRef.current);
       tooltipTimeoutRef.current = null;
     }
+    if (touchTooltipTimeoutRef.current) {
+      clearTimeout(touchTooltipTimeoutRef.current);
+      touchTooltipTimeoutRef.current = null;
+    }
     setHoveredStatus(null);
     setShowTooltip(false);
     if (forceClosed) {
       setIsTooltipForceClosed(true);
     }
+  };
+
+  const cancelTouchTooltip = () => {
+    if (touchTooltipTimeoutRef.current) {
+      clearTimeout(touchTooltipTimeoutRef.current);
+      touchTooltipTimeoutRef.current = null;
+    }
+    touchStartRef.current = null;
   };
 
   const openTooltip = () => {
@@ -41,6 +58,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       clearTimeout(tooltipTimeoutRef.current);
       tooltipTimeoutRef.current = null;
     }
+    window.dispatchEvent(new CustomEvent(SKILL_TOOLTIP_OPEN_EVENT, {
+      detail: { sourceId: tooltipInstanceIdRef.current }
+    }));
     setShowTooltip(true);
     setIsTooltipForceClosed(false);
   };
@@ -54,6 +74,19 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
     }
   };
 
+  const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const getStatusPatterns = (statusName: string) => {
+    if (statusName === "治癒(X)") {
+      return [
+        escapeRegExp(statusName),
+        "治癒\\([^)]*\\)",
+        "治癒（[^）]*）"
+      ];
+    }
+    return [escapeRegExp(statusName)];
+  };
+
   const renderFormattedDescription = (text: string) => {
     let parts: (string | React.ReactNode)[] = [text];
     
@@ -61,13 +94,13 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       const newParts: (string | React.ReactNode)[] = [];
       parts.forEach(part => {
         if (typeof part === 'string') {
-          const regex = new RegExp(`(${status.name})`, 'g');
+          const regex = new RegExp(`(${getStatusPatterns(status.name).join('|')})`, 'g');
           const subParts = part.split(regex);
           subParts.forEach(subPart => {
-            if (subPart === status.name) {
+            if (getStatusPatterns(status.name).some(pattern => new RegExp(`^${pattern}$`).test(subPart))) {
               newParts.push(
                 <span 
-                  key={status.name + Math.random()}
+                  key={status.name + subPart + Math.random()}
                   onMouseEnter={() => setHoveredStatus(status.name)}
                   onMouseLeave={() => setHoveredStatus(null)}
                   style={{ color: '#ffeb3b', textDecoration: 'underline', cursor: 'help', fontWeight: 'bold', pointerEvents: 'auto' }}
@@ -103,6 +136,26 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const [tooltipPos, setTooltipPos] = useState<'center' | 'left' | 'right'>('center');
   const [isTooltipBelow, setIsTooltipBelow] = useState(false);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    const closeOtherTooltip = (event: Event) => {
+      const sourceId = (event as CustomEvent<{ sourceId?: string }>).detail?.sourceId;
+      if (sourceId !== tooltipInstanceIdRef.current) {
+        closeTooltip();
+      }
+    };
+
+    window.addEventListener(SKILL_TOOLTIP_OPEN_EVENT, closeOtherTooltip);
+
+    return () => {
+      window.removeEventListener(SKILL_TOOLTIP_OPEN_EVENT, closeOtherTooltip);
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+        tooltipTimeoutRef.current = null;
+      }
+      cancelTouchTooltip();
+    };
+  }, []);
 
   useEffect(() => {
     const updatePosition = () => {
@@ -241,9 +294,32 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       onClick={handleClick}
       onPointerDown={(e) => {
         if (e.pointerType === 'touch' || e.pointerType === 'pen') {
-          openTooltip();
+          touchStartRef.current = { x: e.clientX, y: e.clientY };
+          if (touchTooltipTimeoutRef.current) {
+            clearTimeout(touchTooltipTimeoutRef.current);
+          }
+          touchTooltipTimeoutRef.current = setTimeout(() => {
+            touchTooltipTimeoutRef.current = null;
+            openTooltip();
+          }, 250);
         }
       }}
+      onPointerMove={(e) => {
+        if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+        if (!touchStartRef.current) return;
+
+        const moveX = Math.abs(e.clientX - touchStartRef.current.x);
+        const moveY = Math.abs(e.clientY - touchStartRef.current.y);
+        if (moveX > 8 || moveY > 8) {
+          cancelTouchTooltip();
+        }
+      }}
+      onPointerUp={(e) => {
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+          cancelTouchTooltip();
+        }
+      }}
+      onPointerCancel={cancelTouchTooltip}
       onMouseEnter={openTooltip}
       onMouseLeave={() => {
         if (!disableTooltip) {

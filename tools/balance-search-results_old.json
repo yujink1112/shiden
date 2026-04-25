@@ -1,0 +1,357 @@
+[
+  {
+    "key": "1-1",
+    "bossName": "ルーサー",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺待果搦",
+      "一刺待果玉",
+      "一刺待果強",
+      "一刺待果速",
+      "一刺待搦果"
+    ],
+    "pool": "一刺果待搦玉強速"
+  },
+  {
+    "key": "1-2",
+    "bossName": "肉厚な魚",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待玉",
+      "一刺果搦玉",
+      "一刺果強玉",
+      "一刺果速待",
+      "一刺果速搦"
+    ],
+    "pool": "一刺果待搦玉強速"
+  },
+  {
+    "key": "2-1",
+    "bossName": "血に飢えたジョーズ",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待玉",
+      "一刺果搦待",
+      "一刺果玉待",
+      "一刺果玉搦",
+      "一刺果玉強"
+    ],
+    "pool": "一刺果待搦玉強速拳"
+  },
+  {
+    "key": "2-2",
+    "bossName": "弱者狩りのハゲタカ",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待搦",
+      "一刺果待玉",
+      "一刺果待強",
+      "一刺果待速",
+      "一刺果待拳"
+    ],
+    "pool": "一刺果待搦玉強速拳"
+  },
+  {
+    "key": "3-1",
+    "bossName": "デザインド・エッグ号",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待飛",
+      "一刺果搦飛",
+      "一刺果玉飛",
+      "一刺果強飛",
+      "一刺果速飛"
+    ],
+    "pool": "一刺果待搦玉強速拳飛"
+  },
+  {
+    "key": "3-2",
+    "bossName": "エーヴィス",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一待搦玉刺",
+      "一待搦強刺",
+      "一待搦速刺",
+      "一待搦飛刺",
+      "一待玉搦刺"
+    ],
+    "pool": "一刺果待搦玉強速拳飛"
+  },
+  {
+    "key": "4-1",
+    "bossName": "ラ・マンチャ号",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待玉",
+      "一刺果待拳",
+      "一刺果玉待",
+      "一刺果玉拳",
+      "一刺果速待"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏"
+  },
+  {
+    "key": "4-2",
+    "bossName": "イスパニア艦隊",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一待搦刺果",
+      "一待搦刺玉",
+      "一待搦刺強",
+      "一待搦刺速",
+      "一待搦刺拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏"
+  },
+  {
+    "key": "5-1",
+    "bossName": "ゾルゲイド",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果玉速",
+      "一刺待玉速",
+      "一刺搦玉速",
+      "一刺搦速飛",
+      "一刺強玉速"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦"
+  },
+  {
+    "key": "5-2",
+    "bossName": "エルダゾルゲイド",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺待果速",
+      "一刺待搦果",
+      "一刺待玉果",
+      "一刺待強果",
+      "一刺待速果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦"
+  },
+  {
+    "key": "6-1",
+    "bossName": "クラーケン",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果玉待",
+      "一刺果玉搦",
+      "一刺果玉強",
+      "一刺果玉速",
+      "一刺果玉飛"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒"
+  },
+  {
+    "key": "6-2",
+    "bossName": "ゴルゾアの胃袋",
+    "clearable": false,
+    "searchMode": "ordered-with-dup",
+    "checked": 371293,
+    "samples": [],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒"
+  },
+  {
+    "key": "7-1",
+    "bossName": "バクバク",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待玉",
+      "一刺果搦玉",
+      "一刺果玉搦",
+      "一刺果強玉",
+      "一刺果速玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼"
+  },
+  {
+    "key": "7-2",
+    "bossName": "死者の群れ",
+    "clearable": false,
+    "searchMode": "ordered-with-dup",
+    "checked": 729904,
+    "samples": [],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁▽"
+  },
+  {
+    "key": "8-1",
+    "bossName": "死霊船 黒潮号",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果搦玉",
+      "一刺果玉霊",
+      "一刺果飛搦",
+      "一刺果霊玉",
+      "一刺待搦玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊爆"
+  },
+  {
+    "key": "8-2",
+    "bossName": "ブライニクル",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 207636,
+    "samples": [
+      "待待待毒果",
+      "待待搦毒果",
+      "待待玉毒果",
+      "待待強毒果",
+      "待待速毒果",
+      "待待飛毒果",
+      "待待毒一果",
+      "待待毒刺果",
+      "待待毒果果",
+      "待待毒待果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔"
+  },
+  {
+    "key": "9-1",
+    "bossName": "廃都の守護者",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺待搦狼",
+      "一刺待搦爆",
+      "一刺待玉狼",
+      "一刺待玉爆",
+      "一刺待強狼"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円"
+  },
+  {
+    "key": "9-2",
+    "bossName": "深海の賢王 ジズ",
+    "clearable": false,
+    "searchMode": "ordered-with-dup",
+    "checked": 2359296,
+    "samples": [],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円"
+  },
+  {
+    "key": "10-1",
+    "bossName": "ゾルゲイドクイーン",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺搦待拳",
+      "一刺玉速狼",
+      "一刺玉礁狼",
+      "一果搦刺飛",
+      "一果搦待拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅"
+  },
+  {
+    "key": "10-2",
+    "bossName": "デザインド・エッグ号",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺搦飛狼",
+      "一刺飛礁狼",
+      "一刺飛狼礁",
+      "一刺飛狼霊",
+      "一刺飛霊狼"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅"
+  },
+  {
+    "key": "11-1",
+    "bossName": "エーヴィス海賊団",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺果待搦",
+      "一刺果待玉",
+      "一刺果待強",
+      "一刺果待速",
+      "一刺果待拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受"
+  },
+  {
+    "key": "11-2",
+    "bossName": "大海賊 エーヴィス",
+    "clearable": false,
+    "searchMode": "ordered-with-dup",
+    "checked": 3989088,
+    "samples": [],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受"
+  },
+  {
+    "key": "12-1",
+    "bossName": "偽聖女 リザベル",
+    "clearable": true,
+    "searchMode": "previous-ordered-no-dup",
+    "checked": null,
+    "samples": [
+      "一刺霊毒果",
+      "一刺霊毒拳",
+      "一刺霊毒滅",
+      "一刺霊毒死",
+      "一果刺毒拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死"
+  },
+  {
+    "key": "12-2",
+    "bossName": "魔女 グリザーベルク",
+    "clearable": false,
+    "searchMode": "ordered-with-dup",
+    "checked": 5082519,
+    "samples": [],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死"
+  },
+  {
+    "key": "12-3",
+    "bossName": "魔女 グリザーベルク",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 1154108,
+    "samples": [
+      "搦飛霊魔死",
+      "搦飛魔霊死",
+      "搦飛魔死霊",
+      "搦霊飛魔死",
+      "搦霊魔飛死",
+      "搦霊魔死飛",
+      "搦魔飛霊死",
+      "搦魔飛死霊",
+      "搦魔霊飛死",
+      "搦魔霊死飛"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死"
+  }
+]

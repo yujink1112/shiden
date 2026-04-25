@@ -29,6 +29,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     showEpilogue,
     handleResetGame,
     handleStartGame,
+    handleDebugWin,
     handleBattleLogComplete,
     getStorageUrl,
     selectedPlayerSkills,
@@ -79,10 +80,14 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
     return flow?.flow[chapter2FlowIndex] || null;
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
+  const currentFlow = React.useMemo(() => {
+    return chapter2Flows.find(f => f.stageNo === stageCycle) || null;
+  }, [chapter2Flows, stageCycle]);
 
   // 第2章の報酬選択（flow type が reward の場合）
   const isChapter2Reward = currentStep?.type === 'reward';
   const isFixedChapter2Reward = isChapter2Reward && !!currentStep?.skill;
+  const isPreBattleReward = isChapter2Reward && currentFlow?.flow[chapter2FlowIndex + 1]?.type === 'battle';
 
   // 報酬の選択肢を生成して保存する。リロード時は同じ報酬ステップの候補を再利用する。
   const [rewardChoices, setRewardChoices] = React.useState<string[]>([]);
@@ -178,17 +183,16 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
   const previousChapter2BattleStep = React.useMemo(() => {
     if (!isChapter2Reward) return null;
-    const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
-    return [...(flow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle') || null;
-  }, [isChapter2Reward, chapter2Flows, stageCycle, chapter2FlowIndex]);
+    return [...(currentFlow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle') || null;
+  }, [isChapter2Reward, currentFlow, chapter2FlowIndex]);
   const hasCurrentBattleResults = battleResults.length > 0;
   const hasCurrentBattleVictory = battleResults.some(result => result.winner === 1);
   const hasChapter2BattleVictory = hasCurrentBattleVictory || (!hasCurrentBattleResults && canGoToBoss);
 
   // 報酬選択の表示判定を上書き
   const showRewardSelection = (rewardSelectionMode || isChapter2Reward) &&
-    !(isChapter2Reward && previousChapter2BattleStep && !hasChapter2BattleVictory);
-  const showChapter2VictoryPanel = canGoToBoss && (!hasCurrentBattleResults || hasCurrentBattleVictory);
+    !(isChapter2Reward && !isPreBattleReward && previousChapter2BattleStep && !hasChapter2BattleVictory);
+  const showChapter2VictoryPanel = !isChapter2Reward && canGoToBoss && (!hasCurrentBattleResults || hasCurrentBattleVictory);
   const isChapter2FinalBattle = stageCycle === 24 && (
     chapter2SubStage === 3 ||
     (currentStep?.type === 'battle' && currentStep.subStage === 3) ||
@@ -201,6 +205,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     battleResults[0]?.winner === 1;
   const [introEffectActive, setIntroEffectActive] = React.useState(false);
   const [finalClearEffectActive, setFinalClearEffectActive] = React.useState(false);
+  const showDebugBattleButton = process.env.NODE_ENV !== 'production';
   const finalClearStartedRef = React.useRef(false);
   const introEffectKeyRef = React.useRef('');
   const moveToNextStepRef = React.useRef(moveToNextStep);
@@ -419,8 +424,11 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         {!gameStarted && (
           <div style={{ width: '100%', maxWidth: '800px' }}>
             {selectedPlayerSkills.length === PLAYER_SKILL_COUNT && (
-              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button onClick={handleStartGame} style={{ padding: '10px 60px', fontSize: '20px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 0 15px rgba(40, 167, 69, 0.5)', fontWeight: 'bold' }}>戦闘開始</button>
+                {showDebugBattleButton && (
+                  <button onClick={handleDebugWin} style={{ padding: '10px 24px', fontSize: '18px', backgroundColor: '#1565c0', color: 'white', border: '1px solid #64b5f6', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>[DEBUG] 勝利</button>
+                )}
               </div>
             )}
             <div className="PlayerSkillSelection" style={{ marginBottom: '20px', padding: '10px', border: '1px solid #333', borderRadius: '10px', background: '#121212' }}>

@@ -677,7 +677,7 @@ export class Battle {
         const s = attacker.skill[idx];
         if (s === "紫") attacker.stan = StatusFlag.RESERVED;
         if (s === "爆") {
-            attacker.roubai = StatusFlag.RESERVED;
+            attacker.suijaku = StatusFlag.RESERVED;
             attacker.stan = StatusFlag.RESERVED;
             attacker.yakedo = StatusFlag.RESERVED;
         }
@@ -899,7 +899,7 @@ export class Battle {
             this.log(`＞魔弾の効果で${defender.playerName}に死紋が刻まれた！`);
         }
         if (s === "爆") {
-            attacker.roubai = StatusFlag.RESERVED;
+            attacker.suijaku = StatusFlag.RESERVED;
             attacker.stan = StatusFlag.RESERVED;
             attacker.yakedo = StatusFlag.RESERVED;
         }
@@ -977,14 +977,9 @@ export class Battle {
         if (pc1.stan === StatusFlag.RESERVED) { this.log(`${pc1.playerName}はスタンを受けた！`); pc1.stan = StatusFlag.ACTIVE; flag = 1; }
         if (pc1.roubai === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は狼狽を受けた！`); pc1.roubai = StatusFlag.ACTIVE; flag = 1; }
         if (pc1.suijaku === StatusFlag.RESERVED) {
-            if (this.hasActiveSkill(pc1, "極")) {
-                this.log(`${pc1.playerName}は【極限】により忘却を受けない！`);
-                pc1.suijaku = StatusFlag.NONE;
-            } else {
-                this.log(`${pc1.playerName}は忘却を受けた！`);
-                pc1.suijaku = StatusFlag.ACTIVE;
-                flag = 1;
-            }
+            this.log(`${pc1.playerName}は忘却を受けた！`);
+            pc1.suijaku = StatusFlag.ACTIVE;
+            flag = 1;
         }
         if (pc1.tyudoku === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は毒を受けた！`); pc1.tyudoku = StatusFlag.ACTIVE; flag = 1; }
         if (pc1.yakedo === StatusFlag.RESERVED) { this.log(`${pc1.playerName}は火傷を受けた！`); pc1.yakedo = StatusFlag.ACTIVE; flag = 1; }
@@ -1051,6 +1046,10 @@ export class Battle {
         if (pc1.ekibyo === StatusFlag.RESERVED) {
             for (let i = 0; i < pc1.getSkillsLength(); i++) {
                 if (pc1.type[i] !== Player.NONE) {
+                    if (pc1.skill[i] === "極") {
+                        this.log(`${pc1.playerName}の【極限】${i + 1}はいかなる変化効果も受けない！`);
+                        break;
+                    }
                     this.log(`${pc1.playerName}の【${pc1.name[i]}】${i + 1}が【疫病】${i + 1}に変化した！`);
                     pc1.skill[i] = "疫"; pc1.name[i] = "疫病"; pc1.type[i] = Player.COUNTER;
                     pc1.speed[i] = pc1.getSkillLevel(i); pc1.damage[i] = 0; pc1.limited[i] = 0;
@@ -1304,9 +1303,12 @@ export class Battle {
 
     private applySuijaku(pc: Player): number {
         if (pc.suijaku !== StatusFlag.ACTIVE) return 0;
-        if (this.hasActiveSkill(pc, "極")) return 0;
         for (let i = 0; i < pc.getSkillsLength(); i++) {
             if (pc.type[i] !== Player.NONE && pc.skill[i] !== "空") {
+                if (pc.skill[i] === "極") {
+                    this.log(`${pc.playerName}の【極限】${i + 1}はいかなる変化効果も受けない！`);
+                    return 1;
+                }
                 this.log(`忘却の効果で${pc.playerName}の【${pc.name[i]}】${i + 1}が【空白】${i + 1}に変化した！`);
                 pc.skill[i] = "空"; pc.name[i] = "空白"; pc.type[i] = Player.ENCHANT;
                 pc.speed[i] = 0; pc.damage[i] = 0; pc.scar[i] = 0; pc.limited[i] = 0;
@@ -1317,15 +1319,11 @@ export class Battle {
     }
 
     private judgeMastery(): number {
-        if (this.turn !== 20) return BattleResult.CONTINUE;
+        if (this.turn !== 9) return BattleResult.CONTINUE;
 
         const pc1Mastery = this.hasActiveSkill(this.pc1, "掌");
         const pc2Mastery = this.hasActiveSkill(this.pc2, "掌");
         if (!pc1Mastery && !pc2Mastery) return BattleResult.CONTINUE;
-
-        this.log();
-        this.log("【掌握】");
-        this.log();
 
         let result = BattleResult.CONTINUE;
         if (pc1Mastery && pc2Mastery) {
@@ -1336,8 +1334,8 @@ export class Battle {
             result = BattleResult.PC2_WIN;
         }
 
-        if (result === BattleResult.PC1_WIN) this.log(`${this.pc1.playerName}の【掌握】により、第20ラウンドの終了フェイズに勝利！`);
-        else if (result === BattleResult.PC2_WIN) this.log(`${this.pc2.playerName}の【掌握】により、第20ラウンドの終了フェイズに勝利！`);
+        if (result === BattleResult.PC1_WIN) this.log(`${this.pc1.playerName}は全てを掌握した！！`);
+        else if (result === BattleResult.PC2_WIN) this.log(`${this.pc2.playerName}は全てを掌握した！！`);
         else this.log("互いの【掌握】により、引き分け！");
 
         this.log();

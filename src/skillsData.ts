@@ -69,12 +69,12 @@ export const ALL_SKILLS: SkillDetail[] = [
 
   // 神業スキル
   { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/v2/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1 },
-  { abbr: "▽", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1,speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
-  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「狼狽」「スタン」「火傷」を与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
+  { abbr: "▽", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃・神業", kamiwaza: 1,speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
+  { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「スタン」「忘却」「火傷」を与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
   { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
 
   // 敵専用スキル
-  { abbr: "極", name: "極限", kana:"グランツヴァルト", icon: "/images/skill/v2/infinity.png", type: "付帯・敵専用", speed: "なし", description: "【ＨＰ】1000個分として扱う。以降のスキルのLVは1001から数える。あなたは状態「忘却」の効果を受けない。", ruleDisplay: false, exclude: 1  },
+  { abbr: "極", name: "極限", kana:"グランツヴァルト", icon: "/images/skill/v2/infinity.png", type: "付帯・敵専用", speed: "なし", description: "【ＨＰ】1000個分として扱う。以降のスキルのLVは1001から数える。このスキルはいかなる変化効果も受けない。", ruleDisplay: false, exclude: 1  },
   { abbr: "掌", name: "掌握", kana:"エアグライフェン", icon: "/images/skill/v2/hand.png", type: "付帯・敵専用", speed: "なし", description: "あなたは第9ラウンドの終了フェイズに勝利する。", ruleDisplay: false, exclude: 1  },
 
 

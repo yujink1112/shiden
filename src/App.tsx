@@ -33,6 +33,24 @@ const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強"
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
+const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
+  "狼": "ルーサー",
+  "▽": "アダム",
+  "爆": "ウィッチ",
+  "魔": "レミエル"
+};
+
+const CHAPTER2_STAGE_ALLOWED_KAMIWAZA: Record<string, string> = {
+  "7-1": "狼",
+  "7-2": "▽",
+  "8-1": "爆",
+  "8-2": "魔"
+};
+
+const getPlayerNameForSkills = (selectedSkills: string[], fallbackName: string) => {
+  const kamiwaza = selectedSkills.find(abbr => KAMIWAZA_PLAYER_NAMES[abbr]);
+  return kamiwaza ? KAMIWAZA_PLAYER_NAMES[kamiwaza] : fallbackName;
+};
 
 type StoryCanvasState = {
   kind: 'story' | 'storyUrl' | 'credits';
@@ -165,6 +183,7 @@ function App() {
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isAdminPreview, setIsAdminPreview] = useState(false);
+  const [adminEpilogueSequence, setAdminEpilogueSequence] = useState<'idle' | 'title' | 'story' | 'credits'>('idle');
   const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
   const isAdminDebugSkillsActiveRef = useRef(false);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
@@ -447,6 +466,54 @@ function App() {
     return `Stage${chapterStage}-${getChapter2SubStageForDisplay(stageNo, flowIndex)}`;
   };
 
+  const CHAPTER2_FINAL_STAGE_NO = 24;
+  const CHAPTER2_FINAL_BATTLE_FLOW_INDEX = 5;
+
+  const nonAdminProfiles = React.useMemo(
+    () => allProfiles.filter(profile => profile.uid !== process.env.REACT_APP_ADMIN_UID),
+    [allProfiles]
+  );
+
+  const chapter1RawStageClearCounts = React.useMemo(() => {
+    return Array.from({ length: 12 }, (_, index) => {
+      const stageNum = index + 1;
+      const clearKey = `BOSS_${stageNum}`;
+      const registeredClears = nonAdminProfiles.filter(profile => profile.victorySkills && profile.victorySkills[clearKey]).length;
+      const anonymousClears = Object.values(anonymousVictories).filter(victories => victories && victories[clearKey]).length;
+      return registeredClears + anonymousClears;
+    });
+  }, [anonymousVictories, nonAdminProfiles]);
+
+  const chapter1StageClearCounts = React.useMemo(() => {
+    const correctedCounts = [...chapter1RawStageClearCounts];
+    for (let i = correctedCounts.length - 2; i >= 0; i--) {
+      correctedCounts[i] = Math.max(correctedCounts[i], correctedCounts[i + 1]);
+    }
+    return correctedCounts;
+  }, [chapter1RawStageClearCounts]);
+
+  const hasClearedChapter2Stage = (profile: UserProfile, stageNo: number): boolean => {
+    if (!profile.chapter2 || typeof profile.chapter2.stageCycle !== 'number') return false;
+
+    if (profile.chapter2.stageCycle > stageNo) {
+      return true;
+    }
+
+    if (stageNo === CHAPTER2_FINAL_STAGE_NO && profile.chapter2.stageCycle === CHAPTER2_FINAL_STAGE_NO) {
+      return profile.chapter2.flowIndex === CHAPTER2_FINAL_BATTLE_FLOW_INDEX && Boolean(profile.chapter2.canGoToBoss);
+    }
+
+    return false;
+  };
+
+  const chapter2StageClearCounts = React.useMemo(() => {
+    return Array.from({ length: 12 }, (_, index) => {
+      const stageNum = index + 1;
+      const stageNo = stageNum + 12;
+      return nonAdminProfiles.filter(profile => hasClearedChapter2Stage(profile, stageNo)).length;
+    });
+  }, [nonAdminProfiles]);
+
   const suppressChapter2ProgressSaveRef = useRef(false);
 
   const haveSameItems = (a: string[], b: string[]) => {
@@ -479,6 +546,26 @@ function App() {
     const previousBattleStep = [...flow.flow.slice(0, chapter2FlowIndex + 1)].reverse().find(s => s.type === 'battle');
     return previousBattleStep?.subStage || 1;
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
+
+  const startChapter2EpilogueSequence = () => {
+    clearStoryCanvasState();
+    setStoryContent(null);
+    setStoryContentV2(null);
+    setStoryUrl(null);
+    setCreditsUrl(null);
+    setShowStoryModal(false);
+    setShowChapterTitle(false);
+    setShowChapter2Title(false);
+    setShowPrologueTitle(false);
+    setShowAdmin(false);
+    setIsAdminPreview(true);
+    setAdminEpilogueSequence('title');
+    setStageCycle(24);
+    setStageMode('BOSS');
+    setGameStarted(false);
+    setIsTitle(false);
+    setShowEpilogue(false);
+  };
 
   // 第2章の次のステップへ進む
   const moveToNextStep = async (currentFlow?: Chapter2StageFlow, currentIndex?: number, ignoreTitle: boolean = false): Promise<void> => {
@@ -516,11 +603,19 @@ function App() {
       } else if (nextStep.type === 'reward') {
         clearStoryCanvasState();
         setChapter2FlowIndex(nextIndex);
+        const isPreBattleReward = flow.flow[nextIndex + 1]?.type === 'battle';
         const rewardStepKey = getRewardStepKey(stageCycle, nextIndex);
         if (claimedRewardSteps.includes(rewardStepKey)) {
           setSelectedRewards([]);
           setRewardSelectionMode(false);
           return moveToNextStep(flow, nextIndex);
+        }
+        if (isPreBattleReward) {
+          setCanGoToBoss(false);
+          setBattleResults([]);
+          setShowLogForBattleIndex(-1);
+          setLogComplete(false);
+          setShowBossClearPanel(false);
         }
         setSelectedRewards([]); // 報酬選択前にリセット
         if (nextStep.skill) {
@@ -543,6 +638,11 @@ function App() {
         setShowStoryModal(true);
       }
     } else {
+      const lastStep = flow.flow[flow.flow.length - 1];
+      if (flow.stageNo === 24 && lastStep?.type === 'battle' && lastStep.subStage === 3) {
+        startChapter2EpilogueSequence();
+        return;
+      }
       // ステージクリア、次のサイクルへ
       clearStoryCanvasState();
       clearBossAndNextCycle();
@@ -816,6 +916,16 @@ const PLAYER_SKILL_COUNT = 5;
           const availableChapter1SkillAbbrs = new Set(getAvailableSkillsUntilStage(stageCycle).map(skill => skill.abbr));
           skillAbbrs = skillAbbrs.filter(abbr => abbr === "一" || availableChapter1SkillAbbrs.has(abbr));
         }
+        if (isChapter2) {
+          const chapter2StageKey = `${stageCycle - 12}-${getChapter2SubStageForDisplay(stageCycle, chapter2FlowIndex)}`;
+          const allowedKamiwaza = CHAPTER2_STAGE_ALLOWED_KAMIWAZA[chapter2StageKey];
+          if (allowedKamiwaza) {
+            skillAbbrs = skillAbbrs.filter(abbr => {
+              const skill = getSkillByAbbr(abbr);
+              return skill?.kamiwaza !== 1 || abbr === allowedKamiwaza;
+            });
+          }
+        }
         const owned = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
         return owned.sort((a, b) => {
           // 神業スキルを最優先
@@ -836,7 +946,7 @@ const PLAYER_SKILL_COUNT = 5;
         setCanGoToBoss(false);
       }
     }
-  }, [gameStarted, ownedSkillAbbrs, isAdminDebugSkillsActive, stageCycle, stageMode, chapter2FlowIndex]);
+  }, [gameStarted, ownedSkillAbbrs, isAdminDebugSkillsActive, stageCycle, stageMode, chapter2FlowIndex, chapter2Flows]);
 
   useEffect(() => {
     if (!isChapter2 || chapter2Flows.length === 0 || showStoryModal || showChapterTitle || showChapter2Title || isStoryTransitioning) return;
@@ -1417,6 +1527,37 @@ const PLAYER_SKILL_COUNT = 5;
       }
     }
     setShowChapterSelect({ mode: 'CONTINUE' });
+  };
+
+  const handleAdminSetChapter2Save = async (stageNo: number) => {
+    if (!user) return;
+
+    const now = Date.now();
+    const flowIndex = 0;
+    const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
+    const snapshot = await get(chapter2Ref);
+    const currentData = snapshot.exists() ? snapshot.val() : {};
+
+    await set(chapter2Ref, {
+      ...currentData,
+      stageCycle: stageNo,
+      flowIndex,
+      canGoToBoss: false,
+      lastUpdated: now
+    });
+    await saveProfileProgress(user.uid, { updatedAt: now });
+
+    localStorage.setItem('shiden_chapter2_stage', stageNo.toString());
+    localStorage.setItem('shiden_chapter2_flow_index', flowIndex.toString());
+    localStorage.setItem('shiden_stage_cycle', stageNo.toString());
+    localStorage.setItem('shiden_stage_mode', 'BOSS');
+    localStorage.setItem('shiden_last_game_mode', 'BOSS');
+    localStorage.setItem('shiden_can_go_to_boss', 'false');
+    localStorage.setItem('shiden_updated_at', now.toString());
+
+    setChapterProgress(prev => ({ ...prev, 2: stageNo }));
+    setChapter2FlowIndex(flowIndex);
+    setHasChapter2Save(true);
   };
 
   const handleEpilogueComplete = () => {
@@ -2176,6 +2317,8 @@ const PLAYER_SKILL_COUNT = 5;
             hasSynergy = prev.type.includes("攻撃"); // +錬は攻撃スキルのみに反応
           } else if (current.name === "＋強") {
             hasSynergy = prev.type.includes("攻撃"); // +強は攻撃スキルのみに反応
+          } else if (current.name === "＋光") {
+            hasSynergy = prev.name === "一閃"; // +光は一閃のみに反応
           } else {
             hasSynergy = false; // その他の＋スキルはデフォルトでシナジーなし
           }
@@ -2245,6 +2388,137 @@ const PLAYER_SKILL_COUNT = 5;
 
   const [showBossClearPanel, setShowBossClearPanel] = useState(false);
 
+  const applyPostLogBattleOutcome = (winCount: number) => {
+    const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+    const isChapter2 = currentStageInfo?.chapter === 2;
+    const currentChapter2Flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+    const currentChapter2Step = currentChapter2Flow?.flow[chapter2FlowIndex];
+    const isChapter2FinalBattle = stageCycle === 24 && (
+      chapter2SubStage === 3 ||
+      (currentChapter2Step?.type === 'battle' && currentChapter2Step.subStage === 3) ||
+      chapter2FlowIndex === 6
+    );
+    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || isChapter2) ? winCount >= 1 : winCount === 10;
+
+    if (!isVictory || !(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || isChapter2)) {
+      return;
+    }
+
+    if (!isChapter2FinalBattle) {
+      triggerVictoryConfetti();
+    }
+
+    if (isChapter2) {
+      setCanGoToBoss(true);
+      return;
+    }
+
+    if (stageMode === 'BOSS') {
+      setShowBossClearPanel(true);
+      if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
+        const profileRef = ref(database, `profiles/${user.uid}/`);
+        const newMedals = [...(myProfile.medals || []), 'master'];
+        set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+      }
+    }
+
+    if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
+      const kenjuConfig = KENJU_DATA.find(k => k.name === kenjuBoss.name);
+      if (kenjuConfig && kenjuConfig.medalId) {
+        const medalId = kenjuConfig.medalId;
+        if (!(myProfile.medals || []).includes(medalId)) {
+          const profileRef = ref(database, `profiles/${user.uid}/`);
+          const newMedals = [...(myProfile.medals || []), medalId];
+          set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
+          console.log(`[Medal] Awarded ${medalId} for defeating ${kenjuBoss.name}`);
+        }
+      }
+    }
+  };
+
+  const finalizeBattleResults = (
+    results: BattleResult[],
+    winCount: number,
+    battleCount: number,
+    context: any,
+    options?: { markLogComplete?: boolean }
+  ) => {
+    const shouldMarkLogComplete = options?.markLogComplete === true;
+
+    setBattleResults(results);
+    setGameStarted(true);
+    setShowLogForBattleIndex(results.length > 0 ? 0 : -1);
+    setLogComplete(shouldMarkLogComplete);
+
+    if (isMobile) {
+      window.scrollTo({ top: 0 });
+      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+    }
+
+    const winRateVal = Math.round((winCount / battleCount) * 100);
+
+    if (stageProcessor.shouldShowWinRate?.(context)) {
+      setStage11TrialActive(true);
+      let currentRate = 0;
+      const threshold = stageProcessor.getWinThreshold?.(context) || 100;
+      const interval = setInterval(() => {
+        currentRate += 1;
+        setWinRateDisplay(currentRate);
+        if (currentRate >= winRateVal) {
+          clearInterval(interval);
+          setTimeout(() => {
+            if (winRateVal >= threshold) {
+              setCanGoToBoss(true);
+              localStorage.setItem('shiden_can_go_to_boss', 'true');
+              triggerVictoryConfetti();
+            } else {
+              setCanGoToBoss(false);
+              localStorage.setItem('shiden_can_go_to_boss', 'false');
+            }
+            if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
+              setRewardSelectionMode(true);
+            }
+            setStage11TrialActive(false);
+          }, 1000);
+        }
+      }, 30);
+      return;
+    }
+
+    const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
+    const isChapter2 = currentStageInfo?.chapter === 2;
+    const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) || isChapter2 ? winCount >= 1 : winCount === 10;
+    const result = isVictory ? stageProcessor.onVictory(context) : stageProcessor.onFailure(context);
+
+    if (isVictory) {
+      if (isChapter2) {
+        setCanGoToBoss(true);
+      } else {
+        setCanGoToBoss(true);
+        localStorage.setItem('shiden_can_go_to_boss', 'true');
+        if (stageMode === 'MID') {
+          triggerVictoryConfetti();
+          if (stageCycle === 1) {
+            setShowStage1Tutorial(true);
+          }
+        }
+      }
+    } else if (isChapter2) {
+      setCanGoToBoss(false);
+    }
+
+    if (result.showReward && !isChapter2 && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
+      if ((result as any).pendingClear) setBossClearRewardPending(true);
+      else setRewardSelectionMode(true);
+    } else if (isVictory && (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !isChapter2) {
+      setShowBossClearPanel(true);
+    }
+
+    if (shouldMarkLogComplete) {
+      applyPostLogBattleOutcome(winCount);
+    }
+  };
+
   const handlePlayerSkillSelectionClick = (abbr: string) => {
     if (selectedPlayerSkills.length < PLAYER_SKILL_COUNT) {
       const skill = getSkillByAbbr(abbr);
@@ -2262,6 +2536,7 @@ const PLAYER_SKILL_COUNT = 5;
 
   const handleStartGame = () => {
     if (selectedPlayerSkills.length === PLAYER_SKILL_COUNT) {
+      setLogComplete(false);
       window.scrollTo({ top: 0 });
       if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
       const results: BattleResult[] = [];
@@ -2309,80 +2584,6 @@ const PLAYER_SKILL_COUNT = 5;
         }
       }
       
-      const processResults = (winCount: number) => {
-          setBattleResults(results);
-          setGameStarted(true);
-          setShowLogForBattleIndex(0);
-          
-          if (isMobile) {
-            window.scrollTo({ top: 0 });
-            if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
-          }
-
-          const winRateVal = Math.round((winCount / battleCount) * 100);
-
-          if (stageProcessor.shouldShowWinRate?.(context)) {
-            setStage11TrialActive(true);
-            let currentRate = 0;
-            const threshold = stageProcessor.getWinThreshold?.(context) || 100;
-            const interval = setInterval(() => {
-              currentRate += 1;
-              setWinRateDisplay(currentRate);
-              if (currentRate >= winRateVal) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    if (winRateVal >= threshold) {
-                        setCanGoToBoss(true);
-                        localStorage.setItem('shiden_can_go_to_boss', 'true');
-                        triggerVictoryConfetti();
-                    } else {
-                        setCanGoToBoss(false);
-                        localStorage.setItem('shiden_can_go_to_boss', 'false');
-                    }
-                    if (getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
-                      setRewardSelectionMode(true);
-                    }
-                    setStage11TrialActive(false);
-                }, 1000);
-              }
-            }, 30);
-          } else {
-            // 第2章の場合はMIDでも1勝で勝利とする
-            const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
-            const isChapter2 = currentStageInfo?.chapter === 2;
-            const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) || isChapter2 ? winCount >= 1 : winCount === 10;
-            const result = isVictory ? stageProcessor.onVictory(context) : stageProcessor.onFailure(context);
-            
-            if (isVictory) {
-              // 第2章の処理
-              const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
-              const isChapter2 = currentStageInfo?.chapter === 2;
-
-              if (isChapter2) {
-                setCanGoToBoss(true);
-              } else {
-                setCanGoToBoss(true);
-                localStorage.setItem('shiden_can_go_to_boss', 'true');
-                if (stageMode === 'MID') {
-                  triggerVictoryConfetti();
-                  if (stageCycle === 1) {
-                    setShowStage1Tutorial(true);
-                  }
-                }
-              }
-            } else if (isChapter2) {
-              setCanGoToBoss(false);
-            }
-
-            if (result.showReward && !isChapter2 && getAvailableSkillsUntilStage(stageCycle).filter(s => !ownedSkillAbbrs.includes(s.abbr)).length > 0) {
-              if ((result as any).pendingClear) setBossClearRewardPending(true);
-              else setRewardSelectionMode(true);
-            } else if (isVictory && (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) && !isChapter2) { // 第2章以外
-              setShowBossClearPanel(true);
-            }
-          }
-      };
-
       let winCountTotal = 0;
       for (let i = 0; i < battleCount; i++) {
         const enemyName = stageProcessor.getEnemyName(i, context);
@@ -2390,17 +2591,55 @@ const PLAYER_SKILL_COUNT = 5;
         const currentStageInfo = context.chapter2SubStage !== undefined && stageCycle >= 13
           ? STAGE_DATA.find(s => s.chapter === 2 && s.stage === stageCycle - 12 && s.battle === context.chapter2SubStage)
           : STAGE_DATA.find(s => s.no === stageCycle);
-        const playerName = currentStageInfo?.chapter === 2 ? (currentStageInfo.playerName || "あなた") : "あなた";
+        const defaultPlayerName = currentStageInfo?.chapter === 2 ? (currentStageInfo.playerName || "あなた") : "あなた";
+        const playerName = getPlayerNameForSkills(selectedPlayerSkills, defaultPlayerName);
         const game = new Game(selectedPlayerSkills.join("") + "／" + playerName, currentComputerSkills.map(s => s.abbr).join("") + "／" + enemyName);
         const winner = game.startGame();
         if (winner === 1) winCountTotal++;
         results.push({ playerSkills: playerSkillDetails, computerSkills: currentComputerSkills, winner, resultText: winner === 1 ? "Win!" : winner === 2 ? "Lose" : "Draw", gameLog: game.gameLog, battleInstance: game.battle });
         if ((['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode)) break;
       }
-      processResults(winCountTotal);
+      finalizeBattleResults(results, winCountTotal, battleCount, context);
     } else {
       alert(`スキルを${PLAYER_SKILL_COUNT}枚選択してください。`);
     }
+  };
+
+  const handleDebugWin = () => {
+    if (selectedPlayerSkills.length !== PLAYER_SKILL_COUNT) {
+      alert(`スキルを${PLAYER_SKILL_COUNT}枚選択してください。`);
+      return;
+    }
+
+    window.scrollTo({ top: 0 });
+    if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+
+    const context = stageContext;
+    const battleCount = stageProcessor.getBattleCount();
+    const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
+    const results: BattleResult[] = [];
+
+    setRewardSelectionMode(false);
+    setSelectedRewards([]);
+    setShowBossClearPanel(false);
+
+    for (let i = 0; i < battleCount; i++) {
+      const enemyName = stageProcessor.getEnemyName(i, context);
+      const currentComputerSkills = stageProcessor.getEnemySkills(i, context);
+      results.push({
+        playerSkills: playerSkillDetails,
+        computerSkills: currentComputerSkills,
+        winner: 1,
+        resultText: 'Debug Win!',
+        gameLog: [
+          `DEBUG: ${enemyName} との戦闘を強制勝利しました。`,
+          'あなたの勝利！'
+        ].join('\n')
+      });
+      if ((['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode)) break;
+    }
+
+    finalizeBattleResults(results, results.length, battleCount, context, { markLogComplete: true });
   };
 
   const handleResetGame = () => {
@@ -2506,11 +2745,12 @@ const PLAYER_SKILL_COUNT = 5;
       const rewardStepKey = getRewardStepKey();
 
       if (isChapter2Reward && currentStep?.type === 'reward') {
+        const isPreBattleReward = flow?.flow[chapter2FlowIndex + 1]?.type === 'battle';
         const previousBattleStep = [...(flow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle');
         const hasCurrentBattleResults = battleResults.length > 0;
         const hasCurrentBattleVictory = battleResults.some(result => result.winner === 1);
         const hasChapter2BattleVictory = hasCurrentBattleVictory || (!hasCurrentBattleResults && canGoToBoss);
-        if (previousBattleStep && !hasChapter2BattleVictory) {
+        if (!isPreBattleReward && previousBattleStep && !hasChapter2BattleVictory) {
           alert("第2章の報酬は、直前の戦闘に勝利した時だけ獲得できます。");
           setSelectedRewards([]);
           setRewardSelectionMode(false);
@@ -2755,53 +2995,8 @@ const PLAYER_SKILL_COUNT = 5;
       window.scrollTo({ top: 0 });
       if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
     }
-    // ボス戦、剣獣戦、または電影戦で勝利した場合のみ、紙吹雪とボス撃破パネルを表示
     const winCount = battleResults.filter(r => r.winner === 1).length;
-    const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle);
-    const isChapter2 = currentStageInfo?.chapter === 2;
-    const currentChapter2Flow = chapter2Flows.find(f => f.stageNo === stageCycle);
-    const currentChapter2Step = currentChapter2Flow?.flow[chapter2FlowIndex];
-    const isChapter2FinalBattle = stageCycle === 24 && (
-        chapter2SubStage === 3 ||
-        (currentChapter2Step?.type === 'battle' && currentChapter2Step.subStage === 3) ||
-        chapter2FlowIndex === 6
-    );
-    const isVictory = (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || isChapter2) ? winCount >= 1 : winCount === 10;
-
-    if (isVictory && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI' || isChapter2)) {
-        if (!isChapter2FinalBattle) {
-            triggerVictoryConfetti();
-        }
-
-        if (isChapter2) {
-            // 第2章の場合、自動遷移はせず、GameChapter2 の「次へ進む」ボタンに任せる
-            // 報酬はフローの type: "reward" ステップで行うため、ここでは次へ進むパネルだけ出す
-            setCanGoToBoss(true);
-            return;
-        }
-
-        if (stageMode === 'BOSS') {
-            setShowBossClearPanel(true);
-            // Stage12のボス勝利で「クリアしたよ！」の称号
-            if (stageCycle === 12 && user && myProfile && !(myProfile.medals || []).includes('master')) {
-                const profileRef = ref(database, `profiles/${user.uid}/`);
-                const newMedals = [...(myProfile.medals || []), 'master'];
-                set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-            }
-        }
-        if (stageMode === 'KENJU' && kenjuBoss && user && myProfile) {
-            const kenjuConfig = KENJU_DATA.find(k => k.name === kenjuBoss.name);
-            if (kenjuConfig && kenjuConfig.medalId) {
-                const medalId = kenjuConfig.medalId;
-                if (!(myProfile.medals || []).includes(medalId)) {
-                    const profileRef = ref(database, `profiles/${user.uid}/`);
-                    const newMedals = [...(myProfile.medals || []), medalId];
-                    set(profileRef, { ...myProfile, medals: newMedals, lastActive: Date.now() });
-                    console.log(`[Medal] Awarded ${medalId} for defeating ${kenjuBoss.name}`);
-                }
-            }
-        }
-    }
+    applyPostLogBattleOutcome(winCount);
   };
 
   const handleForceUpdate = () => {
@@ -2834,6 +3029,13 @@ const PLAYER_SKILL_COUNT = 5;
 
     // シーンに応じたBGM再生
     const playSceneBgm = async () => {
+      if (adminEpilogueSequence !== 'idle') {
+        if (adminEpilogueSequence === 'title') {
+          audioManager.stopBgm();
+        }
+        return;
+      }
+
       if (showStoryModal || showChapter2Title) return;
       
       if (showChapterTitle || showPrologueTitle) {
@@ -2852,6 +3054,10 @@ const PLAYER_SKILL_COUNT = 5;
       }
 
       if (stageMode === 'BOSS' || stageMode === 'MID' || stageMode === 'KENJU' || stageMode === 'DENEI') {
+        if (!isChapter2 && (stageMode === 'BOSS' || stageMode === 'MID')) {
+          audioManager.stopBgm();
+          return;
+        }
         
         // ステージごとのBGM指定を確認
         let currentStage = STAGE_DATA.find(s => s.no === stageCycle);
@@ -2885,7 +3091,7 @@ const PLAYER_SKILL_COUNT = 5;
 
     playSceneBgm();
 
-  }, [isTitle, stageMode, showStoryModal, showChapterTitle, showChapter2Title, showPrologueTitle, bgmEnabled, bgmVolume, stageCycle, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex, gameStarted, stagesLoaded]);
+  }, [isTitle, stageMode, showStoryModal, showChapterTitle, showChapter2Title, showPrologueTitle, adminEpilogueSequence, bgmEnabled, bgmVolume, stageCycle, isChapter2, isLoungeMode, kenjuBoss, currentKenjuBattle, chapter2Flows, chapter2FlowIndex, gameStarted, stagesLoaded]);
 
   useEffect(() => {
     if (gameStarted && battleResults.length > 0) {
@@ -3557,20 +3763,11 @@ const PLAYER_SKILL_COUNT = 5;
                 <button onClick={() => setShowClearStats(false)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
               </div>
               <div className="ChangelogContent" style={{ padding: '20px' }}>
+                <div style={{ color: '#ffd700', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>第1章 ステージクリア人数</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(stageNum => {
-                    const bossKey = `BOSS_${stageNum}`;
-                    // BOSSのみを集計
-                    const registeredClears = allProfiles.filter(p => p.victorySkills && p.victorySkills[bossKey]).length;
-                    const anonClears = Object.values(anonymousVictories).filter(v => v && v[bossKey]).length;
-                    const totalClears = registeredClears + anonClears;
-
-                    const allStageCounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => {
-                      const bk = `BOSS_${n}`;
-                      return allProfiles.filter(p => p.victorySkills && p.victorySkills[bk]).length +
-                             Object.values(anonymousVictories).filter(v => v && v[bk]).length;
-                    });
-                    const maxClears = Math.max(...allStageCounts, 1);
+                    const totalClears = chapter1StageClearCounts[stageNum - 1] || 0;
+                    const maxClears = Math.max(...chapter1StageClearCounts, 1);
                     const percentage = (totalClears / maxClears) * 100;
 
                     // 虹色の計算 (Stage 12: 赤(0), Stage 1: 紫(270))
@@ -3595,6 +3792,36 @@ const PLAYER_SKILL_COUNT = 5;
                       </div>
                     );
                   })}
+                </div>
+                <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #444' }}>
+                  <div style={{ color: '#ffd700', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>第2章 ステージクリア人数</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(stageNum => {
+                      const totalClears = chapter2StageClearCounts[stageNum - 1] || 0;
+                      const maxClears = Math.max(...chapter2StageClearCounts, 1);
+                      const percentage = (totalClears / maxClears) * 100;
+                      const hue = (12 - stageNum) * (270 / 11);
+                      const barColor = `hsl(${hue}, 80%, 60%)`;
+
+                      return (
+                        <div key={`chapter2-${stageNum}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '70px', textAlign: 'right', fontSize: '0.8rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Stage {stageNum}</div>
+                          <div style={{ flex: 1, height: '20px', backgroundColor: '#333', borderRadius: '10px', overflow: 'hidden', position: 'relative' }}>
+                            <div style={{
+                              width: `${percentage}%`,
+                              height: '100%',
+                              backgroundColor: barColor,
+                              transition: 'width 1s ease-out',
+                              boxShadow: stageNum === 12 ? `0 0 10px ${barColor}` : 'none'
+                            }} />
+                            <div style={{ position: 'absolute', right: '10px', top: 0, height: '100%', display: 'flex', alignItems: 'center', fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', textShadow: '1px 1px 2px #000' }}>
+                              {totalClears}人
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#888', textAlign: 'center' }}>
                   ※各ステージのBOSSを撃破した人数です
@@ -3685,15 +3912,40 @@ const PLAYER_SKILL_COUNT = 5;
                   setStoryUrl(null);
                   setShowAdmin(false);
                   setIsAdminPreview(true);
+                  setAdminEpilogueSequence('idle');
                   setIsTitle(false);
                   setShowPrologueTitle(true);
                 }} style={{ background: '#4527a0' }}>プロローグ (prologue.txt)</button>
                 <button onClick={() => {
+                  AudioManager.getInstance().stopBgm();
                   setCreditsUrl('/data/credits.json');
                   setShowAdmin(false);
                   setIsAdminPreview(true);
+                  setAdminEpilogueSequence('credits');
                   setTimeout(() => setShowStoryModal(true), 50);
                 }} style={{ background: '#2e7d32' }}>エンドロール (credits.json)</button>
+                <button onClick={async () => {
+                  const data = await loadV2Story('epilogue');
+                  if (!data) return;
+                  setStoryContent(null);
+                  setStoryContentV2(data);
+                  setStoryUrl(null);
+                  setCreditsUrl(null);
+                  setShowStoryModal(false);
+                  setShowChapterTitle(false);
+                  setShowChapter2Title(false);
+                  setShowPrologueTitle(false);
+                  setShowAdmin(false);
+                  setIsAdminPreview(true);
+                  setAdminEpilogueSequence('idle');
+                  setStageCycle(24);
+                  setStageMode('BOSS');
+                  setGameStarted(false);
+                  setIsTitle(false);
+                  setShowEpilogue(false);
+                  setTimeout(() => setShowStoryModal(true), 50);
+                }} style={{ background: '#8d6e63' }}>エピローグ (v2/epilogue.txt)</button>
+                <button onClick={startChapter2EpilogueSequence} style={{ background: '#ad1457' }}>エピローグ通し再生</button>
               </div>
             </div>
 
@@ -3754,6 +4006,12 @@ const PLAYER_SKILL_COUNT = 5;
                         setShowChapterTitle(true);
                       }} style={{ padding: '5px 10px', background: '#6a1b9a', border: '1px solid #ab47bc', fontWeight: 'bold' }}>
                         TITLE
+                      </button>
+
+                      <button onClick={async () => {
+                        await handleAdminSetChapter2Save(stageNo);
+                      }} style={{ padding: '5px 10px', background: '#455a64', border: '1px solid #78909c', fontWeight: 'bold' }}>
+                        SAVE
                       </button>
 
                       <div style={{ display: 'flex', gap: '5px' }}>
@@ -3837,6 +4095,7 @@ const PLAYER_SKILL_COUNT = 5;
                 onOpenSettings={() => setShowSettings(true)}
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
                 isBgmEnabled={bgmEnabled}
+                autoEndOnScriptEnd={adminEpilogueSequence === 'story'}
                 onEnd={() => {
                   const isPrologue = !!storyUrl;
                   const isCredits = !!creditsUrl;
@@ -3853,7 +4112,19 @@ const PLAYER_SKILL_COUNT = 5;
                   setStoryContentV2(null);
                   setGameStarted(false);
 
+                  if (adminEpilogueSequence === 'story') {
+                    setAdminEpilogueSequence('credits');
+                    AudioManager.getInstance().stopBgm();
+                    setCreditsUrl('/data/credits.json');
+                    setIsAdminPreview(true);
+                    setTimeout(() => setShowStoryModal(true), 50);
+                    return;
+                  }
+
                   if (isCredits) {
+                    if (adminEpilogueSequence === 'credits') {
+                      setAdminEpilogueSequence('idle');
+                    }
                     setIsAdminPreview(false);
                     setIsTitle(true);
                     return;
@@ -3912,6 +4183,7 @@ const PLAYER_SKILL_COUNT = 5;
     isLargeScreen,
     handleResetGame,
     handleStartGame,
+    handleDebugWin,
     handleBattleLogComplete,
     triggerVictoryConfetti,
     getStorageUrl,
@@ -4022,7 +4294,32 @@ const PLAYER_SKILL_COUNT = 5;
   
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
-      {!showChapter2Title && !shouldRenderStoryCanvas && !showChapterTitle && !showPrologueTitle && !isStoryTransitioning && gameContent}
+      {!showChapter2Title && !shouldRenderStoryCanvas && !showChapterTitle && !showPrologueTitle && adminEpilogueSequence === 'idle' && !isStoryTransitioning && gameContent}
+
+      {adminEpilogueSequence === 'title' && (
+        <StoryTitle
+          chapter={2}
+          stage={12}
+          stageLabelOverride="エピローグ"
+          metaOverride="第2章"
+          title="エピローグ"
+          onComplete={async () => {
+            const data = await loadV2Story('epilogue');
+            setAdminEpilogueSequence('story');
+            if (data) {
+              setStoryContent(null);
+              setStoryContentV2(data);
+              setStoryUrl(null);
+              setCreditsUrl(null);
+              setShowStoryModal(true);
+            } else {
+              setAdminEpilogueSequence('idle');
+              setIsAdminPreview(false);
+              setIsTitle(true);
+            }
+          }}
+        />
+      )}
 
       {showPrologueTitle && (
         <StoryTitle
@@ -4070,6 +4367,7 @@ const PLAYER_SKILL_COUNT = 5;
                 onOpenSettings={() => setShowSettings(true)}
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
                 isBgmEnabled={bgmEnabled}
+                autoEndOnScriptEnd={adminEpilogueSequence === 'story'}
                 onEnd={() => {
                   const isPrologue = !!storyUrl;
                   const isCredits = !!creditsUrl;
@@ -4086,7 +4384,19 @@ const PLAYER_SKILL_COUNT = 5;
                   setStoryContentV2(null);
                   setGameStarted(false);
 
+                  if (adminEpilogueSequence === 'story') {
+                    setAdminEpilogueSequence('credits');
+                    AudioManager.getInstance().stopBgm();
+                    setCreditsUrl('/data/credits.json');
+                    setIsAdminPreview(true);
+                    setTimeout(() => setShowStoryModal(true), 50);
+                    return;
+                  }
+
                   if (isCredits) {
+                    if (adminEpilogueSequence === 'credits') {
+                      setAdminEpilogueSequence('idle');
+                    }
                     setIsAdminPreview(false);
                     setIsTitle(true);
                     return;

@@ -445,7 +445,6 @@ export class Player {
                     this.type[i] = Player.ATTACK;
                     this.speed[i] = level;
                     this.damage[i] = 1;
-                    this.limited[i] = 1;
                     break;
                 case "爆":
                     this.name[i] = "爆砕";

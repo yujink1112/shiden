@@ -25,7 +25,58 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
   const lines = text.split('\n');
   const script: StoryScript = [];
   let currentBackground = "";
+  let currentBackgroundMobile: string | undefined = undefined;
+  let currentBackgroundMobileOffsetX: number | undefined = undefined;
   let currentSepia = false;
+  let pendingTextStyle: Pick<StoryEntry, "textAlign" | "typingSpeed" | "letterSpacing"> | null = null;
+
+  const parseNumericOption = (value: string | undefined): number => {
+    if (!value) return NaN;
+    const normalized = value.replace(/[０-９．]/g, char => {
+      if (char === '．') return '.';
+      return String(char.charCodeAt(0) - '０'.charCodeAt(0));
+    });
+    return parseFloat(normalized);
+  };
+
+  const applyPendingTextStyle = (entry: StoryEntry): StoryEntry => {
+    if (!pendingTextStyle || !entry.text) return entry;
+    const styledEntry = {
+      ...entry,
+      ...pendingTextStyle
+    };
+    pendingTextStyle = null;
+    return styledEntry;
+  };
+
+  const withCurrentBackgroundOptions = (entry: StoryEntry): StoryEntry => ({
+    ...entry,
+    backgroundMobile: currentBackgroundMobile,
+    backgroundMobileOffsetX: currentBackgroundMobileOffsetX
+  });
+
+  const resolveBackground = (nameOrPath: string): string | undefined => {
+    if (assets.backgrounds[nameOrPath]) {
+      return assets.backgrounds[nameOrPath];
+    }
+
+    for (const [bgName, bgFile] of Object.entries(assets.backgrounds)) {
+      if (nameOrPath === bgName) {
+        return bgFile;
+      }
+    }
+
+    if (
+      nameOrPath.startsWith("/") ||
+      nameOrPath.startsWith("http") ||
+      nameOrPath.startsWith("images/") ||
+      /\.(png|jpg|jpeg|gif|webp)$/i.test(nameOrPath)
+    ) {
+      return nameOrPath;
+    }
+
+    return undefined;
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -38,6 +89,29 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
     }
     if (line.toUpperCase() === '@SEPIA OFF') {
       currentSepia = false;
+      continue;
+    }
+
+    // 発言パネル内テキスト演出: @PANEL CENTER_SLOW [typingSpeedMs] [letterSpacingPx]
+    // 日本語指定: @中央セリフ [typingSpeedMs] [letterSpacingPx]
+    if (line.toUpperCase().startsWith('@PANEL ') || line.startsWith('@中央セリフ')) {
+      const parts = line.split(/\s+/);
+      const mode = line.startsWith('@中央セリフ') ? 'CENTER_SLOW' : (parts[1] || '').toUpperCase();
+      if (mode === 'RESET') {
+        pendingTextStyle = null;
+        continue;
+      }
+      if (mode === 'CENTER_SLOW') {
+        const speedPart = line.startsWith('@中央セリフ') ? parts[1] : parts[2];
+        const spacingPart = line.startsWith('@中央セリフ') ? parts[2] : parts[3];
+        const typingSpeed = Number.parseFloat(speedPart || '');
+        const letterSpacing = Number.parseFloat(spacingPart || '');
+        pendingTextStyle = {
+          textAlign: "center",
+          typingSpeed: Number.isFinite(typingSpeed) ? typingSpeed : 120,
+          letterSpacing: Number.isFinite(letterSpacing) ? letterSpacing : 10
+        };
+      }
       continue;
     }
 
@@ -55,6 +129,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         type: "clearCharacter",
         position: position,
         background: currentBackground,
+        backgroundMobile: currentBackgroundMobile,
+        backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
         sepia: currentSepia
       });
       continue;
@@ -68,6 +144,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           type: "effect",
           still: "none",
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia
         });
         continue;
@@ -77,6 +155,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           type: "effect",
           still: assets.stills[stillName],
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia
         });
         continue;
@@ -89,6 +169,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         type: "effect",
         bgm: "OFF",
         background: currentBackground,
+        backgroundMobile: currentBackgroundMobile,
+        backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
         sepia: currentSepia
       });
       continue;
@@ -103,6 +185,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         bgm: "OFF",
         duration: seconds * 1000,
         background: currentBackground,
+        backgroundMobile: currentBackgroundMobile,
+        backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
         sepia: currentSepia
       });
       continue;
@@ -116,6 +200,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         type: "effect",
         duration: seconds * 1000,
         background: currentBackground,
+        backgroundMobile: currentBackgroundMobile,
+        backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
         sepia: currentSepia
       });
       continue;
@@ -128,6 +214,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         type: "effect",
         bgm: bgmName,
         background: currentBackground,
+        backgroundMobile: currentBackgroundMobile,
+        backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
         sepia: currentSepia
       });
       continue;
@@ -135,35 +223,53 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
 
     // 背景変更: 《...》
     if (line.startsWith('《') && line.endsWith('》')) {
-      const content = line.substring(1, line.length - 1);
+      const rawContent = line.substring(1, line.length - 1).trim();
+      let content = rawContent;
+      let nextBackgroundMobile: string | undefined = undefined;
+      let nextBackgroundMobileOffsetX: number | undefined = undefined;
+      const mobileBgOptionPattern = /\s*@(mobileBg|spBg|スマホ背景)\s*=\s*("[^"]+"|「[^」]+」|[^\s@]+)/gi;
+      content = content.replace(mobileBgOptionPattern, (_match, _name, value) => {
+        const mobileBgName = value.replace(/^["「]|["」]$/g, '').trim();
+        if (mobileBgName) {
+          nextBackgroundMobile = resolveBackground(mobileBgName);
+        }
+        return "";
+      }).trim();
+      const optionPattern = /\s*@(mobileX|spX|スマホX)\s*=\s*([+-]?(?:\d*\.\d+|\d+|[０-９]*．[０-９]+|[０-９]+))/gi;
+      content = content.replace(optionPattern, (_match, _name, value) => {
+        const offset = parseNumericOption(value);
+        if (Number.isFinite(offset)) {
+          nextBackgroundMobileOffsetX = offset;
+        }
+        return "";
+      }).trim();
       
       if (content === "OFF" || content === "None" || content === "消去") {
         currentBackground = "";
+        currentBackgroundMobile = undefined;
+        currentBackgroundMobileOffsetX = undefined;
         script.push({
           type: "background",
           background: "OFF",
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia
         });
         continue;
       }
 
-      let targetBg = "";
-      if (assets.backgrounds[content]) {
-        targetBg = assets.backgrounds[content];
-      } else {
-        for (const [bgName, bgFile] of Object.entries(assets.backgrounds)) {
-          if (content === bgName) {
-            targetBg = bgFile;
-            break;
-          }
-        }
-      }
+      let targetBg: string | undefined = "";
+      targetBg = resolveBackground(content);
 
       if (targetBg) {
         currentBackground = targetBg;
+        currentBackgroundMobile = nextBackgroundMobile;
+        currentBackgroundMobileOffsetX = nextBackgroundMobileOffsetX;
         script.push({
           type: "background",
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia
         });
       }
@@ -172,12 +278,20 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
 
     // アニメーション・演出指示: [アニメ名] または 【...】
     if (line.startsWith('[') && line.endsWith(']')) {
-      const animName = line.substring(1, line.length - 1);
+      const animText = line.substring(1, line.length - 1).trim();
+      const animParts = animText.split(/\s+/);
+      const maybeDuration = animParts.length > 1 ? parseNumericOption(animParts[animParts.length - 1]) : NaN;
+      const hasDuration = Number.isFinite(maybeDuration);
+      const animName = hasDuration ? animParts.slice(0, -1).join(' ') : animText;
+
       if (assets.animations[animName]) {
         script.push({
           type: "effect",
           animation: assets.animations[animName],
+          duration: hasDuration ? maybeDuration * 1000 : undefined,
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia
         });
         continue;
@@ -199,14 +313,14 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         if (parts.length >= 2) fadeDuration = parseFloat(parts[1]);
       }
 
-      script.push({
+      script.push(applyPendingTextStyle(withCurrentBackgroundOptions({
         type: "direction",
         text: content,
         duration: duration,
         fadeDuration: fadeDuration,
         background: currentBackground,
         sepia: currentSepia
-      });
+      })));
       continue;
     }
 
@@ -264,6 +378,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           name: displayName,
           text: dialogue,
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia,
           scale: scale,
           offsetY: offsetY
@@ -290,6 +406,8 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
           duration: duration,
           fadeDuration: fadeDuration,
           background: currentBackground,
+          backgroundMobile: currentBackgroundMobile,
+          backgroundMobileOffsetX: currentBackgroundMobileOffsetX,
           sepia: currentSepia,
           scale: scale,
           offsetY: offsetY
@@ -314,18 +432,18 @@ export const parseStoryText = (text: string, assets: StoryAssets): StoryScript =
         entry.position = position;
       }
 
-      script.push(entry);
+      script.push(applyPendingTextStyle(entry));
       i++;
       continue;
     }
 
     // モノローグまたは地の文
-    script.push({
+    script.push(applyPendingTextStyle(withCurrentBackgroundOptions({
       type: "monologue",
       text: line,
       background: currentBackground,
       sepia: currentSepia
-    });
+    })));
   }
 
   return script;

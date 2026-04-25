@@ -24,4 +24,5 @@ yarn-debug.log*
 yarn-error.log*
 simulation_results.txt
 skill_popularity.txt
+tools/.battle-sim-build/
 .firebase/hosting.YnVpbGQ.cache

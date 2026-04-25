@@ -1,0 +1,506 @@
+[
+  {
+    "key": "1-1",
+    "bossName": "ルーサー",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一待一",
+      "一一一待刺",
+      "一一一待果",
+      "一一一待待",
+      "一一一速玉",
+      "一一刺待一",
+      "一一刺待刺",
+      "一一刺待果",
+      "一一刺待待",
+      "一一刺待玉"
+    ],
+    "pool": "一刺果待搦玉強速",
+    "requireSkills": []
+  },
+  {
+    "key": "1-2",
+    "bossName": "肉厚な魚",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一玉速",
+      "一一一強果",
+      "一一一強玉",
+      "一一一速玉",
+      "一一刺待一",
+      "一一刺待刺",
+      "一一刺待果",
+      "一一刺待待",
+      "一一刺待搦",
+      "一一刺待玉"
+    ],
+    "pool": "一刺果待搦玉強速",
+    "requireSkills": []
+  },
+  {
+    "key": "2-1",
+    "bossName": "血に飢えたジョーズ",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一一玉",
+      "一一一刺玉",
+      "一一一果玉",
+      "一一一待玉",
+      "一一一玉一",
+      "一一一玉刺",
+      "一一一玉果",
+      "一一一玉待",
+      "一一一玉搦",
+      "一一一玉玉"
+    ],
+    "pool": "一刺果待搦玉強速拳",
+    "requireSkills": []
+  },
+  {
+    "key": "2-2",
+    "bossName": "弱者狩りのハゲタカ",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一一待",
+      "一一一刺待",
+      "一一一果待",
+      "一一一待一",
+      "一一一待刺",
+      "一一一待果",
+      "一一一待待",
+      "一一一待搦",
+      "一一一待玉",
+      "一一一待強"
+    ],
+    "pool": "一刺果待搦玉強速拳",
+    "requireSkills": []
+  },
+  {
+    "key": "3-1",
+    "bossName": "デザインド・エッグ号",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一一飛",
+      "一一一刺飛",
+      "一一一果飛",
+      "一一一待待",
+      "一一一待飛",
+      "一一一搦飛",
+      "一一一玉飛",
+      "一一一強飛",
+      "一一一速飛",
+      "一一一拳飛"
+    ],
+    "pool": "一刺果待搦玉強速拳飛",
+    "requireSkills": []
+  },
+  {
+    "key": "3-2",
+    "bossName": "エーヴィス",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一待待一速",
+      "一待待待一",
+      "一待待待刺",
+      "一待待搦一",
+      "一待待搦刺",
+      "一待待玉一",
+      "一待待玉刺",
+      "一待待強一",
+      "一待待強刺",
+      "一待待速一"
+    ],
+    "pool": "一刺果待搦玉強速拳飛",
+    "requireSkills": []
+  },
+  {
+    "key": "4-1",
+    "bossName": "ラ・マンチャ号",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一待一",
+      "一一一待刺",
+      "一一一待果",
+      "一一一待待",
+      "一一一待玉",
+      "一一一待拳",
+      "一一一搦果",
+      "一一一玉果",
+      "一一一玉待",
+      "一一一玉拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏",
+    "requireSkills": []
+  },
+  {
+    "key": "4-2",
+    "bossName": "イスパニア艦隊",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一待待刺一",
+      "一待待刺刺",
+      "一待待刺果",
+      "一待待刺待",
+      "一待待刺搦",
+      "一待待刺玉",
+      "一待待刺強",
+      "一待待刺速",
+      "一待待刺拳",
+      "一待待刺飛"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏",
+    "requireSkills": []
+  },
+  {
+    "key": "5-1",
+    "bossName": "ゾルゲイド",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一玉速",
+      "一一刺玉速",
+      "一一果玉速",
+      "一一待玉速",
+      "一一搦玉速",
+      "一一搦速飛",
+      "一一玉玉速",
+      "一一強玉速",
+      "一一速玉速",
+      "一一拳玉速"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦",
+    "requireSkills": []
+  },
+  {
+    "key": "5-2",
+    "bossName": "エルダゾルゲイド",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一一果",
+      "一一一果果",
+      "一一一待果",
+      "一一一搦果",
+      "一一一玉果",
+      "一一一強果",
+      "一一一速果",
+      "一一一拳果",
+      "一一一飛果",
+      "一一一焦果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦",
+    "requireSkills": []
+  },
+  {
+    "key": "6-1",
+    "bossName": "クラーケン",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一玉一",
+      "一一一玉刺",
+      "一一一玉果",
+      "一一一玉待",
+      "一一一玉搦",
+      "一一一玉玉",
+      "一一一玉強",
+      "一一一玉速",
+      "一一一玉飛",
+      "一一一拳玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒",
+    "requireSkills": []
+  },
+  {
+    "key": "6-2",
+    "bossName": "ゴルゾアの胃袋",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一玉待毒",
+      "一刺玉待毒",
+      "一果玉待毒",
+      "一待玉待毒",
+      "一搦待待毒",
+      "一玉玉待毒",
+      "一強玉待毒",
+      "一拳玉待毒",
+      "一飛玉待毒",
+      "一奏玉待毒"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒",
+    "requireSkills": []
+  },
+  {
+    "key": "7-1",
+    "bossName": "バクバク",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一一玉玉",
+      "一一一強玉",
+      "一一果一玉",
+      "一一果刺玉",
+      "一一果果玉",
+      "一一果待玉",
+      "一一果搦玉",
+      "一一果玉搦",
+      "一一果玉玉",
+      "一一果強玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼",
+    "requireSkills": []
+  },
+  {
+    "key": "7-2",
+    "bossName": "死者の群れ",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "待刺強一▽",
+      "待刺強刺▽",
+      "待刺強果▽",
+      "待刺強待▽",
+      "待刺強搦▽",
+      "搦刺強一▽",
+      "玉刺強一▽",
+      "強刺強一▽",
+      "速刺強一▽",
+      "飛刺強一▽"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁▽",
+    "requireSkills": []
+  },
+  {
+    "key": "8-1",
+    "bossName": "死霊船 黒潮号",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一礁爆玉",
+      "一一爆礁玉",
+      "一一爆霊待",
+      "一刺礁爆玉",
+      "一刺爆礁玉",
+      "刺一礁爆玉",
+      "果一礁爆玉",
+      "待一礁爆玉",
+      "搦一礁爆玉",
+      "玉一礁爆玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊爆",
+    "requireSkills": []
+  },
+  {
+    "key": "8-2",
+    "bossName": "ブライニクル",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "待待待毒果",
+      "待待搦毒果",
+      "待待玉毒果",
+      "待待強毒果",
+      "待待速毒果",
+      "待待飛毒果",
+      "待待毒一果",
+      "待待毒刺果",
+      "待待毒果果",
+      "待待毒待果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔",
+    "requireSkills": []
+  },
+  {
+    "key": "9-1",
+    "bossName": "廃都の守護者",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一刺強一爆",
+      "一刺強待爆",
+      "一刺強搦爆",
+      "一刺強玉爆",
+      "一刺強強爆",
+      "一刺強速爆",
+      "一刺強拳爆",
+      "一刺強飛爆",
+      "一刺強奏爆",
+      "一刺強礁爆"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
+    "requireSkills": []
+  },
+  {
+    "key": "9-2",
+    "bossName": "深海の賢王 ジズ",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一飛礁狼",
+      "一一礁飛狼",
+      "一刺飛礁狼",
+      "一刺礁飛狼",
+      "一果飛礁狼",
+      "一果礁飛狼",
+      "一待飛礁狼",
+      "一待礁飛狼",
+      "一搦飛礁狼",
+      "一搦礁飛狼"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
+    "requireSkills": []
+  },
+  {
+    "key": "10-1",
+    "bossName": "ゾルゲイドクイーン",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一搦刺飛",
+      "一一搦待拳",
+      "一一玉速狼",
+      "一一玉礁狼",
+      "一刺搦刺飛",
+      "一刺搦待拳",
+      "一刺玉速狼",
+      "一刺玉礁狼",
+      "一果搦刺飛",
+      "一果搦待拳"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅",
+    "requireSkills": []
+  },
+  {
+    "key": "10-2",
+    "bossName": "デザインド・エッグ号",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一一搦飛狼",
+      "一一飛礁狼",
+      "一一飛狼礁",
+      "一一飛狼霊",
+      "一一飛霊狼",
+      "一一礁飛狼",
+      "一一礁狼飛",
+      "一一霊飛狼",
+      "一一霊狼飛",
+      "一刺搦飛狼"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅",
+    "requireSkills": []
+  },
+  {
+    "key": "11-1",
+    "bossName": "エーヴィス海賊団",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "一強一霊果",
+      "一強一霊狼",
+      "一強一霊爆",
+      "一強刺霊果",
+      "一強刺霊狼",
+      "一強刺霊爆",
+      "一強果霊果",
+      "一強果霊狼",
+      "一強果霊爆",
+      "一強待霊果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "requireSkills": []
+  },
+  {
+    "key": "11-2",
+    "bossName": "大海賊 エーヴィス",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "待一礁礁玉",
+      "待刺礁礁玉",
+      "待果礁礁玉",
+      "待待礁礁玉",
+      "待搦礁礁玉",
+      "待玉礁礁玉",
+      "待強礁礁玉",
+      "待速礁礁玉",
+      "待拳礁礁玉",
+      "待飛礁礁玉"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "requireSkills": []
+  },
+  {
+    "key": "12-1",
+    "bossName": "偽聖女 リザベル",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 10,
+    "samples": [
+      "待待待魔一",
+      "待待搦魔一",
+      "待待玉魔一",
+      "待待強魔一",
+      "待待速魔一",
+      "待待飛魔一",
+      "待待礁魔一",
+      "待待霊魔一",
+      "待待魔待一",
+      "待待魔搦一"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
+    "requireSkills": []
+  },
+  {
+    "key": "12-2#2",
+    "bossName": "魔女 グリザーベルク",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 157470,
+    "samples": [
+      "待▽霊待滅",
+      "待霊滅待▽",
+      "搦▽霊待滅",
+      "搦霊滅待▽",
+      "玉▽霊待滅"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
+    "requireSkills": [
+      "▽"
+    ],
+    "bossIndexes": [
+      2
+    ]
+  }
+]

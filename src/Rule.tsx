@@ -121,7 +121,7 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
           <div className="rule-content-section">
             <h2>状態について</h2>
             <div style={{ height: isMobile ? 'calc(100vh - 150px)' : '400px', overflowY: 'auto' }}>
-              {STATUS_DATA.map(status => (
+              {STATUS_DATA.filter(status => status.name !== "死紋").map(status => (
                 <div key={status.name} style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '4px solid #4fc3f7' }}>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>

@@ -1,0 +1,685 @@
+[
+  {
+    "key": "1-1",
+    "bossName": "ルーサー",
+    "pool": "一刺果待搦玉強速",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一待一",
+      "一一一待刺",
+      "一一一待果",
+      "一一一待待",
+      "一一一速玉"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "1-2",
+    "bossName": "肉厚な魚",
+    "pool": "一刺果待搦玉強速",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一玉速",
+      "一一一強果",
+      "一一一強玉",
+      "一一一速玉",
+      "一一刺待一"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "2-1",
+    "bossName": "血に飢えたジョーズ",
+    "pool": "一刺果待搦玉強速拳",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一一玉",
+      "一一一刺玉",
+      "一一一果玉",
+      "一一一待玉",
+      "一一一玉一"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "2-2",
+    "bossName": "弱者狩りのハゲタカ",
+    "pool": "一刺果待搦玉強速拳",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一一待",
+      "一一一刺待",
+      "一一一果待",
+      "一一一待一",
+      "一一一待刺"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "3-1",
+    "bossName": "デザインド・エッグ号",
+    "pool": "一刺果待搦玉強速拳飛",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一一飛",
+      "一一一刺飛",
+      "一一一果飛",
+      "一一一待待",
+      "一一一待飛"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "3-2",
+    "bossName": "エーヴィス",
+    "pool": "一刺果待搦玉強速拳飛",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一待待一速",
+      "一待待待一",
+      "一待待待刺",
+      "一待待搦一",
+      "一待待搦刺"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "4-1",
+    "bossName": "ラ・マンチャ号",
+    "pool": "一刺果待搦玉強速拳飛奏",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一待一",
+      "一一一待刺",
+      "一一一待果",
+      "一一一待待",
+      "一一一待玉"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "4-2",
+    "bossName": "イスパニア艦隊",
+    "pool": "一刺果待搦玉強速拳飛奏",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一待待刺一",
+      "一待待刺刺",
+      "一待待刺果",
+      "一待待刺待",
+      "一待待刺搦"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "5-1",
+    "bossName": "ゾルゲイド",
+    "pool": "一刺果待搦玉強速拳飛奏焦",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一玉速",
+      "一一刺玉速",
+      "一一果玉速",
+      "一一待玉速",
+      "一一搦玉速"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "5-2",
+    "bossName": "エルダゾルゲイド",
+    "pool": "一刺果待搦玉強速拳飛奏焦",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一一果",
+      "一一一果果",
+      "一一一待果",
+      "一一一搦果",
+      "一一一玉果"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "6-1",
+    "bossName": "クラーケン",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一玉一",
+      "一一一玉刺",
+      "一一一玉果",
+      "一一一玉待",
+      "一一一玉搦"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "6-2",
+    "bossName": "ゴルゾアの胃袋",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一玉待毒",
+      "一刺玉待毒",
+      "一果玉待毒",
+      "一待玉待毒",
+      "一搦待待毒"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "7-1",
+    "bossName": "バクバク",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一一玉玉",
+      "一一一強玉",
+      "一一果一玉",
+      "一一果刺玉",
+      "一一果果玉"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "7-2",
+    "bossName": "死者の群れ",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁▽",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "待刺強一▽",
+      "待刺強刺▽",
+      "待刺強果▽",
+      "待刺強待▽",
+      "待刺強搦▽"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "8-1",
+    "bossName": "死霊船 黒潮号",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊爆",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一礁爆玉",
+      "一一爆礁玉",
+      "一一爆霊待",
+      "一刺礁爆玉",
+      "一刺爆礁玉"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "8-2",
+    "bossName": "ブライニクル",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "待待待毒果",
+      "待待搦毒果",
+      "待待玉毒果",
+      "待待強毒果",
+      "待待速毒果"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "9-1",
+    "bossName": "廃都の守護者",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一刺強一爆",
+      "一刺強待爆",
+      "一刺強搦爆",
+      "一刺強玉爆",
+      "一刺強強爆"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "9-2",
+    "bossName": "深海の賢王 ジズ",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一飛礁狼",
+      "一一礁飛狼",
+      "一刺飛礁狼",
+      "一刺礁飛狼",
+      "一果飛礁狼"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "10-1",
+    "bossName": "ゾルゲイドクイーン",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一搦刺飛",
+      "一一搦待拳",
+      "一一玉速狼",
+      "一一玉礁狼",
+      "一刺搦刺飛"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "10-2",
+    "bossName": "デザインド・エッグ号",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一一搦飛狼",
+      "一一飛礁狼",
+      "一一飛狼礁",
+      "一一飛狼霊",
+      "一一飛霊狼"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "11-1",
+    "bossName": "エーヴィス海賊団",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "一強一霊果",
+      "一強一霊狼",
+      "一強一霊爆",
+      "一強刺霊果",
+      "一強刺霊狼"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "11-2",
+    "bossName": "大海賊 エーヴィス",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 5,
+    "baseSamples": [
+      "待一礁礁玉",
+      "待刺礁礁玉",
+      "待果礁礁玉",
+      "待待礁礁玉",
+      "待搦礁礁玉"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "12-1",
+    "bossName": "偽聖女 リザベル",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 401,
+    "baseSamples": [
+      "待待待魔死",
+      "待待搦魔死",
+      "待待玉魔死",
+      "待待強魔死",
+      "待待速魔死"
+    ],
+    "fixes": []
+  },
+  {
+    "key": "12-2",
+    "bossName": "魔女 グリザーベルク",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
+    "requireSkills": [],
+    "baseClearable": false,
+    "baseChecked": 5082519,
+    "baseSamples": [],
+    "fixes": [
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "待"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓待強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "盾"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓盾強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "礁"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓礁強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "強"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓強強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "飛"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓飛強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "滅"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓滅強燐連隠弓"
+        ],
+        "checked": 514951,
+        "samples": [
+          "一待果飛狼",
+          "一礁果飛狼",
+          "刺待果飛狼",
+          "刺礁果飛狼",
+          "果待果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "先"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓先強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "刺"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓刺強燐連隠弓"
+        ],
+        "checked": 1106991,
+        "samples": [
+          "一礁果飛狼",
+          "刺礁果飛狼",
+          "果礁果飛狼",
+          "待礁果飛狼",
+          "搦礁果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "反"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓反強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "無"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓無強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "連"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓連強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      },
+      {
+        "replacementCount": 1,
+        "changes": [
+          {
+            "bossPattern": 3,
+            "index": 5,
+            "from": "雷",
+            "to": "燐"
+          }
+        ],
+        "tunedBosses": [
+          "罠硬待強玉速燐連砲錬",
+          "紫速霊飛燐癒盾隠反雷",
+          "紫速隠弓燐強燐連隠弓"
+        ],
+        "checked": 891835,
+        "samples": [
+          "一待果飛狼",
+          "刺待果飛狼",
+          "果待果飛狼",
+          "待待果飛狼",
+          "待霊果飛狼"
+        ]
+      }
+    ]
+  },
+  {
+    "key": "12-3",
+    "bossName": "魔女 グリザーベルク",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
+    "requireSkills": [],
+    "baseClearable": true,
+    "baseChecked": 1139620,
+    "baseSamples": [
+      "搦飛霊魔死",
+      "搦飛魔霊死",
+      "搦飛魔死霊",
+      "搦霊飛魔死",
+      "搦霊魔飛死"
+    ],
+    "fixes": []
+  }
+]

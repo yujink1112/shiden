@@ -43,6 +43,7 @@ export interface GameProps {
   // State setters and handlers
   handleResetGame: () => void;
   handleStartGame: () => void;
+  handleDebugWin: () => void;
   handleBattleLogComplete: () => void;
   triggerVictoryConfetti: () => void;
   getStorageUrl: (path: string) => string;

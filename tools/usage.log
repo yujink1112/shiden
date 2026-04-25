@@ -1,0 +1,3 @@
+node tools/chapter2-balance-search.cjs --targets 6-2,7-2
+node tools/chapter2-balance-search.cjs --targets 11-2 --sample-limit 5
+node tools/chapter2-balance-search.cjs --uncleared-only

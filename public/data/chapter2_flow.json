@@ -32,7 +32,7 @@
       { "type": "story", "id": "3-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "奏" },
-      { "type": "reward", "choices": ["盗", "待"] },
+      { "type": "reward", "choices": ["盗", "反"] },
       { "type": "story", "id": "3-3" }
     ]
   },
@@ -43,8 +43,8 @@
       { "type": "battle", "subStage": 1},
       { "type": "story", "id": "4-2" },
       { "type": "battle", "subStage": 2},
-      { "type": "reward", "skill": "砲" },
-      { "type": "reward", "choices": ["弓", "紫"] },
+      { "type": "reward", "skill": "焦" },
+      { "type": "reward", "choices": ["砲", "紫"] },
       { "type": "story", "id": "4-3" }
     ]
   },
@@ -55,8 +55,8 @@
       { "type": "battle", "subStage": 1},
       { "type": "story", "id": "5-2" },
       { "type": "battle", "subStage": 2},
-      { "type": "reward", "skill": "焦" },
-      { "type": "reward", "choices": ["毒", "玉"] },
+      { "type": "reward", "skill": "毒" },
+      { "type": "reward", "choices": ["弓", "玉"] },
       { "type": "story", "id": "5-3" }
     ]
   },
@@ -76,10 +76,10 @@
     "stageNo": 19,
     "flow": [
       { "type": "story", "id": "7-1" },
-      { "type": "reward", "skill": "▽" },
+      { "type": "reward", "skill": "狼" },
       { "type": "battle", "subStage": 1},
       { "type": "story", "id": "7-2" },
-      { "type": "reward", "skill": "狼" },
+      { "type": "reward", "skill": "▽" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "霊" },
       { "type": "reward", "choices": ["水", "封"] },
@@ -108,7 +108,7 @@
       { "type": "story", "id": "9-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "滅" },
-      { "type": "reward", "choices": ["受", "燐"] },
+      { "type": "reward", "choices": ["水", "燐"] },
       { "type": "story", "id": "9-3" }
     ]
   },
@@ -119,7 +119,7 @@
       { "type": "battle", "subStage": 1},
       { "type": "story", "id": "10-2" },
       { "type": "battle", "subStage": 2},
-      { "type": "reward", "skill": "弓" },
+      { "type": "reward", "skill": "受" },
       { "type": "reward", "choices": ["瘴", "錬"] },
       { "type": "story", "id": "10-3" }
     ]
@@ -132,7 +132,7 @@
       { "type": "story", "id": "11-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "死" },
-      { "type": "reward", "choices": ["幻", "無"] },
+      { "type": "reward", "choices": ["無", "連"] },
       { "type": "story", "id": "11-3" }
     ]
   },
@@ -141,13 +141,10 @@
     "flow": [
       { "type": "story", "id": "12-1" },
       { "type": "battle", "subStage": 1},
-      { "type": "reward", "choices": ["盾", "連"] },
       { "type": "story", "id": "12-2" },
       { "type": "battle", "subStage": 2},
       { "type": "story", "id": "12-3" },
-      { "type": "battle", "subStage": 3},
-      { "type": "story", "id": "12-4" },
-      { "type": "credits", "id": "/data/credits.json" }
+      { "type": "battle", "subStage": 3}
     ]
   }
 ]

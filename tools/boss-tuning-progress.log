@@ -1,0 +1,2310 @@
+[2026-04-24T14:45:01.561Z] 6-2 ゴルゾアの胃袋: base search start.
+[2026-04-24T14:45:09.125Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=3).
+[2026-04-24T14:45:11.452Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:45:13.791Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:45:16.135Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:45:52.029Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=一搦速毒飛
+[2026-04-24T14:46:03.848Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:46:06.575Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:46:08.812Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待刺速果速
+[2026-04-24T14:46:21.298Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:46:23.760Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 sample=待拳強毒待
+[2026-04-24T14:46:35.416Z] 6-2 ゴルゾアの胃袋: base search start.
+[2026-04-24T14:46:43.610Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2).
+[2026-04-24T14:46:46.230Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=一罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:46:49.016Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=刺罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:46:51.934Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=果罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:47:23.737Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=拳罠待硬連隠防防 sample=一搦速毒飛
+[2026-04-24T14:47:34.423Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=奏罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:47:37.123Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=焦罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:47:40.687Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=毒罠待硬連隠防防 sample=待刺速果速
+[2026-04-24T14:47:56.236Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=狼罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:47:58.600Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=▽罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:48:10.147Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=爆罠待硬連隠防防 sample=待刺一待待
+[2026-04-24T14:48:12.755Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=魔罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:48:24.557Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=滅罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:48:35.590Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=盗罠待硬連隠防防 sample=待待待待刺
+[2026-04-24T14:48:40.127Z] 6-2 ゴルゾアの胃袋: base search start.
+[2026-04-24T14:48:47.863Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2).
+[2026-04-24T14:48:50.232Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=一罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:48:52.605Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=刺罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:48:54.962Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=果罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:49:26.633Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=拳罠待硬連隠防防 sample=一搦速毒飛
+[2026-04-24T14:49:37.279Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=奏罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:49:39.683Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=焦罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:49:41.585Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=毒罠待硬連隠防防 sample=待刺速果速
+[2026-04-24T14:50:08.390Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=滅罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:50:18.284Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=盗罠待硬連隠防防 sample=待待待待刺
+[2026-04-24T14:50:27.922Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=砲罠待硬連隠防防 sample=待刺飛刺速
+[2026-04-24T14:50:27.985Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=紫罠待硬連隠防防 sample=一刺強玉一
+[2026-04-24T14:50:31.412Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=封罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:50:34.837Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=凍罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:50:36.894Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=隠罠待硬連隠防防 sample=待待待焦毒
+[2026-04-24T14:51:12.930Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=防罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:51:16.586Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=癒罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:51:51.887Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=雷罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:52:19.957Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=死罠待硬連隠防防 sample=待刺飛刺速
+[2026-04-24T14:52:22.113Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=烈罠待硬連隠防防 sample=待刺飛刺速
+[2026-04-24T14:52:39.670Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦一待硬連隠防防 sample=一待玉待刺
+[2026-04-24T14:52:39.672Z] 6-2 ゴルゾアの胃袋: done fixes=20.
+[2026-04-24T14:52:39.672Z] 7-2 死者の群れ: base search start.
+[2026-04-24T14:52:56.355Z] 7-2 死者の群れ: tuning search start (maxReplacements=2).
+[2026-04-24T14:52:59.649Z] 7-2 死者の群れ: fix found replacements=1 tuned=一崩転連交一盾 sample=待刺一飛礁
+[2026-04-24T14:53:03.121Z] 7-2 死者の群れ: fix found replacements=1 tuned=刺崩転連交一盾 sample=待刺一飛礁
+[2026-04-24T14:53:07.043Z] 7-2 死者の群れ: fix found replacements=1 tuned=果崩転連交一盾 sample=待刺一飛礁
+[2026-04-24T14:54:27.546Z] 7-2 死者の群れ: fix found replacements=1 tuned=拳崩転連交一盾 sample=一一刺一飛
+[2026-04-24T14:54:47.944Z] 7-2 死者の群れ: fix found replacements=1 tuned=奏崩転連交一盾 sample=待待刺一一
+[2026-04-24T14:54:52.088Z] 7-2 死者の群れ: fix found replacements=1 tuned=焦崩転連交一盾 sample=待刺待飛▽
+[2026-04-24T14:54:55.794Z] 7-2 死者の群れ: fix found replacements=1 tuned=毒崩転連交一盾 sample=待刺刺強果
+[2026-04-24T14:55:00.040Z] 6-2 ゴルゾアの胃袋: base search start (seeds=60).
+[2026-04-24T14:55:10.168Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2, seeds=60).
+[2026-04-24T14:55:10.171Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=一罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:55:10.172Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=刺罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:55:10.172Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=果罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:55:55.110Z] 1-1 ルーサー: base search start (seeds=5).
+[2026-04-24T14:55:55.118Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T14:55:55.119Z] 1-2 肉厚な魚: base search start (seeds=5).
+[2026-04-24T14:55:55.120Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T14:55:55.121Z] 2-1 血に飢えたジョーズ: base search start (seeds=5).
+[2026-04-24T14:55:55.122Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T14:55:55.122Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5).
+[2026-04-24T14:55:55.123Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T14:55:55.124Z] 3-1 デザインド・エッグ号: base search start (seeds=5).
+[2026-04-24T14:55:55.125Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T14:55:55.126Z] 3-2 エーヴィス: base search start (seeds=5).
+[2026-04-24T14:55:55.127Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T14:55:55.128Z] 4-1 ラ・マンチャ号: base search start (seeds=5).
+[2026-04-24T14:55:55.129Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T14:55:55.129Z] 4-2 イスパニア艦隊: base search start (seeds=5).
+[2026-04-24T14:55:55.130Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T14:55:55.131Z] 5-1 ゾルゲイド: base search start (seeds=5).
+[2026-04-24T14:55:55.131Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T14:55:55.132Z] 5-2 エルダゾルゲイド: base search start (seeds=5).
+[2026-04-24T14:55:55.133Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T14:55:55.133Z] 6-1 クラーケン: base search start (seeds=5).
+[2026-04-24T14:55:55.134Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T14:55:55.135Z] 6-2 ゴルゾアの胃袋: base search start (seeds=60).
+[2026-04-24T14:56:04.098Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2, seeds=60).
+[2026-04-24T14:56:04.100Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=一罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:04.101Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=刺罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:04.102Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=果罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:47.740Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=拳罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:57.095Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=奏罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:57.096Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=焦罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:56:57.096Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=毒罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:25.155Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=滅罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:34.940Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=盗罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:46.575Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=砲罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:46.576Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=紫罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:46.577Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=封罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:46.578Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=凍罠待硬連隠防防 sample=待拳強毒待
+[2026-04-24T14:57:46.580Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=隠罠待硬連隠防防 sample=待待待焦毒
+[2026-04-24T14:58:08.040Z] 1-1 ルーサー: base search start (seeds=8).
+[2026-04-24T14:58:08.048Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T14:58:08.049Z] 1-2 肉厚な魚: base search start (seeds=8).
+[2026-04-24T14:58:08.050Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T14:58:08.050Z] 2-1 血に飢えたジョーズ: base search start (seeds=8).
+[2026-04-24T14:58:08.051Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T14:58:08.052Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=8).
+[2026-04-24T14:58:08.053Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T14:58:08.054Z] 3-1 デザインド・エッグ号: base search start (seeds=8).
+[2026-04-24T14:58:08.055Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T14:58:08.056Z] 3-2 エーヴィス: base search start (seeds=8).
+[2026-04-24T14:58:08.057Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T14:58:08.058Z] 4-1 ラ・マンチャ号: base search start (seeds=8).
+[2026-04-24T14:58:08.059Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T14:58:08.059Z] 4-2 イスパニア艦隊: base search start (seeds=8).
+[2026-04-24T14:58:08.060Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T14:58:08.060Z] 5-1 ゾルゲイド: base search start (seeds=8).
+[2026-04-24T14:58:08.061Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T14:58:08.061Z] 5-2 エルダゾルゲイド: base search start (seeds=8).
+[2026-04-24T14:58:08.062Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T14:58:08.063Z] 6-1 クラーケン: base search start (seeds=8).
+[2026-04-24T14:58:08.064Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T14:58:08.064Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0).
+[2026-04-24T14:58:20.079Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2, seeds=0).
+[2026-04-24T14:58:23.779Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠隠防 sample=搦一待一飛
+[2026-04-24T14:58:26.746Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠円防 sample=待待毒焦待
+[2026-04-24T14:58:29.797Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠飛防 sample=搦一待一飛
+[2026-04-24T14:58:32.032Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠弓防 sample=待待待毒待
+[2026-04-24T14:58:34.193Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠罠防 sample=搦一待飛拳
+[2026-04-24T14:58:36.386Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠盗防 sample=待待待待刺
+[2026-04-24T14:58:36.399Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠拳防 sample=一一搦一飛
+[2026-04-24T14:58:38.068Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠凍防 sample=待待毒待刺
+[2026-04-24T14:58:38.225Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠反防 sample=一待待待一
+[2026-04-24T14:58:46.983Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠搦防 sample=搦一待一飛
+[2026-04-24T14:58:46.989Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠砲防 sample=一一一待待
+[2026-04-24T14:58:55.765Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠礁防 sample=搦一待毒飛
+[2026-04-24T14:59:12.540Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠刺防 sample=一一一待待
+[2026-04-24T14:59:15.538Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠交防 sample=搦一待一飛
+[2026-04-24T14:59:24.937Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠果防 sample=一一搦飛毒
+[2026-04-24T14:59:36.273Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠無防 sample=搦一待拳飛
+[2026-04-24T14:59:38.934Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠硬防 sample=搦一待一飛
+[2026-04-24T14:59:41.819Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠逆防 sample=搦一待一飛
+[2026-04-24T14:59:53.536Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠奏防 sample=待一強一果
+[2026-04-24T14:59:56.617Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠待防 sample=搦一待飛拳
+[2026-04-24T14:59:59.205Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠強防 sample=搦一待一飛
+[2026-04-24T15:00:02.140Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠幻防 sample=搦待果速飛
+[2026-04-24T15:00:17.801Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠受防 sample=搦一待一飛
+[2026-04-24T15:00:19.964Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠先防 sample=搦一待拳飛
+[2026-04-24T15:00:22.132Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠速防 sample=搦一待一飛
+[2026-04-24T15:00:24.231Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠崩防 sample=搦一待一飛
+[2026-04-24T15:00:24.410Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠滅防 sample=一搦待待刺
+[2026-04-24T15:00:24.538Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠紫防 sample=一一強果速
+[2026-04-24T15:00:26.791Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠連防 sample=搦待果速飛
+[2026-04-24T15:00:28.903Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠玉防 sample=搦一待一飛
+[2026-04-24T15:00:31.144Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠水防 sample=搦一待一飛
+[2026-04-24T15:00:40.976Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠盾防 sample=待待毒焦待
+[2026-04-24T15:00:54.714Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠逆硬連隠防防 sample=待毒焦待待
+[2026-04-24T15:00:54.724Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠拳硬連隠防防 sample=一一一玉果
+[2026-04-24T15:00:54.877Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠隠硬連隠防防 sample=一一毒玉待
+[2026-04-24T15:00:58.090Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠癒硬連隠防防 sample=待待待刺強
+[2026-04-24T15:01:01.618Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠円硬連隠防防 sample=待焦毒待待
+[2026-04-24T15:01:11.132Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠雷硬連隠防防 sample=一一一玉毒
+[2026-04-24T15:06:19.898Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0, require=焦).
+[2026-04-24T15:06:22.904Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2, seeds=0, require=焦).
+[2026-04-24T15:06:23.609Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠搦防 sample=搦待待飛焦
+[2026-04-24T15:06:28.864Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠交防 sample=搦待待飛焦
+[2026-04-24T15:06:29.569Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠罠防 sample=搦待待毒焦
+[2026-04-24T15:06:35.595Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠隠防 sample=搦待待飛焦
+[2026-04-24T15:06:35.707Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠拳防 sample=一焦搦一飛
+[2026-04-24T15:06:39.303Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠反防 sample=待待待毒焦
+[2026-04-24T15:06:40.004Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠逆防 sample=搦待待飛焦
+[2026-04-24T15:06:40.524Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠奏防 sample=待一強焦果
+[2026-04-24T15:06:41.208Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠凍防 sample=待毒焦待刺
+[2026-04-24T15:06:41.943Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠硬防 sample=搦待待飛焦
+[2026-04-24T15:06:42.018Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠刺防 sample=一速飛搦焦
+[2026-04-24T15:06:42.741Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦罠待硬連隠玉防 sample=搦待待飛焦
+[2026-04-24T15:06:42.742Z] 6-2 ゴルゾアの胃袋: done fixes=12.
+[2026-04-24T15:06:47.135Z] 6-2 ゴルゾアの胃袋: base search start (seeds=12, require=焦).
+[2026-04-24T15:06:50.149Z] 6-2 ゴルゾアの胃袋: tuning search start (maxReplacements=2, seeds=12, require=焦).
+[2026-04-24T15:06:53.115Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦烈待硬連隠防防 sample=搦毒速飛焦
+[2026-04-24T15:06:53.116Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦死待硬連隠防防 sample=搦待待飛焦
+[2026-04-24T15:06:53.117Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦焦待硬連隠防防 sample=搦待待毒焦
+[2026-04-24T15:06:53.162Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦凍待硬連隠防防 sample=焦待待毒待
+[2026-04-24T15:07:03.902Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦封待硬連隠防防 sample=拳強焦待毒
+[2026-04-24T15:07:09.823Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦一待硬連隠防防 sample=搦速毒飛焦
+[2026-04-24T15:07:09.928Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦隠待硬連隠防防 sample=待速焦待毒
+[2026-04-24T15:07:13.310Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦果待硬連隠防防 sample=搦待待飛焦
+[2026-04-24T15:07:21.009Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦癒待硬連隠防防 sample=拳強焦待毒
+[2026-04-24T15:07:24.045Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦雷待硬連隠防防 sample=搦速毒飛焦
+[2026-04-24T15:07:29.859Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦盗待硬連隠防防 sample=待毒焦待刺
+[2026-04-24T15:07:29.860Z] 6-2 ゴルゾアの胃袋: fix found replacements=1 tuned=搦円待硬連隠防防 sample=待毒焦待刺
+[2026-04-24T15:07:29.862Z] 6-2 ゴルゾアの胃袋: done fixes=12.
+[2026-04-24T15:10:38.469Z] 7-2 死者の群れ: skipped because required skills are missing from pool (狼).
+[2026-04-24T15:10:45.753Z] 7-1 バクバク: base search start (seeds=5, require=狼).
+[2026-04-24T15:10:45.762Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:10:59.314Z] 7-2 死者の群れ: base search start (seeds=0, require=▽).
+[2026-04-24T15:11:03.881Z] 7-2 死者の群れ: tuning search start (maxReplacements=2, seeds=0, require=▽).
+[2026-04-24T15:12:44.369Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連交一円 sample=一待毒飛▽
+[2026-04-24T15:12:54.571Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連交一弓 sample=一毒▽一刺
+[2026-04-24T15:13:24.355Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連交一反 sample=一毒待果▽
+[2026-04-24T15:14:33.240Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連奏一盾 sample=待刺強一▽
+[2026-04-24T15:14:33.244Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連滅一盾 sample=一一刺飛▽
+[2026-04-24T15:14:33.250Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連拳一盾 sample=一一搦飛▽
+[2026-04-24T15:14:38.441Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連砲一盾 sample=一一一飛▽
+[2026-04-24T15:14:38.444Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連凍一盾 sample=一一一▽果
+[2026-04-24T15:14:48.730Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連死一盾 sample=一一▽搦飛
+[2026-04-24T15:14:48.921Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連烈一盾 sample=一▽搦速飛
+[2026-04-24T15:15:00.339Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連盗一盾 sample=待毒▽一一
+[2026-04-24T15:15:11.813Z] 7-2 死者の群れ: fix found replacements=1 tuned=霊崩転連防一盾 sample=待毒▽一待
+[2026-04-24T15:15:11.814Z] 7-2 死者の群れ: done fixes=12.
+[2026-04-24T15:17:17.388Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=▽).
+[2026-04-24T15:17:25.375Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:18:14.229Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T15:19:01.432Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反幻烈強 sample=毒▽一霊円
+[2026-04-24T15:19:01.439Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反毒烈強 sample=一一一待狼
+[2026-04-24T15:19:19.529Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反封烈強 sample=待待待毒円
+[2026-04-24T15:19:32.104Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反盾烈強 sample=待毒円▽果
+[2026-04-24T15:19:34.114Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反烈烈強 sample=一毒霊▽果
+[2026-04-24T15:19:43.689Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反飛烈強 sample=待毒円▽果
+[2026-04-24T15:19:53.279Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反焦烈強 sample=待待待毒円
+[2026-04-24T15:20:02.874Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反無烈強 sample=待毒円▽果
+[2026-04-24T15:20:02.876Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反死烈強 sample=一一一一狼
+[2026-04-24T15:20:11.151Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反強烈強 sample=待待毒霊円
+[2026-04-24T15:20:48.481Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反水烈強 sample=毒▽一霊円
+[2026-04-24T15:20:48.503Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反果烈強 sample=一一待果霊
+[2026-04-24T15:20:48.505Z] 9-2 深海の賢王 ジズ: done fixes=12.
+[2026-04-24T15:22:05.029Z] 9-2 深海の賢王 ジズ: base search start (seeds=12, require=-).
+[2026-04-24T15:22:57.978Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=12, require=-).
+[2026-04-24T15:23:54.454Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防奏反燐烈強 sample=毒▽一霊円
+[2026-04-24T15:27:06.857Z] 9-2 深海の賢王 ジズ: base search start (seeds=12, require=-).
+[2026-04-24T15:28:09.073Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=12, require=-).
+[2026-04-24T15:29:06.522Z] 1-1 ルーサー: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.533Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:29:06.534Z] 1-2 肉厚な魚: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.537Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:29:06.538Z] 2-1 血に飢えたジョーズ: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.539Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:29:06.540Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.541Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:29:06.541Z] 3-1 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.543Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:29:06.543Z] 3-2 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.641Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:29:06.641Z] 4-1 ラ・マンチャ号: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.643Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:29:06.644Z] 4-2 イスパニア艦隊: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.735Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:29:06.735Z] 5-1 ゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.738Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:29:06.738Z] 5-2 エルダゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.739Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:29:06.739Z] 6-1 クラーケン: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.742Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:29:06.742Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.768Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:29:06.768Z] 7-1 バクバク: base search start (seeds=0, require=-).
+[2026-04-24T15:29:06.773Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:29:06.773Z] 7-2 死者の群れ: base search start (seeds=0, require=-).
+[2026-04-24T15:29:12.496Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:29:12.497Z] 8-1 死霊船 黒潮号: base search start (seeds=0, require=-).
+[2026-04-24T15:29:12.502Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:29:12.502Z] 8-2 ブライニクル: base search start (seeds=0, require=-).
+[2026-04-24T15:29:16.998Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:29:16.998Z] 9-1 廃都の守護者: base search start (seeds=0, require=-).
+[2026-04-24T15:29:17.007Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:29:17.008Z] 9-2 深海の賢王 ジズ: base search start (seeds=12, require=-).
+[2026-04-24T15:30:08.839Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=12, require=-).
+[2026-04-24T15:30:08.846Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反燐烈罠 sample=霊待待毒円
+[2026-04-24T15:30:08.890Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反燐烈烈 sample=奏▽一霊果
+[2026-04-24T15:30:08.896Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反燐烈盗 sample=霊待待毒円
+[2026-04-24T15:30:08.903Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反燐烈防 sample=霊待待毒円
+[2026-04-24T15:30:08.908Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無幻防紫反燐烈紫 sample=霊待待毒円
+[2026-04-24T15:30:45.142Z] 1-1 ルーサー: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.150Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:30:45.151Z] 1-2 肉厚な魚: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.152Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:30:45.152Z] 2-1 血に飢えたジョーズ: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.153Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:30:45.153Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.154Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:30:45.155Z] 3-1 デザインド・エッグ号: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.156Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:30:45.156Z] 3-2 エーヴィス: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.158Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:30:45.158Z] 4-1 ラ・マンチャ号: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.159Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:30:45.159Z] 4-2 イスパニア艦隊: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.160Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:30:45.161Z] 5-1 ゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.162Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:30:45.162Z] 5-2 エルダゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.163Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:30:45.163Z] 6-1 クラーケン: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.164Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:30:45.164Z] 6-2 ゴルゾアの胃袋: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.165Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:30:45.166Z] 7-1 バクバク: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.167Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:30:45.167Z] 7-2 死者の群れ: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.169Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:30:45.169Z] 8-1 死霊船 黒潮号: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.170Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:30:45.170Z] 8-2 ブライニクル: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.171Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:30:45.172Z] 9-1 廃都の守護者: base search start (seeds=1, require=-).
+[2026-04-24T15:30:45.172Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:30:45.173Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:31:14.777Z] 1-1 ルーサー: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.785Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:31:14.785Z] 1-2 肉厚な魚: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.786Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:31:14.787Z] 2-1 血に飢えたジョーズ: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.788Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:31:14.788Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.789Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:31:14.790Z] 3-1 デザインド・エッグ号: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.791Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:31:14.792Z] 3-2 エーヴィス: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.792Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:31:14.793Z] 4-1 ラ・マンチャ号: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.794Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:31:14.794Z] 4-2 イスパニア艦隊: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.795Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:31:14.795Z] 5-1 ゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.796Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:31:14.796Z] 5-2 エルダゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.797Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:31:14.797Z] 6-1 クラーケン: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.798Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:31:14.798Z] 6-2 ゴルゾアの胃袋: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.799Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:31:14.800Z] 7-1 バクバク: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.800Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:31:14.801Z] 7-2 死者の群れ: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.802Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:31:14.802Z] 8-1 死霊船 黒潮号: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.803Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:31:14.803Z] 8-2 ブライニクル: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.804Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:31:14.804Z] 9-1 廃都の守護者: base search start (seeds=1, require=-).
+[2026-04-24T15:31:14.807Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:31:14.808Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:32:02.432Z] 1-1 ルーサー: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.440Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:32:02.441Z] 1-2 肉厚な魚: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.442Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:32:02.442Z] 2-1 血に飢えたジョーズ: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.443Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:32:02.443Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.444Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:32:02.445Z] 3-1 デザインド・エッグ号: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.446Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:32:02.447Z] 3-2 エーヴィス: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.448Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:32:02.448Z] 4-1 ラ・マンチャ号: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.449Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:32:02.449Z] 4-2 イスパニア艦隊: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.450Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:32:02.450Z] 5-1 ゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.451Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:32:02.451Z] 5-2 エルダゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.452Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:32:02.452Z] 6-1 クラーケン: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.453Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:32:02.453Z] 6-2 ゴルゾアの胃袋: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.454Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:32:02.455Z] 7-1 バクバク: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.455Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:32:02.456Z] 7-2 死者の群れ: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.457Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:32:02.457Z] 8-1 死霊船 黒潮号: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.458Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:32:02.458Z] 8-2 ブライニクル: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.459Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:32:02.459Z] 9-1 廃都の守護者: base search start (seeds=1, require=-).
+[2026-04-24T15:32:02.460Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:32:02.460Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:33:03.552Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T15:34:31.846Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無防水水盾反燐烈 sample=奏待▽霊果
+[2026-04-24T15:35:03.598Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無防水水先反燐烈 sample=奏待▽霊果
+[2026-04-24T15:35:37.216Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無防水水弓反燐烈 sample=奏待▽霊果
+[2026-04-24T15:36:07.761Z] 1-1 ルーサー: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.769Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:36:07.769Z] 1-2 肉厚な魚: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.770Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:36:07.771Z] 2-1 血に飢えたジョーズ: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.772Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:36:07.772Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.773Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:36:07.773Z] 3-1 デザインド・エッグ号: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.775Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:36:07.775Z] 3-2 エーヴィス: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.776Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:36:07.776Z] 4-1 ラ・マンチャ号: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.777Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:36:07.777Z] 4-2 イスパニア艦隊: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.778Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:36:07.778Z] 5-1 ゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.779Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:36:07.779Z] 5-2 エルダゾルゲイド: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.780Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:36:07.781Z] 6-1 クラーケン: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.781Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:36:07.782Z] 6-2 ゴルゾアの胃袋: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.783Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:36:07.783Z] 7-1 バクバク: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.784Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:36:07.784Z] 7-2 死者の群れ: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.785Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:36:07.785Z] 8-1 死霊船 黒潮号: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.786Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:36:07.787Z] 8-2 ブライニクル: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.788Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:36:07.788Z] 9-1 廃都の守護者: base search start (seeds=1, require=-).
+[2026-04-24T15:36:07.789Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:36:07.790Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:36:52.278Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T15:36:52.790Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無一水水紫反燐烈 sample=一待待奏爆
+[2026-04-24T15:38:50.565Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無奏水水紫反燐烈 sample=待毒霊円狼
+[2026-04-24T15:38:50.581Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無紫水水紫反燐烈 sample=一一刺玉速
+[2026-04-24T15:40:32.661Z] 9-2 深海の賢王 ジズ: fix found replacements=1 tuned=無刺水水紫反燐烈 sample=待一待毒狼
+[2026-04-24T15:40:49.163Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:41:34.812Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T15:45:54.766Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:46:47.704Z] 9-2 深海の賢王 ジズ: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T15:47:46.565Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:47:55.255Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:49:00.774Z] 9-2 深海の賢王 ジズ: base search start (seeds=1, require=-).
+[2026-04-24T15:49:00.782Z] 9-2 深海の賢王 ジズ: base clearable samples=待待刺狼霊
+[2026-04-24T15:49:00.784Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:49:07.630Z] 9-2 深海の賢王 ジズ: base search start (seeds=1, require=-).
+[2026-04-24T15:49:07.638Z] 9-2 深海の賢王 ジズ: base clearable samples=待待刺狼霊
+[2026-04-24T15:49:07.639Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:49:09.105Z] 9-2 深海の賢王 ジズ: base search start (seeds=1, require=-).
+[2026-04-24T15:49:09.117Z] 9-2 深海の賢王 ジズ: base clearable samples=待待刺狼霊
+[2026-04-24T15:49:09.119Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:50:21.858Z] 9-2 深海の賢王 ジズ: base search start (seeds=1, require=-).
+[2026-04-24T15:50:21.891Z] 9-2 深海の賢王 ジズ: base clearable samples=[毒待刺狼霊 | 待待毒狼霊 | 飛礁刺狼霊 | 礁飛刺狼霊 | 搦待毒狼霊]
+[2026-04-24T15:50:21.892Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:50:38.455Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:50:38.532Z] 9-2 深海の賢王 ジズ: base clearable samples=[飛礁一狼霊 | 飛礁毒狼霊 | 礁飛一狼霊 | 礁飛毒狼霊 | 毒飛礁狼霊]
+[2026-04-24T15:50:38.533Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:50:42.722Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:50:42.730Z] 9-2 深海の賢王 ジズ: base clearable samples=[飛礁一狼霊 | 飛礁毒狼霊 | 礁飛一狼霊 | 礁飛毒狼霊 | 毒飛礁狼霊]
+[2026-04-24T15:50:42.731Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:50:58.175Z] 1-1 ルーサー: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.188Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:50:58.189Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:50:58.189Z] 1-2 肉厚な魚: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.193Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:50:58.194Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:50:58.195Z] 2-1 血に飢えたジョーズ: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.197Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:50:58.198Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:50:58.199Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.201Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:50:58.202Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:50:58.202Z] 3-1 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.204Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:50:58.205Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:50:58.205Z] 3-2 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.302Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:50:58.303Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:50:58.304Z] 4-1 ラ・マンチャ号: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.305Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:50:58.306Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:50:58.306Z] 4-2 イスパニア艦隊: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.396Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:50:58.398Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:50:58.398Z] 5-1 ゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.412Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:50:58.414Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:50:58.414Z] 5-2 エルダゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.418Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:50:58.419Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:50:58.420Z] 6-1 クラーケン: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.422Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:50:58.423Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:50:58.423Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.632Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:50:58.633Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:50:58.633Z] 7-1 バクバク: base search start (seeds=0, require=-).
+[2026-04-24T15:50:58.647Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:50:58.648Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:50:58.649Z] 7-2 死者の群れ: base search start (seeds=0, require=-).
+[2026-04-24T15:51:04.299Z] 7-2 死者の群れ: base clearable samples=[待刺強一一 | 待刺強一刺 | 待刺強一果 | 待刺強一待 | 待刺強一搦]
+[2026-04-24T15:51:04.301Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:51:04.301Z] 8-1 死霊船 黒潮号: base search start (seeds=0, require=-).
+[2026-04-24T15:51:04.319Z] 8-1 死霊船 黒潮号: base clearable samples=[一一一礁玉 | 一一一霊待 | 一一刺礁玉 | 一一刺霊待 | 一一果礁玉]
+[2026-04-24T15:51:04.320Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:51:04.320Z] 8-2 ブライニクル: base search start (seeds=0, require=-).
+[2026-04-24T15:51:08.831Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T15:51:08.832Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:51:08.832Z] 9-1 廃都の守護者: base search start (seeds=0, require=-).
+[2026-04-24T15:51:08.960Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:51:08.962Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:51:08.962Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:51:08.963Z] 9-2 深海の賢王 ジズ: base clearable samples=[飛礁一狼霊 | 飛礁毒狼霊 | 礁飛一狼霊 | 礁飛毒狼霊 | 毒飛礁狼霊]
+[2026-04-24T15:51:08.964Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:51:08.965Z] 10-1 ゾルゲイドクイーン: base search start (seeds=0, require=-).
+[2026-04-24T15:51:09.165Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:51:09.166Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:51:09.167Z] 10-2 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T15:51:09.259Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:51:09.261Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:51:09.261Z] 11-1 エーヴィス海賊団: base search start (seeds=0, require=-).
+[2026-04-24T15:51:09.262Z] 11-1 エーヴィス海賊団: base clearable samples=[一一一一一 | 一一一一刺 | 一一一一果 | 一一一一待 | 一一一一搦]
+[2026-04-24T15:51:09.262Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:51:09.263Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:52:23.632Z] 11-2 大海賊 エーヴィス: tuning search start (maxReplacements=1, seeds=0, require=-).
+[2026-04-24T15:54:14.779Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.788Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:54:14.789Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:54:14.790Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.794Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:54:14.795Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:54:14.795Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.796Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:54:14.797Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:54:14.797Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.798Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:54:14.799Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:54:14.799Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.800Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:54:14.801Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:54:14.801Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.802Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:54:14.803Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:54:14.803Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.804Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:54:14.805Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:54:14.805Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.807Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:54:14.808Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:54:14.808Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.808Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:54:14.809Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:54:14.809Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.810Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:54:14.811Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:54:14.811Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.812Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:54:14.813Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:54:14.813Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.814Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:54:14.814Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:54:14.815Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.815Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:54:14.816Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:54:14.816Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T15:54:14.817Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:54:14.818Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:54:14.819Z] 8-1 死霊船 黒潮号: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.819Z] 8-1 死霊船 黒潮号: base clearable samples=[一一一礁玉 | 一一一霊待 | 一一刺礁玉 | 一一刺霊待 | 一一果礁玉]
+[2026-04-24T15:54:14.820Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:54:14.820Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.821Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T15:54:14.822Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:54:14.823Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.823Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:54:14.824Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:54:14.825Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.826Z] 9-2 深海の賢王 ジズ: base clearable samples=[飛礁一狼霊 | 飛礁毒狼霊 | 礁飛一狼霊 | 礁飛毒狼霊 | 毒飛礁狼霊]
+[2026-04-24T15:54:14.827Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:54:14.827Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.828Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:54:14.829Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:54:14.829Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.830Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:54:14.831Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:54:14.831Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T15:54:14.832Z] 11-1 エーヴィス海賊団: base clearable samples=[一一一一一 | 一一一一刺 | 一一一一果 | 一一一一待 | 一一一一搦]
+[2026-04-24T15:54:14.833Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:54:14.833Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:54:22.607Z] 7-1 バクバク: base search start (seeds=5, require=狼).
+[2026-04-24T15:54:22.622Z] 7-1 バクバク: base clearable samples=[狼一一玉玉 | 一狼一玉玉 | 一一狼玉玉 | 狼一一強玉 | 一狼一強玉]
+[2026-04-24T15:54:22.623Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:54:22.627Z] 8-2 ブライニクル: base search start (seeds=0, require=魔).
+[2026-04-24T15:54:22.629Z] 8-1 死霊船 黒潮号: base search start (seeds=0, require=爆).
+[2026-04-24T15:54:22.645Z] 7-2 死者の群れ: base search start (seeds=5, require=▽).
+[2026-04-24T15:54:22.660Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:54:22.661Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:54:22.732Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T15:54:22.733Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:54:24.076Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:54:24.077Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:55:47.272Z] 11-2 大海賊 エーヴィス: tuning search start (maxReplacements=1, seeds=0, require=-).
+[2026-04-24T15:55:59.198Z] 11-2 大海賊 エーヴィス: fix found replacements=1 tuned=先封待連焦盾死燐死 sample=待一礁礁玉
+[2026-04-24T15:57:33.436Z] 1-1 ルーサー: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.453Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:57:33.455Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:57:33.455Z] 1-2 肉厚な魚: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.459Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:57:33.460Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:57:33.460Z] 2-1 血に飢えたジョーズ: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.463Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:57:33.463Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:57:33.464Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.467Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:57:33.468Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:57:33.469Z] 3-1 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.471Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:57:33.472Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:57:33.472Z] 3-2 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.574Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:57:33.575Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:57:33.576Z] 4-1 ラ・マンチャ号: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.577Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:57:33.578Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:57:33.578Z] 4-2 イスパニア艦隊: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.674Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:57:33.675Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:57:33.675Z] 5-1 ゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.688Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:57:33.689Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:57:33.690Z] 5-2 エルダゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.694Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:57:33.695Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:57:33.695Z] 6-1 クラーケン: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.697Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:57:33.698Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:57:33.699Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.920Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:57:33.921Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:57:33.922Z] 7-1 バクバク: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.937Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:57:33.939Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:57:33.939Z] 7-2 死者の群れ: base search start (seeds=5, require=-).
+[2026-04-24T15:57:33.940Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:57:33.941Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:57:33.941Z] 8-1 死霊船 黒潮号: base search start (seeds=0, require=-).
+[2026-04-24T15:57:33.958Z] 8-1 死霊船 黒潮号: base clearable samples=[一一一礁玉 | 一一一霊待 | 一一刺礁玉 | 一一刺霊待 | 一一果礁玉]
+[2026-04-24T15:57:33.959Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:57:33.960Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:57:33.961Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:57:33.961Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:57:33.962Z] 9-1 廃都の守護者: base search start (seeds=0, require=-).
+[2026-04-24T15:57:34.105Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:57:34.106Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:57:34.107Z] 9-2 深海の賢王 ジズ: base search start (seeds=0, require=-).
+[2026-04-24T15:57:34.741Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T15:57:34.742Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:57:34.743Z] 10-1 ゾルゲイドクイーン: base search start (seeds=0, require=-).
+[2026-04-24T15:57:34.955Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:57:34.956Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:57:34.956Z] 10-2 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T15:57:35.057Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:57:35.058Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:57:35.058Z] 11-1 エーヴィス海賊団: base search start (seeds=0, require=-).
+[2026-04-24T15:57:35.059Z] 11-1 エーヴィス海賊団: base clearable samples=[一一一一一 | 一一一一刺 | 一一一一果 | 一一一一待 | 一一一一搦]
+[2026-04-24T15:57:35.060Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:57:35.060Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:57:46.933Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T15:57:46.935Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T15:57:46.935Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T15:57:47.005Z] 12-1 偽聖女 リザベル: base clearable samples=[一一一毒円 | 一一刺毒円 | 一一待毒一 | 一一待毒果 | 一一待毒待]
+[2026-04-24T15:57:47.006Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T15:57:47.007Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T15:58:38.418Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.427Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:58:38.429Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:58:38.429Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.430Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:58:38.431Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:58:38.431Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.432Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:58:38.433Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:58:38.433Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.434Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:58:38.435Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:58:38.435Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.436Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:58:38.437Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:58:38.438Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.439Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:58:38.439Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:58:38.440Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.440Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:58:38.441Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:58:38.441Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.443Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:58:38.444Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:58:38.444Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.445Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:58:38.446Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:58:38.446Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.447Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:58:38.448Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:58:38.448Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.448Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:58:38.449Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:58:38.449Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.450Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:58:38.451Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:58:38.451Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.452Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:58:38.453Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:58:38.453Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T15:58:38.454Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:58:38.455Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:58:38.455Z] 8-1 死霊船 黒潮号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.456Z] 8-1 死霊船 黒潮号: base clearable samples=[一一一礁玉 | 一一一霊待 | 一一刺礁玉 | 一一刺霊待 | 一一果礁玉]
+[2026-04-24T15:58:38.456Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:58:38.457Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.457Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:58:38.459Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:58:38.459Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.460Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:58:38.460Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:58:38.461Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.462Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T15:58:38.463Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:58:38.463Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.464Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:58:38.465Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:58:38.465Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.466Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:58:38.467Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:58:38.468Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.468Z] 11-1 エーヴィス海賊団: base clearable samples=[一一一一一 | 一一一一刺 | 一一一一果 | 一一一一待 | 一一一一搦]
+[2026-04-24T15:58:38.469Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:58:38.469Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.470Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T15:58:38.471Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T15:58:38.471Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T15:58:38.473Z] 12-1 偽聖女 リザベル: base clearable samples=[一一一毒円 | 一一刺毒円 | 一一待毒一 | 一一待毒果 | 一一待毒待]
+[2026-04-24T15:58:38.474Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T15:58:38.474Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T15:58:57.384Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.393Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:58:57.395Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:58:57.395Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.396Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:58:57.397Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:58:57.399Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.400Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:58:57.401Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:58:57.402Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.402Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:58:57.403Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:58:57.403Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.405Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:58:57.406Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:58:57.406Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.407Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:58:57.408Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:58:57.409Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.409Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:58:57.410Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:58:57.411Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.412Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:58:57.413Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:58:57.413Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.413Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:58:57.414Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:58:57.414Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.415Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:58:57.416Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:58:57.416Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.417Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:58:57.418Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:58:57.418Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.419Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:58:57.419Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:58:57.420Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.421Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:58:57.421Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:58:57.422Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T15:58:57.423Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:58:57.424Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:58:57.424Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T15:58:57.425Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T15:58:57.425Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:58:57.426Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.427Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:58:57.427Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:58:57.428Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.428Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:58:57.429Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:58:57.429Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.430Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T15:58:57.431Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:58:57.432Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.432Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:58:57.433Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:58:57.433Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:58:57.434Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:58:57.435Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:58:57.435Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.284Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.294Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:59:27.295Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:59:27.295Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.296Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:59:27.297Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:59:27.297Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.298Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:59:27.299Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:59:27.299Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.300Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:59:27.301Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:59:27.301Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.303Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:59:27.304Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:59:27.305Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.306Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:59:27.307Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:59:27.307Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.308Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:59:27.309Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:59:27.309Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.310Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:59:27.311Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:59:27.311Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.312Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:59:27.312Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:59:27.313Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.314Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:59:27.315Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:59:27.315Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.316Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:59:27.316Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:59:27.317Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.318Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:59:27.318Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:59:27.318Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.320Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:59:27.321Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:59:27.321Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T15:59:27.322Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:59:27.324Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:59:27.324Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T15:59:27.325Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T15:59:27.325Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:59:27.326Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.327Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:59:27.328Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:59:27.328Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.329Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:59:27.329Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:59:27.330Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.331Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T15:59:27.332Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:59:27.332Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.333Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:59:27.333Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:59:27.334Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:27.335Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:59:27.336Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:59:27.336Z] 11-1 エーヴィス海賊団: base search start (seeds=0, require=-).
+[2026-04-24T15:59:27.337Z] 11-1 エーヴィス海賊団: base clearable samples=[一一一一一 | 一一一一刺 | 一一一一果 | 一一一一待 | 一一一一搦]
+[2026-04-24T15:59:27.338Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:59:27.339Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T15:59:39.654Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.663Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T15:59:39.664Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T15:59:39.664Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.665Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T15:59:39.666Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T15:59:39.667Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.667Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T15:59:39.668Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T15:59:39.669Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.670Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T15:59:39.671Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T15:59:39.671Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.673Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T15:59:39.674Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:59:39.674Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.675Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T15:59:39.676Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T15:59:39.676Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.677Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T15:59:39.677Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T15:59:39.678Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.679Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T15:59:39.679Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T15:59:39.680Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.680Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T15:59:39.681Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T15:59:39.681Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.682Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T15:59:39.683Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T15:59:39.683Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.684Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T15:59:39.684Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T15:59:39.685Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.686Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T15:59:39.686Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T15:59:39.687Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.688Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T15:59:39.688Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T15:59:39.689Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T15:59:39.690Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T15:59:39.691Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T15:59:39.692Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T15:59:39.692Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T15:59:39.693Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T15:59:39.693Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.694Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T15:59:39.695Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T15:59:39.696Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.696Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T15:59:39.697Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T15:59:39.697Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.698Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T15:59:39.699Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T15:59:39.699Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.700Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T15:59:39.701Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T15:59:39.701Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.702Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T15:59:39.703Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T15:59:39.703Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T15:59:39.733Z] 11-1 エーヴィス海賊団: base clearable samples=[爆一一一果 | 滅一一一果 | 待奏一一一 | 搦奏一一一 | 玉奏一一一]
+[2026-04-24T15:59:39.735Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T15:59:39.735Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:00:21.142Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.150Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:00:21.151Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:00:21.152Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.153Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:00:21.153Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:00:21.154Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.154Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:00:21.155Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:00:21.155Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.156Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:00:21.157Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:00:21.157Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.159Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:00:21.160Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:21.160Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.161Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:00:21.162Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:00:21.162Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.163Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:00:21.164Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:00:21.164Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.165Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:00:21.166Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:00:21.167Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.167Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:00:21.168Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:00:21.168Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.169Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:00:21.170Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:00:21.170Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.171Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:00:21.171Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:00:21.172Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.173Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:00:21.173Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:00:21.173Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.174Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:00:21.175Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:00:21.175Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:00:21.176Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:00:21.177Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:00:21.178Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:00:21.178Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:00:21.179Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:00:21.180Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.181Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:00:21.181Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:00:21.182Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.183Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:00:21.183Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:00:21.184Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.185Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:00:21.186Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:00:21.186Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.187Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:00:21.188Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:00:21.188Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.189Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:00:21.190Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:21.190Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:00:21.198Z] 11-1 エーヴィス海賊団: base clearable samples=[待奏一一一 | 搦奏一一一 | 玉奏一一一 | 爆一一霊果 | 滅待一一果]
+[2026-04-24T16:00:21.200Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:00:21.200Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:00:39.380Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.388Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:00:39.389Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:00:39.390Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.390Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:00:39.391Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:00:39.392Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.393Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:00:39.393Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:00:39.394Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.395Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:00:39.396Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:00:39.396Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.398Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:00:39.399Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:39.399Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.400Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:00:39.401Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:00:39.401Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.402Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:00:39.402Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:00:39.403Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.404Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:00:39.404Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:00:39.405Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.405Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:00:39.406Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:00:39.406Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.407Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:00:39.407Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:00:39.408Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.408Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:00:39.409Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:00:39.409Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.410Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:00:39.410Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:00:39.411Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.412Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:00:39.412Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:00:39.413Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:00:39.414Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:00:39.415Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:00:39.415Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:00:39.416Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:00:39.416Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:00:39.417Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.418Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:00:39.418Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:00:39.419Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.419Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:00:39.420Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:00:39.420Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.421Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:00:39.422Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:00:39.422Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.423Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:00:39.424Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:00:39.424Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.425Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:00:39.426Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:39.426Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:00:39.427Z] 11-1 エーヴィス海賊団: base clearable samples=[待奏一一一 | 搦奏一一一 | 玉奏一一一 | 爆一一霊果 | 滅待一一果]
+[2026-04-24T16:00:39.428Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:00:39.428Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:00:51.561Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.569Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:00:51.570Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:00:51.571Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.571Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:00:51.572Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:00:51.573Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.574Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:00:51.574Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:00:51.575Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.576Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:00:51.576Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:00:51.577Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.578Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:00:51.579Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:51.579Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.581Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:00:51.581Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:00:51.582Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.582Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:00:51.583Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:00:51.583Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.585Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:00:51.585Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:00:51.586Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.586Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:00:51.587Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:00:51.587Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.588Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:00:51.589Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:00:51.589Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.590Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:00:51.591Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:00:51.591Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.592Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:00:51.592Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:00:51.593Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.594Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:00:51.594Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:00:51.594Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:00:51.596Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:00:51.597Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:00:51.597Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:00:51.598Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:00:51.599Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:00:51.599Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.600Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:00:51.601Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:00:51.601Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.602Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:00:51.603Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:00:51.603Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.604Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:00:51.605Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:00:51.605Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.606Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:00:51.607Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:00:51.607Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.608Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:00:51.609Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:00:51.609Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:00:51.610Z] 11-1 エーヴィス海賊団: base clearable samples=[待奏一一一 | 搦奏一一一 | 玉奏一一一 | 爆一一霊果 | 滅待一一果]
+[2026-04-24T16:00:51.611Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:00:51.611Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:01:16.260Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.270Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:01:16.271Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:01:16.271Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.272Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:01:16.273Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:01:16.273Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.274Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:01:16.275Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:01:16.275Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.276Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:01:16.277Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:01:16.278Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.279Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:01:16.280Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:01:16.280Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.281Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:01:16.282Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:01:16.282Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.283Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:01:16.284Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:01:16.284Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.285Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:01:16.285Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:01:16.286Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.286Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:01:16.287Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:01:16.287Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.288Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:01:16.289Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:01:16.289Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.290Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:01:16.290Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:01:16.291Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.291Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:01:16.292Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:01:16.293Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.294Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:01:16.294Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:01:16.295Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:01:16.296Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:01:16.297Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:01:16.297Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:01:16.298Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:01:16.298Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:01:16.299Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.299Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:01:16.300Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:01:16.300Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.301Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:01:16.301Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:01:16.302Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.303Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:01:16.303Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:01:16.304Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.304Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:01:16.305Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:01:16.305Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.306Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:01:16.307Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:01:16.307Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:01:16.308Z] 11-1 エーヴィス海賊団: base clearable samples=[待奏一一一 | 搦奏一一一 | 玉奏一一一 | 爆一一霊果 | 滅待一一果]
+[2026-04-24T16:01:16.309Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:01:16.309Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:01:28.632Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:01:28.634Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:01:28.634Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:01:28.763Z] 12-1 偽聖女 リザベル: base clearable samples=[一一一毒円 | 一一刺毒円 | 一一待毒一 | 一一待毒果 | 一一待毒待]
+[2026-04-24T16:01:28.765Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:01:28.766Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:01:39.299Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.308Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:01:39.309Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:01:39.310Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.311Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:01:39.312Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:01:39.312Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.313Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:01:39.313Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:01:39.314Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.315Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:01:39.315Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:01:39.316Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.317Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:01:39.318Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:01:39.319Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.320Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:01:39.320Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:01:39.321Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.322Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:01:39.322Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:01:39.323Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.324Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:01:39.325Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:01:39.325Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.326Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:01:39.327Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:01:39.327Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.328Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:01:39.329Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:01:39.329Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.330Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:01:39.331Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:01:39.331Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.332Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:01:39.332Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:01:39.333Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.333Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:01:39.334Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:01:39.334Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:01:39.335Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:01:39.336Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:01:39.337Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:01:39.337Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:01:39.338Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:01:39.339Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.339Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:01:39.340Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:01:39.341Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.341Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:01:39.342Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:01:39.342Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.344Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:01:39.345Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:01:39.345Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.346Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:01:39.347Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:01:39.347Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.348Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:01:39.349Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:01:39.349Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.373Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:01:39.374Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:01:39.375Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.376Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:01:39.377Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:01:39.377Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:01:39.379Z] 12-1 偽聖女 リザベル: base clearable samples=[一一一毒円 | 一一刺毒円 | 一一待毒一 | 一一待毒果 | 一一待毒待]
+[2026-04-24T16:01:39.379Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:01:39.380Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:03:00.113Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.122Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:03:00.123Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:03:00.123Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.124Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:03:00.125Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:03:00.125Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.126Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:03:00.127Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:03:00.128Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.129Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:03:00.129Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:03:00.130Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.132Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:03:00.133Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:03:00.134Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.135Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:03:00.136Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:03:00.136Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.137Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:03:00.138Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:03:00.138Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.139Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:03:00.140Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:03:00.140Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.141Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:03:00.141Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:03:00.142Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.143Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:03:00.144Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:03:00.144Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.144Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:03:00.145Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:03:00.145Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.146Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:03:00.147Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:03:00.148Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.149Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:03:00.150Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:03:00.150Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:03:00.151Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:03:00.152Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:03:00.153Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:03:00.154Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:03:00.154Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:03:00.155Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.156Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:03:00.156Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:03:00.157Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.157Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:03:00.158Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:03:00.158Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.159Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:03:00.160Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:03:00.161Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.161Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:03:00.162Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:03:00.162Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.164Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:03:00.165Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:03:00.165Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.167Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:03:00.168Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:03:00.168Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:03:00.169Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:03:00.170Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:03:00.170Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.379Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.388Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:03:30.389Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:03:30.389Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.390Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:03:30.391Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:03:30.391Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.392Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:03:30.393Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:03:30.394Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.395Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:03:30.396Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:03:30.396Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.398Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:03:30.399Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:03:30.399Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.401Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:03:30.401Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:03:30.402Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.402Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:03:30.403Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:03:30.403Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.405Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:03:30.405Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:03:30.406Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.406Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:03:30.407Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:03:30.407Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.408Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:03:30.409Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:03:30.409Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.410Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:03:30.411Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:03:30.411Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.412Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:03:30.413Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:03:30.413Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.415Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:03:30.415Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:03:30.416Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:03:30.417Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:03:30.418Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:03:30.418Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:03:30.419Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:03:30.419Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:03:30.420Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.420Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:03:30.421Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:03:30.422Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.422Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:03:30.423Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:03:30.423Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.425Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:03:30.425Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:03:30.426Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.426Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:03:30.427Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:03:30.428Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.429Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:03:30.430Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:03:30.430Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.431Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:03:30.432Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:03:30.432Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:03:30.433Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:03:30.434Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:03:30.434Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:05:50.778Z] 12-1 偽聖女 リザベル: tuning search start (maxReplacements=1, seeds=0, require=-).
+[2026-04-24T16:07:40.193Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.202Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:07:40.203Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:07:40.204Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.205Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:07:40.206Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:07:40.206Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.207Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:07:40.208Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:07:40.209Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.209Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:07:40.210Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:07:40.210Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.212Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:07:40.213Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:07:40.213Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.214Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:07:40.215Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:07:40.215Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.216Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:07:40.217Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:07:40.217Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.219Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:07:40.219Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:07:40.220Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.221Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:07:40.221Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:07:40.222Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.223Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:07:40.223Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:07:40.224Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.224Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:07:40.225Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:07:40.225Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.226Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:07:40.227Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:07:40.227Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.228Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:07:40.229Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:07:40.229Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:07:40.230Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:07:40.231Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:07:40.231Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:07:40.232Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:07:40.232Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:07:40.233Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.233Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:07:40.234Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:07:40.235Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.235Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:07:40.236Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:07:40.237Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.238Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:07:40.239Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:07:40.239Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.240Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:07:40.241Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:07:40.241Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.242Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:07:40.243Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:07:40.243Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.245Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:07:40.245Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:07:40.246Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:07:40.246Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:07:40.247Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:07:40.247Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:07:42.442Z] 12-1 偽聖女 リザベル: base clearable samples=[一一魔強死 | 一刺魔強死 | 一果魔強死 | 一待魔強死 | 一搦魔強死]
+[2026-04-24T16:07:42.444Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:07:42.444Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:08:11.141Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.150Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:08:11.151Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:08:11.152Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.153Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:08:11.153Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:08:11.154Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.155Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:08:11.156Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:08:11.156Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.157Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:08:11.158Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:08:11.158Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.160Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:08:11.160Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:08:11.161Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.162Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:08:11.162Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:08:11.163Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.164Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:08:11.164Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:08:11.165Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.166Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:08:11.167Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:08:11.167Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.168Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:08:11.168Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:08:11.169Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.170Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:08:11.171Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:08:11.171Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.172Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:08:11.172Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:08:11.173Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.173Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:08:11.174Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:08:11.174Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.175Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:08:11.176Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:08:11.176Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:08:11.178Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:08:11.178Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:08:11.179Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:08:11.180Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:08:11.180Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:08:11.181Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.182Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:08:11.183Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:08:11.183Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.184Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:08:11.184Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:08:11.185Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.186Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:08:11.187Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:08:11.187Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.188Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:08:11.189Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:08:11.189Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.190Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:08:11.191Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:08:11.191Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.193Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:08:11.194Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:08:11.194Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:08:11.195Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:08:11.196Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:08:11.196Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:08:38.984Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:08:38.994Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:08:38.995Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:08:38.996Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:08:38.997Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:08:38.998Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:08:38.998Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:38.999Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:08:39.000Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:08:39.001Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.001Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:08:39.002Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:08:39.003Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.004Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:08:39.005Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:08:39.005Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.006Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:08:39.007Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:08:39.008Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.008Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:08:39.009Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:08:39.009Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.010Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:08:39.011Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:08:39.012Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.012Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:08:39.013Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:08:39.013Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.014Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:08:39.015Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:08:39.016Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.017Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:08:39.017Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:08:39.018Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.019Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:08:39.019Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:08:39.020Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.021Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:08:39.021Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:08:39.022Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:08:39.023Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:08:39.024Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:08:39.024Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:08:39.025Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:08:39.026Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:08:39.026Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.027Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:08:39.028Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:08:39.028Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.029Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:08:39.030Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:08:39.031Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.032Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:08:39.033Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:08:39.033Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.034Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:08:39.034Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:08:39.035Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.036Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:08:39.036Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:08:39.037Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.038Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:08:39.038Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:08:39.039Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:08:39.039Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:08:39.040Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:08:39.040Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:09:00.965Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.974Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:09:00.975Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:09:00.976Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.977Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:09:00.978Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:09:00.978Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.979Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:09:00.980Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:09:00.980Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.981Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:09:00.982Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:09:00.982Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.984Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:09:00.985Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:09:00.985Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.986Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:09:00.987Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:09:00.987Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.988Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:09:00.989Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:09:00.989Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.991Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:09:00.992Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:09:00.992Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.993Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:09:00.994Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:09:00.994Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.995Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:09:00.995Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:09:00.996Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.996Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:09:00.997Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:09:00.997Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:09:00.998Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:09:00.999Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:09:00.999Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.000Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:09:01.000Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:09:01.001Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:09:01.002Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:09:01.003Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:09:01.003Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:09:01.004Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:09:01.005Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:09:01.005Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.006Z] 8-2 ブライニクル: base clearable samples=[待待毒魔果 | 待搦毒魔果 | 待玉毒魔果 | 待強毒魔果 | 待速毒魔果]
+[2026-04-24T16:09:01.007Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:09:01.007Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.008Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:09:01.009Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:09:01.010Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.011Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:09:01.012Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:09:01.012Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.013Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:09:01.014Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:09:01.014Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.015Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:09:01.016Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:09:01.016Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.017Z] 11-1 エーヴィス海賊団: base clearable samples=[滅一一霊果 | 爆一毒霊果 | 滅強一一果 | 滅霊一一果 | 滅待焦一果]
+[2026-04-24T16:09:01.018Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:09:01.019Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:09:01.019Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:09:01.020Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:09:01.020Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:09:03.228Z] 12-1 偽聖女 リザベル: base clearable samples=[一一魔強死 | 一刺魔強死 | 一果魔強死 | 一待魔強死 | 一搦魔強死]
+[2026-04-24T16:09:03.230Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:09:03.230Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:09:40.346Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:40.356Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:09:40.358Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:09:45.015Z] 1-1 ルーサー: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.029Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:09:45.031Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:09:45.031Z] 1-2 肉厚な魚: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.035Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:09:45.036Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:09:45.037Z] 2-1 血に飢えたジョーズ: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.041Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:09:45.042Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:09:45.042Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.045Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:09:45.046Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:09:45.046Z] 3-1 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.048Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:09:45.049Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:09:45.050Z] 3-2 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.158Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:09:45.159Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:09:45.160Z] 4-1 ラ・マンチャ号: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.161Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:09:45.162Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:09:45.163Z] 4-2 イスパニア艦隊: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.265Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:09:45.266Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:09:45.267Z] 5-1 ゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.280Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:09:45.281Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:09:45.281Z] 5-2 エルダゾルゲイド: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.286Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:09:45.287Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:09:45.288Z] 6-1 クラーケン: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.291Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:09:45.292Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:09:45.292Z] 6-2 ゴルゾアの胃袋: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.532Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:09:45.533Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:09:45.534Z] 7-1 バクバク: base search start (seeds=0, require=-).
+[2026-04-24T16:09:45.550Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:09:45.551Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:09:45.551Z] 7-2 死者の群れ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:45.552Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:09:45.553Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:09:45.553Z] 8-1 死霊船 黒潮号: base search start (seeds=5, require=-).
+[2026-04-24T16:09:45.554Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:09:45.555Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:09:45.555Z] 8-2 ブライニクル: base search start (seeds=0, require=-).
+[2026-04-24T16:09:50.642Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:09:50.644Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:09:50.644Z] 9-1 廃都の守護者: base search start (seeds=0, require=-).
+[2026-04-24T16:09:50.787Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:09:50.789Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:09:50.789Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:09:50.790Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:09:50.791Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:09:50.791Z] 10-1 ゾルゲイドクイーン: base search start (seeds=0, require=-).
+[2026-04-24T16:09:51.016Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:09:51.017Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:09:51.018Z] 10-2 デザインド・エッグ号: base search start (seeds=0, require=-).
+[2026-04-24T16:09:51.120Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:09:51.122Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:09:51.122Z] 11-1 エーヴィス海賊団: base search start (seeds=0, require=-).
+[2026-04-24T16:09:52.886Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:09:52.888Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:09:52.888Z] 11-2 大海賊 エーヴィス: base search start (seeds=0, require=-).
+[2026-04-24T16:10:05.199Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:10:05.202Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:10:05.203Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:10:25.666Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔死 | 待待搦魔死 | 待待玉魔死 | 待待強魔死 | 待待速魔死]
+[2026-04-24T16:10:25.668Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:10:25.669Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:10:39.455Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.466Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:10:39.467Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:10:39.467Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.471Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:10:39.472Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:10:39.473Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.474Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:10:39.475Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:10:39.475Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.476Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:10:39.477Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:10:39.477Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.479Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:10:39.480Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:10:39.480Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.481Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:10:39.482Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:10:39.483Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.484Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:10:39.484Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:10:39.485Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.486Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:10:39.487Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:10:39.487Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.488Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:10:39.488Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:10:39.489Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.490Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:10:39.490Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:10:39.491Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.491Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:10:39.492Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:10:39.492Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.493Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:10:39.494Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:10:39.494Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.495Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:10:39.496Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:10:39.496Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:10:39.498Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:10:39.499Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:10:39.499Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:10:39.500Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:10:39.501Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:10:39.501Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.502Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:10:39.503Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:10:39.503Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.504Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:10:39.505Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:10:39.505Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.506Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:10:39.507Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:10:39.508Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.508Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:10:39.509Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:10:39.510Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.511Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:10:39.511Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:10:39.512Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.512Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:10:39.513Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:10:39.514Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.514Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:10:39.515Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:10:39.516Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:10:39.539Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔一 | 待待搦魔一 | 待待玉魔一 | 待待強魔一 | 待待速魔一]
+[2026-04-24T16:10:39.541Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:10:39.541Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:10:53.269Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.278Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:10:53.279Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:10:53.279Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.280Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:10:53.281Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:10:53.282Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.283Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:10:53.284Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:10:53.284Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.285Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:10:53.286Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:10:53.286Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.288Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:10:53.289Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:10:53.289Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.290Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:10:53.291Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:10:53.291Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.292Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:10:53.293Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:10:53.293Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.294Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:10:53.295Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:10:53.295Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.296Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:10:53.297Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:10:53.297Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.298Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:10:53.299Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:10:53.299Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.300Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:10:53.301Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:10:53.302Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.302Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:10:53.303Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:10:53.303Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.304Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:10:53.305Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:10:53.305Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:10:53.306Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:10:53.307Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:10:53.308Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:10:53.309Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:10:53.309Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:10:53.310Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.311Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:10:53.311Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:10:53.312Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.312Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:10:53.313Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:10:53.313Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.315Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:10:53.316Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:10:53.316Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.317Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:10:53.318Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:10:53.318Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.319Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:10:53.320Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:10:53.321Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.321Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:10:53.322Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:10:53.322Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:10:53.323Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:10:53.324Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:10:53.324Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.287Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.296Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:11:26.297Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:11:26.298Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.300Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:11:26.301Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:11:26.301Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.302Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:11:26.303Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:11:26.303Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.307Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:11:26.308Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:11:26.308Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.311Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:11:26.312Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:11:26.313Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.314Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:11:26.315Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:11:26.315Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.316Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:11:26.317Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:11:26.317Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.318Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:11:26.319Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:11:26.319Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.320Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:11:26.321Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:11:26.321Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.322Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:11:26.323Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:11:26.323Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.324Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:11:26.324Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:11:26.325Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.326Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:11:26.326Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:11:26.327Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.328Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:11:26.329Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:11:26.329Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:11:26.331Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:11:26.331Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:11:26.332Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:11:26.333Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:11:26.333Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:11:26.334Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.334Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:11:26.335Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:11:26.335Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.336Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:11:26.337Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:11:26.337Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.338Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:11:26.339Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:11:26.339Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.340Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:11:26.341Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:11:26.341Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.343Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:11:26.344Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:11:26.344Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.345Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:11:26.346Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:11:26.346Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:11:26.347Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:11:26.348Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:11:26.348Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:11:52.159Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.168Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:11:52.169Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:11:52.169Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.170Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:11:52.171Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:11:52.171Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.173Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:11:52.173Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:11:52.174Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.175Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:11:52.176Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:11:52.176Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.178Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:11:52.179Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:11:52.179Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.180Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:11:52.181Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:11:52.181Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.182Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:11:52.183Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:11:52.183Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.184Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:11:52.185Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:11:52.185Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.186Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:11:52.186Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:11:52.187Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.187Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:11:52.188Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:11:52.188Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.189Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:11:52.190Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:11:52.190Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.191Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:11:52.192Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:11:52.192Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.193Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:11:52.194Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:11:52.194Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:11:52.195Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:11:52.196Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:11:52.197Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:11:52.197Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:11:52.198Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:11:52.198Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.199Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:11:52.200Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:11:52.200Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.201Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:11:52.201Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:11:52.202Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.203Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:11:52.204Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:11:52.204Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.205Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:11:52.206Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:11:52.206Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.207Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:11:52.208Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:11:52.209Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.210Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:11:52.211Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:11:52.211Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:11:52.212Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:11:52.212Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:11:52.213Z] 12-1 偽聖女 リザベル: base search start (seeds=0, require=-).
+[2026-04-24T16:12:16.985Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔一 | 待待搦魔一 | 待待玉魔一 | 待待強魔一 | 待待速魔一]
+[2026-04-24T16:12:16.987Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:12:16.988Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:12:45.811Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.821Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:12:45.822Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:12:45.822Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.823Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:12:45.824Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:12:45.825Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.826Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:12:45.827Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:12:45.827Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.828Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:12:45.829Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:12:45.829Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.831Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:12:45.831Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:12:45.832Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.833Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:12:45.834Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:12:45.834Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.835Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:12:45.836Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:12:45.836Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.837Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:12:45.838Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:12:45.838Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.839Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:12:45.840Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:12:45.840Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.841Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:12:45.842Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:12:45.842Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.843Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:12:45.843Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:12:45.844Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.844Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:12:45.845Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:12:45.845Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.846Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:12:45.847Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:12:45.847Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:12:45.848Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:12:45.849Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:12:45.850Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:12:45.851Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:12:45.852Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:12:45.852Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.853Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:12:45.854Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:12:45.854Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.855Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:12:45.855Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:12:45.856Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.857Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:12:45.858Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:12:45.858Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.859Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:12:45.859Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:12:45.860Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.861Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:12:45.861Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:12:45.862Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.862Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:12:45.863Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:12:45.863Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.864Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:12:45.865Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:12:45.865Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:12:45.866Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔一 | 待待搦魔一 | 待待玉魔一 | 待待強魔一 | 待待速魔一]
+[2026-04-24T16:12:45.867Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:12:45.867Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:12:58.105Z] 1-1 ルーサー: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.114Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:12:58.115Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:12:58.116Z] 1-2 肉厚な魚: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.117Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:12:58.118Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:12:58.118Z] 2-1 血に飢えたジョーズ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.119Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:12:58.120Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:12:58.121Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.122Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:12:58.122Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:12:58.123Z] 3-1 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.124Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:12:58.125Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:12:58.126Z] 3-2 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.127Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:12:58.127Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:12:58.128Z] 4-1 ラ・マンチャ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.128Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:12:58.129Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:12:58.129Z] 4-2 イスパニア艦隊: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.130Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:12:58.131Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:12:58.132Z] 5-1 ゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.132Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:12:58.133Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:12:58.133Z] 5-2 エルダゾルゲイド: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.135Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:12:58.135Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:12:58.136Z] 6-1 クラーケン: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.137Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:12:58.137Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:12:58.138Z] 6-2 ゴルゾアの胃袋: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.138Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:12:58.139Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:12:58.139Z] 7-1 バクバク: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.140Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:12:58.141Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:12:58.141Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:12:58.142Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:12:58.143Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:12:58.143Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:12:58.144Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:12:58.145Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:12:58.145Z] 8-2 ブライニクル: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.146Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:12:58.147Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:12:58.147Z] 9-1 廃都の守護者: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.148Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:12:58.148Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:12:58.149Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.150Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:12:58.151Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:12:58.151Z] 10-1 ゾルゲイドクイーン: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.152Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:12:58.153Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:12:58.153Z] 10-2 デザインド・エッグ号: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.154Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:12:58.155Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:12:58.155Z] 11-1 エーヴィス海賊団: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.156Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:12:58.157Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:12:58.157Z] 11-2 大海賊 エーヴィス: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.158Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:12:58.159Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:12:58.160Z] 12-1 偽聖女 リザベル: base search start (seeds=5, require=-).
+[2026-04-24T16:12:58.161Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔一 | 待待搦魔一 | 待待玉魔一 | 待待強魔一 | 待待速魔一]
+[2026-04-24T16:12:58.162Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:12:58.162Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:13:01.066Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:13:01.076Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:13:01.077Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:13:04.622Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=-).
+[2026-04-24T16:13:04.633Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:13:04.634Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:13:06.643Z] 9-2 深海の賢王 ジズ: base search start (seeds=5, require=▽).
+[2026-04-24T16:16:40.966Z] 1-1 ルーサー: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.974Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:16:40.975Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:16:40.976Z] 1-2 肉厚な魚: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.977Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:16:40.977Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:16:40.978Z] 2-1 血に飢えたジョーズ: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.979Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:16:40.980Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:16:40.980Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.981Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:16:40.982Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:16:40.982Z] 3-1 デザインド・エッグ号: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.984Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:16:40.985Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:16:40.985Z] 3-2 エーヴィス: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.986Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:16:40.987Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:16:40.987Z] 4-1 ラ・マンチャ号: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.988Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:16:40.989Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:16:40.989Z] 4-2 イスパニア艦隊: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.991Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:16:40.992Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:16:40.992Z] 5-1 ゾルゲイド: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.993Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:16:40.993Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:16:40.994Z] 5-2 エルダゾルゲイド: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.995Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:16:40.996Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:16:40.996Z] 6-1 クラーケン: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.997Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:16:40.998Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:16:40.998Z] 6-2 ゴルゾアの胃袋: base search start (seeds=10, require=-).
+[2026-04-24T16:16:40.999Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:16:41.000Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:16:41.000Z] 7-1 バクバク: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.001Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:16:41.001Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:16:41.002Z] 7-2 死者の群れ: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.003Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:16:41.003Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:16:41.004Z] 8-1 死霊船 黒潮号: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.004Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:16:41.005Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:16:41.005Z] 8-2 ブライニクル: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.006Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:16:41.007Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:16:41.007Z] 9-1 廃都の守護者: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.008Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:16:41.009Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:16:41.009Z] 9-2 深海の賢王 ジズ: base search start (seeds=15, require=-).
+[2026-04-24T16:16:41.011Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:16:41.012Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:16:41.012Z] 10-1 ゾルゲイドクイーン: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.013Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:16:41.014Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:16:41.014Z] 10-2 デザインド・エッグ号: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.015Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:16:41.016Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:16:41.016Z] 11-1 エーヴィス海賊団: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.017Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:16:41.018Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:16:41.018Z] 11-2 大海賊 エーヴィス: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.019Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:16:41.019Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:16:41.020Z] 12-1 偽聖女 リザベル: base search start (seeds=10, require=-).
+[2026-04-24T16:16:41.021Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔一 | 待待搦魔一 | 待待玉魔一 | 待待強魔一 | 待待速魔一]
+[2026-04-24T16:16:41.022Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:16:41.022Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:16:51.608Z] 1-1 ルーサー: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.617Z] 1-1 ルーサー: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一速玉]
+[2026-04-24T16:16:51.618Z] 1-1 ルーサー: done fixes=0.
+[2026-04-24T16:16:51.619Z] 1-2 肉厚な魚: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.620Z] 1-2 肉厚な魚: base clearable samples=[一一一玉速 | 一一一強果 | 一一一強玉 | 一一一速玉 | 一一刺待一]
+[2026-04-24T16:16:51.620Z] 1-2 肉厚な魚: done fixes=0.
+[2026-04-24T16:16:51.621Z] 2-1 血に飢えたジョーズ: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.622Z] 2-1 血に飢えたジョーズ: base clearable samples=[一一一一玉 | 一一一刺玉 | 一一一果玉 | 一一一待玉 | 一一一玉一]
+[2026-04-24T16:16:51.622Z] 2-1 血に飢えたジョーズ: done fixes=0.
+[2026-04-24T16:16:51.623Z] 2-2 弱者狩りのハゲタカ: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.624Z] 2-2 弱者狩りのハゲタカ: base clearable samples=[一一一一待 | 一一一刺待 | 一一一果待 | 一一一待一 | 一一一待刺]
+[2026-04-24T16:16:51.625Z] 2-2 弱者狩りのハゲタカ: done fixes=0.
+[2026-04-24T16:16:51.625Z] 3-1 デザインド・エッグ号: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.627Z] 3-1 デザインド・エッグ号: base clearable samples=[一一一一飛 | 一一一刺飛 | 一一一果飛 | 一一一待待 | 一一一待飛]
+[2026-04-24T16:16:51.628Z] 3-1 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:16:51.628Z] 3-2 エーヴィス: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.630Z] 3-2 エーヴィス: base clearable samples=[一待待一速 | 一待待待一 | 一待待待刺 | 一待待搦一 | 一待待搦刺]
+[2026-04-24T16:16:51.630Z] 3-2 エーヴィス: done fixes=0.
+[2026-04-24T16:16:51.631Z] 4-1 ラ・マンチャ号: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.631Z] 4-1 ラ・マンチャ号: base clearable samples=[一一一待一 | 一一一待刺 | 一一一待果 | 一一一待待 | 一一一待玉]
+[2026-04-24T16:16:51.632Z] 4-1 ラ・マンチャ号: done fixes=0.
+[2026-04-24T16:16:51.632Z] 4-2 イスパニア艦隊: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.633Z] 4-2 イスパニア艦隊: base clearable samples=[一待待刺一 | 一待待刺刺 | 一待待刺果 | 一待待刺待 | 一待待刺搦]
+[2026-04-24T16:16:51.634Z] 4-2 イスパニア艦隊: done fixes=0.
+[2026-04-24T16:16:51.634Z] 5-1 ゾルゲイド: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.635Z] 5-1 ゾルゲイド: base clearable samples=[一一一玉速 | 一一刺玉速 | 一一果玉速 | 一一待玉速 | 一一搦玉速]
+[2026-04-24T16:16:51.636Z] 5-1 ゾルゲイド: done fixes=0.
+[2026-04-24T16:16:51.636Z] 5-2 エルダゾルゲイド: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.637Z] 5-2 エルダゾルゲイド: base clearable samples=[一一一一果 | 一一一果果 | 一一一待果 | 一一一搦果 | 一一一玉果]
+[2026-04-24T16:16:51.638Z] 5-2 エルダゾルゲイド: done fixes=0.
+[2026-04-24T16:16:51.638Z] 6-1 クラーケン: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.639Z] 6-1 クラーケン: base clearable samples=[一一一玉一 | 一一一玉刺 | 一一一玉果 | 一一一玉待 | 一一一玉搦]
+[2026-04-24T16:16:51.639Z] 6-1 クラーケン: done fixes=0.
+[2026-04-24T16:16:51.640Z] 6-2 ゴルゾアの胃袋: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.641Z] 6-2 ゴルゾアの胃袋: base clearable samples=[一一玉待毒 | 一刺玉待毒 | 一果玉待毒 | 一待玉待毒 | 一搦待待毒]
+[2026-04-24T16:16:51.641Z] 6-2 ゴルゾアの胃袋: done fixes=0.
+[2026-04-24T16:16:51.642Z] 7-1 バクバク: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.643Z] 7-1 バクバク: base clearable samples=[一一一玉玉 | 一一一強玉 | 一一果一玉 | 一一果刺玉 | 一一果果玉]
+[2026-04-24T16:16:51.643Z] 7-1 バクバク: done fixes=0.
+[2026-04-24T16:16:51.644Z] 7-2 死者の群れ: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.645Z] 7-2 死者の群れ: base clearable samples=[待刺強一▽ | 待刺強刺▽ | 待刺強果▽ | 待刺強待▽ | 待刺強搦▽]
+[2026-04-24T16:16:51.646Z] 7-2 死者の群れ: done fixes=0.
+[2026-04-24T16:16:51.647Z] 8-1 死霊船 黒潮号: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.647Z] 8-1 死霊船 黒潮号: base clearable samples=[一一礁爆玉 | 一一爆礁玉 | 一一爆霊待 | 一刺礁爆玉 | 一刺爆礁玉]
+[2026-04-24T16:16:51.648Z] 8-1 死霊船 黒潮号: done fixes=0.
+[2026-04-24T16:16:51.649Z] 8-2 ブライニクル: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.650Z] 8-2 ブライニクル: base clearable samples=[待待待毒果 | 待待搦毒果 | 待待玉毒果 | 待待強毒果 | 待待速毒果]
+[2026-04-24T16:16:51.650Z] 8-2 ブライニクル: done fixes=0.
+[2026-04-24T16:16:51.651Z] 9-1 廃都の守護者: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.651Z] 9-1 廃都の守護者: base clearable samples=[一刺強一爆 | 一刺強待爆 | 一刺強搦爆 | 一刺強玉爆 | 一刺強強爆]
+[2026-04-24T16:16:51.652Z] 9-1 廃都の守護者: done fixes=0.
+[2026-04-24T16:16:51.652Z] 9-2 深海の賢王 ジズ: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.653Z] 9-2 深海の賢王 ジズ: base clearable samples=[一一飛礁狼 | 一一礁飛狼 | 一刺飛礁狼 | 一刺礁飛狼 | 一果飛礁狼]
+[2026-04-24T16:16:51.654Z] 9-2 深海の賢王 ジズ: done fixes=0.
+[2026-04-24T16:16:51.654Z] 10-1 ゾルゲイドクイーン: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.655Z] 10-1 ゾルゲイドクイーン: base clearable samples=[一一搦刺飛 | 一一搦待拳 | 一一玉速狼 | 一一玉礁狼 | 一刺搦刺飛]
+[2026-04-24T16:16:51.656Z] 10-1 ゾルゲイドクイーン: done fixes=0.
+[2026-04-24T16:16:51.656Z] 10-2 デザインド・エッグ号: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.657Z] 10-2 デザインド・エッグ号: base clearable samples=[一一搦飛狼 | 一一飛礁狼 | 一一飛狼礁 | 一一飛狼霊 | 一一飛霊狼]
+[2026-04-24T16:16:51.658Z] 10-2 デザインド・エッグ号: done fixes=0.
+[2026-04-24T16:16:51.658Z] 11-1 エーヴィス海賊団: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.659Z] 11-1 エーヴィス海賊団: base clearable samples=[一強一霊果 | 一強一霊狼 | 一強一霊爆 | 一強刺霊果 | 一強刺霊狼]
+[2026-04-24T16:16:51.660Z] 11-1 エーヴィス海賊団: done fixes=0.
+[2026-04-24T16:16:51.661Z] 11-2 大海賊 エーヴィス: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.662Z] 11-2 大海賊 エーヴィス: base clearable samples=[待一礁礁玉 | 待刺礁礁玉 | 待果礁礁玉 | 待待礁礁玉 | 待搦礁礁玉]
+[2026-04-24T16:16:51.662Z] 11-2 大海賊 エーヴィス: done fixes=0.
+[2026-04-24T16:16:51.663Z] 12-1 偽聖女 リザベル: base search start (seeds=15, require=-).
+[2026-04-24T16:16:51.683Z] 12-1 偽聖女 リザベル: base clearable samples=[待待待魔死 | 待待搦魔死 | 待待玉魔死 | 待待強魔死 | 待待速魔死]
+[2026-04-24T16:16:51.685Z] 12-1 偽聖女 リザベル: done fixes=0.
+[2026-04-24T16:16:51.685Z] 12-2 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:19:01.247Z] 12-2 魔女 グリザーベルク: tuning search start (maxReplacements=2, seeds=0, require=-).
+[2026-04-24T16:19:23.382Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓待強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:19:45.449Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓盾強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:20:07.401Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓礁強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:20:29.568Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓強強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:20:51.634Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓飛強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:21:04.540Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓滅強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:21:26.989Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓先強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:21:54.312Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓刺強燐連隠弓 sample=一礁果飛狼
+[2026-04-24T16:24:22.354Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓反強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:26:50.807Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓無強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:29:19.795Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓連強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:29:42.043Z] 12-2 魔女 グリザーベルク: fix found replacements=1 tuned=罠硬待強玉速燐連砲錬 | 紫速霊飛燐癒盾隠反雷 | 紫速隠弓燐強燐連隠弓 sample=一待果飛狼
+[2026-04-24T16:29:42.045Z] 12-2 魔女 グリザーベルク: done fixes=12.
+[2026-04-24T16:29:42.045Z] 12-3 魔女 グリザーベルク: base search start (seeds=0, require=-).
+[2026-04-24T16:29:57.605Z] 12-3 魔女 グリザーベルク: base clearable samples=[搦飛霊魔死 | 搦飛魔霊死 | 搦飛魔死霊 | 搦霊飛魔死 | 搦霊魔飛死]
+[2026-04-24T16:29:57.607Z] 12-3 魔女 グリザーベルク: done fixes=0.
