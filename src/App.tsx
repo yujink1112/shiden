@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, get } from "firebase/database";
 import { database, auth, googleProvider, recordAccess, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress } from "./firebase";
@@ -22,6 +23,7 @@ import SkillCard, { IconMode } from './components/SkillCard';
 import GameChapter1 from './GameChapter1';
 import GameChapter2 from './GameChapter2';
 import StoryTitle from './components/StoryTitle';
+import Chapter2StoryBook from './components/Chapter2StoryBook';
 import { GameProps, BattleResult } from './types/GameProps';
 import './App.css';
 
@@ -44,7 +46,9 @@ const CHAPTER2_STAGE_ALLOWED_KAMIWAZA: Record<string, string> = {
   "7-1": "狼",
   "7-2": "▽",
   "8-1": "爆",
-  "8-2": "魔"
+  "8-2": "魔",
+  "11-1": "狼",
+  "11-2": "魔",
 };
 
 const getPlayerNameForSkills = (selectedSkills: string[], fallbackName: string) => {
@@ -186,6 +190,7 @@ function App() {
   const [activeUsers, setActiveUsers] = useState(0);
   const [isAssetsLoaded, setIsAssetsLoaded] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showChapter2StoryBook, setShowChapter2StoryBook] = useState(false);
   const [isAdminPreview, setIsAdminPreview] = useState(false);
   const [adminEpilogueSequence, setAdminEpilogueSequence] = useState<'idle' | 'title' | 'story' | 'credits'>('idle');
   const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
@@ -307,11 +312,27 @@ function App() {
   const [showLegal, setShowLegal] = useState(false);
   const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [showTitleMenuModal, setShowTitleMenuModal] = useState(false);
+  const [showNewGameIntro, setShowNewGameIntro] = useState(false);
+  const [newGameIntroChapter, setNewGameIntroChapter] = useState<1 | 2>(1);
+  const [newGameIntroTrackIndex, setNewGameIntroTrackIndex] = useState(1);
+  const [isNewGameIntroTrackAnimating, setIsNewGameIntroTrackAnimating] = useState(true);
   const [isTapStartBlinking, setIsTapStartBlinking] = useState(false);
   const [changelogData, setChangelogData] = useState<any[]>([]);
   const [showUpdateNotify, setShowUpdateNotify] = useState(false);
   const [hasChapter2Save, setHasChapter2Save] = useState(false);
   const [showStage1Tutorial, setShowStage1Tutorial] = useState(false);
+  const newGameIntroTouchStartXRef = useRef<number | null>(null);
+  const newGameIntroInputLockedRef = useRef(false);
+  const suppressAdminBattleStoryOpenRef = useRef(false);
+
+  const storyBookOverlay = showChapter2StoryBook && isAdmin && typeof document !== 'undefined'
+    ? createPortal(
+        <div className="StoryBookOverlayHost" style={{ position: 'fixed', inset: 0, zIndex: 40000, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
+          <Chapter2StoryBook onClose={() => setShowChapter2StoryBook(false)} />
+        </div>,
+        document.body
+      )
+    : null;
   
 
   useEffect(() => {
@@ -883,6 +904,11 @@ const PLAYER_SKILL_COUNT = 5;
 
         try {
           if (currentStage?.chapter && currentStage.chapter >= 2) {
+            if (suppressAdminBattleStoryOpenRef.current) {
+              setStoryContent(null);
+              setStoryContentV2(null);
+              return;
+            }
             // 第2章以降 (JSONフローに基づく)
             const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
             const step = flow?.flow[chapter2FlowIndex];
@@ -921,6 +947,9 @@ const PLAYER_SKILL_COUNT = 5;
       // ストーリーが読み込まれたらモーダルを表示
       if (!gameStarted && !showStoryModal) {
         const currentStage = STAGE_DATA.find(s => s.no === stageCycle);
+        if (suppressAdminBattleStoryOpenRef.current && currentStage?.chapter && currentStage.chapter >= 2) {
+          return;
+        }
         const shouldOpenStoryCanvas = storyUrl || (!!storyContentV2 && !!currentStage?.chapter && currentStage.chapter >= 2);
         if (shouldOpenStoryCanvas) {
           const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
@@ -1010,6 +1039,16 @@ const PLAYER_SKILL_COUNT = 5;
       moveToNextStep();
     }
   }, [isChapter2, chapter2Flows, stageCycle, chapter2FlowIndex, claimedRewardSteps, showStoryModal, showChapterTitle, showChapter2Title, isStoryTransitioning, user, ownedSkillAbbrs]);
+
+  useEffect(() => {
+    if (!suppressAdminBattleStoryOpenRef.current || !isChapter2) return;
+
+    const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
+    const currentStep = flow?.flow[chapter2FlowIndex];
+    if (stageMode === 'BOSS' && !gameStarted && currentStep?.type === 'battle') {
+      suppressAdminBattleStoryOpenRef.current = false;
+    }
+  }, [isChapter2, chapter2Flows, stageCycle, chapter2FlowIndex, stageMode, gameStarted]);
 
   useEffect(() => {
     if (stageMode === 'BOSS' && stagesLoaded) {
@@ -1506,7 +1545,12 @@ const PLAYER_SKILL_COUNT = 5;
     //if (localStorage.getItem('shiden_stage_cycle') && !window.confirm('進捗をリセットして最初から始めますか？')) return;
     
     setIsAdminDebugSkillsActive(false);
-    setShowChapterSelect({ mode: 'NEW' });
+    setShowTitleMenuModal(false);
+    setNewGameIntroChapter(1);
+    setNewGameIntroTrackIndex(1);
+    setIsNewGameIntroTrackAnimating(true);
+    newGameIntroInputLockedRef.current = false;
+    setShowNewGameIntro(true);
     
     // const now = Date.now();
     
@@ -3060,12 +3104,82 @@ const PLAYER_SKILL_COUNT = 5;
     window.location.reload();
   };
 
+  const handleAdminClearClientCache = async () => {
+    if (!window.confirm('この端末のアプリキャッシュを削除して再読み込みしますか？\n進行データやアカウント情報は削除しません。')) {
+      return;
+    }
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(registration => registration.unregister()));
+      }
+
+      if ('caches' in window) {
+        const cacheKeys = await window.caches.keys();
+        await Promise.all(cacheKeys.map(cacheKey => window.caches.delete(cacheKey)));
+      }
+
+      setShowAdmin(false);
+      window.alert('この端末のキャッシュを削除しました。再読み込みします。');
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to clear client cache:', error);
+      window.alert('キャッシュ削除に失敗しました。コンソールを確認してください。');
+    }
+  };
+
 
   const currentStageInfo = STAGE_DATA.find(s => s.no === stageCycle) || STAGE_DATA[STAGE_DATA.length - 1];
   const isMobile = window.innerWidth < 768;
   const isLargeScreen = window.innerWidth > 1024;
   const isLoungeMode = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'ADMIN_ANALYTICS'].includes(stageMode);
   const titleHeroUrl = isMobile ? titleHeroMobileUrl : titleHeroPcUrl;
+  const newGameIntroPanels = [
+    {
+      chapter: 1 as const,
+      image: '/images/chapter/Chapter1.png',
+      alt: '第1章 導入イメージ',
+      eyebrow: 'FIGHT TO SURVIVE',
+      title: '孤独な少女と、無人島の秘密。',
+      lead: (
+        <>
+          無人島に閉じ込められた、少女の物語。
+          {isMobile && <br />}
+          ユーザ未登録でも遊べます。
+        </>
+      ),
+      cta: '第1章を始める'
+    },
+    {
+      chapter: 2 as const,
+      image: '/images/chapter/Chapter2.png',
+      alt: '第2章 導入イメージ',
+      eyebrow: 'SECOND CHAPTER',
+      title: '旗を掲げろ。海賊達の冒険譚。',
+      lead: (
+        <>
+          幻の島《アノマ》を追い求める、海賊の物語。
+          {isMobile && <br />}
+          第1章未クリアでも遊べます。 ※BGMが流れます
+        </>
+      ),
+      cta: '第2章を始める'
+    }
+  ];
+  const newGameIntroLoopPanels = [
+    newGameIntroPanels[1],
+    newGameIntroPanels[0],
+    newGameIntroPanels[1],
+    newGameIntroPanels[0]
+  ];
+  const moveNewGameIntro = (direction: 'prev' | 'next') => {
+    if (newGameIntroInputLockedRef.current) return;
+    newGameIntroInputLockedRef.current = true;
+    setIsNewGameIntroTrackAnimating(true);
+    setNewGameIntroTrackIndex((prev) => prev + (direction === 'next' ? 1 : -1));
+    setNewGameIntroChapter((prev) => (prev === 1 ? 2 : 1));
+  };
 
   const handleTapStart = () => {
     if (showTitleMenuModal || isTapStartBlinking) return;
@@ -3388,6 +3502,7 @@ const PLAYER_SKILL_COUNT = 5;
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}>
+        {storyBookOverlay}
         {showUpdateNotify && (
           <div className="UpdateNotification" style={{
             position: 'absolute',
@@ -3468,6 +3583,17 @@ const PLAYER_SKILL_COUNT = 5;
               >
                 Tap to Start
               </div>
+              <div className={`TitleCatchcopy ${showTitleMenuModal ? 'is-hidden' : ''}`}>
+                <div className="TitleCatchcopyMain">
+                  頼れるのは、君の
+                  <ruby className="TitleCatchcopyRuby">
+                    閃き
+                    <rt>スキル</rt>
+                  </ruby>
+                  だけ。
+                </div>
+                <div className="TitleCatchcopySub">- パズル感覚ノンフィールドRPG - </div>
+              </div>
 
               <div className="TitleFooter TitleFooterRenewed">
                 {user && (
@@ -3479,16 +3605,31 @@ const PLAYER_SKILL_COUNT = 5;
                 <div className="TitleFooterStat">{activeUsers}人がプレイ中です</div>
                 <div className="TitleFooterCopyright"> © 2026 Shiden Games </div>
                 <div className="TitleFooterLinks">
-                  <span style={{ cursor: 'pointer', marginLeft: '5px', textDecoration: 'underline' }} onClick={(e) => { e.stopPropagation(); setShowLegal(true); }}>規約・運営情報</span>
-                  <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" style={{ color: '#888' }} onClick={(e) => e.stopPropagation()}>お問い合わせ</a>
+                  <span className="TitleFooterLinkButton" onClick={(e) => { e.stopPropagation(); setShowLegal(true); }}>規約・運営情報</span>
+                  <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" className="TitleFooterLinkButton" onClick={(e) => e.stopPropagation()}>お問い合わせ</a>
                 </div>
-                <button
-                  className="TitleAdminButton"
-                  onClick={(e) => { e.stopPropagation(); setShowAdmin(true); }}
-                >
-                  管理者パネル
-                </button>
-                <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
+                {isAdmin && (
+                  <>
+                    <button
+                      className="TitleAdminButton"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTitleMenuModal(false);
+                        setShowChapter2StoryBook(true);
+                      }}
+                      style={{ bottom: '92px', background: 'rgba(0, 137, 123, 0.92)', borderColor: 'rgba(129, 255, 230, 0.45)' }}
+                    >
+                      第2章ブック
+                    </button>
+                    <button
+                      className="TitleAdminButton"
+                      onClick={(e) => { e.stopPropagation(); setShowAdmin(true); }}
+                    >
+                      管理者パネル
+                    </button>
+                    <div onDoubleClick={() => setShowAdmin(true)} style={{ position: 'fixed', bottom: 0, left: 0, width: '50px', height: '50px', opacity: 0 }} />
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -3502,66 +3643,27 @@ const PLAYER_SKILL_COUNT = 5;
             </p>
           </div>
 
-          {showTitleMenuModal && (
-            <div className="TitleStartModalOverlay" onClick={() => setShowTitleMenuModal(false)}>
-              <div className="TitleStartModal" onClick={(e) => e.stopPropagation()}>
-                <div className="TitleStartModalHeader">
-                  <span>MENU</span>
-                  <button onClick={() => setShowTitleMenuModal(false)} className="TitleStartModalClose">×</button>
-                </div>
-                <div className="TitleMenu TitleMenuRenewed">
-                  <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
-                  <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
-                  <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
-                  <button
-                    className="TitleButton neon-purple"
-                    onClick={() => {
-                      if (hasSaveData) {
-                        setShowRule(true);
-                      } else {
-                        setShowRuleHint(true);
-                      }
-                    }}
-                    style={{ opacity: hasSaveData ? 1 : 0.58, cursor: 'pointer' }}
-                  >
-                    RULE
-                  </button>
-                  <button className="TitleButton neon-blue" onClick={() => {
-                    const anonymousVictoriesRef = ref(database, 'anonymousVictories');
-                    get(anonymousVictoriesRef).then((snap) => {
-                      if (snap.exists()) {
-                        setAnonymousVictories(snap.val());
-                      }
-                      setShowClearStats(true);
-                    }).catch(err => {
-                      console.warn("Anonymous victories fetch failed (possibly permission denied):", err);
-                      setShowClearStats(true);
-                    });
-                  }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
         
-        <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
-          <span>更新履歴</span>
-        </div>
+        {(showTitleMenuModal || showNewGameIntro) && (
+          <div className="ChangelogTab" onClick={() => setShowChangelog(true)}>
+            <span>更新履歴</span>
+          </div>
+        )}
 
         {showChapterSelect && (
-          <div className="ChangelogModalOverlay" onClick={() => setShowChapterSelect(null)} style={{ zIndex: 11000, backgroundColor: 'rgba(0, 0, 0, 0.28)', backdropFilter: 'blur(8px)' }}>
-            <div className="ChangelogModal" onClick={(e) => e.stopPropagation()} style={{ 
-              maxWidth: '800px', 
-              width: '90%', 
-              background: 'linear-gradient(180deg, rgba(8, 26, 52, 0.68), rgba(8, 20, 40, 0.5))',
-              border: '1px solid rgba(137, 216, 255, 0.7)',
-              backdropFilter: 'blur(14px)',
-              boxShadow: '0 28px 60px rgba(3, 14, 32, 0.32)',
-              padding: isMobile ? '10px' : '20px'
-            }}>
-              <div className="ChangelogHeader" style={{ background: '#4fc3f7', color: '#000', marginBottom: '20px' }}>
-                <span style={{ fontWeight: 'bold' }}>{showChapterSelect.mode === 'NEW' ? 'NEW GAME - 章選択' : 'CONTINUE - 章選択'}</span>
-                <button onClick={() => setShowChapterSelect(null)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+          <div
+            className="TitleStartModalOverlay"
+            onClick={() => setShowChapterSelect(null)}
+            style={{ zIndex: 2200 }}
+          >
+            <div
+              className="TitleStartModal TitleChapterSelectModal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="TitleStartModalHeader" style={{ marginBottom: '20px' }}>
+                <span>{showChapterSelect.mode === 'NEW' ? 'NEW GAME - 章選択' : 'CONTINUE - 章選択'}</span>
+                <button onClick={() => setShowChapterSelect(null)} className="TitleStartModalClose">×</button>
               </div>
               
               <div style={{ 
@@ -3578,12 +3680,14 @@ const PLAYER_SKILL_COUNT = 5;
                   style={{ 
                     flex: 1,
                     cursor: 'pointer',
-                    border: '1px solid #4fc3f7',
-                    borderRadius: '8px',
+                    border: '1px solid rgba(137, 216, 255, 0.56)',
+                    borderRadius: '18px',
                     overflow: 'hidden',
-                    background: '#1a1a1a',
+                    background: 'linear-gradient(180deg, rgba(10, 28, 52, 0.72), rgba(8, 20, 38, 0.54))',
                     transition: 'transform 0.2s',
-                    position: 'relative'
+                    position: 'relative',
+                    boxShadow: '0 18px 38px rgba(3, 14, 32, 0.22)',
+                    backdropFilter: 'blur(12px)'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -3621,14 +3725,16 @@ const PLAYER_SKILL_COUNT = 5;
                   style={{ 
                     flex: 1,
                     cursor: isChapter2ContinueUnavailable ? 'default' : 'pointer',
-                    border: isChapter2PanelDimmed ? '1px solid #333' : '1px solid #ff5252',
-                    borderRadius: '8px',
+                    border: isChapter2PanelDimmed ? '1px solid rgba(80, 80, 80, 0.5)' : '1px solid rgba(255, 120, 120, 0.56)',
+                    borderRadius: '18px',
                     overflow: 'hidden',
-                    background: '#1a1a1a',
+                    background: 'linear-gradient(180deg, rgba(10, 28, 52, 0.72), rgba(8, 20, 38, 0.54))',
                     transition: 'transform 0.2s',
                     position: 'relative',
                     opacity: isChapter2PanelDimmed ? 0.45 : 1,
-                    filter: isChapter2PanelDimmed ? 'grayscale(1)' : 'none'
+                    filter: isChapter2PanelDimmed ? 'grayscale(1)' : 'none',
+                    boxShadow: '0 18px 38px rgba(3, 14, 32, 0.22)',
+                    backdropFilter: 'blur(12px)'
                   }}
                   onMouseEnter={(e) => {
                     if (!isChapter2ContinueUnavailable) {
@@ -3662,92 +3768,235 @@ const PLAYER_SKILL_COUNT = 5;
                 })()}
               </div>
               
-              <button 
-                className="ChangelogCloseButton" 
-                onClick={() => setShowChapterSelect(null)}
-                style={{ marginTop: '20px' }}
-              >
-                閉じる
-              </button>
+              {showChapterSelect.mode === 'NEW' && (
+                <button 
+                  className="ChangelogCloseButton" 
+                  onClick={() => setShowChapterSelect(null)}
+                  style={{ marginTop: '20px' }}
+                >
+                  閉じる
+                </button>
+              )}
             </div>
           </div>
         )}
-        <div 
-          onClick={() => setShowYoutubeModal(true)} 
-          className="YoutubeTab"
-        >
-          <span style={{ fontSize: '0.8rem' }}></span>
-          <div style={{
-            width: '20px',
-            height: '20px',
-            backgroundColor: '#ff0000',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative'
-          }}>
-            <div style={{
-              width: 0,
-              height: 0,
-              borderTop: '5px solid transparent',
-              borderBottom: '5px solid transparent',
-              borderLeft: '8px solid #fff',
-              marginLeft: '2px'
-            }}></div>
-          </div>
-        </div>
-
-        <div
-            className="LifukuTab"
-            onClick={() => { setStageMode('LIFUKU'); setIsTitle(false); }}
-            style={{
-              position: 'absolute',
-              bottom: '100px', // 右下（更新履歴の近く）
-              right: '-15px',
-              backgroundColor: '#f06292',
-              padding: '8px 35px 8px 15px',
-              borderRadius: '20px 0 0 20px',
-              cursor: 'pointer',
-              boxShadow: '-2px 2px 10px rgba(0,0,0,0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'transform 0.3s ease, background-color 0.3s',
-              zIndex: 100,
-              border: '2px solid #fff',
-              borderRight: 'none',
-              animation: 'tabSlideIn 0.8s ease-out'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-15px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+        {(showTitleMenuModal || showNewGameIntro) && (
+          <div 
+            onClick={() => setShowYoutubeModal(true)} 
+            className="YoutubeTab"
           >
-            {/* 実際のらいふくに近い形状の小さな個体 */}
+            <span style={{ fontSize: '0.8rem' }}></span>
             <div style={{
-              width: '28px',
-              height: '24px',
-              backgroundColor: 'white',
-              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', // 饅頭フォルム
-              position: 'relative',
-              border: '1px solid #333', // 少し細く
+              width: '20px',
+              height: '20px',
+              backgroundColor: '#ff0000',
+              borderRadius: '4px',
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              boxSizing: 'border-box'
+              justifyContent: 'center',
+              position: 'relative'
             }}>
-              {/* 目 - 位置とサイズを調整 */}
-              <div style={{ position: 'absolute', top: '10px', left: '6px', width: '2px', height: '2px', backgroundColor: 'black', borderRadius: '50%' }} />
-              <div style={{ position: 'absolute', top: '10px', right: '6px', width: '2px', height: '2px', backgroundColor: 'black', borderRadius: '50%' }} />
-              {/* 口 (ωを疑似再現) - 左右の曲線を隙間なく配置 */}
-              <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '9px', height: '3.5px', display: 'flex' }}>
-                <div style={{ flex: 1, border: '0.8px solid black', borderTop: 'none', borderRadius: '0 0 4.5px 4.5px', boxSizing: 'border-box' }} />
-                <div style={{ flex: 1, border: '0.8px solid black', borderTop: 'none', borderLeft: 'none', borderRadius: '0 0 4.5px 4.5px', boxSizing: 'border-box' }} />
-              </div>
-              {/* ほっぺ */}
-              <div style={{ position: 'absolute', bottom: '5px', left: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
-              <div style={{ position: 'absolute', bottom: '5px', right: '2px', width: '4px', height: '4px', backgroundColor: 'rgba(255, 120, 120, 0.6)', borderRadius: '50%' }} />
+              <div style={{
+                width: 0,
+                height: 0,
+                borderTop: '5px solid transparent',
+                borderBottom: '5px solid transparent',
+                borderLeft: '8px solid #fff',
+                marginLeft: '2px'
+              }}></div>
             </div>
           </div>
+        )}
+
+        {showTitleMenuModal && (
+          <div className="TitleStartModalOverlay" onClick={() => setShowTitleMenuModal(false)}>
+            <div className="TitleStartModal" onClick={(e) => e.stopPropagation()}>
+              <div className="TitleStartModalHeader">
+                <span>MENU</span>
+                <button onClick={() => setShowTitleMenuModal(false)} className="TitleStartModalClose">×</button>
+              </div>
+              <div className="TitleMenu TitleMenuRenewed">
+                <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
+                <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
+                <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
+                <button
+                  className="TitleButton neon-purple"
+                  onClick={() => {
+                    if (hasSaveData) {
+                      setShowRule(true);
+                    } else {
+                      setShowRuleHint(true);
+                    }
+                  }}
+                  style={{ opacity: hasSaveData ? 1 : 0.58, cursor: 'pointer' }}
+                >
+                  RULE
+                </button>
+                <button className="TitleButton neon-blue" onClick={() => {
+                  const anonymousVictoriesRef = ref(database, 'anonymousVictories');
+                  get(anonymousVictoriesRef).then((snap) => {
+                    if (snap.exists()) {
+                      setAnonymousVictories(snap.val());
+                    }
+                    setShowClearStats(true);
+                  }).catch(err => {
+                    console.warn("Anonymous victories fetch failed (possibly permission denied):", err);
+                    setShowClearStats(true);
+                  });
+                }} style={{ borderStyle: 'dotted' }}>BATTLE STATS</button>
+                <button
+                  className="TitleMiniGameButton"
+                  onClick={() => { setStageMode('LIFUKU'); setIsTitle(false); }}
+                >
+                  <span className="TitleMiniGameIcon" aria-hidden="true">
+                    <span className="TitleMiniGameEye TitleMiniGameEyeLeft" />
+                    <span className="TitleMiniGameEye TitleMiniGameEyeRight" />
+                    <span className="TitleMiniGameMouth">
+                      <span className="TitleMiniGameMouthLeft" />
+                      <span className="TitleMiniGameMouthRight" />
+                    </span>
+                    <span className="TitleMiniGameCheek TitleMiniGameCheekLeft" />
+                    <span className="TitleMiniGameCheek TitleMiniGameCheekRight" />
+                  </span>
+                  <span>MINI GAME</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showNewGameIntro && (
+          <div className="TitleStartModalOverlay" onClick={() => setShowNewGameIntro(false)}>
+            <div className="TitleStartModal TitleNewGameIntroModal" onClick={(e) => e.stopPropagation()}>
+              <div className="TitleStartModalHeader">
+                <span>NEW GAME</span>
+                <button onClick={() => setShowNewGameIntro(false)} className="TitleStartModalClose">×</button>
+              </div>
+              <div
+                className="TitleNewGameIntroCarousel"
+                onTouchStart={(e) => {
+                  newGameIntroTouchStartXRef.current = e.touches[0]?.clientX ?? null;
+                }}
+                onTouchEnd={(e) => {
+                  const startX = newGameIntroTouchStartXRef.current;
+                  const endX = e.changedTouches[0]?.clientX ?? null;
+                  newGameIntroTouchStartXRef.current = null;
+                  if (startX === null || endX === null) return;
+                  const deltaX = endX - startX;
+                  if (Math.abs(deltaX) < 40) return;
+                  if (deltaX < 0) {
+                    moveNewGameIntro('next');
+                  } else {
+                    moveNewGameIntro('prev');
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className="TitleNewGameIntroNav TitleNewGameIntroNavLeft"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveNewGameIntro('prev');
+                  }}
+                  aria-label="前の章へ"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  className="TitleNewGameIntroNav TitleNewGameIntroNavRight"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveNewGameIntro('next');
+                  }}
+                  aria-label="次の章へ"
+                >
+                  ›
+                </button>
+                <div
+                  className="TitleNewGameIntroTrack"
+                  style={{
+                    transform: `translateX(-${newGameIntroTrackIndex * 25}%)`,
+                    transition: isNewGameIntroTrackAnimating ? 'transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)' : 'none'
+                  }}
+                  onTransitionEnd={() => {
+                    if (newGameIntroTrackIndex === 0) {
+                      setIsNewGameIntroTrackAnimating(false);
+                      setNewGameIntroTrackIndex(2);
+                      window.requestAnimationFrame(() => {
+                        window.requestAnimationFrame(() => {
+                          setIsNewGameIntroTrackAnimating(true);
+                          newGameIntroInputLockedRef.current = false;
+                        });
+                      });
+                    } else if (newGameIntroTrackIndex === 3) {
+                      setIsNewGameIntroTrackAnimating(false);
+                      setNewGameIntroTrackIndex(1);
+                      window.requestAnimationFrame(() => {
+                        window.requestAnimationFrame(() => {
+                          setIsNewGameIntroTrackAnimating(true);
+                          newGameIntroInputLockedRef.current = false;
+                        });
+                      });
+                    } else {
+                      newGameIntroInputLockedRef.current = false;
+                    }
+                  }}
+                >
+                  {newGameIntroLoopPanels.map((panel, index) => (
+                    <section className="TitleNewGameIntroPanel" key={`${panel.chapter}-${index}`}>
+                      <div className="TitleNewGameIntroVisual">
+                        <img
+                          src={getStorageUrl(panel.image)}
+                          alt={panel.alt}
+                          className="TitleNewGameIntroImage"
+                        />
+                        <div className="TitleNewGameIntroGlow" />
+                        <div className="TitleNewGameIntroCopy">
+                          <div className="TitleNewGameIntroEyebrow">{panel.eyebrow}</div>
+                          <div className="TitleNewGameIntroTitle">{panel.title}</div>
+                        </div>
+                      </div>
+                      <div className="TitleNewGameIntroBody">
+                        <p className="TitleNewGameIntroLead">{panel.lead}</p>
+                        {panel.chapter === 2 && !user && (
+                          <div className="TitleNewGameIntroNotice">LOUNGEでユーザ登録が必要です</div>
+                        )}
+                        <div className="TitleNewGameIntroActions">
+                          <button
+                            className="TitleButton neon-blue"
+                            onClick={() => {
+                              if (panel.chapter === 2 && !user) {
+                                setShowNewGameIntro(false);
+                                setStageMode('LOUNGE');
+                                setIsTitle(false);
+                                refreshKenju();
+                                return;
+                              }
+                              setShowNewGameIntro(false);
+                              handleChapterSelect(panel.chapter, true);
+                            }}
+                          >
+                            {panel.chapter === 2 && !user ? 'ユーザ登録' : panel.cta}
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </div>
+              <div className="TitleNewGameIntroFooter">
+                <div className="TitleNewGameIntroPager" aria-hidden="true">
+                  <span className={`TitleNewGameIntroDot ${newGameIntroChapter === 1 ? 'is-active' : ''}`} />
+                  <span className={`TitleNewGameIntroDot ${newGameIntroChapter === 2 ? 'is-active' : ''}`} />
+                </div>
+                <div className="TitleNewGameIntroSwipeHint">
+                  {isMobile ? '左右にスワイプして章を切り替え' : '左右のボタンで章を切り替え'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showChangelog && (
           <div className="ChangelogModalOverlay" onClick={() => setShowChangelog(false)}>
@@ -3987,6 +4236,10 @@ const PLAYER_SKILL_COUNT = 5;
               <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button onClick={() => {
+                  setShowChapter2StoryBook(true);
+                  setShowAdmin(false);
+                }} style={{ background: '#00897b' }}>第2章ストーリーブック</button>
+                <button onClick={() => {
                   setStoryContentV2(null);
                   setCreditsUrl(null);
                   setStoryUrl(null);
@@ -4026,6 +4279,21 @@ const PLAYER_SKILL_COUNT = 5;
                   setTimeout(() => setShowStoryModal(true), 50);
                 }} style={{ background: '#8d6e63' }}>エピローグ (v2/epilogue.txt)</button>
                 <button onClick={startChapter2EpilogueSequence} style={{ background: '#ad1457' }}>エピローグ通し再生</button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444' }}>
+              <h3 style={{ color: '#90caf9', marginTop: 0 }}>端末メンテナンス</h3>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleAdminClearClientCache}
+                  style={{ background: '#1565c0', border: '1px solid #64b5f6', fontWeight: 'bold' }}
+                >
+                  この端末のキャッシュ削除
+                </button>
+              </div>
+              <div style={{ marginTop: '8px', color: '#bbb', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                PC版・スマホ版とも、このボタンを押した端末のアプリキャッシュだけを削除します。
               </div>
             </div>
 
@@ -4095,7 +4363,7 @@ const PLAYER_SKILL_COUNT = 5;
                       </button>
 
                       <div style={{ display: 'flex', gap: '5px' }}>
-                        {battleSteps.map(({ step, index }) => {
+                        {battleSteps.map(({ step, index: flowIndex }) => {
                           const subStage = step.subStage || 1;
                           const label = subStage === 1 ? 'MID' : subStage === 2 ? 'BOSS' : `BATTLE ${subStage}`;
                           const background = subStage === 1 ? '#1a237e' : subStage === 2 ? '#b71c1c' : '#4a148c';
@@ -4104,7 +4372,8 @@ const PLAYER_SKILL_COUNT = 5;
                           return (
                             <button key={`${stageNo}-${subStage}`} onClick={() => {
                               applyAdminDebugSkills();
-                              setChapter2FlowIndex(index);
+                              suppressAdminBattleStoryOpenRef.current = true;
+                              setChapter2FlowIndex(flowIndex);
                               setStageCycle(stageNo);
                               setStageMode('BOSS');
                               setGameStarted(false);
@@ -4112,6 +4381,10 @@ const PLAYER_SKILL_COUNT = 5;
                               setLogComplete(false);
                               setBattleResults([]);
                               setShowLogForBattleIndex(-1);
+                              setShowStoryModal(false);
+                              setStoryContent(null);
+                              setStoryContentV2(null);
+                              clearStoryCanvasState();
                               setIsTitle(false);
                               setShowAdmin(false);
                             }} style={{ padding: '5px 10px', background, border: `1px solid ${border}` }}>
@@ -4336,9 +4609,6 @@ const PLAYER_SKILL_COUNT = 5;
     epilogueContent,
     onEpilogueComplete: handleEpilogueComplete
   };
-
-
-
   if (!stagesLoaded) {
     const progressPercent = preloadProgress.total > 0 
       ? Math.round((preloadProgress.current / preloadProgress.total) * 100) 
@@ -4374,6 +4644,8 @@ const PLAYER_SKILL_COUNT = 5;
   
   return (
     <div style={{ backgroundColor: '#000', minHeight: '100dvh' }}>
+      {storyBookOverlay}
+
       {!showChapter2Title && !shouldRenderStoryCanvas && !showChapterTitle && !showPrologueTitle && adminEpilogueSequence === 'idle' && !isStoryTransitioning && gameContent}
 
       {adminEpilogueSequence === 'title' && (

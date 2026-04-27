@@ -13,6 +13,8 @@ const ALLOWED_KAMIWAZA = {
   "7-2": "▽",
   "8-1": "爆",
   "8-2": "魔",
+  "11-1": "狼",
+  "11-2": "魔",
 };
 const KAMIWAZA = new Set(["狼", "▽", "爆", "魔"]);
 
@@ -48,6 +50,28 @@ function getStageEntry(stages, stageNo, subStage) {
 
 function getBossPatterns(entry) {
   return Array.isArray(entry.bossSkillAbbrs) ? entry.bossSkillAbbrs : [entry.bossSkillAbbrs];
+}
+
+function getSearchTargets(baseKey, allBosses, requestedBossIndexes) {
+  if (requestedBossIndexes && requestedBossIndexes.length > 0) {
+    return [{
+      key: `${baseKey}#${requestedBossIndexes.join(",")}`,
+      bosses: requestedBossIndexes.map((index) => allBosses[index - 1]),
+      bossIndexes: requestedBossIndexes,
+    }];
+  }
+  if (allBosses.length <= 1) {
+    return [{
+      key: baseKey,
+      bosses: allBosses,
+      bossIndexes: null,
+    }];
+  }
+  return allBosses.map((boss, index) => ({
+    key: `${baseKey}#${index + 1}`,
+    bosses: [boss],
+    bossIndexes: [index + 1],
+  }));
 }
 
 function parseArgs(argv) {
@@ -284,117 +308,115 @@ function main() {
       const selectedBossIndexes = args.bossIndexes
         ? args.bossIndexes.filter((index) => index >= 1 && index <= allBosses.length)
         : null;
-      const bosses = selectedBossIndexes
-        ? selectedBossIndexes.map((index) => allBosses[index - 1])
-        : allBosses;
-      const key = selectedBossIndexes && selectedBossIndexes.length > 0
-        ? `${baseKey}#${selectedBossIndexes.join(",")}`
-        : baseKey;
+      const searchTargets = getSearchTargets(baseKey, allBosses, selectedBossIndexes);
+      for (const searchTarget of searchTargets) {
+        const { key, bosses, bossIndexes } = searchTarget;
 
-      if (!shouldSearch(baseKey, key)) {
-        const existing = existingMap.get(key);
-        if (existing) results.push(existing);
-        continue;
-      }
-
-      const previousSamples = PREVIOUS_CLEAR_SAMPLES[key] || [];
-      const existingSeedSamples = existingMap.get(key)?.samples || [];
-      const seedSamples = [...existingSeedSamples, ...previousSamples];
-      const missingRequiredSkills = args.requireSkills.filter((skill) => !pool.includes(skill));
-      if (previousSamples.length > 0) {
-        const filteredSamples = previousSamples
-          .filter((sample) => lineupContainsRequiredSkills(sample, args.requireSkills))
-          .slice(0, args.sampleLimit);
-        const entryResult = {
-          key,
-          bossName: entry.bossName,
-          clearable: filteredSamples.length > 0,
-          searchMode: "previous-ordered-no-dup",
-          checked: null,
-          samples: filteredSamples,
-          pool: pool.join(""),
-          requireSkills: args.requireSkills,
-          bossIndexes: selectedBossIndexes,
-        };
-        results.push(entryResult);
-        writeResults(args.resultsPath, results);
-        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: reused ${entryResult.samples.length} stored samples.`);
-        continue;
-      }
-
-      const samples = [];
-      let checked = 0;
-      let stopReason = "exhausted";
-      if (missingRequiredSkills.length > 0) {
-        const entryResult = {
-          key,
-          bossName: entry.bossName,
-          clearable: false,
-          searchMode: "ordered-with-dup",
-          checked: 0,
-          samples: [],
-          pool: pool.join(""),
-          requireSkills: args.requireSkills,
-          bossIndexes: selectedBossIndexes,
-          stopReason: "missing-required-skills",
-        };
-        results.push(entryResult);
-        writeResults(args.resultsPath, results);
-        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: skipped because required skills are missing from pool (${missingRequiredSkills.join(",")}).`);
-        continue;
-      }
-      appendProgress(args.progressLogPath, `${key} ${entry.bossName}: search start (pool=${pool.join("")}, bosses=${bosses.length}, bossIndexes=${selectedBossIndexes ? selectedBossIndexes.join(",") : "all"}, kamiwazaLimit=1, seeds=${seedSamples.length}, require=${args.requireSkills.join(",") || "-"}, sampleLimit=${hasSampleCap ? args.sampleLimit : "unbounded"}, maxChecks=${hasCheckCap ? args.maxChecks : "none"}).`);
-      for (const lineup of seededCandidates(pool, 5, seedSamples)) {
-        if (!lineupContainsRequiredSkills(lineup, args.requireSkills)) continue;
-        checked++;
-        if (bosses.every((boss) => win(lineup, boss))) {
-          samples.push(lineup);
-          if (shouldLogWin(samples.length)) {
-            appendProgress(args.progressLogPath, `${key} ${entry.bossName}: found #${samples.length} ${lineup} after ${checked} checks.`);
-          }
-          if (hasSampleCap && samples.length >= args.sampleLimit) {
-            stopReason = "sample-limit";
-            break;
-          }
+        if (!shouldSearch(baseKey, key)) {
+          const existing = existingMap.get(key);
+          if (existing) results.push(existing);
+          continue;
         }
-        if (hasCheckCap && checked >= args.maxChecks) {
-          stopReason = "max-checks";
-          break;
-        }
-        if (checked % 250000 === 0) {
-          const snapshot = {
+
+        const previousSamples = PREVIOUS_CLEAR_SAMPLES[key] || [];
+        const existingSeedSamples = existingMap.get(key)?.samples || [];
+        const seedSamples = [...existingSeedSamples, ...previousSamples];
+        const missingRequiredSkills = args.requireSkills.filter((skill) => !pool.includes(skill));
+        if (previousSamples.length > 0) {
+          const filteredSamples = previousSamples
+            .filter((sample) => lineupContainsRequiredSkills(sample, args.requireSkills))
+            .slice(0, args.sampleLimit);
+          const entryResult = {
             key,
             bossName: entry.bossName,
+            clearable: filteredSamples.length > 0,
+            searchMode: "previous-ordered-no-dup",
+            checked: null,
+            samples: filteredSamples,
+            pool: pool.join(""),
+            requireSkills: args.requireSkills,
+            bossIndexes,
+          };
+          results.push(entryResult);
+          writeResults(args.resultsPath, results);
+          appendProgress(args.progressLogPath, `${key} ${entry.bossName}: reused ${entryResult.samples.length} stored samples.`);
+          continue;
+        }
+
+        const samples = [];
+        let checked = 0;
+        let stopReason = "exhausted";
+        if (missingRequiredSkills.length > 0) {
+          const entryResult = {
+            key,
+            bossName: entry.bossName,
+            clearable: false,
+            searchMode: "ordered-with-dup",
+            checked: 0,
+            samples: [],
+            pool: pool.join(""),
+            requireSkills: args.requireSkills,
+            bossIndexes,
+            stopReason: "missing-required-skills",
+          };
+          results.push(entryResult);
+          writeResults(args.resultsPath, results);
+          appendProgress(args.progressLogPath, `${key} ${entry.bossName}: skipped because required skills are missing from pool (${missingRequiredSkills.join(",")}).`);
+          continue;
+        }
+        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: search start (pool=${pool.join("")}, bosses=${bosses.length}, bossIndexes=${bossIndexes ? bossIndexes.join(",") : "all"}, kamiwazaLimit=1, seeds=${seedSamples.length}, require=${args.requireSkills.join(",") || "-"}, sampleLimit=${hasSampleCap ? args.sampleLimit : "unbounded"}, maxChecks=${hasCheckCap ? args.maxChecks : "none"}).`);
+        for (const lineup of seededCandidates(pool, 5, seedSamples)) {
+          if (!lineupContainsRequiredSkills(lineup, args.requireSkills)) continue;
+          checked++;
+          if (bosses.every((boss) => win(lineup, boss))) {
+            samples.push(lineup);
+            if (shouldLogWin(samples.length)) {
+              appendProgress(args.progressLogPath, `${key} ${entry.bossName}: found #${samples.length} ${lineup} after ${checked} checks.`);
+            }
+            if (hasSampleCap && samples.length >= args.sampleLimit) {
+              stopReason = "sample-limit";
+              break;
+            }
+          }
+          if (hasCheckCap && checked >= args.maxChecks) {
+            stopReason = "max-checks";
+            break;
+          }
+          if (checked % 250000 === 0) {
+            const snapshot = {
+              key,
+              bossName: entry.bossName,
+              clearable: samples.length > 0,
+              searchMode: "ordered-with-dup",
+              checked,
+              samples: samples.slice(),
+              pool: pool.join(""),
+              requireSkills: args.requireSkills,
+              bossIndexes,
+              stopReason,
+            };
+            const nextResults = results.filter((r) => r.key !== key).concat(snapshot);
+            writeResults(args.resultsPath, nextResults);
+            appendProgress(args.progressLogPath, `${key} ${entry.bossName}: progress ${checked} checks, wins=${samples.length}.`);
+          }
+        }
+
+        const entryResult = {
+          key,
+          bossName: entry.bossName,
           clearable: samples.length > 0,
           searchMode: "ordered-with-dup",
           checked,
-          samples: samples.slice(),
+          samples,
           pool: pool.join(""),
           requireSkills: args.requireSkills,
-          bossIndexes: selectedBossIndexes,
+          bossIndexes,
           stopReason,
         };
-          const nextResults = results.filter((r) => r.key !== key).concat(snapshot);
-          writeResults(args.resultsPath, nextResults);
-          appendProgress(args.progressLogPath, `${key} ${entry.bossName}: progress ${checked} checks, wins=${samples.length}.`);
-        }
+        results.push(entryResult);
+        writeResults(args.resultsPath, results);
+        appendProgress(args.progressLogPath, `${key} ${entry.bossName}: done (${checked} checks, wins=${samples.length}, stopReason=${stopReason}).`);
       }
-
-      const entryResult = {
-        key,
-        bossName: entry.bossName,
-        clearable: samples.length > 0,
-        searchMode: "ordered-with-dup",
-        checked,
-        samples,
-        pool: pool.join(""),
-        requireSkills: args.requireSkills,
-        bossIndexes: selectedBossIndexes,
-        stopReason,
-      };
-      results.push(entryResult);
-      writeResults(args.resultsPath, results);
-      appendProgress(args.progressLogPath, `${key} ${entry.bossName}: done (${checked} checks, wins=${samples.length}, stopReason=${stopReason}).`);
     }
   }
 }

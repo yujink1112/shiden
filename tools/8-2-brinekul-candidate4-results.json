@@ -1,0 +1,27 @@
+[
+  {
+    "key": "8-2",
+    "bossName": "ブライニクル",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 1167,
+    "samples": [
+      "一一一飛果",
+      "一一刺飛果",
+      "一一果待霊",
+      "一一果飛果",
+      "一一果飛霊",
+      "一一果霊待",
+      "一一果霊飛",
+      "一一待待毒",
+      "一一待飛果",
+      "一一待毒待",
+      "一一搦果搦",
+      "一一搦飛果"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔",
+    "requireSkills": [],
+    "bossIndexes": null,
+    "stopReason": "sample-limit"
+  }
+]

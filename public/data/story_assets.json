@@ -112,7 +112,7 @@
     "孤児院": "images/background/v2/peaceful-village1.webp",
     "夕方の草原": "images/background/v2/grassland-evening-1.webp",
     "夕方の甲板": "images/background/v2/夕方の甲板.webp",
-    "夕方の甲板2": "images/background/v2/夕方の甲板2.webp",
+    "夕方の甲板2": "images/background/v2/夕方の甲板2.png",
     "夕方の甲板3": "images/background/v2/夕方の甲板3.png",
     "最後の甲板": "images/background/v2/最後の甲板.webp",
     "子供たちの冒険": "images/background/v2/子供たちの冒険.webp",
@@ -121,8 +121,10 @@
     "ブライニクル2": "images/background/v2/ブライニクル2.webp",
     "ジズ": "images/background/v2/ジズ.webp",
     "ゾルゲイドクイーン": "images/background/v2/ゾルゲイドクイーン.webp",
-    "船とポータル": "images/background/v2/船とポータル.webp",
-    "夕方の海": "images/background/v2/夕方の海.webp",
+    "爆砕": "images/background/v2/爆砕.png",
+    "船とポータル": "images/background/v2/船とポータル.png",
+    "飛び移る": "images/background/v2/飛び移る.png",
+    "夕方の海": "images/background/v2/夕方の海.png",
     "夕方の海賊船": "images/background/v2/夕方の海賊船.webp",
     "追悼": "images/background/v2/追悼.webp",
     "決闘": "images/background/v2/決闘.webp",
@@ -136,10 +138,7 @@
     "虹のオーロラ": "images/background/v2/虹のオーロラ.png",
     "ラストシーン": "images/background/v2/ラストシーン.webp",
     "ラストシーンスマホ": "images/background/v2/ラストシーン_スマホ.png"
-    
-    
-    
-    
+
   },
   "animations": {
     "fade": "fade",

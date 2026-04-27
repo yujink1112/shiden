@@ -1,0 +1,14 @@
+[2026-04-26T11:13:59.435Z] 8-2 ブライニクル: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁霊魔, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=12, maxChecks=none).
+[2026-04-26T11:13:59.443Z] 8-2 ブライニクル: found #1 一一一一果 after 3 checks.
+[2026-04-26T11:13:59.447Z] 8-2 ブライニクル: found #2 一一一刺果 after 19 checks.
+[2026-04-26T11:13:59.450Z] 8-2 ブライニクル: found #3 一一一果果 after 35 checks.
+[2026-04-26T11:13:59.452Z] 8-2 ブライニクル: found #4 一一一待果 after 51 checks.
+[2026-04-26T11:13:59.454Z] 8-2 ブライニクル: found #5 一一一搦果 after 67 checks.
+[2026-04-26T11:13:59.456Z] 8-2 ブライニクル: found #6 一一一玉果 after 83 checks.
+[2026-04-26T11:13:59.458Z] 8-2 ブライニクル: found #7 一一一強果 after 99 checks.
+[2026-04-26T11:13:59.460Z] 8-2 ブライニクル: found #8 一一一速果 after 115 checks.
+[2026-04-26T11:13:59.461Z] 8-2 ブライニクル: found #9 一一一拳果 after 131 checks.
+[2026-04-26T11:13:59.463Z] 8-2 ブライニクル: found #10 一一一飛果 after 147 checks.
+[2026-04-26T11:13:59.464Z] 8-2 ブライニクル: found #11 一一一奏果 after 163 checks.
+[2026-04-26T11:13:59.466Z] 8-2 ブライニクル: found #12 一一一焦果 after 179 checks.
+[2026-04-26T11:13:59.467Z] 8-2 ブライニクル: done (179 checks, wins=12, stopReason=sample-limit).

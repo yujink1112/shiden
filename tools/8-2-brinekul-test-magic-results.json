@@ -1,0 +1,29 @@
+[
+  {
+    "key": "8-2",
+    "bossName": "ブライニクル",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 43,
+    "samples": [
+      "毒一毒待魔",
+      "毒一毒魔待",
+      "霊刺果魔果",
+      "霊刺拳魔果",
+      "霊刺毒果魔",
+      "毒刺毒待魔",
+      "霊刺毒待魔",
+      "毒刺毒魔待",
+      "霊刺毒魔待",
+      "毒果毒果魔",
+      "毒拳毒果魔",
+      "毒一待果魔"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔",
+    "requireSkills": [
+      "魔"
+    ],
+    "bossIndexes": null,
+    "stopReason": "sample-limit"
+  }
+]

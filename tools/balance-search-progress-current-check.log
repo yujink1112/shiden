@@ -1,0 +1,205 @@
+[2026-04-26T13:21:07.057Z] 1-1 ルーサー: search start (pool=一刺果待搦玉強速, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.065Z] 1-1 ルーサー: found #1 一一一待一 after 25 checks.
+[2026-04-26T13:21:07.066Z] 1-1 ルーサー: found #2 一一一待刺 after 26 checks.
+[2026-04-26T13:21:07.066Z] 1-1 ルーサー: found #3 一一一待果 after 27 checks.
+[2026-04-26T13:21:07.073Z] 1-1 ルーサー: found #4 一一一待待 after 28 checks.
+[2026-04-26T13:21:07.075Z] 1-1 ルーサー: found #5 一一一速玉 after 62 checks.
+[2026-04-26T13:21:07.076Z] 1-1 ルーサー: done (62 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.077Z] 1-2 肉厚な魚: search start (pool=一刺果待搦玉強速, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.079Z] 1-2 肉厚な魚: found #1 一一一玉速 after 48 checks.
+[2026-04-26T13:21:07.079Z] 1-2 肉厚な魚: found #2 一一一強果 after 51 checks.
+[2026-04-26T13:21:07.080Z] 1-2 肉厚な魚: found #3 一一一強玉 after 54 checks.
+[2026-04-26T13:21:07.080Z] 1-2 肉厚な魚: found #4 一一一速玉 after 62 checks.
+[2026-04-26T13:21:07.082Z] 1-2 肉厚な魚: found #5 一一刺待一 after 89 checks.
+[2026-04-26T13:21:07.082Z] 1-2 肉厚な魚: done (89 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.083Z] 2-1 血に飢えたジョーズ: search start (pool=一刺果待搦玉強速拳, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.083Z] 2-1 血に飢えたジョーズ: found #1 一一一一玉 after 6 checks.
+[2026-04-26T13:21:07.084Z] 2-1 血に飢えたジョーズ: found #2 一一一刺玉 after 15 checks.
+[2026-04-26T13:21:07.084Z] 2-1 血に飢えたジョーズ: found #3 一一一果玉 after 24 checks.
+[2026-04-26T13:21:07.085Z] 2-1 血に飢えたジョーズ: found #4 一一一待玉 after 33 checks.
+[2026-04-26T13:21:07.086Z] 2-1 血に飢えたジョーズ: found #5 一一一玉一 after 46 checks.
+[2026-04-26T13:21:07.086Z] 2-1 血に飢えたジョーズ: done (46 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.087Z] 2-2 弱者狩りのハゲタカ: search start (pool=一刺果待搦玉強速拳, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.087Z] 2-2 弱者狩りのハゲタカ: found #1 一一一一待 after 4 checks.
+[2026-04-26T13:21:07.088Z] 2-2 弱者狩りのハゲタカ: found #2 一一一刺待 after 13 checks.
+[2026-04-26T13:21:07.089Z] 2-2 弱者狩りのハゲタカ: found #3 一一一果待 after 22 checks.
+[2026-04-26T13:21:07.089Z] 2-2 弱者狩りのハゲタカ: found #4 一一一待一 after 28 checks.
+[2026-04-26T13:21:07.090Z] 2-2 弱者狩りのハゲタカ: found #5 一一一待刺 after 29 checks.
+[2026-04-26T13:21:07.090Z] 2-2 弱者狩りのハゲタカ: done (29 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.091Z] 3-1 デザインド・エッグ号: search start (pool=一刺果待搦玉強速拳飛, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.092Z] 3-1 デザインド・エッグ号: found #1 一一一一飛 after 10 checks.
+[2026-04-26T13:21:07.092Z] 3-1 デザインド・エッグ号: found #2 一一一刺飛 after 20 checks.
+[2026-04-26T13:21:07.093Z] 3-1 デザインド・エッグ号: found #3 一一一果飛 after 30 checks.
+[2026-04-26T13:21:07.093Z] 3-1 デザインド・エッグ号: found #4 一一一待待 after 34 checks.
+[2026-04-26T13:21:07.094Z] 3-1 デザインド・エッグ号: found #5 一一一待飛 after 40 checks.
+[2026-04-26T13:21:07.094Z] 3-1 デザインド・エッグ号: done (40 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.095Z] 3-2 エーヴィス: search start (pool=一刺果待搦玉強速拳飛, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.182Z] 3-2 エーヴィス: found #1 一待待一速 after 3308 checks.
+[2026-04-26T13:21:07.183Z] 3-2 エーヴィス: found #2 一待待待一 after 3331 checks.
+[2026-04-26T13:21:07.184Z] 3-2 エーヴィス: found #3 一待待待刺 after 3332 checks.
+[2026-04-26T13:21:07.184Z] 3-2 エーヴィス: found #4 一待待搦一 after 3341 checks.
+[2026-04-26T13:21:07.185Z] 3-2 エーヴィス: found #5 一待待搦刺 after 3342 checks.
+[2026-04-26T13:21:07.185Z] 3-2 エーヴィス: done (3342 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.186Z] 4-1 ラ・マンチャ号: search start (pool=一刺果待搦玉強速拳飛奏, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.186Z] 4-1 ラ・マンチャ号: found #1 一一一待一 after 34 checks.
+[2026-04-26T13:21:07.187Z] 4-1 ラ・マンチャ号: found #2 一一一待刺 after 35 checks.
+[2026-04-26T13:21:07.187Z] 4-1 ラ・マンチャ号: found #3 一一一待果 after 36 checks.
+[2026-04-26T13:21:07.187Z] 4-1 ラ・マンチャ号: found #4 一一一待待 after 37 checks.
+[2026-04-26T13:21:07.188Z] 4-1 ラ・マンチャ号: found #5 一一一待玉 after 39 checks.
+[2026-04-26T13:21:07.188Z] 4-1 ラ・マンチャ号: done (39 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.189Z] 4-2 イスパニア艦隊: search start (pool=一刺果待搦玉強速拳飛奏, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.190Z] 4-2 イスパニア艦隊: found #1 一一一一飛 after 10 checks.
+[2026-04-26T13:21:07.191Z] 4-2 イスパニア艦隊: found #2 一一一刺飛 after 21 checks.
+[2026-04-26T13:21:07.192Z] 4-2 イスパニア艦隊: found #3 一一一果飛 after 32 checks.
+[2026-04-26T13:21:07.193Z] 4-2 イスパニア艦隊: found #4 一一一待待 after 37 checks.
+[2026-04-26T13:21:07.193Z] 4-2 イスパニア艦隊: found #5 一一一待搦 after 38 checks.
+[2026-04-26T13:21:07.194Z] 4-2 イスパニア艦隊: done (38 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.194Z] 5-1 ゾルゲイド: search start (pool=一刺果待搦玉強速拳飛奏焦, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.196Z] 5-1 ゾルゲイド: found #1 一一一玉速 after 68 checks.
+[2026-04-26T13:21:07.199Z] 5-1 ゾルゲイド: found #2 一一刺玉速 after 212 checks.
+[2026-04-26T13:21:07.202Z] 5-1 ゾルゲイド: found #3 一一果玉速 after 356 checks.
+[2026-04-26T13:21:07.204Z] 5-1 ゾルゲイド: found #4 一一待玉速 after 500 checks.
+[2026-04-26T13:21:07.206Z] 5-1 ゾルゲイド: found #5 一一搦玉速 after 644 checks.
+[2026-04-26T13:21:07.207Z] 5-1 ゾルゲイド: done (644 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.208Z] 5-2 エルダゾルゲイド: search start (pool=一刺果待搦玉強速拳飛奏焦, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.208Z] 5-2 エルダゾルゲイド: found #1 一一一一果 after 3 checks.
+[2026-04-26T13:21:07.210Z] 5-2 エルダゾルゲイド: found #2 一一一果果 after 27 checks.
+[2026-04-26T13:21:07.210Z] 5-2 エルダゾルゲイド: found #3 一一一待果 after 39 checks.
+[2026-04-26T13:21:07.211Z] 5-2 エルダゾルゲイド: found #4 一一一搦果 after 51 checks.
+[2026-04-26T13:21:07.212Z] 5-2 エルダゾルゲイド: found #5 一一一玉果 after 63 checks.
+[2026-04-26T13:21:07.213Z] 5-2 エルダゾルゲイド: done (63 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.213Z] 6-1 クラーケン: search start (pool=一刺果待搦玉強速拳飛奏焦毒, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.215Z] 6-1 クラーケン: found #1 一一一玉一 after 66 checks.
+[2026-04-26T13:21:07.215Z] 6-1 クラーケン: found #2 一一一玉刺 after 67 checks.
+[2026-04-26T13:21:07.216Z] 6-1 クラーケン: found #3 一一一玉果 after 68 checks.
+[2026-04-26T13:21:07.216Z] 6-1 クラーケン: found #4 一一一玉待 after 69 checks.
+[2026-04-26T13:21:07.216Z] 6-1 クラーケン: found #5 一一一玉搦 after 70 checks.
+[2026-04-26T13:21:07.217Z] 6-1 クラーケン: done (70 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.217Z] 6-2 ゴルゾアの胃袋: search start (pool=一刺果待搦玉強速拳飛奏焦毒, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:07.239Z] 6-2 ゴルゾアの胃袋: found #1 一一玉待毒 after 897 checks.
+[2026-04-26T13:21:07.288Z] 6-2 ゴルゾアの胃袋: found #2 一刺玉待毒 after 3094 checks.
+[2026-04-26T13:21:07.334Z] 6-2 ゴルゾアの胃袋: found #3 一果玉待毒 after 5291 checks.
+[2026-04-26T13:21:07.382Z] 6-2 ゴルゾアの胃袋: found #4 一待玉待毒 after 7488 checks.
+[2026-04-26T13:21:07.422Z] 6-2 ゴルゾアの胃袋: found #5 一搦待待毒 after 9347 checks.
+[2026-04-26T13:21:07.423Z] 6-2 ゴルゾアの胃袋: done (9347 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:07.424Z] 7-1 バクバク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:09.827Z] 7-1 バクバク: found #1 待刺強一狼 after 152867 checks.
+[2026-04-26T13:21:09.828Z] 7-1 バクバク: found #2 待刺強刺狼 after 152882 checks.
+[2026-04-26T13:21:09.829Z] 7-1 バクバク: found #3 待刺強果狼 after 152897 checks.
+[2026-04-26T13:21:09.829Z] 7-1 バクバク: found #4 待刺強待狼 after 152912 checks.
+[2026-04-26T13:21:09.830Z] 7-1 バクバク: found #5 待刺強搦狼 after 152927 checks.
+[2026-04-26T13:21:09.831Z] 7-1 バクバク: done (152927 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:09.831Z] 7-2 死者の群れ: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁▽, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:13.899Z] 7-2 死者の群れ: found #1 待待待▽待 after 159058 checks.
+[2026-04-26T13:21:13.904Z] 7-2 死者の群れ: found #2 待待搦▽待 after 159282 checks.
+[2026-04-26T13:21:13.909Z] 7-2 死者の群れ: found #3 待待玉▽待 after 159506 checks.
+[2026-04-26T13:21:13.915Z] 7-2 死者の群れ: found #4 待待強▽待 after 159730 checks.
+[2026-04-26T13:21:13.920Z] 7-2 死者の群れ: found #5 待待速▽待 after 159954 checks.
+[2026-04-26T13:21:13.921Z] 7-2 死者の群れ: done (159954 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:13.922Z] 8-1 死霊船 黒潮号: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁霊爆, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:13.925Z] 8-1 死霊船 黒潮号: found #1 一一一待爆 after 64 checks.
+[2026-04-26T13:21:13.927Z] 8-1 死霊船 黒潮号: found #2 一一一搦爆 after 80 checks.
+[2026-04-26T13:21:13.928Z] 8-1 死霊船 黒潮号: found #3 一一一玉爆 after 96 checks.
+[2026-04-26T13:21:13.929Z] 8-1 死霊船 黒潮号: found #4 一一一強爆 after 112 checks.
+[2026-04-26T13:21:13.929Z] 8-1 死霊船 黒潮号: found #5 一一一速爆 after 128 checks.
+[2026-04-26T13:21:13.930Z] 8-1 死霊船 黒潮号: done (128 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:13.931Z] 8-2 ブライニクル: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁霊魔, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:13.987Z] 8-2 ブライニクル: found #1 一一待毒一 after 958 checks.
+[2026-04-26T13:21:13.988Z] 8-2 ブライニクル: found #2 一一待毒刺 after 959 checks.
+[2026-04-26T13:21:13.988Z] 8-2 ブライニクル: found #3 一一待毒果 after 960 checks.
+[2026-04-26T13:21:13.988Z] 8-2 ブライニクル: found #4 一一待毒待 after 961 checks.
+[2026-04-26T13:21:13.989Z] 8-2 ブライニクル: found #5 一一待毒搦 after 962 checks.
+[2026-04-26T13:21:13.990Z] 8-2 ブライニクル: done (962 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:13.990Z] 9-1 廃都の守護者: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:14.136Z] 9-1 廃都の守護者: found #1 一刺強一爆 after 9490 checks.
+[2026-04-26T13:21:14.137Z] 9-1 廃都の守護者: found #2 一刺強待爆 after 9550 checks.
+[2026-04-26T13:21:14.138Z] 9-1 廃都の守護者: found #3 一刺強搦爆 after 9570 checks.
+[2026-04-26T13:21:14.138Z] 9-1 廃都の守護者: found #4 一刺強玉爆 after 9590 checks.
+[2026-04-26T13:21:14.139Z] 9-1 廃都の守護者: found #5 一刺強強爆 after 9610 checks.
+[2026-04-26T13:21:14.140Z] 9-1 廃都の守護者: done (9610 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:14.140Z] 9-2 深海の賢王 ジズ: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:14.276Z] 9-2 深海の賢王 ジズ: found #1 一一飛礁狼 after 3731 checks.
+[2026-04-26T13:21:14.328Z] 9-2 深海の賢王 ジズ: found #2 一一礁飛狼 after 5187 checks.
+[2026-04-26T13:21:14.513Z] 9-2 深海の賢王 ジズ: found #3 一刺飛礁狼 after 10899 checks.
+[2026-04-26T13:21:14.561Z] 9-2 深海の賢王 ジズ: found #4 一刺礁飛狼 after 12355 checks.
+[2026-04-26T13:21:14.741Z] 9-2 深海の賢王 ジズ: found #5 一果飛礁狼 after 18067 checks.
+[2026-04-26T13:21:14.743Z] 9-2 深海の賢王 ジズ: done (18067 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:14.743Z] 10-1 ゾルゲイドクイーン: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:14.794Z] 10-1 ゾルゲイドクイーン: found #1 一一搦刺飛 after 1731 checks.
+[2026-04-26T13:21:14.796Z] 10-1 ゾルゲイドクイーン: found #2 一一搦待拳 after 1772 checks.
+[2026-04-26T13:21:14.812Z] 10-1 ゾルゲイドクイーン: found #3 一一玉速狼 after 2287 checks.
+[2026-04-26T13:21:14.814Z] 10-1 ゾルゲイドクイーン: found #4 一一玉礁狼 after 2413 checks.
+[2026-04-26T13:21:14.969Z] 10-1 ゾルゲイドクイーン: found #5 一刺搦刺飛 after 10112 checks.
+[2026-04-26T13:21:14.970Z] 10-1 ゾルゲイドクイーン: done (10112 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:14.970Z] 10-2 デザインド・エッグ号: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:15.032Z] 10-2 デザインド・エッグ号: found #1 一一搦飛狼 after 1904 checks.
+[2026-04-26T13:21:15.082Z] 10-2 デザインド・エッグ号: found #2 一一飛礁狼 after 4113 checks.
+[2026-04-26T13:21:15.084Z] 10-2 デザインド・エッグ号: found #3 一一飛狼礁 after 4133 checks.
+[2026-04-26T13:21:15.084Z] 10-2 デザインド・エッグ号: found #4 一一飛狼霊 after 4134 checks.
+[2026-04-26T13:21:15.085Z] 10-2 デザインド・エッグ号: found #5 一一飛霊狼 after 4168 checks.
+[2026-04-26T13:21:15.086Z] 10-2 デザインド・エッグ号: done (4168 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:15.086Z] 11-1 エーヴィス
+海賊団: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:16.700Z] 11-1 エーヴィス
+海賊団: found #1 一強一霊果 after 58667 checks.
+[2026-04-26T13:21:16.701Z] 11-1 エーヴィス
+海賊団: found #2 一強一霊狼 after 58679 checks.
+[2026-04-26T13:21:16.702Z] 11-1 エーヴィス
+海賊団: found #3 一強一霊爆 after 58682 checks.
+[2026-04-26T13:21:16.712Z] 11-1 エーヴィス
+海賊団: found #4 一強刺霊果 after 59135 checks.
+[2026-04-26T13:21:16.713Z] 11-1 エーヴィス
+海賊団: found #5 一強刺霊狼 after 59147 checks.
+[2026-04-26T13:21:16.713Z] 11-1 エーヴィス
+海賊団: done (59147 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:16.714Z] 11-2 大海賊 エーヴィス: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:21.263Z] 11-2 大海賊 エーヴィス: progress 250000 checks, wins=0.
+[2026-04-26T13:21:25.854Z] 11-2 大海賊 エーヴィス: progress 500000 checks, wins=0.
+[2026-04-26T13:21:27.691Z] 11-2 大海賊 エーヴィス: found #1 待一礁礁玉 after 601240 checks.
+[2026-04-26T13:21:27.870Z] 11-2 大海賊 エーヴィス: found #2 待刺礁礁玉 after 610960 checks.
+[2026-04-26T13:21:28.051Z] 11-2 大海賊 エーヴィス: found #3 待果礁礁玉 after 620680 checks.
+[2026-04-26T13:21:28.236Z] 11-2 大海賊 エーヴィス: found #4 待待礁礁玉 after 630400 checks.
+[2026-04-26T13:21:28.422Z] 11-2 大海賊 エーヴィス: found #5 待搦礁礁玉 after 640120 checks.
+[2026-04-26T13:21:28.423Z] 11-2 大海賊 エーヴィス: done (640120 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:28.423Z] 12-1 偽聖女 リザベル: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:34.472Z] 12-1 偽聖女 リザベル: progress 250000 checks, wins=0.
+[2026-04-26T13:21:40.488Z] 12-1 偽聖女 リザベル: progress 500000 checks, wins=0.
+[2026-04-26T13:21:46.512Z] 12-1 偽聖女 リザベル: progress 750000 checks, wins=0.
+[2026-04-26T13:21:46.651Z] 12-1 偽聖女 リザベル: found #1 待待待魔死 after 755728 checks.
+[2026-04-26T13:21:46.663Z] 12-1 偽聖女 リザベル: found #2 待待搦魔死 after 756241 checks.
+[2026-04-26T13:21:46.676Z] 12-1 偽聖女 リザベル: found #3 待待玉魔死 after 756754 checks.
+[2026-04-26T13:21:46.688Z] 12-1 偽聖女 リザベル: found #4 待待強魔死 after 757267 checks.
+[2026-04-26T13:21:46.701Z] 12-1 偽聖女 リザベル: found #5 待待速魔死 after 757780 checks.
+[2026-04-26T13:21:46.702Z] 12-1 偽聖女 リザベル: done (757780 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:46.702Z] 12-2#1 魔女 グリザーベルク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死, bosses=1, bossIndexes=1, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:46.714Z] 12-2#1 魔女 グリザーベルク: found #1 一一刺一飛 after 523 checks.
+[2026-04-26T13:21:46.715Z] 12-2#1 魔女 グリザーベルク: found #2 一一刺刺飛 after 546 checks.
+[2026-04-26T13:21:46.715Z] 12-2#1 魔女 グリザーベルク: found #3 一一刺果飛 after 569 checks.
+[2026-04-26T13:21:46.716Z] 12-2#1 魔女 グリザーベルク: found #4 一一刺待飛 after 592 checks.
+[2026-04-26T13:21:46.717Z] 12-2#1 魔女 グリザーベルク: found #5 一一刺搦飛 after 615 checks.
+[2026-04-26T13:21:46.718Z] 12-2#1 魔女 グリザーベルク: done (615 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:46.718Z] 12-2#2 魔女 グリザーベルク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死, bosses=1, bossIndexes=2, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:46.777Z] 12-2#2 魔女 グリザーベルク: found #1 一一果一狼 after 1041 checks.
+[2026-04-26T13:21:46.779Z] 12-2#2 魔女 グリザーベルク: found #2 一一果刺狼 after 1064 checks.
+[2026-04-26T13:21:46.780Z] 12-2#2 魔女 グリザーベルク: found #3 一一果果狼 after 1087 checks.
+[2026-04-26T13:21:46.781Z] 12-2#2 魔女 グリザーベルク: found #4 一一果待狼 after 1110 checks.
+[2026-04-26T13:21:46.782Z] 12-2#2 魔女 グリザーベルク: found #5 一一果搦狼 after 1133 checks.
+[2026-04-26T13:21:46.783Z] 12-2#2 魔女 グリザーベルク: done (1133 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:46.783Z] 12-2#3 魔女 グリザーベルク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死, bosses=1, bossIndexes=3, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:47.072Z] 12-2#3 魔女 グリザーベルク: found #1 一刺搦果飛 after 13299 checks.
+[2026-04-26T13:21:47.072Z] 12-2#3 魔女 グリザーベルク: found #2 一刺搦待果 after 13315 checks.
+[2026-04-26T13:21:47.073Z] 12-2#3 魔女 グリザーベルク: found #3 一刺搦搦果 after 13338 checks.
+[2026-04-26T13:21:47.074Z] 12-2#3 魔女 グリザーベルク: found #4 一刺搦玉果 after 13361 checks.
+[2026-04-26T13:21:47.076Z] 12-2#3 魔女 グリザーベルク: found #5 一刺搦飛果 after 13453 checks.
+[2026-04-26T13:21:47.077Z] 12-2#3 魔女 グリザーベルク: done (13453 checks, wins=5, stopReason=sample-limit).
+[2026-04-26T13:21:47.078Z] 12-3 魔女 グリザーベルク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-26T13:21:50.242Z] 12-3 魔女 グリザーベルク: progress 250000 checks, wins=0.
+[2026-04-26T13:21:53.370Z] 12-3 魔女 グリザーベルク: progress 500000 checks, wins=0.
+[2026-04-26T13:21:56.495Z] 12-3 魔女 グリザーベルク: progress 750000 checks, wins=0.
+[2026-04-26T13:21:59.787Z] 12-3 魔女 グリザーベルク: progress 1000000 checks, wins=0.
+[2026-04-26T13:22:00.807Z] 12-3 魔女 グリザーベルク: found #1 搦飛霊魔死 after 1069304 checks.
+[2026-04-26T13:22:00.822Z] 12-3 魔女 グリザーベルク: found #2 搦飛魔霊死 after 1070042 checks.
+[2026-04-26T13:22:00.823Z] 12-3 魔女 グリザーベルク: found #3 搦飛魔死霊 after 1070114 checks.
+[2026-04-26T13:22:01.806Z] 12-3 魔女 グリザーベルク: found #4 搦霊飛魔死 after 1135690 checks.
+[2026-04-26T13:22:01.924Z] 12-3 魔女 グリザーベルク: found #5 搦霊魔飛死 after 1139620 checks.
+[2026-04-26T13:22:01.925Z] 12-3 魔女 グリザーベルク: done (1139620 checks, wins=5, stopReason=sample-limit).

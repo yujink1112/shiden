@@ -1,0 +1,14 @@
+[2026-04-26T11:19:22.638Z] 7-1 バクバク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=狼, sampleLimit=12, maxChecks=none).
+[2026-04-26T11:19:22.646Z] 7-1 バクバク: found #1 一一一待狼 after 4 checks.
+[2026-04-26T11:19:22.647Z] 7-1 バクバク: found #2 一一一玉狼 after 6 checks.
+[2026-04-26T11:19:22.650Z] 7-1 バクバク: found #3 一一刺待狼 after 32 checks.
+[2026-04-26T11:19:22.651Z] 7-1 バクバク: found #4 一一刺玉狼 after 34 checks.
+[2026-04-26T11:19:22.654Z] 7-1 バクバク: found #5 一一果待狼 after 60 checks.
+[2026-04-26T11:19:22.654Z] 7-1 バクバク: found #6 一一果玉狼 after 62 checks.
+[2026-04-26T11:19:22.657Z] 7-1 バクバク: found #7 一一待一狼 after 85 checks.
+[2026-04-26T11:19:22.658Z] 7-1 バクバク: found #8 一一待刺狼 after 86 checks.
+[2026-04-26T11:19:22.658Z] 7-1 バクバク: found #9 一一待果狼 after 87 checks.
+[2026-04-26T11:19:22.659Z] 7-1 バクバク: found #10 一一待待狼 after 88 checks.
+[2026-04-26T11:19:22.659Z] 7-1 バクバク: found #11 一一待搦狼 after 89 checks.
+[2026-04-26T11:19:22.659Z] 7-1 バクバク: found #12 一一待玉狼 after 90 checks.
+[2026-04-26T11:19:22.660Z] 7-1 バクバク: done (90 checks, wins=12, stopReason=sample-limit).

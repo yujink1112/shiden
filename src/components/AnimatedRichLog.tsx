@@ -235,7 +235,23 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '0 10px' }}>
                       <span className="battle-start-player-name" style={{ fontSize: p1.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p1.trim()}</span>
                       <span className="battle-start-vs" style={{ fontSize: '2.2rem', fontWeight: 'black', color: '#ff5252', fontStyle: 'italic' }}>VS</span>
-                      <span className="battle-start-enemy-name" style={{ fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem', fontWeight: 'bold', color: '#ff5252', textShadow: '0 0 10px rgba(255,255,255,0.5)', wordBreak: 'break-all' }}>{p2.trim()}</span>
+                      <span
+                        className="battle-start-enemy-name"
+                        style={{
+                          fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem',
+                          fontWeight: 'bold',
+                          color: '#ff5252',
+                          textShadow: '0 0 10px rgba(255,255,255,0.5)',
+                          wordBreak: 'break-all',
+                          whiteSpace: isMobile ? 'pre-line' : 'nowrap',
+                          overflowWrap: 'anywhere',
+                          lineHeight: isMobile ? 1.2 : 1,
+                          textAlign: 'center',
+                          maxWidth: isMobile ? 'min(180px, 42vw)' : 'none'
+                        }}
+                      >
+                        {p2.trim()}
+                      </span>
                     </div>
                   </div>
                 );

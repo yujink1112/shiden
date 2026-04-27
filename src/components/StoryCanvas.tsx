@@ -25,6 +25,8 @@ interface RubySegment {
   ruby?: string;
 }
 
+const STORY_CANVAS_TEXT_FONT = '"Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif';
+
 const parseRubyText = (text: string): RubySegment[] => {
   const segments: RubySegment[] = [];
   let i = 0;
@@ -393,7 +395,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 const titleLines = drawWrappedText(ctx, section.title || "", titleX, currentY + (section.icon ? (iconSize - titleFontSize) / 2 : 0), titleMaxWidth, titleLineHeight);
                 
                 ctx.fillStyle = '#eee';
-                ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.font = `${textFontSize}px ${STORY_CANVAS_TEXT_FONT}`;
                 const textLineHeight = textFontSize * 1.4;
                 const titleHeight = titleLines * titleLineHeight;
                 const storyTextY = currentY + Math.max(iconSize, titleHeight) + 10 * dpr;
@@ -402,7 +404,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 break;
             case "text":
                 ctx.fillStyle = '#fff';
-                ctx.font = `${(isMobileMode ? 15 : 20) * dpr}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                ctx.font = `${(isMobileMode ? 15 : 20) * dpr}px ${STORY_CANVAS_TEXT_FONT}`;
                 ctx.textAlign = 'center';
                 const simpleTextLineHeight = (isMobileMode ? 22 : 30) * dpr;
                 currentY += drawWrappedText(ctx, section.content || "", creditsX + creditsWidth / 2, currentY, maxContentWidth, simpleTextLineHeight) * simpleTextLineHeight;
@@ -1018,13 +1020,13 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
       if (shouldDisplayName) {
         const nameFontSize = conf.nameFontSize * dpr;
         ctx.fillStyle = '#81d4fa';
-        ctx.font = `bold ${nameFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+        ctx.font = `bold ${nameFontSize}px ${STORY_CANVAS_TEXT_FONT}`;
         ctx.fillText(currentEntry.name!, margin + paddingX, boxY + paddingY);
       }
 
       const textFontSize = conf.fontSize * dpr;
       ctx.fillStyle = '#fff';
-      ctx.font = `${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+      ctx.font = `${textFontSize}px ${STORY_CANVAS_TEXT_FONT}`;
       const textX = margin + paddingX;
       const nameOffset = shouldDisplayName ? (isMobileMode ? 30 : 48) * dpr : 0;
       const textY = boxY + paddingY + nameOffset;
@@ -1034,7 +1036,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           const fullSegments = parseRubyText(currentEntry.text);
           const currentSegments = getDisplayedSegments(fullSegments, displayedCharCount);
           if (usesCenteredPanelText) {
-            ctx.font = `bold ${textFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+            ctx.font = `bold ${textFontSize}px ${STORY_CANVAS_TEXT_FONT}`;
             const visibleText = currentSegments.map(seg => seg.text).join('');
             const letterSpacing = (currentEntry.letterSpacing || 0) * dpr;
             const centeredLines = wrapTextWithLetterSpacing(ctx, visibleText, maxWidth, letterSpacing);
@@ -1078,7 +1080,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 if (seg.ruby) {
                     ctx.save();
                     const rubyFontSize = textFontSize * 0.5;
-                    ctx.font = `${rubyFontSize}px "Yu Gothic", "YuGothic", "sans-serif"`;
+                    ctx.font = `${rubyFontSize}px ${STORY_CANVAS_TEXT_FONT}`;
                     const rubyWidth = ctx.measureText(seg.ruby).width;
                     const rubyX = currentX + (charWidth - rubyWidth) / 2;
                     const rubyY = ly - rubyFontSize * 0.9;

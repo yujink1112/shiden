@@ -1,6 +1,6 @@
 export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "一", name: "一閃", kana:"いっせん", icon: "/images/skill/a01.gif", type: "攻撃", speed: "LV", description: "相手に1点のダメージを与える。", exclude: 0 },
-  { abbr: "刺", name: "刺突", kana:"しとつ", icon: "/images/skill/a02.gif", type: "攻撃", speed: "1", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルと最もLVが近いスキル（より高いLVを優先）に変更される。", exclude: 0 },
+  { abbr: "刺", name: "刺突", kana:"しとつ", icon: "/images/skill/a02.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルと最もLVが近いスキル（より高いLVを優先）に変更される。", exclude: 0 },
   { abbr: "果", name: "果断", kana:"かだん", icon: "/images/skill/a03.gif", type: "攻撃", speed: "1", description: "相手にLV点のダメージを与える。", exclude: 0 },
   { abbr: "剣", name: "剣舞", kana:"けんばい", icon: "/images/skill/a04.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。\nXは、あなたが所持している攻撃スキルの数である。", exclude: 0 },
   { abbr: "紫", name: "紫電", kana:"しでん", icon: "/images/skill/a05.gif", type: "攻撃", speed: "LV+2", description: "相手に1点のダメージを与える。\nあなたに状態「スタン」を与える。", exclude: 0 },
@@ -13,7 +13,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに2点のダメージを与える。", exclude: 1 },
   { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/v2/2011-12-23_3-067.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。迎撃スキルが発動しなければ、さらに上からスキルを1つ破壊する。", exclude: 0 },
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "1", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。", exclude: 1 },
-  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "0", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
+  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "1", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
   { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/v2/2011-12-23_1-019.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、相手が持っている悪い状態の数+1である。", exclude: 1  },
   { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/v2/2011-12-23_3-049.gif", type: "攻撃（リミテッド）", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。相手に状態「火傷」を与える。", exclude: 1 },
   { abbr: "弱", name: "弱撃", kana:"じゃくげき", icon: "/images/skill/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。", exclude: 1 },
@@ -69,7 +69,7 @@ export const ALL_SKILLS: SkillDetail[] = [
 
   // 神業スキル
   { abbr: "狼", name: "狼嵐", kana:"ウルフストーム", icon: "/images/skill/v2/2011-12-23_1-031.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "1", description: "相手にLV点のダメージを与える。このスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1 },
-  { abbr: "▽", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃・神業", kamiwaza: 1,speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
+  { abbr: "▽", name: "▽解", kana:"デルタブレイク", icon: "/images/skill/v2/2011-12-23_3-036.gif", type: "攻撃・神業", kamiwaza: 1,speed: "LV", description: "相手に1点のダメージを与える。それを3回行う。このスキルは、【＋〇】の効果を受けられない。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
   { abbr: "爆", name: "爆砕", kana:"イクスプロージョン", icon: "/images/skill/v2/2013-4-20_034.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手にLV点のダメージを与える。自分に状態「スタン」「忘却」「火傷」を与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
   { abbr: "魔", name: "魔弾", kana:"ザミエル", icon: "/images/skill/v2/2011-12-23_1-044.gif", type: "攻撃(リミテッド)・神業", kamiwaza: 1, speed: "LV", description: "相手に1点のダメージを与える。相手に状態「死紋」を1つ与える。神業スキルは1つしか選択できない。", ruleDisplay:false, exclude: 1  },
 
@@ -121,7 +121,7 @@ export const STATUS_DATA: StatusDetail[] = [
     { name: "先制", type: 0, kana: "せんせい", icon: "/images/skill/d10.gif", stackable: false, description: "先攻決定フェイズにおいて常に先攻となる。両者が受けている場合は速度比較となる。毎ラウンドの終了フェイズに解除される。" },
 
     // 新規追加
-    { name: "回復", type: 0, kana: "かいふく", icon: "/images/skill/v2/2011-12-23_3-140.gif", stackable: false, description: "終了フェイズに、あなたの破壊されたスキルを全て【ＨＰ】に変化させる。" },
+    // { name: "回復", type: 0, kana: "かいふく", icon: "/images/skill/v2/2011-12-23_3-140.gif", stackable: false, description: "終了フェイズに、あなたの破壊されたスキルを全て【ＨＰ】に変化させる。" },
     { name: "治癒(X)", type: 0, kana: "ちゆ", icon: "/images/skill/v2/2014-8-31_021.gif", stackable: false, description: "終了フェイズに、破壊された先頭のスキル1個を【ＨＰ】に変化させる。第Xラウンドの効果発生後に消滅する。Xが異なる場合でも、後から付与された治癒に上書きされない。" },
     { name: "協奏", type: 0, kana: "きょうそう", icon: "/images/skill/v2/2011-12-23_3-195.gif", stackable: true, description: "所持する攻撃スキルのダメージと速度に、受けている協奏の数を加える。先攻決定フェイズには影響しない。" },
     { name: "霊化", type: 0, kana: "れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", stackable: false, description: "攻撃スキルを所持していない時、【弱撃】ではなく【影討】を使用する。LVは0とする。" },
@@ -136,9 +136,9 @@ export const STATUS_DATA: StatusDetail[] = [
     { name: "狼狽", type: 1, kana: "ろうばい", icon: "/images/skill/x02.gif", stackable: false, description: "所持する攻撃スキルの速度は、攻撃フェイズにおいて常に0として扱われる。先攻決定フェイズには影響しない。他のあらゆる速度変化効果に対して優先される。" },
     { name: "忘却", type: 1, kana: "ぼうきゃく", icon: "/images/skill/x03.gif", stackable: false, description: "毎ラウンドの終了フェイズに、自身が所持している【空白】を除く先頭のスキルが【空白】に変化する。" },
 
-    { name: "毒", type: 1, kana: "どく", icon: "/images/skill/v2/2011-12-23_3-136.gif", stackable: false, description: "終了フェイズにあなたの先頭のスキルを1つ破壊する。" },
-    { name: "火傷", type: 1, kana: "やけど", icon: "/images/skill/v2/2011-12-23_3-142.gif", stackable: false, description: "あなたが与える攻撃スキルのダメージに-1する。(最低1)" },
-    { name: "死紋", type: 1, kana: "しもん", icon: "/images/skill/v2/2011-12-24_007.gif", stackable: true, description: "あなたが攻撃スキルによって受けるダメージに、あなたが受けている死紋の数を加える。終了フェイズに、あなたが受けている死紋の数だけ状態「死紋」を与える。" },
+    { name: "毒", type: 1, kana: "どく", icon: "/images/skill/v2/2011-12-23_3-136.gif", stackable: false, description: "終了フェイズに自身が先頭のスキルを1つ破壊する。" },
+    { name: "火傷", type: 1, kana: "やけど", icon: "/images/skill/v2/2011-12-23_3-142.gif", stackable: false, description: "自身が与える攻撃スキルのダメージに-1する。(最低1)" },
+    { name: "死紋", type: 1, kana: "しもん", icon: "/images/skill/v2/2011-12-24_007.gif", stackable: true, description: "自身が攻撃スキルによって受けるダメージに、受けている死紋の数を加える。終了フェイズに、自身が受けている死紋の数だけ死紋を与える。" },
     // { name: "嫉妬", type: 1, kana: "しっと", icon: "/images/skill/invidia.png", description: "あなたは良い状態を受けることができない。" },
     // { name: "色欲", type: 1, kana: "しきよく", icon: "/images/skill/luxuria.png", description: "あなたが与える攻撃・迎撃スキルのダメージに-1する。(最低1)" },
 

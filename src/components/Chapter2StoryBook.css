@@ -1,0 +1,423 @@
+.storybook-shell {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top, rgba(209, 179, 122, 0.24), transparent 32%),
+    linear-gradient(180deg, #16120f 0%, #241a16 40%, #120e0c 100%);
+  color: #241a16;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.storybook-controls {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  max-width: 1180px;
+  margin: 0 auto 24px;
+  padding: 20px;
+  border: 1px solid rgba(214, 188, 138, 0.28);
+  border-radius: 20px;
+  background: rgba(20, 15, 12, 0.82);
+  backdrop-filter: blur(16px);
+  color: #f7efe1;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.28);
+}
+
+.storybook-controls-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.storybook-controls-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.storybook-controls-kicker,
+.storybook-page-header-kicker,
+.storybook-section-meta {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.storybook-controls h1 {
+  margin: 6px 0 0;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-print-button,
+.storybook-close-button,
+.storybook-select-card select,
+.storybook-opacity-control input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.storybook-close-button,
+.storybook-print-button {
+  border: 1px solid rgba(255, 232, 194, 0.42);
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.storybook-print-button {
+  background: linear-gradient(135deg, #ead3a3 0%, #c8934e 100%);
+  color: #25160e;
+}
+
+.storybook-close-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7efe1;
+}
+
+.storybook-description {
+  margin: 14px 0 18px;
+  color: rgba(247, 239, 225, 0.9);
+  line-height: 1.7;
+}
+
+.storybook-opacity-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.storybook-opacity-control span {
+  min-width: 92px;
+}
+
+.storybook-opacity-control input {
+  flex: 1;
+}
+
+.storybook-background-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.storybook-select-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.storybook-select-card span {
+  font-size: 0.92rem;
+}
+
+.storybook-select-card select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 240, 219, 0.28);
+  background: rgba(17, 12, 10, 0.72);
+  color: #f7efe1;
+  padding: 10px 12px;
+}
+
+.storybook-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  padding-bottom: 48px;
+}
+
+.storybook-page {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #f5efe5;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26);
+}
+
+.storybook-page-background,
+.storybook-page-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.storybook-page-background {
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.72) contrast(0.92) brightness(1.08);
+  transform: scale(1.04);
+}
+
+.storybook-page-overlay {
+  background: rgba(245, 239, 229, 0.92);
+}
+
+.storybook-page-header,
+.storybook-page-body,
+.storybook-page-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.storybook-page-header {
+  flex: 0 0 auto;
+  padding: 18mm 18mm 8mm;
+  color: #5e4434;
+  border-bottom: 1px solid rgba(110, 79, 50, 0.24);
+}
+
+.storybook-page-header-title {
+  margin-top: 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8mm 18mm 10mm;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.storybook-page-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 18mm 12mm;
+  color: #735844;
+  font-weight: 700;
+}
+
+.storybook-block {
+  break-inside: avoid;
+}
+
+.storybook-section-title {
+  margin: 0 0 8mm;
+  padding-bottom: 5mm;
+  border-bottom: 1px solid rgba(110, 79, 50, 0.24);
+}
+
+.storybook-section-title h2 {
+  margin: 10px 0 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.35;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-part-title {
+  margin: 0 0 4mm;
+}
+
+.storybook-part-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 79, 50, 0.26);
+  color: #6c4f39;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.storybook-text-block {
+  margin-bottom: 4mm;
+}
+
+.storybook-text-block.is-center {
+  text-align: center;
+}
+
+.storybook-speaker {
+  margin-bottom: 2mm;
+  color: #577493;
+  font-weight: 700;
+  font-size: 0.96rem;
+}
+
+.storybook-text {
+  line-height: 1.9;
+  font-size: 1rem;
+  white-space: normal;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-text-direction .storybook-text,
+.storybook-text-monologue .storybook-text {
+  color: #332720;
+}
+
+.storybook-text-direction .storybook-text {
+  font-weight: 700;
+}
+
+.storybook-text-dialogue .storybook-text {
+  color: #18110d;
+}
+
+.storybook-text rt {
+  font-size: 0.5em;
+}
+
+.storybook-loading {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #120e0c;
+  color: #f7efe1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.storybook-loading-card {
+  width: min(560px, 100%);
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(214, 188, 138, 0.2);
+  background: rgba(30, 22, 17, 0.92);
+  text-align: center;
+}
+
+.storybook-loading-card h1 {
+  margin: 0 0 12px;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-measure-layer {
+  position: absolute;
+  left: -99999px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.storybook-measure-page {
+  width: 210mm;
+}
+
+.storybook-measure-body {
+  width: calc(210mm - 36mm);
+  box-sizing: border-box;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .storybook-shell {
+    padding: 14px;
+  }
+
+  .storybook-controls {
+    position: static;
+    padding: 16px;
+  }
+
+  .storybook-controls-header {
+    flex-direction: column;
+  }
+
+  .storybook-controls-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .storybook-preview {
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 24px;
+  }
+
+  .storybook-page {
+    width: 100%;
+    min-height: auto;
+    transform-origin: top left;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .storybook-shell,
+  .storybook-shell * {
+    visibility: visible;
+  }
+
+  .storybook-shell {
+    background: #fff;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .storybook-controls,
+  .storybook-measure-layer {
+    display: none;
+  }
+
+  .storybook-preview {
+    gap: 0;
+    padding: 0;
+  }
+
+  .storybook-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    box-shadow: none;
+    margin: 0;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .storybook-page-header {
+    padding: 14mm 16mm 6mm;
+  }
+
+  .storybook-page-body {
+    padding: 6mm 16mm 8mm;
+  }
+
+  .storybook-page-footer {
+    padding: 0 16mm 8mm;
+  }
+
+  .storybook-text {
+    font-size: 0.95rem;
+    line-height: 1.78;
+  }
+
+  .storybook-section-title {
+    margin-bottom: 6mm;
+    padding-bottom: 4mm;
+  }
+
+  .storybook-part-title {
+    margin-bottom: 3mm;
+  }
+
+  .storybook-text-block {
+    margin-bottom: 3mm;
+  }
+}

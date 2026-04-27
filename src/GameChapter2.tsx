@@ -547,9 +547,14 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         )}
       </div>
       <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflow: 'hidden', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
-        <h2 style={{ color: '#61dafb' }}>
-            {!gameStarted ? 'BOSS' : (logComplete ? 'ゲームログ' : 'BOSS')}
-        </h2>
+        {(() => {
+          const logHeading = !gameStarted ? 'BOSS' : (logComplete ? 'ゲームログ' : 'BOSS');
+          return !(isMobile && logHeading === 'BOSS') ? (
+            <h2 style={{ color: '#61dafb' }}>
+              {logHeading}
+            </h2>
+          ) : null;
+        })()}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
           <button
             onClick={() => setUseRichLog(!useRichLog)}

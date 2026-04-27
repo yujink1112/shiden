@@ -14,6 +14,8 @@ const ALLOWED_KAMIWAZA = {
   "7-2": "▽",
   "8-1": "爆",
   "8-2": "魔",
+  "11-1": "狼",
+  "11-2": "魔",
 };
 const KAMIWAZA = new Set(["狼", "▽", "爆", "魔"]);
 const BANNED_REPLACEMENTS = new Set(["空", "Ｈ", "弱", "狼", "▽", "爆", "魔"]);

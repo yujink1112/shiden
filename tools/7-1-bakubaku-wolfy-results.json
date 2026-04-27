@@ -1,0 +1,27 @@
+[
+  {
+    "key": "7-1",
+    "bossName": "バクバク",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 38,
+    "samples": [
+      "一一一一果",
+      "一一一一狼",
+      "一一一刺果",
+      "一一一刺狼",
+      "一一一果一",
+      "一一一果刺",
+      "一一一果果",
+      "一一一果待",
+      "一一一果搦",
+      "一一一果玉",
+      "一一一果強",
+      "一一一果速"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼",
+    "requireSkills": [],
+    "bossIndexes": null,
+    "stopReason": "sample-limit"
+  }
+]

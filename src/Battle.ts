@@ -52,7 +52,7 @@ export class Battle {
     public start(): number {
         Battle.SHORT = 0;
 
-        this.log("=============================================");
+        this.log("===========================================");
         this.log();
         this.log(`${this.pc1.playerName}　VS　${this.pc2.playerName}`);
         this.log();
@@ -1339,7 +1339,7 @@ export class Battle {
         else this.log("互いの【掌握】により、引き分け！");
 
         this.log();
-        this.log("=============================================");
+        this.log("===========================================");
         return result;
     }
 
@@ -1383,7 +1383,7 @@ export class Battle {
         else if (result === BattleResult.DRAW) this.log("引き分け");
 
         this.log();
-        this.log("=============================================");
+        this.log("===========================================");
         return result;
     }
 }

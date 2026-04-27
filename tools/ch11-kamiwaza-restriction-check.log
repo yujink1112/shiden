@@ -1,0 +1,22 @@
+[2026-04-27T13:25:16.013Z] 11-1 エーヴィス
+海賊団: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼霊円滅受, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-27T13:25:17.116Z] 11-1 エーヴィス
+海賊団: found #1 一強一霊果 after 41111 checks.
+[2026-04-27T13:25:17.117Z] 11-1 エーヴィス
+海賊団: found #2 一強一霊狼 after 41123 checks.
+[2026-04-27T13:25:17.128Z] 11-1 エーヴィス
+海賊団: found #3 一強刺霊果 after 41471 checks.
+[2026-04-27T13:25:17.129Z] 11-1 エーヴィス
+海賊団: found #4 一強刺霊狼 after 41483 checks.
+[2026-04-27T13:25:17.141Z] 11-1 エーヴィス
+海賊団: found #5 一強果霊果 after 41831 checks.
+[2026-04-27T13:25:17.142Z] 11-1 エーヴィス
+海賊団: done (41831 checks, wins=5, stopReason=sample-limit).
+[2026-04-27T13:25:17.143Z] 11-2 大海賊 エーヴィス: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁霊魔円滅受, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=-, sampleLimit=5, maxChecks=none).
+[2026-04-27T13:25:21.682Z] 11-2 大海賊 エーヴィス: progress 250000 checks, wins=0.
+[2026-04-27T13:25:24.292Z] 11-2 大海賊 エーヴィス: found #1 待一礁礁玉 after 389845 checks.
+[2026-04-27T13:25:24.439Z] 11-2 大海賊 エーヴィス: found #2 待刺礁礁玉 after 396649 checks.
+[2026-04-27T13:25:24.568Z] 11-2 大海賊 エーヴィス: found #3 待果礁礁玉 after 403453 checks.
+[2026-04-27T13:25:24.708Z] 11-2 大海賊 エーヴィス: found #4 待待礁礁玉 after 410257 checks.
+[2026-04-27T13:25:24.836Z] 11-2 大海賊 エーヴィス: found #5 待搦礁礁玉 after 417061 checks.
+[2026-04-27T13:25:24.837Z] 11-2 大海賊 エーヴィス: done (417061 checks, wins=5, stopReason=sample-limit).
