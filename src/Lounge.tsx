@@ -41,6 +41,7 @@ export interface UserProfile {
     }
   };
   lifukuHighscore?: number;
+  storyBookCouponUnlocked?: boolean;
   chapter2?: {
     stageCycle?: number;
     flowIndex?: number;

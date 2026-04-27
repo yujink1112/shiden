@@ -1167,6 +1167,116 @@
   padding: 20px;
 }
 
+.TitleCouponModal {
+  width: min(560px, calc(100vw - 36px));
+  padding: 22px 22px 24px;
+}
+
+.TitleCouponLead {
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 226, 136, 0.3);
+  background:
+    radial-gradient(circle at top right, rgba(255, 223, 132, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  color: #f6f4ed;
+}
+
+.TitleCouponEyebrow {
+  margin-bottom: 8px;
+  color: rgba(255, 231, 164, 0.92);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.TitleCouponTitle {
+  margin: 0 0 10px;
+  color: #fff8d6;
+  font-size: 1.35rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+}
+
+.TitleCouponText {
+  margin: 0 0 10px;
+  color: rgba(241, 246, 255, 0.9);
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+
+.TitleCouponText:last-child {
+  margin-bottom: 0;
+}
+
+.TitleCouponForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.TitleCouponLabel {
+  color: #f2f7ff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.TitleCouponInput {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(207, 227, 255, 0.34);
+  background: rgba(8, 18, 34, 0.42);
+  color: #ffffff;
+  font-size: 1rem;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.TitleCouponInput::placeholder {
+  color: rgba(223, 233, 255, 0.42);
+}
+
+.TitleCouponInput:focus {
+  border-color: rgba(255, 226, 136, 0.88);
+  box-shadow: 0 0 0 3px rgba(255, 226, 136, 0.16);
+}
+
+.TitleCouponMessage {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.TitleCouponMessage.is-success {
+  background: rgba(72, 187, 120, 0.16);
+  border: 1px solid rgba(128, 247, 198, 0.35);
+  color: #dffff1;
+}
+
+.TitleCouponMessage.is-error {
+  background: rgba(255, 82, 82, 0.16);
+  border: 1px solid rgba(255, 138, 128, 0.35);
+  color: #ffe5e3;
+}
+
+.TitleCouponMessage.is-info {
+  background: rgba(79, 195, 247, 0.14);
+  border: 1px solid rgba(144, 202, 249, 0.32);
+  color: #e9f7ff;
+}
+
+.TitleCouponActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .TitleNewGameIntroCarousel {
   position: relative;
   overflow: hidden;
@@ -1525,6 +1635,24 @@
   .TitleChapterSelectModal {
     width: min(440px, calc(100vw - 24px));
     padding: 16px;
+  }
+
+  .TitleCouponModal {
+    width: min(440px, calc(100vw - 24px));
+    padding: 18px 16px 18px;
+  }
+
+  .TitleCouponLead {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .TitleCouponTitle {
+    font-size: 1.15rem;
+  }
+
+  .TitleCouponText {
+    font-size: 0.9rem;
   }
 
   .TitleNewGameIntroPanel {

@@ -29,6 +29,7 @@ export const getStorageUrl = (path: string) => {
   storageCache[path] = url;
   return url;
 };
+
 export const googleProvider = new GoogleAuthProvider();
 
 type Chapter2ProgressPatch = {

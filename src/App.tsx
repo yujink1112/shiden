@@ -35,6 +35,7 @@ const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強"
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
+const STORY_BOOK_COUPON_CODE = 'SHIDEN-BOOK-2026';
 const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
   "狼": "ルーサー",
   "▽": "アダム",
@@ -68,8 +69,8 @@ function App() {
   const [preloadProgress, setPreloadProgress] = useState({ current: 0, total: 0 });
   const [chapter2Flows, setChapter2Flows] = useState<Chapter2StageFlow[]>([]);
   const loadingImageUrl = getStorageUrl('/images/title/sailing_loop_32x32_fixed.gif');
-  const titleHeroPcUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-pc.png`;
-  const titleHeroMobileUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-mobile.png`;
+  const titleHeroPcUrl = getStorageUrl('/images/title/タイトル_PC.webp');
+  const titleHeroMobileUrl = getStorageUrl('/images/title/タイトル_スマホ.webp');
 
   useEffect(() => {
     const loadData = async () => {
@@ -120,12 +121,12 @@ function App() {
 
         // 共通リソース
         imageUrls.add(getStorageUrl('/images/background/background.jpg'));
-        imageUrls.add(getStorageUrl('/images/title/titlelogo.png'));
+        imageUrls.add(getStorageUrl('/images/title/titlelogo.webp'));
         imageUrls.add(titleHeroPcUrl);
         imageUrls.add(titleHeroMobileUrl);
-        imageUrls.add(getStorageUrl('/images/title/タイトルロゴ2.png'));
-        imageUrls.add(getStorageUrl('/images/chapter/Chapter1.png'));
-        imageUrls.add(getStorageUrl('/images/chapter/Chapter2.png'));
+        imageUrls.add(getStorageUrl('/images/title/タイトルロゴ2.webp'));
+        imageUrls.add(getStorageUrl('/images/chapter/Chapter1.webp'));
+        imageUrls.add(getStorageUrl('/images/chapter/Chapter2.webp'));
         imageUrls.add(getStorageUrl('/images/title/sailing_loop_32x32_fixed.gif'));
 
         const urlList = Array.from(imageUrls);
@@ -196,6 +197,7 @@ function App() {
   const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
   const isAdminDebugSkillsActiveRef = useRef(false);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
+  const canAccessChapter2StoryBook = isAdmin || Boolean(myProfile?.storyBookCouponUnlocked);
   const getAllDebugSkillAbbrs = () => Array.from(new Set(ALL_SKILLS.map(skill => skill.abbr)));
   const isDebugAllSkillSet = (skills: string[] | undefined) => {
     if (!skills) return false;
@@ -312,6 +314,10 @@ function App() {
   const [showLegal, setShowLegal] = useState(false);
   const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [showTitleMenuModal, setShowTitleMenuModal] = useState(false);
+  const [showStoryBookCouponModal, setShowStoryBookCouponModal] = useState(false);
+  const [storyBookCouponInput, setStoryBookCouponInput] = useState('');
+  const [storyBookCouponMessage, setStoryBookCouponMessage] = useState<string | null>(null);
+  const [storyBookCouponMessageType, setStoryBookCouponMessageType] = useState<'success' | 'error' | 'info'>('info');
   const [showNewGameIntro, setShowNewGameIntro] = useState(false);
   const [newGameIntroChapter, setNewGameIntroChapter] = useState<1 | 2>(1);
   const [newGameIntroTrackIndex, setNewGameIntroTrackIndex] = useState(1);
@@ -325,14 +331,80 @@ function App() {
   const newGameIntroInputLockedRef = useRef(false);
   const suppressAdminBattleStoryOpenRef = useRef(false);
 
-  const storyBookOverlay = showChapter2StoryBook && isAdmin && typeof document !== 'undefined'
+  const storyBookOverlay = showChapter2StoryBook && canAccessChapter2StoryBook && typeof document !== 'undefined'
     ? createPortal(
-        <div className="StoryBookOverlayHost" style={{ position: 'fixed', inset: 0, zIndex: 40000, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
+        <div className="StoryBookOverlayHost" style={{ position: 'fixed', inset: 0, zIndex: 40000, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', backgroundColor: '#120e0c' }}>
           <Chapter2StoryBook onClose={() => setShowChapter2StoryBook(false)} />
         </div>,
         document.body
       )
     : null;
+
+  useEffect(() => {
+    if (!showChapter2StoryBook) return;
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [showChapter2StoryBook]);
+
+  const handleStoryBookCouponInput = () => {
+    if (!user || !myProfile) {
+      window.alert('クーポンコードの入力はユーザ登録後にご利用ください。');
+      return;
+    }
+    setStoryBookCouponInput('');
+    setStoryBookCouponMessage(
+      myProfile.storyBookCouponUnlocked
+        ? 'このアカウントでは、すでにストーリーブックを閲覧できます。'
+        : null
+    );
+    setStoryBookCouponMessageType(myProfile.storyBookCouponUnlocked ? 'success' : 'info');
+    setShowStoryBookCouponModal(true);
+  };
+
+  const handleSubmitStoryBookCoupon = async () => {
+    if (!user || !myProfile) {
+      setStoryBookCouponMessage('クーポンコードの入力はユーザ登録後にご利用ください。');
+      setStoryBookCouponMessageType('error');
+      return;
+    }
+
+    const normalized = storyBookCouponInput.trim();
+    if (!normalized) {
+      setStoryBookCouponMessage('クーポンコードを入力してください。');
+      setStoryBookCouponMessageType('error');
+      return;
+    }
+
+    if (normalized === STORY_BOOK_COUPON_CODE) {
+      const profileRef = ref(database, `profiles/${user.uid}`);
+      const updatedProfile: UserProfile = {
+        ...myProfile,
+        storyBookCouponUnlocked: true
+      };
+      setMyProfile(updatedProfile);
+      try {
+        await set(profileRef, updatedProfile);
+        setStoryBookCouponMessage('ストーリーブックを閲覧できるようになりました。');
+        setStoryBookCouponMessageType('success');
+      } catch (error) {
+        console.error('Failed to save story book coupon state:', error);
+        setStoryBookCouponMessage('クーポンコードの保存に失敗しました。');
+        setStoryBookCouponMessageType('error');
+      }
+      return;
+    }
+
+    setStoryBookCouponMessage('クーポンコードが正しくありません。');
+    setStoryBookCouponMessageType('error');
+  };
   
 
   useEffect(() => {
@@ -2181,6 +2253,7 @@ const PLAYER_SKILL_COUNT = 5;
               favoriteSkill: "一",
               title: "",
               comment: "よろしく！",
+              storyBookCouponUnlocked: false,
               lastActive: Date.now(),
               points: 0,
               lastKenjuDate: new Date().toLocaleDateString()
@@ -3138,7 +3211,7 @@ const PLAYER_SKILL_COUNT = 5;
   const newGameIntroPanels = [
     {
       chapter: 1 as const,
-      image: '/images/chapter/Chapter1.png',
+      image: '/images/chapter/Chapter1.webp',
       alt: '第1章 導入イメージ',
       eyebrow: 'FIGHT TO SURVIVE',
       title: '孤独な少女と、無人島の秘密。',
@@ -3153,7 +3226,7 @@ const PLAYER_SKILL_COUNT = 5;
     },
     {
       chapter: 2 as const,
-      image: '/images/chapter/Chapter2.png',
+      image: '/images/chapter/Chapter2.webp',
       alt: '第2章 導入イメージ',
       eyebrow: 'SECOND CHAPTER',
       title: '旗を掲げろ。海賊達の冒険譚。',
@@ -3693,7 +3766,7 @@ const PLAYER_SKILL_COUNT = 5;
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
                   <img 
-                    src={getStorageUrl('/images/chapter/Chapter1.png')} 
+                    src={getStorageUrl('/images/chapter/Chapter1.webp')} 
                     alt="Chapter 1" 
                     style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
                   />
@@ -3748,7 +3821,7 @@ const PLAYER_SKILL_COUNT = 5;
                   }}
                 >
                   <img 
-                    src={getStorageUrl('/images/chapter/Chapter2.png')} 
+                    src={getStorageUrl('/images/chapter/Chapter2.webp')} 
                     alt="Chapter 2" 
                     style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
                   />
@@ -3819,6 +3892,17 @@ const PLAYER_SKILL_COUNT = 5;
                 <button className="TitleButton neon-blue" onClick={handleNewGame}>NEW GAME</button>
                 <button className="TitleButton neon-gold" onClick={handleContinue} disabled={!hasSaveData}>CONTINUE</button>
                 <button className="TitleButton neon-green" onClick={() => { setStageMode('LOUNGE'); setIsTitle(false); refreshKenju(); }} >LOUNGE</button>
+                {canAccessChapter2StoryBook && (
+                  <button
+                    className="TitleButton neon-blue"
+                    onClick={() => {
+                      setShowTitleMenuModal(false);
+                      setShowChapter2StoryBook(true);
+                    }}
+                  >
+                    STORY BOOK
+                  </button>
+                )}
                 <button
                   className="TitleButton neon-purple"
                   onClick={() => {
@@ -3859,6 +3943,73 @@ const PLAYER_SKILL_COUNT = 5;
                     <span className="TitleMiniGameCheek TitleMiniGameCheekRight" />
                   </span>
                   <span>MINI GAME</span>
+                </button>
+                <button
+                  className="TitleButton neon-gold"
+                  onClick={handleStoryBookCouponInput}
+                  disabled={!user}
+                  style={{ fontSize: '0.92rem', opacity: user ? 1 : 0.58, cursor: user ? 'pointer' : 'not-allowed' }}
+                >
+                  クーポンコード入力
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showStoryBookCouponModal && (
+          <div className="TitleStartModalOverlay" onClick={() => setShowStoryBookCouponModal(false)}>
+            <div className="TitleStartModal TitleCouponModal" onClick={(e) => e.stopPropagation()}>
+              <div className="TitleStartModalHeader">
+                <span>COUPON CODE</span>
+                <button onClick={() => setShowStoryBookCouponModal(false)} className="TitleStartModalClose">×</button>
+              </div>
+              <div className="TitleCouponLead">
+                <div className="TitleCouponEyebrow">BOOTH Bonus</div>
+                <h3 className="TitleCouponTitle">第2章ストーリーブック特典</h3>
+                <p className="TitleCouponText">
+                  BOOTHで販売予定の特典コードを入力すると、このアカウントで第2章ストーリーブックを閲覧できます。
+                </p>
+                <p className="TitleCouponText">
+                  PDF版や冊子版とあわせて、ゲーム内の演出を振り返るための閲覧特典として使える想定です。
+                </p>
+              </div>
+
+              <div className="TitleCouponForm">
+                <label className="TitleCouponLabel" htmlFor="story-book-coupon-input">クーポンコード</label>
+                <input
+                  id="story-book-coupon-input"
+                  className="TitleCouponInput"
+                  type="text"
+                  value={storyBookCouponInput}
+                  onChange={(e) => setStoryBookCouponInput(e.target.value)}
+                  placeholder="例: ABCD-EFGH-1234"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                />
+                {storyBookCouponMessage && (
+                  <div className={`TitleCouponMessage is-${storyBookCouponMessageType}`}>
+                    {storyBookCouponMessage}
+                  </div>
+                )}
+              </div>
+
+              <div className="TitleCouponActions">
+                {canAccessChapter2StoryBook && (
+                  <button
+                    className="TitleButton neon-blue"
+                    onClick={() => {
+                      setShowStoryBookCouponModal(false);
+                      setShowTitleMenuModal(false);
+                      setShowChapter2StoryBook(true);
+                    }}
+                  >
+                    STORY BOOKを開く
+                  </button>
+                )}
+                <button className="TitleButton neon-gold" onClick={handleSubmitStoryBookCoupon}>
+                  クーポンを適用
                 </button>
               </div>
             </div>
@@ -4812,7 +4963,7 @@ const PLAYER_SKILL_COUNT = 5;
           }}
         >
             <img 
-              src={getStorageUrl('/images/title/タイトルロゴ2.png')} 
+              src={getStorageUrl('/images/title/タイトルロゴ2.webp')} 
               alt="Chapter 2 Title"
               style={{
                 maxWidth: '90%',

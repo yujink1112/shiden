@@ -112,8 +112,8 @@
     "孤児院": "images/background/v2/peaceful-village1.webp",
     "夕方の草原": "images/background/v2/grassland-evening-1.webp",
     "夕方の甲板": "images/background/v2/夕方の甲板.webp",
-    "夕方の甲板2": "images/background/v2/夕方の甲板2.png",
-    "夕方の甲板3": "images/background/v2/夕方の甲板3.png",
+    "夕方の甲板2": "images/background/v2/夕方の甲板2.webp",
+    "夕方の甲板3": "images/background/v2/夕方の甲板3.webp",
     "最後の甲板": "images/background/v2/最後の甲板.webp",
     "子供たちの冒険": "images/background/v2/子供たちの冒険.webp",
     "ブライニクルの海": "images/background/v2/ブライニクルの海.webp",
@@ -121,23 +121,23 @@
     "ブライニクル2": "images/background/v2/ブライニクル2.webp",
     "ジズ": "images/background/v2/ジズ.webp",
     "ゾルゲイドクイーン": "images/background/v2/ゾルゲイドクイーン.webp",
-    "爆砕": "images/background/v2/爆砕.png",
-    "船とポータル": "images/background/v2/船とポータル.png",
-    "飛び移る": "images/background/v2/飛び移る.png",
-    "夕方の海": "images/background/v2/夕方の海.png",
+    "爆砕": "images/background/v2/爆砕.webp",
+    "船とポータル": "images/background/v2/船とポータル.webp",
+    "飛び移る": "images/background/v2/飛び移る.webp",
+    "夕方の海": "images/background/v2/夕方の海.webp",
     "夕方の海賊船": "images/background/v2/夕方の海賊船.webp",
     "追悼": "images/background/v2/追悼.webp",
     "決闘": "images/background/v2/決闘.webp",
-    "沈む聖女": "images/background/v2/沈む聖女.png",
-    "グリザーベルク": "images/background/v2/グリザーベルク.png",
-    "巨大化": "images/background/v2/グリザーベルク_巨大化.png",
+    "沈む聖女": "images/background/v2/沈む聖女.webp",
+    "グリザーベルク": "images/background/v2/グリザーベルク.webp",
+    "巨大化": "images/background/v2/グリザーベルク_巨大化.webp",
     "最強の二人": "images/background/v2/最強の二人.webp",
     "魔女の最期": "images/background/v2/魔女の最期.webp",
-    "魔女の封印": "images/background/v2/魔女の封印.png",
-    "月の海": "images/background/v2/月の海.png",
-    "虹のオーロラ": "images/background/v2/虹のオーロラ.png",
+    "魔女の封印": "images/background/v2/魔女の封印.webp",
+    "月の海": "images/background/v2/月の海.webp",
+    "虹のオーロラ": "images/background/v2/虹のオーロラ.webp",
     "ラストシーン": "images/background/v2/ラストシーン.webp",
-    "ラストシーンスマホ": "images/background/v2/ラストシーン_スマホ.png"
+    "ラストシーンスマホ": "images/background/v2/ラストシーン_スマホ.webp"
 
   },
   "animations": {
@@ -151,7 +151,7 @@
   "stills": {
     "肉厚な魚": "images/still/肉厚な魚.webp",
     "海賊たち": "images/still/海賊たち.webp",
-    "海賊たち_夕方": "images/still/海賊たち_夕方.png",
+    "海賊たち_夕方": "images/still/海賊たち_夕方.webp",
     "古地図": "images/still/古地図.webp",
     "七つ道具：釣り竿": "images/still/七つ道具：釣り竿.webp",
     "七つ道具：拳銃": "images/still/七つ道具：拳銃.webp",
@@ -164,7 +164,7 @@
     "十字架": "images/still/十字架.webp",
     "深海のキス": "images/still/深海のキス.webp",
     "深海の銃": "images/still/深海の銃.webp",
-    "魔女の封印2": "images/still/魔女の封印2.png"
+    "魔女の封印2": "images/still/魔女の封印2.webp"
     
   },
   "bgm": {

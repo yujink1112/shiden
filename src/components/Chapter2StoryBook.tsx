@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
-import { StoryEntry } from '../types/story';
+import { CreditsData, CreditSection, StoryEntry } from '../types/story';
 import './Chapter2StoryBook.css';
 
 type Chapter2StoryBookProps = {
@@ -24,14 +24,18 @@ type StageRecord = {
   name?: string;
 };
 
-type TextBlockKind = 'sectionTitle' | 'partTitle' | 'dialogue' | 'direction' | 'monologue';
+type TextBlockKind = 'sectionTitle' | 'partTitle' | 'dialogue' | 'direction' | 'monologue' | 'creditRole' | 'creditTitle' | 'creditAfterstory' | 'creditText' | 'creditSpace' | 'creditTightSpace' | 'theEnd' | 'tocItem';
 
 type TextBlock = {
   key: string;
   kind: TextBlockKind;
   text: string;
+  meta?: string;
   name?: string;
   align?: 'left' | 'center';
+  names?: string[];
+  spaceHeight?: number;
+  pageNumber?: number;
 };
 
 type BackgroundOption = {
@@ -41,12 +45,13 @@ type BackgroundOption = {
 
 type StoryPart = {
   id: string;
-  label: string;
+  label?: string;
   blocks: TextBlock[];
 };
 
 type StorySection = {
   sectionNo: number;
+  displayLabel: string;
   title: string;
   backgroundOptions: BackgroundOption[];
   defaultBackground: string;
@@ -56,6 +61,7 @@ type StorySection = {
 
 type PageLayout = {
   sectionNo: number;
+  sectionLabel: string;
   sectionTitle: string;
   continuation: boolean;
   blocks: TextBlock[];
@@ -215,11 +221,116 @@ const blockFromEntry = (entry: StoryEntry, key: string): TextBlock | null => {
   return null;
 };
 
+const blockFromCreditSection = (section: CreditSection, key: string, useTightSpace: boolean = false): TextBlock | null => {
+  switch (section.type) {
+    case 'title':
+      return {
+        key,
+        kind: 'creditTitle',
+        text: section.content || '',
+        align: 'center'
+      };
+    case 'role':
+      return {
+        key,
+        kind: 'creditRole',
+        text: section.role || '',
+        names: section.names || []
+      };
+    case 'afterstory':
+      return {
+        key,
+        kind: 'creditAfterstory',
+        text: section.text || '',
+        name: section.title
+      };
+    case 'text':
+      return {
+        key,
+        kind: 'creditText',
+        text: section.content || '',
+        align: 'center'
+      };
+    case 'space':
+      return {
+        key,
+        kind: useTightSpace ? 'creditTightSpace' : 'creditSpace',
+        text: '',
+        spaceHeight: useTightSpace
+          ? Math.max(8, Math.min(section.height || 50, 20))
+          : Math.max(16, Math.min(section.height || 50, 120))
+      };
+    default:
+      return null;
+  }
+};
+
+const getSectionMetaText = (meta?: string) => {
+  if (!meta) return '第2章';
+  if (meta === 'プロローグ' || meta === 'エピローグ') {
+    return `第2章 序幕` === `第2章 序幕` && meta === 'プロローグ'
+      ? '第2章 序幕'
+      : '第2章 終幕';
+  }
+  return `第2章 ${meta}`;
+};
+
+const getPageHeaderTitle = (sectionLabel: string, sectionTitle: string) => {
+  if (sectionLabel === sectionTitle) {
+    return sectionTitle;
+  }
+  return `${sectionLabel} ${sectionTitle}`.trim();
+};
+
+const paginateSectionBlocks = (
+  sections: StorySection[],
+  measuredHeights: Record<string, number>
+): PageLayout[] => {
+  const pages: PageLayout[] = [];
+
+  sections.forEach((section) => {
+    let currentPage: PageLayout = {
+      sectionNo: section.sectionNo,
+      sectionLabel: section.displayLabel,
+      sectionTitle: section.title,
+      continuation: false,
+      blocks: []
+    };
+    let usedHeight = 0;
+
+    section.blocks.forEach((block) => {
+      const blockHeight = measuredHeights[block.key] || 0;
+      const exceedsPage = usedHeight > 0 && usedHeight + blockHeight > PAGE_BODY_HEIGHT_PX;
+
+      if (exceedsPage) {
+        pages.push(currentPage);
+        currentPage = {
+          sectionNo: section.sectionNo,
+          sectionLabel: section.displayLabel,
+          sectionTitle: section.title,
+          continuation: true,
+          blocks: []
+        };
+        usedHeight = 0;
+      }
+
+      currentPage.blocks.push(block);
+      usedHeight += blockHeight;
+    });
+
+    if (currentPage.blocks.length > 0) {
+      pages.push(currentPage);
+    }
+  });
+
+  return pages;
+};
+
 const PrintableBlock: React.FC<{ block: TextBlock }> = ({ block }) => {
   if (block.kind === 'sectionTitle') {
     return (
       <section className="storybook-block storybook-section-title">
-        <div className="storybook-section-meta">第2章 第{block.key.split('-')[1]}節</div>
+        <div className="storybook-section-meta">{getSectionMetaText(block.meta)}</div>
         <h2>{block.text}</h2>
       </section>
     );
@@ -229,6 +340,70 @@ const PrintableBlock: React.FC<{ block: TextBlock }> = ({ block }) => {
     return (
       <section className="storybook-block storybook-part-title">
         <div className="storybook-part-chip">{block.text}</div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'creditTitle') {
+    return (
+      <section className="storybook-block storybook-credit-title">
+        <div className="storybook-text">{renderRubyText(block.text)}</div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'creditRole') {
+    return (
+      <section className="storybook-block storybook-credit-role">
+        <div className="storybook-credit-role-name">{block.text}</div>
+        <div className="storybook-credit-role-names">
+          {(block.names || []).map((name, index) => (
+            <div key={`${block.key}-${index}`}>{name}</div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'creditAfterstory') {
+    return (
+      <section className="storybook-block storybook-credit-afterstory">
+        {block.name && <div className="storybook-credit-afterstory-name">{block.name}</div>}
+        <div className="storybook-text">{renderRubyText(block.text)}</div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'creditText') {
+    return (
+      <section className="storybook-block storybook-credit-text">
+        <div className="storybook-text">{renderRubyText(block.text)}</div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'creditSpace') {
+    return <div className="storybook-credit-space" style={{ height: `${block.spaceHeight || 24}px` }} />;
+  }
+
+  if (block.kind === 'creditTightSpace') {
+    return <div className="storybook-credit-tight-space" style={{ height: `${block.spaceHeight || 12}px` }} />;
+  }
+
+  if (block.kind === 'theEnd') {
+    return (
+      <section className="storybook-block storybook-the-end">
+        <div className="storybook-the-end-text">{block.text}</div>
+      </section>
+    );
+  }
+
+  if (block.kind === 'tocItem') {
+    return (
+      <section className="storybook-block storybook-toc-item">
+        <div className="storybook-toc-label">{block.text}</div>
+        <div className="storybook-toc-dots" />
+        <div className="storybook-toc-page">{block.pageNumber}</div>
       </section>
     );
   }
@@ -258,23 +433,29 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
         setIsLoading(true);
         setError(null);
 
-        const [assetsRes, flowRes, stagesRes] = await Promise.all([
+        const [assetsRes, flowRes, stagesRes, creditsRes] = await Promise.all([
           fetch(toPublicUrl('/data/story_assets.json')),
           fetch(toPublicUrl('/data/chapter2_flow.json')),
-          fetch(toPublicUrl('/data/stages.json'))
+          fetch(toPublicUrl('/data/stages.json')),
+          fetch(toPublicUrl('/data/credits.json'))
         ]);
 
-        if (!assetsRes.ok || !flowRes.ok || !stagesRes.ok) {
+        if (!assetsRes.ok || !flowRes.ok || !stagesRes.ok || !creditsRes.ok) {
           throw new Error('ストーリーデータの読み込みに失敗しました。');
         }
 
         const assets = await assetsRes.json() as StoryAssets;
         const flows = await flowRes.json() as Chapter2StageFlow[];
         const stages = await stagesRes.json() as StageRecord[];
+        const creditsData = await creditsRes.json() as CreditsData;
 
-        const storyIds = flows
-          .flatMap((flow) => flow.flow.filter((step) => step.type === 'story').map((step) => step.id))
-          .filter((id): id is string => Boolean(id));
+        const storyIds = [
+          'prologue',
+          ...flows
+            .flatMap((flow) => flow.flow.filter((step) => step.type === 'story').map((step) => step.id))
+            .filter((id): id is string => Boolean(id)),
+          'epilogue'
+        ];
 
         const uniqueIds = Array.from(new Set(storyIds));
         const stories = await Promise.all(
@@ -295,14 +476,15 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
           urlToBackgroundName.set(value, name);
         });
 
-        const nextSections: StorySection[] = flows.map((flow) => {
-          const sectionNo = Math.max(flow.stageNo - 12, 1);
-          const stageTitle = stages.find((stage) => stage.chapter === 2 && stage.stage === sectionNo && stage.battle === 1)?.name || `第${sectionNo}節`;
-          const storySteps = flow.flow.filter((step) => step.type === 'story' && step.id);
-
+        const buildSection = (
+          sectionNo: number,
+          displayLabel: string,
+          title: string,
+          partDefs: Array<{ id: string; label?: string }>
+        ): StorySection => {
           const partBackgroundValues: string[] = [];
-          const parts: StoryPart[] = storySteps.map((step, partIndex) => {
-            const rawText = textMap.get(step.id!);
+          const parts: StoryPart[] = partDefs.map((part, partIndex) => {
+            const rawText = textMap.get(part.id);
             const script = parseStoryText(rawText || '', assets);
             const blocks = script
               .map((entry, entryIndex) => {
@@ -314,8 +496,8 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
               .filter((block): block is TextBlock => Boolean(block));
 
             return {
-              id: step.id!,
-              label: `パート ${partIndex + 1}`,
+              id: part.id,
+              label: part.label,
               blocks
             };
           });
@@ -333,28 +515,112 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
             {
               key: `section-${sectionNo}-title`,
               kind: 'sectionTitle',
-              text: stageTitle
+              meta: displayLabel,
+              text: title
             }
           ];
 
           parts.forEach((part, partIndex) => {
-            blocks.push({
-              key: `section-${sectionNo}-part-${partIndex + 1}-title`,
-              kind: 'partTitle',
-              text: part.label
-            });
+            if (part.label) {
+              blocks.push({
+                key: `section-${sectionNo}-part-${partIndex + 1}-title`,
+                kind: 'partTitle',
+                text: part.label
+              });
+            }
             blocks.push(...part.blocks);
           });
 
           return {
             sectionNo,
-            title: stageTitle,
+            displayLabel,
+            title,
             backgroundOptions,
             defaultBackground: backgroundOptions[1]?.value || '',
             blocks,
             parts
           };
+        };
+
+        const chapterSections = flows.map((flow) => {
+          const sectionNo = Math.max(flow.stageNo - 12, 1);
+          const stageTitle = stages.find((stage) => stage.chapter === 2 && stage.stage === sectionNo && stage.battle === 1)?.name || `第${sectionNo}節`;
+          const storySteps = flow.flow.filter((step) => step.type === 'story' && step.id);
+
+          return buildSection(
+            sectionNo,
+            `第${sectionNo}節`,
+            stageTitle,
+            storySteps.map((step, partIndex) => ({
+              id: step.id!,
+              label: `パート ${partIndex + 1}`
+            }))
+          );
         });
+
+        const rawCreditBlocks = creditsData.sections
+          .map((section, index, list) => {
+            const previousType = index > 0 ? list[index - 1].type : null;
+            const nextType = index < list.length - 1 ? list[index + 1].type : null;
+            const useTightSpace = section.type === 'space' && (previousType === 'afterstory' || nextType === 'afterstory');
+            return blockFromCreditSection(section, `section-100-credit-${index}`, useTightSpace);
+          })
+          .filter((block): block is TextBlock => Boolean(block));
+
+        const firstAfterstoryIndex = rawCreditBlocks.findIndex((block) => block.kind === 'creditAfterstory');
+        const creditBlocks = firstAfterstoryIndex >= 0
+          ? [
+              ...rawCreditBlocks.slice(0, firstAfterstoryIndex),
+              {
+                key: 'section-100-afterstory-title',
+                kind: 'creditTitle' as const,
+                text: '後日談',
+                align: 'center' as const
+              } satisfies TextBlock,
+              ...rawCreditBlocks.slice(firstAfterstoryIndex)
+            ]
+          : rawCreditBlocks;
+
+        const endSection: StorySection = {
+          sectionNo: 101,
+          displayLabel: '終幕',
+          title: 'THE END',
+          backgroundOptions: [{ label: 'なし', value: '' }],
+          defaultBackground: '',
+          parts: [{ id: 'the-end', blocks: [] }],
+          blocks: [
+            {
+              key: 'section-101-the-end',
+              kind: 'theEnd',
+              text: 'THE END',
+              align: 'center'
+            }
+          ]
+        };
+
+        const nextSections: StorySection[] = [
+          buildSection(0, 'プロローグ', 'プロローグ', [{ id: 'prologue' }]),
+          ...chapterSections,
+          buildSection(99, 'エピローグ', 'エピローグ', [{ id: 'epilogue' }]),
+          {
+            sectionNo: 100,
+            displayLabel: 'エンドロール',
+            title: 'エンドロール',
+            backgroundOptions: [{ label: 'なし', value: '' }],
+            defaultBackground: '',
+            parts: [{ id: 'credits', blocks: creditBlocks }],
+            blocks: [
+              {
+                key: 'section-100-title',
+                kind: 'sectionTitle',
+                meta: 'エンドロール',
+                text: 'エンドロール'
+              },
+              ...creditBlocks
+            ]
+          },
+          endSection
+        ];
 
         setSections(nextSections);
         setSelectedBackgrounds(
@@ -379,7 +645,52 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
     };
   }, []);
 
-  const allBlocks = useMemo(() => sections.flatMap((section) => section.blocks), [sections]);
+  const contentPageLayouts = useMemo(
+    () => paginateSectionBlocks(sections, measuredHeights),
+    [measuredHeights, sections]
+  );
+
+  const tocBlocks = useMemo<TextBlock[]>(() => {
+    if (sections.length === 0) return [];
+
+    const firstPageBySection = new Map<number, number>();
+    contentPageLayouts.forEach((page, index) => {
+      if (!firstPageBySection.has(page.sectionNo)) {
+        firstPageBySection.set(page.sectionNo, index + 2);
+      }
+    });
+
+    return [
+      {
+        key: 'section--1-title',
+        kind: 'sectionTitle',
+        meta: '目次',
+        text: '目次'
+      },
+      ...sections
+        .filter((section) => section.displayLabel !== '終幕')
+        .map((section) => ({
+          key: `section--1-toc-${section.sectionNo}`,
+          kind: 'tocItem' as const,
+          text: section.displayLabel === section.title
+            ? section.title
+            : `${section.displayLabel} ${section.title}`,
+          pageNumber: firstPageBySection.get(section.sectionNo) || 1
+        }))
+    ];
+  }, [contentPageLayouts, sections]);
+
+  const tocSection = useMemo<StorySection>(() => ({
+    sectionNo: -1,
+    displayLabel: '目次',
+    title: '目次',
+    backgroundOptions: [{ label: 'なし', value: '' }],
+    defaultBackground: '',
+    parts: [{ id: 'toc', blocks: tocBlocks }],
+    blocks: tocBlocks
+  }), [tocBlocks]);
+
+  const allBlocks = useMemo(() => [tocSection, ...sections].flatMap((section) => section.blocks), [sections, tocSection]);
 
   useLayoutEffect(() => {
     if (allBlocks.length === 0) return;
@@ -412,46 +723,10 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
     };
   }, [allBlocks]);
 
-  const pageLayouts = useMemo<PageLayout[]>(() => {
-    if (sections.length === 0) return [];
-
-    const pages: PageLayout[] = [];
-
-    sections.forEach((section) => {
-      let currentPage: PageLayout = {
-        sectionNo: section.sectionNo,
-        sectionTitle: section.title,
-        continuation: false,
-        blocks: []
-      };
-      let usedHeight = 0;
-
-      section.blocks.forEach((block) => {
-        const blockHeight = measuredHeights[block.key] || 0;
-        const exceedsPage = usedHeight > 0 && usedHeight + blockHeight > PAGE_BODY_HEIGHT_PX;
-
-        if (exceedsPage) {
-          pages.push(currentPage);
-          currentPage = {
-            sectionNo: section.sectionNo,
-            sectionTitle: section.title,
-            continuation: true,
-            blocks: []
-          };
-          usedHeight = 0;
-        }
-
-        currentPage.blocks.push(block);
-        usedHeight += blockHeight;
-      });
-
-      if (currentPage.blocks.length > 0) {
-        pages.push(currentPage);
-      }
-    });
-
-    return pages;
-  }, [measuredHeights, sections]);
+  const pageLayouts = useMemo<PageLayout[]>(
+    () => paginateSectionBlocks([tocSection, ...sections], measuredHeights),
+    [measuredHeights, sections, tocSection]
+  );
 
   if (isLoading) {
     return (
@@ -515,7 +790,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
         <div className="storybook-background-grid">
           {sections.map((section) => (
             <label key={section.sectionNo} className="storybook-select-card">
-              <span>第{section.sectionNo}節 背景</span>
+              <span>{section.displayLabel} 背景</span>
               <select
                 value={selectedBackgrounds[section.sectionNo] ?? section.defaultBackground}
                 onChange={(event) => {
@@ -540,6 +815,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
       <main className="storybook-preview">
         {pageLayouts.map((page, pageIndex) => {
           const backgroundValue = selectedBackgrounds[page.sectionNo] || '';
+          const isTheEndPage = page.blocks.length === 1 && page.blocks[0].kind === 'theEnd';
           return (
             <article key={`page-${page.sectionNo}-${pageIndex}`} className="storybook-page">
               {backgroundValue && (
@@ -555,15 +831,16 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
                 aria-hidden="true"
               />
 
-              <header className="storybook-page-header">
-                <div className="storybook-page-header-kicker">SHIDEN CHAPTER 2</div>
-                <div className="storybook-page-header-title">
-                  第{page.sectionNo}節 {page.sectionTitle}
-                  {page.continuation ? ' 続き' : ''}
-                </div>
-              </header>
+              {!isTheEndPage && (
+                <header className="storybook-page-header">
+                  <div className="storybook-page-header-kicker">SHIDEN CHAPTER 2</div>
+                  <div className="storybook-page-header-title">
+                    {getPageHeaderTitle(page.sectionLabel, page.sectionTitle)}
+                  </div>
+                </header>
+              )}
 
-              <div className="storybook-page-body">
+              <div className={`storybook-page-body ${isTheEndPage ? 'is-the-end-page' : ''}`}>
                 {page.blocks.map((block) => (
                   <PrintableBlock key={block.key} block={block} />
                 ))}

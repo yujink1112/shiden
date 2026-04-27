@@ -1,20 +1,27 @@
 .storybook-shell {
   min-height: 100dvh;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   background:
     radial-gradient(circle at top, rgba(209, 179, 122, 0.24), transparent 32%),
     linear-gradient(180deg, #16120f 0%, #241a16 40%, #120e0c 100%);
   color: #241a16;
   padding: 24px;
   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
 }
 
 .storybook-controls {
   position: sticky;
   top: 0;
   z-index: 5;
-  max-width: 1180px;
-  margin: 0 auto 24px;
+  width: min(360px, 30vw);
+  max-width: 360px;
+  flex: 0 0 min(360px, 30vw);
+  margin: 0;
   padding: 20px;
   border: 1px solid rgba(214, 188, 138, 0.28);
   border-radius: 20px;
@@ -128,11 +135,13 @@
 }
 
 .storybook-preview {
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 26px;
   padding-bottom: 48px;
+  min-width: 0;
 }
 
 .storybook-page {
@@ -191,6 +200,14 @@
   padding: 8mm 18mm 10mm;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.storybook-page-body.is-the-end-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .storybook-page-footer {
@@ -271,6 +288,100 @@
   color: #18110d;
 }
 
+.storybook-credit-title,
+.storybook-credit-text {
+  margin-bottom: 4mm;
+  text-align: center;
+}
+
+.storybook-credit-title .storybook-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.storybook-credit-role {
+  margin-bottom: 4mm;
+  text-align: center;
+}
+
+.storybook-credit-role-name {
+  margin-bottom: 2mm;
+  color: #6c4f39;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.storybook-credit-role-names {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+  color: #18110d;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-credit-afterstory {
+  margin-bottom: 0;
+}
+
+.storybook-credit-afterstory-name {
+  margin-bottom: 1mm;
+  color: #8f6b25;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.storybook-credit-space {
+  width: 100%;
+}
+
+.storybook-credit-tight-space {
+  width: 100%;
+}
+
+.storybook-toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 3.5mm;
+}
+
+.storybook-toc-label {
+  color: #18110d;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+
+.storybook-toc-dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(108, 79, 57, 0.65);
+  transform: translateY(-2px);
+}
+
+.storybook-toc-page {
+  min-width: 2.5em;
+  text-align: right;
+  color: #6c4f39;
+  font-weight: 700;
+}
+
+.storybook-the-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  text-align: center;
+}
+
+.storybook-the-end-text {
+  color: #5e4434;
+  font-family: "Cinzel", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
 .storybook-text rt {
   font-size: 0.5em;
 }
@@ -320,11 +431,16 @@
 
 @media (max-width: 900px) {
   .storybook-shell {
+    display: block;
     padding: 14px;
   }
 
   .storybook-controls {
     position: static;
+    width: auto;
+    max-width: 1180px;
+    flex: none;
+    margin: 0 auto 24px;
     padding: 16px;
   }
 
@@ -419,5 +535,13 @@
 
   .storybook-text-block {
     margin-bottom: 3mm;
+  }
+
+  .storybook-toc-item {
+    margin-bottom: 3mm;
+  }
+
+  .storybook-the-end-text {
+    font-size: 2.6rem;
   }
 }
