@@ -420,7 +420,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
   const [sections, setSections] = useState<StorySection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [backgroundOpacity, setBackgroundOpacity] = useState(0.16);
+  const [backgroundOpacity] = useState(0.16);
   const [selectedBackgrounds, setSelectedBackgrounds] = useState<Record<number, string>>({});
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
   const measureRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -774,42 +774,6 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
           各節ごとに3パートをまとめ、`StoryCanvas` の本文をそのまま読める形でA4ページに整えています。
         </p>
 
-        <label className="storybook-opacity-control">
-          <span>背景の濃さ</span>
-          <input
-            type="range"
-            min="0"
-            max="0.35"
-            step="0.01"
-            value={backgroundOpacity}
-            onChange={(event) => setBackgroundOpacity(Number(event.target.value))}
-          />
-          <strong>{Math.round(backgroundOpacity * 100)}%</strong>
-        </label>
-
-        <div className="storybook-background-grid">
-          {sections.map((section) => (
-            <label key={section.sectionNo} className="storybook-select-card">
-              <span>{section.displayLabel} 背景</span>
-              <select
-                value={selectedBackgrounds[section.sectionNo] ?? section.defaultBackground}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSelectedBackgrounds((prev) => ({
-                    ...prev,
-                    [section.sectionNo]: value
-                  }));
-                }}
-              >
-                {section.backgroundOptions.map((option) => (
-                  <option key={`${section.sectionNo}-${option.value || 'none'}`} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ))}
-        </div>
       </aside>
 
       <main className="storybook-preview">

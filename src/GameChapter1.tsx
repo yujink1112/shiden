@@ -1,5 +1,6 @@
 import React from 'react';
 import SkillCard from './components/SkillCard';
+import MobileSelectedSkillsTray from './components/MobileSelectedSkillsTray';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import Kamishibai from './components/Kamishibai';
 import AudioManager from './utils/audioManager';
@@ -256,6 +257,16 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       backgroundColor: '#000',
       overflow: 'hidden'
     }}>
+    <MobileSelectedSkillsTray
+      isMobile={isMobile}
+      selectedPlayerSkills={selectedPlayerSkills}
+      getSkillCardsFromAbbrs={getSkillCardsFromAbbrs}
+      iconMode={iconMode}
+      gameStarted={gameStarted}
+      handleSelectedSkillClick={handleSelectedSkillClick}
+      connections={connections}
+      dimmedIndices={dimmedIndices}
+    />
 
 {showStage1Tutorial && (
         <div className="ChangelogModalOverlay" style={{ zIndex: 20000 }} onClick={() => setShowStage1Tutorial(false)}>

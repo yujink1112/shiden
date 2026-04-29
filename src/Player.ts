@@ -125,7 +125,8 @@ export class Player {
                 case "刺":
                     this.name[i] = "刺突";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 1;
+                    this.speed[i] = level - 2;
+                    if (this.speed[i] < 0) this.speed[i] = 0;
                     this.damage[i] = 1;
                     break;
                 case "果":
@@ -335,7 +336,7 @@ export class Player {
                 case "砲":
                     this.name[i] = "艦砲";
                     this.type[i] = Player.ATTACK;
-                    this.speed[i] = 0;
+                    this.speed[i] = 1;
                     this.damage[i] = 3;
                     break;
                 case "死":

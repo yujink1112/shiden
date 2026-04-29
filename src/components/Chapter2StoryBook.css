@@ -1,7 +1,9 @@
 .storybook-shell {
   min-height: 100dvh;
+  height: 100dvh;
   overflow-x: hidden;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   background:
     radial-gradient(circle at top, rgba(209, 179, 122, 0.24), transparent 32%),
     linear-gradient(180deg, #16120f 0%, #241a16 40%, #120e0c 100%);
@@ -142,6 +144,11 @@
   gap: 26px;
   padding-bottom: 48px;
   min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .storybook-page {
@@ -432,6 +439,9 @@
 @media (max-width: 900px) {
   .storybook-shell {
     display: block;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
     padding: 14px;
   }
 
@@ -455,8 +465,9 @@
 
   .storybook-preview {
     align-items: flex-start;
-    overflow-x: auto;
+    overflow: visible;
     padding-bottom: 24px;
+    max-height: none;
   }
 
   .storybook-page {

@@ -1,5 +1,6 @@
 import React from 'react';
 import SkillCard from './components/SkillCard';
+import MobileSelectedSkillsTray from './components/MobileSelectedSkillsTray';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import StoryCanvas from './components/StoryCanvas';
 import AudioManager from './utils/audioManager';
@@ -41,6 +42,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     showBossClearPanel,
     rewardSelectionMode,
     setRewardSelectionMode,
+    pendingChapter2Reward,
     selectedRewards,
     setSelectedRewards,
     handleRewardSelection,
@@ -80,14 +82,22 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
     return flow?.flow[chapter2FlowIndex] || null;
   }, [chapter2Flows, stageCycle, chapter2FlowIndex]);
+  const displayedRewardStep = React.useMemo(() => {
+    if (currentStep?.type === 'reward') return currentStep;
+    if (rewardSelectionMode && pendingChapter2Reward?.stageNo === stageCycle) {
+      return pendingChapter2Reward.step;
+    }
+    return null;
+  }, [currentStep, rewardSelectionMode, pendingChapter2Reward, stageCycle]);
   const currentFlow = React.useMemo(() => {
     return chapter2Flows.find(f => f.stageNo === stageCycle) || null;
   }, [chapter2Flows, stageCycle]);
 
   // 第2章の報酬選択（flow type が reward の場合）
-  const isChapter2Reward = currentStep?.type === 'reward';
-  const isFixedChapter2Reward = isChapter2Reward && !!currentStep?.skill;
-  const isPreBattleReward = isChapter2Reward && currentFlow?.flow[chapter2FlowIndex + 1]?.type === 'battle';
+  const isChapter2Reward = !!displayedRewardStep;
+  const isFixedChapter2Reward = isChapter2Reward && !!displayedRewardStep?.skill;
+  const displayedRewardFlowIndex = currentStep?.type === 'reward' ? chapter2FlowIndex : pendingChapter2Reward?.flowIndex;
+  const isPreBattleReward = isChapter2Reward && currentFlow?.flow[(displayedRewardFlowIndex ?? chapter2FlowIndex) + 1]?.type === 'battle';
 
   // 報酬の選択肢を生成して保存する。リロード時は同じ報酬ステップの候補を再利用する。
   const [rewardChoices, setRewardChoices] = React.useState<string[]>([]);
@@ -97,13 +107,13 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     if (isRewardConfirming) return;
 
-    if (!isChapter2Reward || !currentStep) {
+    if (!isChapter2Reward || !displayedRewardStep) {
       setRewardChoices([]);
       localStorage.removeItem(storageKey);
       return;
     }
 
-    const rewardStepKey = `${stageCycle}:${chapter2FlowIndex}`;
+    const rewardStepKey = `${stageCycle}:${displayedRewardFlowIndex ?? chapter2FlowIndex}`;
     const saved = localStorage.getItem(storageKey);
     const canOfferReward = (abbr: string) => {
       const skill = ALL_SKILLS.find(s => s.abbr === abbr);
@@ -132,7 +142,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         const parsed = JSON.parse(saved);
         if (parsed?.key === rewardStepKey && Array.isArray(parsed?.choices)) {
           const savedChoices = parsed.choices as string[];
-          const expectedChoices = currentStep.choices || (currentStep.skill ? [currentStep.skill] : []);
+          const expectedChoices = displayedRewardStep.choices || (displayedRewardStep.skill ? [displayedRewardStep.skill] : []);
           const includesFixedChoices = expectedChoices.every(abbr => savedChoices.includes(abbr));
           if (savedChoices.every(abbr => canOfferReward(abbr)) && includesFixedChoices) {
             setRewardChoices(savedChoices);
@@ -144,21 +154,21 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       }
     }
 
-    if (currentStep.skill) {
-      const choices = [currentStep.skill];
+    if (displayedRewardStep.skill) {
+      const choices = [displayedRewardStep.skill];
       setRewardChoices(choices);
       localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices }));
       return;
     }
 
-    if (!currentStep.choices) {
+    if (!displayedRewardStep.choices) {
       setRewardChoices([]);
       localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices: [] }));
       return;
     }
 
     let choices: string[] = [];
-    currentStep.choices.forEach(abbr => {
+    displayedRewardStep.choices.forEach(abbr => {
       if (canOfferReward(abbr) && !choices.includes(abbr)) {
         choices.push(abbr);
         return;
@@ -179,7 +189,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     setRewardChoices(choices);
     localStorage.setItem(storageKey, JSON.stringify({ key: rewardStepKey, choices }));
-  }, [isChapter2Reward, currentStep, stageCycle, chapter2FlowIndex, ownedSkillAbbrs, ALL_SKILLS, isRewardConfirming]);
+  }, [isChapter2Reward, displayedRewardStep, stageCycle, displayedRewardFlowIndex, chapter2FlowIndex, ownedSkillAbbrs, ALL_SKILLS, isRewardConfirming]);
 
   const previousChapter2BattleStep = React.useMemo(() => {
     if (!isChapter2Reward) return null;
@@ -231,6 +241,88 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
     return () => window.clearTimeout(timer);
   }, [isChapter2FinalBattle, showStoryModal, stageCycle, chapter2FlowIndex]);
+
+  const rewardSelectionOverlay = showRewardSelection ? (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      backdropFilter: 'blur(5px)'
+    }}>
+      <div className="RewardSelection" style={{ textAlign: 'center', padding: '30px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '15px', maxWidth: '90%', maxHeight: '90%', overflowY: 'auto', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
+        <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
+          {isPreBattleReward && displayedRewardStep?.skill ? '覚醒！！' : 'ステージクリア！'}<br />
+          {displayedRewardStep?.skill ? '新しいスキルを獲得しました！' :
+            displayedRewardStep?.choices ? 'スキルを1つ選んでください' :
+            isChapter2Reward ? `スキルを${displayedRewardStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
+          {isChapter2Reward ? (
+            rewardChoices.map((abbr: string) => {
+              const skill = getSkillCardsFromAbbrs([abbr])[0];
+              if (!skill) return null;
+              return (
+                <div
+                  key={abbr}
+                  onClick={isFixedChapter2Reward ? undefined : () => handleRewardSelection(abbr)}
+                  style={{ cursor: isFixedChapter2Reward ? 'default' : 'pointer', transition: 'transform 0.2s' }}
+                  className={(isFixedChapter2Reward || selectedRewards.includes(abbr)) ? 'selected-reward-card' : ''}
+                >
+                  <SkillCard skill={skill} isSelected={isFixedChapter2Reward || displayedRewardStep?.choices ? true : selectedRewards.includes(abbr)} iconMode={iconMode} />
+                </div>
+              );
+            })
+          ) : (
+            getAvailableSkillsUntilStage(stageCycle).map((skill: SkillDetail) => {
+              if (ownedSkillAbbrs.includes(skill.abbr)) return null;
+              return (
+                <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}>
+                  <SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} />
+                </div>
+              );
+            })
+          )}
+        </div>
+        <button
+          disabled={
+            isRewardConfirming || (isChapter2Reward ? (
+              displayedRewardStep?.skill ? false :
+              displayedRewardStep?.choices ? selectedRewards.length !== 1 :
+              selectedRewards.length !== (displayedRewardStep?.count || 1)
+            ) : (
+              selectedRewards.length === 0
+            ))
+          }
+          onClick={() => {
+            if (isChapter2Reward && displayedRewardStep?.skill) {
+              confirmRewards([displayedRewardStep.skill]);
+              return;
+            }
+            confirmRewards();
+          }}
+          style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isRewardConfirming || (isChapter2Reward ? (displayedRewardStep?.skill ? false : displayedRewardStep?.choices ? selectedRewards.length !== 1 : selectedRewards.length !== (displayedRewardStep?.count || 1)) : selectedRewards.length === 0)) ? 0.5 : 1 }}
+        >
+          {isChapter2Reward && displayedRewardStep?.skill ? '確認' : 'スキルを獲得する'}
+        </button>
+        <div style={{ marginTop: '15px' }}>
+          {!isChapter2Reward && (
+            <button onClick={() => {
+              setSelectedRewards([]);
+              setRewardSelectionMode(false);
+              clearBossAndNextCycle();
+            }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   React.useEffect(() => {
     finalClearStartedRef.current = false;
@@ -318,6 +410,16 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       backgroundColor: '#000',
       overflow: 'hidden'
     }}>
+      <MobileSelectedSkillsTray
+        isMobile={isMobile}
+        selectedPlayerSkills={selectedPlayerSkills}
+        getSkillCardsFromAbbrs={getSkillCardsFromAbbrs}
+        iconMode={iconMode}
+        gameStarted={gameStarted}
+        handleSelectedSkillClick={handleSelectedSkillClick}
+        connections={connections}
+        dimmedIndices={dimmedIndices}
+      />
       {isChapter2FinalBattle && !showStoryModal && (
         <div className="chapter2-final-embers" aria-hidden="true">
           {Array.from({ length: 34 }).map((_, index) => (
@@ -439,87 +541,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         )}
         {gameStarted && logComplete && (
           <div className="ResultsOverview" style={{ marginTop: '0px', width: '100%', maxWidth: '800px' }}>
-            {showRewardSelection && (
-              <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1000,
-                backdropFilter: 'blur(5px)'
-              }}>
-                <div className="RewardSelection" style={{ textAlign: 'center', padding: '30px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '15px', maxWidth: '90%', maxHeight: '90%', overflowY: 'auto', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
-                  <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
-                    撃破！！<br />
-                    {currentStep?.skill ? '新しいスキルを獲得しました！' :
-                     currentStep?.choices ? 'スキルを1つ選んでください' :
-                     isChapter2Reward ? `スキルを${currentStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
-                  </h2>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '20px' }}>
-                    {currentStep?.type === 'reward' ? (
-                      rewardChoices.map((abbr: string) => {
-                        const skill = getSkillCardsFromAbbrs([abbr])[0];
-                        if (!skill) return null;
-                        return (
-                          <div
-                            key={abbr}
-                            onClick={isFixedChapter2Reward ? undefined : () => handleRewardSelection(abbr)}
-                            style={{ cursor: isFixedChapter2Reward ? 'default' : 'pointer', transition: 'transform 0.2s' }}
-                            className={(isFixedChapter2Reward || selectedRewards.includes(abbr)) ? 'selected-reward-card' : ''}
-                          >
-                            <SkillCard skill={skill} isSelected={isFixedChapter2Reward || currentStep?.choices ? true : selectedRewards.includes(abbr)} iconMode={iconMode} />
-                          </div>
-                        );
-                      })
-                    ) : (
-                      getAvailableSkillsUntilStage(stageCycle).map((skill: SkillDetail) => {
-                        if (ownedSkillAbbrs.includes(skill.abbr)) return null;
-                        return (
-                          <div key={skill.abbr} onClick={() => handleRewardSelection(skill.abbr)} style={{ cursor: 'pointer' }}>
-                            <SkillCard skill={skill} isSelected={selectedRewards.includes(skill.abbr)} iconMode={iconMode} />
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                  <button 
-                    disabled={
-                      isRewardConfirming || (isChapter2Reward ? (
-                        currentStep?.skill ? false :
-                        currentStep?.choices ? selectedRewards.length !== 1 :
-                        selectedRewards.length !== (currentStep?.count || 1)
-                      ) : (
-                        selectedRewards.length === 0
-                      ))
-                    } 
-                    onClick={() => {
-                      if (isChapter2Reward && currentStep?.skill) {
-                        confirmRewards([currentStep.skill]);
-                        return;
-                      }
-                      confirmRewards();
-                    }} 
-                    style={{ padding: '10px 20px', fontSize: '18px', backgroundColor: '#ffd700', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', opacity: (isRewardConfirming || (isChapter2Reward ? (currentStep?.skill ? false : currentStep?.choices ? selectedRewards.length !== 1 : selectedRewards.length !== (currentStep?.count || 1)) : selectedRewards.length === 0)) ? 0.5 : 1 }}
-                  >
-                    {isChapter2Reward && currentStep?.skill ? '確認' : 'スキルを獲得する'}
-                  </button>
-                  <div style={{ marginTop: '15px' }}>
-                      {!isChapter2Reward && (
-                          <button onClick={() => { 
-                              setSelectedRewards([]); 
-                              setRewardSelectionMode(false); 
-                              clearBossAndNextCycle(); 
-                          }} style={{ padding: '8px 20px', background: '#333', border: '1px solid #555', color: '#fff', borderRadius: '5px', cursor: 'pointer' }}>報酬を受け取らない</button>
-                      )}
-                  </div>
-                </div>
-              </div>
-            )}
+            {rewardSelectionOverlay}
             {showChapter2VictoryPanel && !showRewardSelection && !isChapter2FinalBattle && (
               <div style={{ textAlign: 'center', marginBottom: '20px', padding: '20px', background: '#2e7d32', borderRadius: '10px' }}>
                 <h2 style={{ color: 'white', margin: '0 0 15px 0' }}>
@@ -545,6 +567,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{battleResults.map((battle: BattleResult, index: number) => <div key={index} onClick={() => setShowLogForBattleIndex(index)} style={{ padding: '10px', border: `1px solid ${showLogForBattleIndex === index ? '#61dafb' : '#444'}`, borderRadius: '5px', backgroundColor: '#1e1e1e', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><span style={{ marginRight: '10px', fontWeight: 'bold', color: battle.winner === 1 ? '#66bb6a' : '#ef5350' }}>{battle.resultText}</span><div style={{ display: 'flex', gap: '5px' }}>{battle.computerSkills.map((s: SkillDetail, si: number) => <img key={si} src={getStorageUrl(s.icon)} alt="" style={{ width: '30px', height: '30px' }} />)}</div></div>)}</div>
           </div>
         )}
+        {!gameStarted && rewardSelectionOverlay}
       </div>
       <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflow: 'hidden', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
         {(() => {

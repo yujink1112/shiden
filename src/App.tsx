@@ -15,7 +15,7 @@ import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
 import Kamishibai from './components/Kamishibai';
 import { parseStoryText, StoryAssets } from './types/storyParser';
-import { Chapter2StageFlow, Chapter2FlowStep } from './types/chapter2';
+import { Chapter2StageFlow, Chapter2FlowStep, PendingChapter2Reward } from './types/chapter2';
 import StoryCanvas from './components/StoryCanvas';
 import AudioManager from './utils/audioManager';
 import AnimatedRichLog, { StageMode } from './components/AnimatedRichLog';
@@ -483,6 +483,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [rewardSelectionMode, setRewardSelectionMode] = useState<boolean>(false);
+  const [pendingChapter2Reward, setPendingChapter2Reward] = useState<PendingChapter2Reward | null>(null);
   const [selectedRewards, setSelectedRewards] = useState<string[]>([]);
   const [bossClearRewardPending, setBossClearRewardPending] = useState<boolean>(false);
   const [claimedRewardSteps, setClaimedRewardSteps] = useState<string[]>(() => {
@@ -696,15 +697,18 @@ function App() {
           return moveToNextStep(flow, nextIndex);
         }
       } else if (nextStep.type === 'title') {
+        setPendingChapter2Reward(null);
         setChapter2FlowIndex(nextIndex);
         setShowChapter2Title(true);
         AudioManager.getInstance().playBgm("海賊の意志");
       } else if (nextStep.type === 'reward') {
         clearStoryCanvasState();
         setChapter2FlowIndex(nextIndex);
+        setPendingChapter2Reward({ stageNo: stageCycle, flowIndex: nextIndex, step: nextStep });
         const isPreBattleReward = flow.flow[nextIndex + 1]?.type === 'battle';
         const rewardStepKey = getRewardStepKey(stageCycle, nextIndex);
-        if (claimedRewardSteps.includes(rewardStepKey)) {
+        const shouldShowClaimedPreBattleReward = isPreBattleReward && !!nextStep.skill;
+        if (claimedRewardSteps.includes(rewardStepKey) && !shouldShowClaimedPreBattleReward) {
           setSelectedRewards([]);
           setRewardSelectionMode(false);
           return moveToNextStep(flow, nextIndex);
@@ -715,42 +719,6 @@ function App() {
           setShowLogForBattleIndex(-1);
           setLogComplete(false);
           setShowBossClearPanel(false);
-        }
-        if (isPreBattleReward && nextStep.skill) {
-          const rewardsToClaim = [nextStep.skill].filter(abbr => !!getSkillByAbbr(abbr));
-          if (rewardsToClaim.length > 0) {
-            const now = Date.now();
-            if (user) {
-              const result = await claimChapter2Reward(user.uid, {
-                rewardStepKey,
-                rewards: rewardsToClaim,
-                stageCycle,
-                flowIndex: nextIndex,
-                lastUpdated: now
-              });
-              const serverData = result.data || {};
-              const newOwnedSkills = Array.isArray(serverData.ownedSkills)
-                ? getRegularSkills(serverData.ownedSkills, 2)
-                : Array.from(new Set([...ownedSkillAbbrs, ...rewardsToClaim]));
-              const newClaimedSteps = Array.isArray(serverData.claimedRewardSteps)
-                ? serverData.claimedRewardSteps
-                : saveClaimedRewardSteps([...claimedRewardSteps, rewardStepKey]);
-
-              setOwnedSkillAbbrs(newOwnedSkills);
-              saveClaimedRewardSteps(newClaimedSteps);
-              localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(newOwnedSkills));
-              localStorage.removeItem('shiden_chapter2_reward_choices');
-              await saveProfileProgress(user.uid, { updatedAt: now });
-            } else {
-              const newOwnedSkills = Array.from(new Set([...ownedSkillAbbrs, ...rewardsToClaim]));
-              setOwnedSkillAbbrs(newOwnedSkills);
-              saveClaimedRewardSteps([...claimedRewardSteps, rewardStepKey]);
-              localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(newOwnedSkills));
-            }
-          }
-          setSelectedRewards([]);
-          setRewardSelectionMode(false);
-          return moveToNextStep(flow, nextIndex);
         }
         setSelectedRewards([]); // 報酬選択前にリセット
         if (nextStep.skill) {
@@ -763,10 +731,12 @@ function App() {
         }
       } else if (nextStep.type === 'battle') {
         clearStoryCanvasState();
+        setPendingChapter2Reward(null);
         setChapter2FlowIndex(nextIndex);
         setStageMode('BOSS');
         handleResetGame();
       } else if (nextStep.type === 'credits') {
+        setPendingChapter2Reward(null);
         setChapter2FlowIndex(nextIndex);
         setCreditsUrl(nextStep.id || '/data/credits.json');
         saveStoryCanvasState({ kind: 'credits', stageCycle, flowIndex: nextIndex, id: nextStep.id || '/data/credits.json' });
@@ -780,6 +750,7 @@ function App() {
       }
       // ステージクリア、次のサイクルへ
       clearStoryCanvasState();
+      setPendingChapter2Reward(null);
       clearBossAndNextCycle();
     }
   };
@@ -1096,7 +1067,10 @@ const PLAYER_SKILL_COUNT = 5;
 
     const flow = chapter2Flows.find(f => f.stageNo === stageCycle);
     const currentStep = flow?.flow[chapter2FlowIndex];
-    if (currentStep?.type === 'reward' && claimedRewardSteps.includes(getRewardStepKey())) {
+    const isClaimedPreBattleFixedReward = currentStep?.type === 'reward' &&
+      !!currentStep.skill &&
+      flow?.flow[chapter2FlowIndex + 1]?.type === 'battle';
+    if (currentStep?.type === 'reward' && claimedRewardSteps.includes(getRewardStepKey()) && !isClaimedPreBattleFixedReward) {
       setSelectedRewards([]);
       setRewardSelectionMode(false);
       if (user) {
@@ -2692,11 +2666,11 @@ const PLAYER_SKILL_COUNT = 5;
     if (selectedPlayerSkills.length < PLAYER_SKILL_COUNT) {
       const skill = getSkillByAbbr(abbr);
       if (skill?.name === "無想" && selectedPlayerSkills.some(s => getSkillByAbbr(s)?.name === "無想")) {
-        alert("「無想」は編成に1つしか入れられません。");
+        alert("【無想】は編成に1つしか入れられません。");
         return;
       }
       if (skill?.kamiwaza === 1 && selectedPlayerSkills.some(s => getSkillByAbbr(s)?.kamiwaza === 1)) {
-        alert("「神業」カテゴリのスキルは編成に1つしか入れられません。");
+        alert("「神業」スキルは編成に1つしか入れられません。");
         return;
       }
       setSelectedPlayerSkills([...selectedPlayerSkills, abbr]);
@@ -2911,11 +2885,19 @@ const PLAYER_SKILL_COUNT = 5;
       const isChapter2Reward = stageInfo?.chapter === 2;
       const flow = isChapter2Reward ? chapter2Flows.find(f => f.stageNo === stageCycle) : undefined;
       const currentStep = flow?.flow[chapter2FlowIndex];
-      const rewardStepKey = getRewardStepKey();
+      const effectiveChapter2Reward = currentStep?.type === 'reward'
+        ? { stageNo: stageCycle, flowIndex: chapter2FlowIndex, step: currentStep }
+        : pendingChapter2Reward;
+      const effectiveStep = effectiveChapter2Reward?.step;
+      const rewardStepKey = effectiveChapter2Reward
+        ? getRewardStepKey(effectiveChapter2Reward.stageNo, effectiveChapter2Reward.flowIndex)
+        : getRewardStepKey();
 
-      if (isChapter2Reward && currentStep?.type === 'reward') {
-        const isPreBattleReward = flow?.flow[chapter2FlowIndex + 1]?.type === 'battle';
-        const previousBattleStep = [...(flow?.flow.slice(0, chapter2FlowIndex) || [])].reverse().find(step => step.type === 'battle');
+      if (isChapter2Reward && effectiveStep?.type === 'reward') {
+        const rewardFlow = chapter2Flows.find(f => f.stageNo === effectiveChapter2Reward?.stageNo);
+        const effectiveFlowIndex = effectiveChapter2Reward?.flowIndex ?? chapter2FlowIndex;
+        const isPreBattleReward = rewardFlow?.flow[effectiveFlowIndex + 1]?.type === 'battle';
+        const previousBattleStep = [...(rewardFlow?.flow.slice(0, effectiveFlowIndex) || [])].reverse().find(step => step.type === 'battle');
         const hasCurrentBattleResults = battleResults.length > 0;
         const hasCurrentBattleVictory = battleResults.some(result => result.winner === 1);
         const hasChapter2BattleVictory = hasCurrentBattleVictory || (!hasCurrentBattleResults && canGoToBoss);
@@ -2935,14 +2917,14 @@ const PLAYER_SKILL_COUNT = 5;
       }
 
       let rewardsToClaim = rewardOverride ?? selectedRewards;
-      if (isChapter2Reward && currentStep?.type === 'reward') {
-        if (currentStep.skill) {
-          rewardsToClaim = [currentStep.skill];
-        } else if (currentStep.choices) {
-          const validChoices = getStoredChapter2RewardChoices(rewardStepKey) || currentStep.choices;
+      if (isChapter2Reward && effectiveStep?.type === 'reward') {
+        if (effectiveStep.skill) {
+          rewardsToClaim = [effectiveStep.skill];
+        } else if (effectiveStep.choices) {
+          const validChoices = getStoredChapter2RewardChoices(rewardStepKey) || effectiveStep.choices;
           rewardsToClaim = rewardsToClaim.filter(abbr => validChoices.includes(abbr)).slice(0, 1);
-        } else if (currentStep.count) {
-          rewardsToClaim = rewardsToClaim.slice(0, currentStep.count);
+        } else if (effectiveStep.count) {
+          rewardsToClaim = rewardsToClaim.slice(0, effectiveStep.count);
         }
       }
 
@@ -2962,8 +2944,8 @@ const PLAYER_SKILL_COUNT = 5;
         const result = await claimChapter2Reward(user.uid, {
           rewardStepKey,
           rewards: rewardsToClaim,
-          stageCycle,
-          flowIndex: chapter2FlowIndex,
+          stageCycle: effectiveChapter2Reward?.stageNo ?? stageCycle,
+          flowIndex: effectiveChapter2Reward?.flowIndex ?? chapter2FlowIndex,
           lastUpdated: now
         });
 
@@ -2992,6 +2974,7 @@ const PLAYER_SKILL_COUNT = 5;
           alert("この報酬は別のタブまたは端末ですでに処理されています。最新のセーブデータへ同期します。");
           setSelectedRewards([]);
           setRewardSelectionMode(false);
+          setPendingChapter2Reward(null);
           setShowStoryModal(false);
           setGameStarted(false);
           setIsTitle(true);
@@ -3022,6 +3005,7 @@ const PLAYER_SKILL_COUNT = 5;
 
       setSelectedRewards([]);
       setRewardSelectionMode(false);
+      setPendingChapter2Reward(null);
 
       if (isChapter2Reward) {
         await moveToNextStep();
@@ -3228,7 +3212,7 @@ const PLAYER_SKILL_COUNT = 5;
       chapter: 2 as const,
       image: '/images/chapter/Chapter2.webp',
       alt: '第2章 導入イメージ',
-      eyebrow: 'SECOND CHAPTER',
+      eyebrow: 'BEYOND THE LIGHTNING',
       title: '旗を掲げろ。海賊達の冒険譚。',
       lead: (
         <>
@@ -3683,7 +3667,7 @@ const PLAYER_SKILL_COUNT = 5;
                 </div>
                 {isAdmin && (
                   <>
-                    <button
+                    {/* <button
                       className="TitleAdminButton"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -3693,7 +3677,7 @@ const PLAYER_SKILL_COUNT = 5;
                       style={{ bottom: '92px', background: 'rgba(0, 137, 123, 0.92)', borderColor: 'rgba(129, 255, 230, 0.45)' }}
                     >
                       第2章ブック
-                    </button>
+                    </button> */}
                     <button
                       className="TitleAdminButton"
                       onClick={(e) => { e.stopPropagation(); setShowAdmin(true); }}
@@ -3752,6 +3736,7 @@ const PLAYER_SKILL_COUNT = 5;
                   onClick={() => handleChapterSelect(1, showChapterSelect.mode === 'NEW')}
                   style={{ 
                     flex: 1,
+                    minHeight: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '260px' : '310px') : undefined,
                     cursor: 'pointer',
                     border: '1px solid rgba(137, 216, 255, 0.56)',
                     borderRadius: '18px',
@@ -3768,7 +3753,7 @@ const PLAYER_SKILL_COUNT = 5;
                   <img 
                     src={getStorageUrl('/images/chapter/Chapter1.webp')} 
                     alt="Chapter 1" 
-                    style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
+                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '250px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
                   />
                   <div style={{ padding: '15px', textAlign: 'center' }}>
                     <div style={{ color: '#4fc3f7', fontSize: '1.2rem', fontWeight: 'bold' }}>第1章 ISLAND</div>
@@ -3797,6 +3782,7 @@ const PLAYER_SKILL_COUNT = 5;
                   }}
                   style={{ 
                     flex: 1,
+                    minHeight: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '260px' : '310px') : undefined,
                     cursor: isChapter2ContinueUnavailable ? 'default' : 'pointer',
                     border: isChapter2PanelDimmed ? '1px solid rgba(80, 80, 80, 0.5)' : '1px solid rgba(255, 120, 120, 0.56)',
                     borderRadius: '18px',
@@ -3823,7 +3809,7 @@ const PLAYER_SKILL_COUNT = 5;
                   <img 
                     src={getStorageUrl('/images/chapter/Chapter2.webp')} 
                     alt="Chapter 2" 
-                    style={{ width: '100%', height: isMobile ? '150px' : '200px', objectFit: 'cover' }}
+                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '250px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
                   />
                   <div style={{ padding: '15px', textAlign: 'center' }}>
                     <div style={{ color: isChapter2PanelDimmed ? '#666' : '#ff5252', fontSize: '1.2rem', fontWeight: 'bold' }}>第2章 FLAG</div>
@@ -4707,6 +4693,7 @@ const PLAYER_SKILL_COUNT = 5;
     setShowBossClearPanel,
     rewardSelectionMode,
     setRewardSelectionMode,
+    pendingChapter2Reward,
     selectedRewards,
     setSelectedRewards,
     handleRewardSelection,

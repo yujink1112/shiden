@@ -4,7 +4,7 @@ import { StageProcessor } from "../stageData";
 import { SkillDetail } from "../skillsData";
 import { StageMode } from "../components/AnimatedRichLog";
 import { IconMode } from "../components/SkillCard";
-import { Chapter2StageFlow } from "./chapter2";
+import { Chapter2StageFlow, PendingChapter2Reward } from "./chapter2";
 
 export interface BattleResult {
   playerSkills: SkillDetail[];
@@ -73,6 +73,7 @@ export interface GameProps {
   setShowBossClearPanel: (show: boolean) => void;
   rewardSelectionMode: boolean;
   setRewardSelectionMode: (mode: boolean) => void;
+  pendingChapter2Reward: PendingChapter2Reward | null;
   selectedRewards: string[];
   setSelectedRewards: (rewards: string[]) => void;
   handleRewardSelection: (abbr: string) => void;

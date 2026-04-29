@@ -37,6 +37,20 @@
   background-size: cover;
 }
 
+.StoryBookOverlayHost {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+@media (max-width: 900px) {
+  .StoryBookOverlayHost {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
+  }
+}
+
 @media print {
   .StoryBookOverlayHost {
     position: static !important;

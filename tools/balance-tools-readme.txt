@@ -218,6 +218,32 @@ fixes の中身
 - 途中経過は progress.log に出る
 - 長時間探索する時は --targets で対象を絞ると楽
 
+--------------------------------
+4. 8-2 専用候補探索
+--------------------------------
+
+ファイル
+- tools/search-8-2-brinekul-builds.cjs
+
+目的
+- 8-2 ブライニクル専用
+- 攻撃スキルなし
+- 飛行なし
+- 凍結 / 円環 を必須
+の7枚ボス候補をランダム生成して、通常探索と `魔` 必須探索の両方で比較する
+
+基本コマンド
+- 200候補を試す
+  - node tools/search-8-2-brinekul-builds.cjs
+- 候補数を増やす
+  - node tools/search-8-2-brinekul-builds.cjs --iterations 500 --top 30
+- 固定シードで再現する
+  - node tools/search-8-2-brinekul-builds.cjs --iterations 500 --seed 12345
+
+出力
+- tools/8-2-brinekul-build-search.json
+- tools/8-2-brinekul-build-search.log
+
 よく使う例
 - 今の未クリアだけ再探索
   - node tools/chapter2-balance-search.cjs --uncleared-only

@@ -4,7 +4,7 @@
     "bossName": "ルーサー",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 62,
+    "checked": 5,
     "samples": [
       "一一一待一",
       "一一一待刺",
@@ -22,7 +22,7 @@
     "bossName": "肉厚な魚",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 89,
+    "checked": 5,
     "samples": [
       "一一一玉速",
       "一一一強果",
@@ -40,7 +40,7 @@
     "bossName": "血に飢えたジョーズ",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 46,
+    "checked": 5,
     "samples": [
       "一一一一玉",
       "一一一刺玉",
@@ -58,13 +58,13 @@
     "bossName": "弱者狩りのハゲタカ",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 29,
+    "checked": 40,
     "samples": [
-      "一一一一待",
-      "一一一刺待",
-      "一一一果待",
-      "一一一待一",
-      "一一一待刺"
+      "拳一一一待",
+      "一一玉一待",
+      "一一一搦待",
+      "一一一玉待",
+      "一一一一玉"
     ],
     "pool": "一刺果待搦玉強速拳",
     "requireSkills": [],
@@ -76,13 +76,13 @@
     "bossName": "デザインド・エッグ号",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 40,
+    "checked": 6,
     "samples": [
       "一一一一飛",
       "一一一刺飛",
       "一一一果飛",
-      "一一一待待",
-      "一一一待飛"
+      "一一一待飛",
+      "刺一一一飛"
     ],
     "pool": "一刺果待搦玉強速拳飛",
     "requireSkills": [],
@@ -94,7 +94,7 @@
     "bossName": "エーヴィス",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 3342,
+    "checked": 5,
     "samples": [
       "一待待一速",
       "一待待待一",
@@ -112,7 +112,7 @@
     "bossName": "ラ・マンチャ号",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 39,
+    "checked": 5,
     "samples": [
       "一一一待一",
       "一一一待刺",
@@ -130,13 +130,13 @@
     "bossName": "イスパニア艦隊",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 38,
+    "checked": 135,
     "samples": [
-      "一一一一飛",
-      "一一一刺飛",
-      "一一一果飛",
       "一一一待待",
-      "一一一待搦"
+      "一一一待搦",
+      "一一一搦飛",
+      "刺一一待待",
+      "果一一待待"
     ],
     "pool": "一刺果待搦玉強速拳飛奏",
     "requireSkills": [],
@@ -148,7 +148,7 @@
     "bossName": "ゾルゲイド",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 644,
+    "checked": 5,
     "samples": [
       "一一一玉速",
       "一一刺玉速",
@@ -166,7 +166,7 @@
     "bossName": "エルダゾルゲイド",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 63,
+    "checked": 5,
     "samples": [
       "一一一一果",
       "一一一果果",
@@ -184,7 +184,7 @@
     "bossName": "クラーケン",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 70,
+    "checked": 5,
     "samples": [
       "一一一玉一",
       "一一一玉刺",
@@ -202,7 +202,7 @@
     "bossName": "ゴルゾアの胃袋",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 9347,
+    "checked": 5,
     "samples": [
       "一一玉待毒",
       "一刺玉待毒",
@@ -220,7 +220,7 @@
     "bossName": "バクバク",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 152927,
+    "checked": 5,
     "samples": [
       "待刺強一狼",
       "待刺強刺狼",
@@ -238,13 +238,13 @@
     "bossName": "死者の群れ",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 159954,
+    "checked": 12,
     "samples": [
       "待待待▽待",
-      "待待搦▽待",
-      "待待玉▽待",
-      "待待強▽待",
-      "待待速▽待"
+      "搦待待▽待",
+      "玉待待▽待",
+      "強待待▽待",
+      "速待待▽待"
     ],
     "pool": "一刺果待搦玉強速拳飛奏焦毒礁▽",
     "requireSkills": [],
@@ -256,7 +256,7 @@
     "bossName": "死霊船 黒潮号",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 128,
+    "checked": 5,
     "samples": [
       "一一一待爆",
       "一一一搦爆",
@@ -274,7 +274,7 @@
     "bossName": "ブライニクル",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 962,
+    "checked": 5,
     "samples": [
       "一一待毒一",
       "一一待毒刺",
@@ -292,13 +292,13 @@
     "bossName": "廃都の守護者",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 9610,
+    "checked": 348,
     "samples": [
-      "一刺強一爆",
-      "一刺強待爆",
-      "一刺強搦爆",
-      "一刺強玉爆",
-      "一刺強強爆"
+      "一毒強一爆",
+      "一刺搦待爆",
+      "一刺強搦飛",
+      "一刺強玉狼",
+      "刺毒強一爆"
     ],
     "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
     "requireSkills": [],
@@ -310,13 +310,13 @@
     "bossName": "深海の賢王 ジズ",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 18067,
+    "checked": 171,
     "samples": [
-      "一一飛礁狼",
-      "一一礁飛狼",
-      "一刺飛礁狼",
-      "一刺礁飛狼",
-      "一果飛礁狼"
+      "礁一飛礁狼",
+      "一礁飛礁狼",
+      "礁一礁飛狼",
+      "一礁礁飛狼",
+      "礁刺飛礁狼"
     ],
     "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円",
     "requireSkills": [],
@@ -328,7 +328,7 @@
     "bossName": "ゾルゲイドクイーン",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 10112,
+    "checked": 5,
     "samples": [
       "一一搦刺飛",
       "一一搦待拳",
@@ -346,13 +346,13 @@
     "bossName": "デザインド・エッグ号",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 4168,
+    "checked": 9,
     "samples": [
       "一一搦飛狼",
-      "一一飛礁狼",
-      "一一飛狼礁",
-      "一一飛狼霊",
-      "一一飛霊狼"
+      "刺一搦飛狼",
+      "果一搦飛狼",
+      "待一搦飛狼",
+      "搦一搦飛狼"
     ],
     "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅",
     "requireSkills": [],
@@ -361,18 +361,18 @@
   },
   {
     "key": "11-1",
-    "bossName": "エーヴィス\n海賊団",
+    "bossName": "エーヴィス海賊団",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 59147,
+    "checked": 5,
     "samples": [
       "一強一霊果",
       "一強一霊狼",
-      "一強一霊爆",
       "一強刺霊果",
-      "一強刺霊狼"
+      "一強刺霊狼",
+      "刺強一霊果"
     ],
-    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼霊円滅受",
     "requireSkills": [],
     "bossIndexes": null,
     "stopReason": "sample-limit"
@@ -382,7 +382,7 @@
     "bossName": "大海賊 エーヴィス",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 640120,
+    "checked": 5,
     "samples": [
       "待一礁礁玉",
       "待刺礁礁玉",
@@ -390,7 +390,7 @@
       "待待礁礁玉",
       "待搦礁礁玉"
     ],
-    "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受",
+    "pool": "一刺果待搦玉強速拳飛奏焦毒礁霊魔円滅受",
     "requireSkills": [],
     "bossIndexes": null,
     "stopReason": "sample-limit"
@@ -400,7 +400,7 @@
     "bossName": "偽聖女 リザベル",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 757780,
+    "checked": 5,
     "samples": [
       "待待待魔死",
       "待待搦魔死",
@@ -418,13 +418,13 @@
     "bossName": "魔女 グリザーベルク",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 615,
+    "checked": 739,
     "samples": [
-      "一一刺一飛",
-      "一一刺刺飛",
-      "一一刺果飛",
-      "一一刺待飛",
-      "一一刺搦飛"
+      "一一刺礁飛",
+      "一一礁待飛",
+      "一一礁搦飛",
+      "毒礁刺一飛",
+      "礁毒刺一飛"
     ],
     "pool": "一刺果待搦玉強速拳飛奏焦毒礁狼▽霊爆魔円滅受死",
     "requireSkills": [],
@@ -438,7 +438,7 @@
     "bossName": "魔女 グリザーベルク",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 1133,
+    "checked": 5,
     "samples": [
       "一一果一狼",
       "一一果刺狼",
@@ -458,7 +458,7 @@
     "bossName": "魔女 グリザーベルク",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 13453,
+    "checked": 5,
     "samples": [
       "一刺搦果飛",
       "一刺搦待果",
@@ -478,7 +478,7 @@
     "bossName": "魔女 グリザーベルク",
     "clearable": true,
     "searchMode": "ordered-with-dup",
-    "checked": 1139620,
+    "checked": 5,
     "samples": [
       "搦飛霊魔死",
       "搦飛魔霊死",

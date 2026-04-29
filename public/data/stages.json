@@ -234,7 +234,7 @@
     "shopSkills": [""],
     "bossSkillAbbrs": "交交隠罠剣",
     "bgm": "戦闘：血に飢えたジョーズ",
-    "playerName": "レミエル"
+    "playerName": "ルーサー"
   },
   {
     "no": 16,
@@ -436,8 +436,8 @@
     "backgroundImage": "/images/background/v2/ブライニクルの海.webp",
     "shopSkills": [],
     "bossSkillAbbrsBeforeBalance": "怠水水水円円凍",
-    "bossSkillBalanceNote": "攻撃スキルなしの7枚へ再構築。凍結と円環2枚を軸にした耐久・妨害型で、終了フェイズ増加により死紋が伸びやすく、魔弾入りの攻略が相対的に有効になるよう調整。",
-    "bossSkillAbbrs": "凍円円癒盾水封",
+    "bossSkillBalanceNote": "攻撃スキルなし・飛行なしの7枚へ再構築。凍結と円環を軸に、崩技・転回・受難・治癒・＋盾で素殴りを止めつつ、魔弾入りの攻略が相対的に有効になるよう調整。",
+    "bossSkillAbbrs": "崩転円受癒凍盾",
     "bgm": "戦闘：ブライニクル",
     "playerName": "レミエル"
   },
@@ -452,7 +452,7 @@
     "bossDescription": "",
     "backgroundImage": "/images/background/v2/竜宮城.webp",
     "shopSkills": [],
-    "bossSkillAbbrs": "拳反交硬連呪雷",
+    "bossSkillAbbrs": "拳反交硬連焦紫",
     "bgm": "戦闘：グウィン",
     "playerName": "レミエル"
   },
@@ -557,7 +557,7 @@
     "bossDescription": "\"彼方の海\"の魔力を取り込み、変容した魔女。\nそれは遥か未来の存在。18門の連装砲。炎と鋼の玉座。\n紫電の空が震え、黒鉄の牙城が彼女の意志で脈動する。\n真名はグリザーベルク。希望食む暁の魔女。",
     "backgroundImage": "/images/background/v2/紫電の空.webp",
     "shopSkills": [],
-    "bossSkillAbbrs": ["罠硬待強玉速燐連砲錬","紫速霊飛燐癒盾隠反雷","紫速隠弓雷強燐連隠弓"],
+    "bossSkillAbbrs": ["罠硬待速玉速燐連砲錬","紫速霊飛燐癒盾隠反雷","紫速隠弓雷強燐連隠弓"],
     "bgm": "戦闘：グリザーベルク",
     "playerName": "レミエル"
   },

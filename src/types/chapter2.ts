@@ -14,3 +14,9 @@ export interface Chapter2StageFlow {
   stageNo: number;
   flow: Chapter2FlowStep[];
 }
+
+export interface PendingChapter2Reward {
+  stageNo: number;
+  flowIndex: number;
+  step: Chapter2FlowStep;
+}

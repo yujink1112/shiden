@@ -25,6 +25,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchMovedRef = useRef(false);
   const tooltipInstanceIdRef = useRef(`${skill.abbr}-${Math.random()}`);
 
   const closeTooltip = (forceClosed = false) => {
@@ -49,6 +50,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       touchTooltipTimeoutRef.current = null;
     }
     touchStartRef.current = null;
+    touchMovedRef.current = false;
   };
 
   const openTooltip = () => {
@@ -295,6 +297,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       onPointerDown={(e) => {
         if (e.pointerType === 'touch' || e.pointerType === 'pen') {
           touchStartRef.current = { x: e.clientX, y: e.clientY };
+          touchMovedRef.current = false;
           if (touchTooltipTimeoutRef.current) {
             clearTimeout(touchTooltipTimeoutRef.current);
           }
@@ -311,12 +314,21 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
         const moveX = Math.abs(e.clientX - touchStartRef.current.x);
         const moveY = Math.abs(e.clientY - touchStartRef.current.y);
         if (moveX > 8 || moveY > 8) {
+          touchMovedRef.current = true;
           cancelTouchTooltip();
         }
       }}
       onPointerUp={(e) => {
         if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+          const isTap = !touchMovedRef.current;
           cancelTouchTooltip();
+          if (isTap && !onClick && !disableTooltip) {
+            if (showTooltip) {
+              closeTooltip(true);
+            } else {
+              openTooltip();
+            }
+          }
         }
       }}
       onPointerCancel={cancelTouchTooltip}

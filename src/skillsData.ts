@@ -56,13 +56,13 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "無", name: "無想", kana:"むそう", icon: "/images/skill/d08.gif", type: "付帯（リミテッド）", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。\nあなたに状態「無想」を与える。このスキルは1つしか選択できない。", exclude: 0 },
   { abbr: "裏", name: "裏霞", kana:"うらがすみ", icon: "/images/skill/d09.gif", type: "付帯", speed: "なし", description: "あなたが使用する攻撃・補助スキルを決定する直前に効果を発揮する。\nあなたが使用する攻撃・補助スキルは、あなたが所持している最後尾のスキルが選択される。\n先攻決定フェイズには影響しない。", exclude: 0 },
   { abbr: "先", name: "先制", kana:"せんせい", icon: "/images/skill/d10.gif", type: "付帯", speed: "なし", description: "第LVラウンドの開始フェイズに効果を発揮する。あなたに状態「先制」を与える。", exclude: 0 },
-  { abbr: "連", name: "連撃", kana:"れんげき", icon: "/images/skill/d11.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。", exclude: 0 },
+  { abbr: "連", name: "連撃", kana:"れんげき", icon: "/images/skill/d11.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直前に効果を発揮する。あなたは攻撃フェイズをもう一度行うことができる。\n複数所持していても、この効果は1キャラにつき1回しか発揮しない。", exclude: 0 },
   { abbr: "燐", name: "燐光", kana:"りんこう", icon: "/images/skill/d12.gif", type: "付帯", speed: "なし", description: "各ラウンドの開始フェイズに効果を発揮する。あなたが受けている悪い状態を全て解除する。", exclude: 0 },
 
   { abbr: "飛", name: "飛行", kana:"ひこう", icon: "/images/skill/v2/2011-12-23_1-294.gif", type: "付帯", speed: "なし", description: "【弱撃】以外の速度0の攻撃スキルによるダメージと効果を受けない。", exclude: 1 },
-  { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/v2/2013-4-20_038.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直後に効果を発揮する。終了フェイズをもう一度行う。", exclude: 1 },
+  { abbr: "円", name: "円環", kana:"えんかん", icon: "/images/skill/v2/2013-4-20_038.gif", type: "付帯", speed: "なし", description: "各ラウンドの終了フェイズ直後に効果を発揮する。終了フェイズをもう一度行う。\n複数所持していても、この効果は1キャラにつき1回しか発揮しない。", exclude: 1 },
   { abbr: "礁", name: "座礁", kana:"ざしょう", icon: "/images/skill/v2/2011-12-23_3-094.gif", type: "付帯", speed: "なし", description: "互いの攻撃スキルの速度に-1する(最低0)。複数存在する場合、効果は重複する。", exclude: 1 },
-  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "開始フェイズに発動する。あなたに状態「防壁」を1つと状態「霊化」を与える。", exclude: 1  },
+  { abbr: "霊", name: "霊化", kana:"れいか", icon: "/images/skill/v2/2011-12-23_3-060.gif", type: "付帯", speed: "なし", description: "戦闘開始時の開始フェイズにのみ発動する。あなたに状態「防壁」を1つと状態「霊化」を与える。", exclude: 1  },
 
   { abbr: "空", name: "空白", kana:"くうはく", icon: "/images/skill/d13.gif", type: "付帯", speed: "なし", description: "何の効果も持たない。", exclude: 1  },
   { abbr: "Ｈ", name: "ＨＰ", kana:"ヒットポイント", icon: "/images/skill/v2/heart_24x24.png", type: "付帯", speed: "なし", description: "このスキルは【影討】の効果を受けない。", exclude: 1  },

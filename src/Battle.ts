@@ -52,7 +52,7 @@ export class Battle {
     public start(): number {
         Battle.SHORT = 0;
 
-        this.log("===========================================");
+        this.log("==========================================");
         this.log();
         this.log(`${this.pc1.playerName}　VS　${this.pc2.playerName}`);
         this.log();
@@ -285,9 +285,9 @@ export class Battle {
     }
 
     private triggerStartPhaseSkills(pc: Player): number {
-        // 霊化付帯のチェック（常に全スキルチェックが必要）
+        // 霊化は戦闘開始時のみ発動する
         for (let i = 0; i < pc.getSkillsLength(); i++) {
-            if (pc.skill[i] === "霊") {
+            if (this.turn === 1 && pc.skill[i] === "霊") {
                 if (pc.reika === 0) {
                     this.log(`${pc.playerName}の【霊化】${i + 1}が発動！`);
                     pc.reika = StatusFlag.ACTIVE;
@@ -552,6 +552,9 @@ export class Battle {
 
             for (let c = 0; c < count; c++) {
                 this.executeAttack(attacker, defender, idx, finalDamage, finalSpeed);
+                if (count > 1 && c < count - 1) {
+                    this.resolveImmediateStateChanges(attacker, defender);
+                }
             }
         }
 
@@ -560,6 +563,11 @@ export class Battle {
 
         // 強欲の更新
         if (attacker.skill[idx] === "欲") attacker.gouyoku = StatusFlag.RESERVED;
+    }
+
+    private resolveImmediateStateChanges(attacker: Player, defender: Player): void {
+        if (this.applyEffects(attacker, defender) + this.applyEffects(defender, attacker) >= 1) this.log();
+        if (this.applyBreakup(attacker) + this.applyBreakup(defender) >= 1) this.log();
     }
 
     private handleBuffSkill(attacker: Player, defender: Player, idx: number): void {
@@ -1339,7 +1347,7 @@ export class Battle {
         else this.log("互いの【掌握】により、引き分け！");
 
         this.log();
-        this.log("===========================================");
+        this.log("==========================================");
         return result;
     }
 
@@ -1383,7 +1391,7 @@ export class Battle {
         else if (result === BattleResult.DRAW) this.log("引き分け");
 
         this.log();
-        this.log("===========================================");
+        this.log("==========================================");
         return result;
     }
 }

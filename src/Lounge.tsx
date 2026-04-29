@@ -1164,7 +1164,7 @@ onPageChange,
       
       const skill = allSkills.find(s => s.abbr === abbr);
       if (skill?.kamiwaza === 1 && newSkills.some(sAbbr => allSkills.find(s => s.abbr === sAbbr)?.kamiwaza === 1)) {
-        alert("「神業」カテゴリのスキルは1つしか編成できません。");
+        alert("「神業」スキルは1つしか編成できません。");
         return;
       }
 

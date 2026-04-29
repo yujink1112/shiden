@@ -1,0 +1,22 @@
+[2026-04-29T12:13:04.143Z] 8-2 ブライニクル: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁霊魔, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=魔, sampleLimit=20, maxChecks=none).
+[2026-04-29T12:13:04.153Z] 8-2 ブライニクル: found #1 一一一果魔 after 3 checks.
+[2026-04-29T12:13:04.167Z] 8-2 ブライニクル: found #2 一一果一魔 after 61 checks.
+[2026-04-29T12:13:04.167Z] 8-2 ブライニクル: found #3 一一果刺魔 after 62 checks.
+[2026-04-29T12:13:04.168Z] 8-2 ブライニクル: found #4 一一果果魔 after 63 checks.
+[2026-04-29T12:13:04.172Z] 8-2 ブライニクル: found #5 一一果強魔 after 67 checks.
+[2026-04-29T12:13:04.172Z] 8-2 ブライニクル: found #6 一一果拳魔 after 69 checks.
+[2026-04-29T12:13:04.173Z] 8-2 ブライニクル: found #7 一一果毒魔 after 73 checks.
+[2026-04-29T12:13:04.175Z] 8-2 ブライニクル: found #8 一一待果魔 after 93 checks.
+[2026-04-29T12:13:04.176Z] 8-2 ブライニクル: found #9 一一待魔一 after 106 checks.
+[2026-04-29T12:13:04.177Z] 8-2 ブライニクル: found #10 一一待魔果 after 108 checks.
+[2026-04-29T12:13:04.178Z] 8-2 ブライニクル: found #11 一一待魔拳 after 114 checks.
+[2026-04-29T12:13:04.179Z] 8-2 ブライニクル: found #12 一一搦果魔 after 123 checks.
+[2026-04-29T12:13:04.180Z] 8-2 ブライニクル: found #13 一一搦魔一 after 136 checks.
+[2026-04-29T12:13:04.181Z] 8-2 ブライニクル: found #14 一一搦魔果 after 138 checks.
+[2026-04-29T12:13:04.182Z] 8-2 ブライニクル: found #15 一一搦魔拳 after 144 checks.
+[2026-04-29T12:13:04.183Z] 8-2 ブライニクル: found #16 一一玉果魔 after 153 checks.
+[2026-04-29T12:13:04.184Z] 8-2 ブライニクル: found #17 一一玉魔一 after 166 checks.
+[2026-04-29T12:13:04.185Z] 8-2 ブライニクル: found #18 一一玉魔果 after 168 checks.
+[2026-04-29T12:13:04.186Z] 8-2 ブライニクル: found #19 一一玉魔拳 after 174 checks.
+[2026-04-29T12:13:04.186Z] 8-2 ブライニクル: found #20 一一強果魔 after 183 checks.
+[2026-04-29T12:13:04.188Z] 8-2 ブライニクル: done (183 checks, wins=20, stopReason=sample-limit).
