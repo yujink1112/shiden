@@ -98,6 +98,69 @@
   line-height: 1.7;
 }
 
+.storybook-jump-panel {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 232, 194, 0.16);
+}
+
+.storybook-jump-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #f7efe1;
+}
+
+.storybook-jump-header p {
+  margin: 6px 0 0;
+  color: rgba(247, 239, 225, 0.72);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.storybook-jump-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.storybook-jump-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 72px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 232, 194, 0.18);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  color: #f7efe1;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.storybook-jump-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 232, 194, 0.34);
+}
+
+.storybook-jump-label {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.storybook-jump-page {
+  color: rgba(234, 211, 163, 0.92);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .storybook-opacity-control {
   display: flex;
   align-items: center;
@@ -157,11 +220,16 @@
 }
 
 .storybook-page {
+  --storybook-page-height: 297mm;
+  --storybook-page-header-height: 36mm;
+  --storybook-page-footer-height: 20mm;
+  --storybook-page-body-height: calc(var(--storybook-page-height) - var(--storybook-page-header-height) - var(--storybook-page-footer-height));
   position: relative;
   width: 210mm;
-  min-height: 297mm;
-  display: flex;
-  flex-direction: column;
+  min-height: var(--storybook-page-height);
+  height: var(--storybook-page-height);
+  display: grid;
+  grid-template-rows: var(--storybook-page-header-height) minmax(0, var(--storybook-page-body-height)) var(--storybook-page-footer-height);
   box-sizing: border-box;
   overflow: hidden;
   background: #f5efe5;
@@ -193,8 +261,11 @@
 }
 
 .storybook-page-header {
-  flex: 0 0 auto;
+  min-height: 0;
+  height: 100%;
   padding: 18mm 18mm 8mm;
+  box-sizing: border-box;
+  overflow: hidden;
   color: #5e4434;
   border-bottom: 1px solid rgba(110, 79, 50, 0.24);
 }
@@ -207,9 +278,9 @@
 }
 
 .storybook-page-body {
-  flex: 1 1 auto;
   min-height: 0;
-  padding: 8mm 18mm 10mm;
+  height: 100%;
+  padding: 8mm 18mm 16mm;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -223,10 +294,15 @@
 }
 
 .storybook-page-footer {
-  flex: 0 0 auto;
   display: flex;
   justify-content: flex-end;
-  padding: 0 18mm 12mm;
+  align-items: flex-end;
+  min-height: 0;
+  height: 100%;
+  padding: 4mm 18mm 4mm;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-top: 1px solid rgba(110, 79, 50, 0.18);
   color: #735844;
   font-weight: 700;
 }
@@ -243,30 +319,30 @@
 
 .storybook-section-title h2 {
   margin: 10px 0 0;
-  font-size: 1.8rem;
+  font-size: 1.64rem;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.28;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
 }
 
 .storybook-part-title {
-  margin: 0 0 4mm;
+  margin: 0 0 3mm;
 }
 
 .storybook-part-chip {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 5px 11px;
   border-radius: 999px;
   border: 1px solid rgba(110, 79, 50, 0.26);
   color: #6c4f39;
-  font-size: 0.88rem;
+  font-size: 0.83rem;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
 
 .storybook-text-block {
-  margin-bottom: 4mm;
+  margin-bottom: 3mm;
 }
 
 .storybook-text-block.is-center {
@@ -274,15 +350,15 @@
 }
 
 .storybook-speaker {
-  margin-bottom: 2mm;
+  margin-bottom: 1.2mm;
   color: #577493;
   font-weight: 700;
-  font-size: 0.96rem;
+  font-size: 0.9rem;
 }
 
 .storybook-text {
-  line-height: 1.9;
-  font-size: 1rem;
+  line-height: 1.68;
+  font-size: 0.93rem;
   white-space: normal;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
 }
@@ -302,25 +378,25 @@
 
 .storybook-credit-title,
 .storybook-credit-text {
-  margin-bottom: 4mm;
+  margin-bottom: 3mm;
   text-align: center;
 }
 
 .storybook-credit-title .storybook-text {
-  font-size: 1.3rem;
+  font-size: 1.18rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 
 .storybook-credit-role {
-  margin-bottom: 4mm;
+  margin-bottom: 3mm;
   text-align: center;
 }
 
 .storybook-credit-role-name {
-  margin-bottom: 2mm;
+  margin-bottom: 1.2mm;
   color: #6c4f39;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -355,12 +431,12 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 3.5mm;
+  margin-bottom: 2.6mm;
 }
 
 .storybook-toc-label {
   color: #18110d;
-  font-size: 1rem;
+  font-size: 0.93rem;
   font-weight: 700;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
 }
@@ -433,12 +509,22 @@
 
 .storybook-measure-page {
   width: 210mm;
+  min-height: 297mm;
+  height: 297mm;
+  box-shadow: none;
 }
 
 .storybook-measure-body {
-  width: calc(210mm - 36mm);
+  overflow: hidden;
+}
+
+.storybook-measure-blocks {
+  width: 100%;
   box-sizing: border-box;
-  padding: 0;
+}
+
+.storybook-measure-block {
+  display: flow-root;
 }
 
 @media (max-width: 900px) {
@@ -467,6 +553,21 @@
     justify-content: flex-end;
   }
 
+  .storybook-jump-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+    margin-right: -4px;
+    scrollbar-width: thin;
+  }
+
+  .storybook-jump-button {
+    flex: 0 0 220px;
+    min-height: 68px;
+  }
+
   .storybook-preview {
     align-items: flex-start;
     overflow: visible;
@@ -477,6 +578,8 @@
   .storybook-page {
     width: 100%;
     min-height: auto;
+    height: auto;
+    display: block;
     transform-origin: top left;
   }
 }
@@ -513,6 +616,9 @@
   }
 
   .storybook-page {
+    --storybook-page-header-height: 32mm;
+    --storybook-page-footer-height: 17mm;
+    --storybook-page-body-height: calc(var(--storybook-page-height) - var(--storybook-page-header-height) - var(--storybook-page-footer-height));
     width: 210mm;
     min-height: 297mm;
     height: 297mm;
@@ -527,33 +633,33 @@
   }
 
   .storybook-page-body {
-    padding: 6mm 16mm 8mm;
+    padding: 6mm 16mm 12mm;
   }
 
   .storybook-page-footer {
-    padding: 0 16mm 8mm;
+    padding: 3mm 16mm 8mm;
   }
 
   .storybook-text {
-    font-size: 0.95rem;
-    line-height: 1.78;
+    font-size: 0.89rem;
+    line-height: 1.58;
   }
 
   .storybook-section-title {
-    margin-bottom: 6mm;
-    padding-bottom: 4mm;
+    margin-bottom: 5mm;
+    padding-bottom: 3mm;
   }
 
   .storybook-part-title {
-    margin-bottom: 3mm;
+    margin-bottom: 2.4mm;
   }
 
   .storybook-text-block {
-    margin-bottom: 3mm;
+    margin-bottom: 2.4mm;
   }
 
   .storybook-toc-item {
-    margin-bottom: 3mm;
+    margin-bottom: 2.2mm;
   }
 
   .storybook-the-end-text {

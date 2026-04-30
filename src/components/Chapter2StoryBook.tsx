@@ -77,8 +77,9 @@ const A4_HEIGHT_PX = 1123;
 const PAGE_PADDING_PX = 56;
 const PAGE_HEADER_HEIGHT_PX = 92;
 const PAGE_FOOTER_HEIGHT_PX = 44;
-const PAGE_LAYOUT_SAFETY_PX = 72;
+const PAGE_LAYOUT_SAFETY_PX = 132;
 const PAGE_BODY_HEIGHT_PX = A4_HEIGHT_PX - PAGE_PADDING_PX * 2 - PAGE_HEADER_HEIGHT_PX - PAGE_FOOTER_HEIGHT_PX - PAGE_LAYOUT_SAFETY_PX;
+const PAGE_BODY_MEASURE_SAFETY_PX = 42;
 
 const toPublicUrl = (path: string): string => {
   if (!path) return '';
@@ -284,7 +285,8 @@ const getPageHeaderTitle = (sectionLabel: string, sectionTitle: string) => {
 
 const paginateSectionBlocks = (
   sections: StorySection[],
-  measuredHeights: Record<string, number>
+  measuredHeights: Record<string, number>,
+  maxBodyHeight: number
 ): PageLayout[] => {
   const pages: PageLayout[] = [];
 
@@ -300,7 +302,7 @@ const paginateSectionBlocks = (
 
     section.blocks.forEach((block) => {
       const blockHeight = measuredHeights[block.key] || 0;
-      const exceedsPage = usedHeight > 0 && usedHeight + blockHeight > PAGE_BODY_HEIGHT_PX;
+      const exceedsPage = usedHeight > 0 && usedHeight + blockHeight > maxBodyHeight;
 
       if (exceedsPage) {
         pages.push(currentPage);
@@ -423,7 +425,10 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
   const [backgroundOpacity] = useState(0.16);
   const [selectedBackgrounds, setSelectedBackgrounds] = useState<Record<number, string>>({});
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
+  const [pageBodyHeight, setPageBodyHeight] = useState(PAGE_BODY_HEIGHT_PX);
   const measureRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const measurePageBodyRef = useRef<HTMLDivElement | null>(null);
+  const pageRefs = useRef<Record<number, HTMLElement | null>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -646,8 +651,8 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
   }, []);
 
   const contentPageLayouts = useMemo(
-    () => paginateSectionBlocks(sections, measuredHeights),
-    [measuredHeights, sections]
+    () => paginateSectionBlocks(sections, measuredHeights, pageBodyHeight),
+    [measuredHeights, pageBodyHeight, sections]
   );
 
   const tocBlocks = useMemo<TextBlock[]>(() => {
@@ -703,7 +708,11 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
         }
         return acc;
       }, {});
+      const measuredBodyHeight = measurePageBodyRef.current
+        ? Math.max(0, Math.floor(measurePageBodyRef.current.getBoundingClientRect().height) - PAGE_BODY_MEASURE_SAFETY_PX)
+        : PAGE_BODY_HEIGHT_PX;
       setMeasuredHeights(nextHeights);
+      setPageBodyHeight(measuredBodyHeight || PAGE_BODY_HEIGHT_PX);
     };
 
     const rafId = window.requestAnimationFrame(measure);
@@ -724,9 +733,36 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
   }, [allBlocks]);
 
   const pageLayouts = useMemo<PageLayout[]>(
-    () => paginateSectionBlocks([tocSection, ...sections], measuredHeights),
-    [measuredHeights, sections, tocSection]
+    () => paginateSectionBlocks([tocSection, ...sections], measuredHeights, pageBodyHeight),
+    [measuredHeights, pageBodyHeight, sections, tocSection]
   );
+
+  const firstPageIndexBySection = useMemo(() => {
+    return pageLayouts.reduce<Record<number, number>>((acc, page, index) => {
+      if (acc[page.sectionNo] === undefined) {
+        acc[page.sectionNo] = index;
+      }
+      return acc;
+    }, {});
+  }, [pageLayouts]);
+
+  const sectionJumpItems = useMemo(() => {
+    return sections
+      .filter((section) => section.sectionNo !== 101)
+      .map((section) => ({
+        sectionNo: section.sectionNo,
+        label: section.displayLabel === section.title
+          ? section.title
+          : `${section.displayLabel} ${section.title}`,
+        pageNumber: (firstPageIndexBySection[section.sectionNo] ?? 0) + 1
+      }));
+  }, [firstPageIndexBySection, sections]);
+
+  const handleJumpToSection = (sectionNo: number) => {
+    const targetPage = pageRefs.current[sectionNo];
+    if (!targetPage) return;
+    targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   if (isLoading) {
     return (
@@ -774,14 +810,43 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
           各節ごとに3パートをまとめ、ストーリー本文をそのまま読める形でA4ページに整えています。
         </p>
 
+        <section className="storybook-jump-panel">
+          <div className="storybook-jump-header">
+            <h2>節ジャンプ</h2>
+            <p>読みたい節の冒頭ページへ移動できます。</p>
+          </div>
+          <div className="storybook-jump-grid">
+            {sectionJumpItems.map((item) => (
+              <button
+                key={`jump-${item.sectionNo}`}
+                type="button"
+                className="storybook-jump-button"
+                onClick={() => handleJumpToSection(item.sectionNo)}
+              >
+                <span className="storybook-jump-label">{item.label}</span>
+                <span className="storybook-jump-page">P.{item.pageNumber}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
       </aside>
 
       <main className="storybook-preview">
         {pageLayouts.map((page, pageIndex) => {
           const backgroundValue = selectedBackgrounds[page.sectionNo] || '';
           const isTheEndPage = page.blocks.length === 1 && page.blocks[0].kind === 'theEnd';
+          const isSectionStart = firstPageIndexBySection[page.sectionNo] === pageIndex;
           return (
-            <article key={`page-${page.sectionNo}-${pageIndex}`} className="storybook-page">
+            <article
+              key={`page-${page.sectionNo}-${pageIndex}`}
+              className="storybook-page"
+              ref={(element) => {
+                if (isSectionStart) {
+                  pageRefs.current[page.sectionNo] = element;
+                }
+              }}
+            >
               {backgroundValue && (
                 <div
                   className="storybook-page-background"
@@ -819,18 +884,28 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
       </main>
 
       <div className="storybook-measure-layer" aria-hidden="true">
-        <div className="storybook-measure-page">
-          <div className="storybook-measure-body">
-            {allBlocks.map((block) => (
-              <div
-                key={`measure-${block.key}`}
-                ref={(element) => {
-                  measureRefs.current[block.key] = element;
-                }}
-              >
-                <PrintableBlock block={block} />
-              </div>
-            ))}
+        <div className="storybook-page storybook-measure-page">
+          <div className="storybook-page-header">
+            <div className="storybook-page-header-kicker">SHIDEN ISSEN CHAPTER 2</div>
+            <div className="storybook-page-header-title">第1節 サンプル</div>
+          </div>
+          <div className="storybook-page-body storybook-measure-body" ref={measurePageBodyRef}>
+            <div className="storybook-measure-blocks">
+              {allBlocks.map((block) => (
+                <div
+                  key={`measure-${block.key}`}
+                  className="storybook-measure-block"
+                  ref={(element) => {
+                    measureRefs.current[block.key] = element;
+                  }}
+                >
+                  <PrintableBlock block={block} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="storybook-page-footer">
+            <span>1</span>
           </div>
         </div>
       </div>
