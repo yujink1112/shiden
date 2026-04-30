@@ -195,7 +195,16 @@ function App() {
   const [isAdminPreview, setIsAdminPreview] = useState(false);
   const [adminEpilogueSequence, setAdminEpilogueSequence] = useState<'idle' | 'title' | 'story' | 'credits'>('idle');
   const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
+  const [adminSaveMessage, setAdminSaveMessage] = useState<string | null>(null);
+  const adminSaveMessageTimerRef = useRef<number | null>(null);
   const isAdminDebugSkillsActiveRef = useRef(false);
+  useEffect(() => {
+    return () => {
+      if (adminSaveMessageTimerRef.current !== null) {
+        window.clearTimeout(adminSaveMessageTimerRef.current);
+      }
+    };
+  }, []);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
   const canAccessChapter2StoryBook = isAdmin || Boolean(myProfile?.storyBookCouponUnlocked);
   const getAllDebugSkillAbbrs = () => Array.from(new Set(ALL_SKILLS.map(skill => skill.abbr)));
@@ -496,6 +505,14 @@ function App() {
   });
   const [isRewardConfirming, setIsRewardConfirming] = useState(false);
   const rewardConfirmingRef = useRef(false);
+
+  const scrollBattleLayoutToTop = () => {
+    window.scrollTo({ top: 0 });
+    document.querySelector<HTMLElement>('.AppContainer')?.scrollTo({ top: 0 });
+    if (mainGameAreaRef.current) {
+      mainGameAreaRef.current.scrollTop = 0;
+    }
+  };
 
   // ステージ管理
   const getStoredStageMode = (): StageMode => {
@@ -1665,10 +1682,16 @@ const PLAYER_SKILL_COUNT = 5;
     if (!user) return;
 
     const now = Date.now();
-    const flowIndex = 0;
+    const flow = chapter2Flows.find(entry => entry.stageNo === stageNo);
+    const firstStoryIndex = flow?.flow.findIndex(step => step.type === 'story') ?? -1;
+    const flowIndex = firstStoryIndex >= 0 ? firstStoryIndex : 0;
     const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
     const snapshot = await get(chapter2Ref);
     const currentData = snapshot.exists() ? snapshot.val() : {};
+
+    suppressChapter2ProgressSaveRef.current = true;
+    clearStoryCanvasState();
+    localStorage.removeItem('shiden_chapter2_reward_choices');
 
     await set(chapter2Ref, {
       ...currentData,
@@ -1688,8 +1711,35 @@ const PLAYER_SKILL_COUNT = 5;
     localStorage.setItem('shiden_updated_at', now.toString());
 
     setChapterProgress(prev => ({ ...prev, 2: stageNo }));
+    setStageCycle(stageNo);
+    setStageMode('BOSS');
     setChapter2FlowIndex(flowIndex);
+    setCanGoToBoss(false);
+    setGameStarted(false);
+    setBattleResults([]);
+    setShowLogForBattleIndex(-1);
+    setLogComplete(false);
+    setShowBossClearPanel(false);
+    setRewardSelectionMode(false);
+    setPendingChapter2Reward(null);
+    setSelectedRewards([]);
+    setShowStoryModal(false);
+    setShowChapterTitle(false);
+    setShowChapter2Title(false);
     setHasChapter2Save(true);
+    setAdminSaveMessage(`第2章 No.${Math.max(stageNo - 12, 1)} を保存先に設定しました。`);
+
+    if (adminSaveMessageTimerRef.current !== null) {
+      window.clearTimeout(adminSaveMessageTimerRef.current);
+    }
+    adminSaveMessageTimerRef.current = window.setTimeout(() => {
+      setAdminSaveMessage(null);
+      adminSaveMessageTimerRef.current = null;
+    }, 2400);
+
+    window.setTimeout(() => {
+      suppressChapter2ProgressSaveRef.current = false;
+    }, 0);
   };
 
   const handleEpilogueComplete = () => {
@@ -2594,8 +2644,7 @@ const PLAYER_SKILL_COUNT = 5;
     setLogComplete(shouldMarkLogComplete);
 
     if (isMobile) {
-      window.scrollTo({ top: 0 });
-      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+      scrollBattleLayoutToTop();
     }
 
     const winRateVal = Math.round((winCount / battleCount) * 100);
@@ -2680,8 +2729,7 @@ const PLAYER_SKILL_COUNT = 5;
   const handleStartGame = () => {
     if (selectedPlayerSkills.length === PLAYER_SKILL_COUNT) {
       setLogComplete(false);
-      window.scrollTo({ top: 0 });
-      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+      scrollBattleLayoutToTop();
       const results: BattleResult[] = [];
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
       const battleCount = stageProcessor.getBattleCount();
@@ -2754,8 +2802,7 @@ const PLAYER_SKILL_COUNT = 5;
       return;
     }
 
-    window.scrollTo({ top: 0 });
-    if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+    scrollBattleLayoutToTop();
 
     const context = stageContext;
     const battleCount = stageProcessor.getBattleCount();
@@ -3145,8 +3192,7 @@ const PLAYER_SKILL_COUNT = 5;
   const handleBattleLogComplete = () => {
     setLogComplete(true);
     if (isMobile) {
-      window.scrollTo({ top: 0 });
-      if (mainGameAreaRef.current) mainGameAreaRef.current.scrollTop = 0;
+      scrollBattleLayoutToTop();
     }
     const winCount = battleResults.filter(r => r.winner === 1).length;
     applyPostLogBattleOutcome(winCount);
@@ -4452,6 +4498,22 @@ const PLAYER_SKILL_COUNT = 5;
             {/* 第2章 (Stage 13~) */}
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ color: '#ff5252', borderBottom: '2px solid #ff5252', paddingBottom: '5px', marginBottom: '10px' }}>第2章 FLAG (story/v2)</h3>
+              {adminSaveMessage && (
+                <div
+                  style={{
+                    marginBottom: '10px',
+                    padding: '8px 12px',
+                    border: '1px solid #66bb6a',
+                    borderRadius: '8px',
+                    background: 'rgba(46, 125, 50, 0.22)',
+                    color: '#c8e6c9',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {adminSaveMessage}
+                </div>
+              )}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                 {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
                   const n = s.stage!;

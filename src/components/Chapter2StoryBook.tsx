@@ -771,7 +771,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
         </div>
 
         <p className="storybook-description">
-          各節ごとに3パートをまとめ、`StoryCanvas` の本文をそのまま読める形でA4ページに整えています。
+          各節ごとに3パートをまとめ、ストーリー本文をそのまま読める形でA4ページに整えています。
         </p>
 
       </aside>
@@ -797,7 +797,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
 
               {!isTheEndPage && (
                 <header className="storybook-page-header">
-                  <div className="storybook-page-header-kicker">SHIDEN CHAPTER 2</div>
+                  <div className="storybook-page-header-kicker">SHIDEN ISSEN CHAPTER 2</div>
                   <div className="storybook-page-header-title">
                     {getPageHeaderTitle(page.sectionLabel, page.sectionTitle)}
                   </div>

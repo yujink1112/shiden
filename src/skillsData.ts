@@ -13,7 +13,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "拳", name: "鉄拳", kana:"てっけん", icon: "/images/skill/v2/2011-12-23_3-040.gif", type: "攻撃", speed: "3", description: "相手に1点のダメージを与える。このラウンドであなたが先攻ならば、代わりに2点のダメージを与える。", exclude: 1 },
   { abbr: "烈", name: "烈風", kana:"れっぷう", icon: "/images/skill/v2/2011-12-23_3-067.gif", type: "攻撃", speed: "LV-1", description: "相手に1点のダメージを与える。迎撃スキルが発動しなければ、さらに上からスキルを1つ破壊する。", exclude: 0 },
   { abbr: "滅", name: "撃滅", kana:"げきめつ", icon: "/images/skill/v2/2011-12-23_3-033.gif", type: "攻撃", speed: "1", description: "相手が受けている良い状態を全て解除する。相手に1点のダメージを与える。", exclude: 1 },
-  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "1", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 1 },
+  { abbr: "砲", name: "艦砲", kana:"かんぽう", icon: "/images/skill/v2/2011-12-23_3-048.gif", type: "攻撃", speed: "1", description: "相手に3点のダメージを与える。ダメージの対象は、このスキルと最もLVが近いスキルに変更される。", exclude: 0 },
   { abbr: "死", name: "死神", kana:"しにがみ", icon: "/images/skill/v2/2011-12-23_1-019.gif", type: "攻撃", speed: "LV-1", description: "相手にX点のダメージを与える。Xは、相手が持っている悪い状態の数+1である。", exclude: 1  },
   { abbr: "焦", name: "焦熱", kana:"しょうねつ", icon: "/images/skill/v2/2011-12-23_3-049.gif", type: "攻撃（リミテッド）", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。相手に状態「火傷」を与える。", exclude: 1 },
   { abbr: "弱", name: "弱撃", kana:"じゃくげき", icon: "/images/skill/a10.gif", type: "攻撃", speed: "0", description: "相手に1点のダメージを与える。\nあなたが攻撃・補助スキルを所持していない場合、攻撃フェイズに自動的にこのスキルが使用される。", exclude: 1 },
@@ -23,7 +23,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "防", name: "防壁", kana:"ぼうへき", icon: "/images/skill/b02.gif", type: "補助（リミテッド）", speed: "LV", description: "あなたに状態「防壁」を3つ与える。", exclude: 0 },
   { abbr: "封", name: "封印", kana:"ふういん", icon: "/images/skill/b03.gif", type: "補助（リミテッド）", speed: "LV", description: "相手に状態「スタン」「狼狽」「忘却」を与える。", exclude: 0 },
   { abbr: "影", name: "影討", kana:"かげうち", icon: "/images/skill/b04.gif", type: "補助", speed: "LV", description: "相手が所持している先頭のスキルを1つ指定する。\nこのスキルを使用したラウンドの終了フェイズに、相手が所持している指定したスキルと同名のスキルを全て破壊する。", exclude: 0 },
-  { abbr: "毒", name: "蟲毒", kana:"こどく", icon: "/images/skill/v2/2011-12-23_2-009.gif", type: "補助", speed: "0", description: "相手に状態「毒」を与える。", exclude: 0 },
+  { abbr: "毒", name: "蟲毒", kana:"こどく", icon: "/images/skill/v2/2011-12-23_2-009.gif", type: "補助", speed: "0", description: "相手に状態「毒」を与える。", exclude: 1 },
   { abbr: "癒", name: "治癒", kana:"ちゆ", icon: "/images/skill/v2/2014-8-31_021.gif", type: "補助(リミテッド)", speed: "0", description: "あなたに状態「治癒(LV-1)」を与える。", exclude: 0 },
   { abbr: "凍", name: "凍結", kana:"とうけつ", icon: "/images/skill/v2/2011-12-23_3-052.gif", type: "補助", speed: "LV", description: "相手に状態「狼狽」を与える。このスキルを使用したラウンドの終了フェイズに、相手が所持している先頭のスキルを1つ破壊する。", exclude: 0 },
   { abbr: "奏", name: "協奏", kana:"きょうそう", icon: "/images/skill/v2/2011-12-23_3-199.gif", type: "補助", speed: "LV", description: "あなたに状態「協奏」1つと「忘却」を与える。", exclude: 1 },
@@ -40,7 +40,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "水", name: "水幕", kana:"すいまく", icon: "/images/skill/v2/2011-12-23_3-055.gif", type: "迎撃", speed: "LV-1", description: "あなたに状態「防壁」を1つ与える。", exclude: 0 },
   { abbr: "転", name: "転回", kana:"てんかい", icon: "/images/skill/v2/2011-12-23_3-065.gif", type: "迎撃", speed: "LV+2", description: "あなたに状態「狼狽」を与える。", exclude: 0 },
   { abbr: "罠", name: "罠師", kana:"わなし", icon: "/images/skill/v2/2011-12-23_3-182.gif", type: "迎撃", speed: "0", description: "相手に3点のダメージを与える。", exclude: 0 },
-  { abbr: "受", name: "受難", kana:"じゅなん", icon: "/images/skill/v2/2021-7-17_100.gif", type: "迎撃", speed: "LV", description: "あなたが受けている悪い状態を全て解除し、相手に同じ状態を全て与える。", exclude: 0 },
+  { abbr: "受", name: "受難", kana:"じゅなん", icon: "/images/skill/v2/2021-7-17_100.gif", type: "迎撃", speed: "LV", description: "あなたが受けている悪い状態を全て解除し、相手に同じ状態を全て与える。", exclude: 1 },
 
   // 付帯スキル
   { abbr: "強", name: "＋強", kana:"プラスきょう", icon: "/images/skill/d01.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルが与えるダメージは常に+1される。", exclude: 0 },
@@ -48,7 +48,7 @@ export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "速", name: "＋速", kana:"プラスそく", icon: "/images/skill/d03.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃・補助・迎撃スキルの速度は常に+1される。", exclude: 0 },
   { abbr: "反", name: "＋反", kana:"プラスはん", icon: "/images/skill/d04.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルは、常に迎撃スキルとして扱われる。\n迎撃スキルとして扱われている間は、攻撃スキルにのみ適用されるダメージ補正は適用されない。", exclude: 0 },
   { abbr: "光", name: "＋光", kana:"プラスひかり", icon: "/images/skill/v2/2011-12-23_3-130.gif", type: "付帯", speed: "なし", description: "このスキルの直前の【一閃】が与えるダメージは常に+2される。", exclude: 0 },
-  { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/v2/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルにリミテッドを与え、速度に+3する。", exclude: 1 },
+  { abbr: "弓", name: "＋弓", kana:"プラスゆみ", icon: "/images/skill/v2/2011-12-23_1-043.gif", type: "付帯", speed: "なし", description: "このスキルの直前の攻撃スキルにリミテッドを与え、速度に+3する。", exclude: 0 },
 
   { abbr: "盾", name: "＋盾", kana:"プラスたて", icon: "/images/skill/d05.gif", type: "付帯（リミテッド）", speed: "なし", description: "このスキルの直前の攻撃・補助スキルを使用する直前に効果を発揮する。\nそのスキルの効果に「あなたに状態「防壁」を2つ与える。」を追加する。\nこの効果は、攻撃・補助スキルによる「ダメージ以外の効果」として扱う。", exclude: 0 },
   { abbr: "錬", name: "＋錬", kana:"プラスれん", icon: "/images/skill/d06.gif", type: "付帯（リミテッド）", speed: "なし", description: "このスキルの直前の攻撃スキルを使用する直前に効果を発揮する。\nそのスキルが発生させたダメージによる迎撃スキルの発動を1回のみ無効にする。\nダメージを与えた迎撃スキルが発動条件を満たしていなくても、この効果は適用される。", exclude: 0 },

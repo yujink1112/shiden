@@ -248,7 +248,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
     // スマホ判定 (縦長または幅が狭い場合)
     const isMobileMode = (width / dpr) < 800;
-    const mobileScrollSpeedFactor = isMobileMode ? 0.55 : 1;
+    const mobileScrollSpeedFactor = isMobileMode ? 0.8 : 1;
     const scrollSpeed = (creditsData.scrollSpeed || 1) * mobileScrollSpeedFactor * dpr * (delta / 16.6);
     scrollOffsetRef.current += scrollSpeed;
 

@@ -20,6 +20,11 @@ enum BattleResult {
     DRAW = 3
 }
 
+type SelectedActionSkill = {
+    idx: number;
+    skill: string;
+};
+
 export class Battle {
     static SHORT: number = 0; // 0=短縮しない 1=短縮する
 
@@ -91,12 +96,13 @@ export class Battle {
         this.log();
         const { first, second } = this.phaseSpeed(true);
         this.roundFirst = first;
+        const selectedSkills = new Map<Player, SelectedActionSkill>();
         this.log();
 
         // 攻撃フェイズ（先攻）
         this.log(`▼${first.playerName}の攻撃フェイズ`);
         this.log();
-        this.phaseAction(first, second, true);
+        selectedSkills.set(first, this.phaseAction(first, second, true));
         this.log();
         
         let result = this.judge(first === this.pc1 ? 2 : 1);
@@ -105,14 +111,14 @@ export class Battle {
         // 攻撃フェイズ（後攻）
         this.log(`▼${second.playerName}の攻撃フェイズ`);
         this.log();
-        this.phaseAction(second, first, false);
+        selectedSkills.set(second, this.phaseAction(second, first, false));
         this.log();
 
         result = this.judge(first === this.pc1 ? 1 : 2);
         if (result !== BattleResult.CONTINUE) return result;
 
         // 連撃フェイズ
-        result = this.executeRengeki();
+        result = this.executeRengeki(selectedSkills);
         if (result !== BattleResult.CONTINUE) return result;
 
         // 終了フェイズ
@@ -410,10 +416,27 @@ export class Battle {
         return false;
     }
 
+    private isReusableActionSkill(pc: Player, selectedSkill: SelectedActionSkill): boolean {
+        const { idx, skill } = selectedSkill;
+        if (idx < 0 || idx >= pc.getSkillsLength()) return false;
+
+        const type = pc.type[idx];
+        if (pc.skill[idx] !== skill) return false;
+        if (type === Player.NONE) return false;
+
+        if (type === Player.ATTACK) {
+            const hasCounter = (idx < pc.getSkillsLength() - 1 && pc.skill[idx + 1] === "反");
+            const isHiddenNotActive = (pc.skill[idx] === "隠" && this.turn % 2 !== 0);
+            return !hasCounter && !isHiddenNotActive;
+        }
+
+        return type === Player.BUFF;
+    }
+
     /**
      * 攻撃フェイズ
      */
-    private phaseAction(attacker: Player, defender: Player, isFirst: boolean): void {
+    private phaseAction(attacker: Player, defender: Player, isFirst: boolean, preferredSkill?: SelectedActionSkill): SelectedActionSkill {
         let skillIdx = -1;
         let isUragasumi = false;
 
@@ -428,21 +451,27 @@ export class Battle {
         }
 
         // スキルの決定
-        if (isUragasumi) {
-            for (let i = attacker.getSkillsLength() - 1; i >= 0; i--) {
-                if (this.isActionableSkill(attacker, i)) {
-                    skillIdx = i;
-                    break;
-                }
-            }
+        if (preferredSkill && this.isReusableActionSkill(attacker, preferredSkill)) {
+            skillIdx = preferredSkill.idx;
         } else {
-            for (let i = 0; i < attacker.getSkillsLength(); i++) {
-                if (this.isActionableSkill(attacker, i)) {
-                    skillIdx = i;
-                    break;
+            if (isUragasumi) {
+                for (let i = attacker.getSkillsLength() - 1; i >= 0; i--) {
+                    if (this.isActionableSkill(attacker, i)) {
+                        skillIdx = i;
+                        break;
+                    }
+                }
+            } else {
+                for (let i = 0; i < attacker.getSkillsLength(); i++) {
+                    if (this.isActionableSkill(attacker, i)) {
+                        skillIdx = i;
+                        break;
+                    }
                 }
             }
         }
+
+        const usedSkill = skillIdx >= 0 ? attacker.skill[skillIdx] : "";
 
         if (skillIdx === -1) {
             if (attacker.reika > 0) {
@@ -462,6 +491,7 @@ export class Battle {
         // 攻撃後のエフェクト適用と破壊
         if (this.applyEffects(attacker, defender) + this.applyEffects(defender, attacker) >= 1) this.log();
         if (this.applyBreakup(attacker) + this.applyBreakup(defender) >= 1) this.log();
+        return { idx: skillIdx, skill: usedSkill };
     }
 
     private processSkillEffects(attacker: Player, defender: Player, idx: number, isFirst: boolean): void {
@@ -1120,8 +1150,8 @@ export class Battle {
     /**
      * 連撃の実行
      */
-    private executeRengeki(): number {
-        const applyRengeki = (pc: Player, opponent: Player, pNo: number, isFirst: boolean) => {
+    private executeRengeki(selectedSkills: Map<Player, SelectedActionSkill>): number {
+        const applyRengeki = (pc: Player, opponent: Player, isFirst: boolean) => {
             for (let i = 0; i < pc.getSkillsLength(); i++) {
                 if (pc.skill[i] === "連") {
                     this.log();
@@ -1129,7 +1159,7 @@ export class Battle {
                     this.log();
                     this.log(`▼${pc.playerName}の攻撃フェイズ`);
                     this.log();
-                    this.phaseAction(pc, opponent, isFirst);
+                    this.phaseAction(pc, opponent, isFirst, selectedSkills.get(pc));
                     return true;
                 }
             }
@@ -1139,11 +1169,11 @@ export class Battle {
         const { first } = this.phaseSpeed(false); // 再度誰が先攻か確認（状態が変わっている可能性があるため）
         const pc1IsFirst = (first === this.pc1);
 
-        if (applyRengeki(this.pc1, this.pc2, 1, pc1IsFirst)) {
+        if (applyRengeki(this.pc1, this.pc2, pc1IsFirst)) {
             const res = this.judge(2);
             if (res !== BattleResult.CONTINUE) return res;
         }
-        if (applyRengeki(this.pc2, this.pc1, 2, !pc1IsFirst)) {
+        if (applyRengeki(this.pc2, this.pc1, !pc1IsFirst)) {
             const res = this.judge(1);
             if (res !== BattleResult.CONTINUE) return res;
         }

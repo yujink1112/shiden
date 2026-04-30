@@ -25,6 +25,24 @@ const getDestroyedSkillIndex = (line: string, name: string): number | null => {
     return m ? parseInt(m[1], 10) - 1 : null;
 };
 
+const getRestoredSkillIndex = (line: string, name: string): number | null => {
+    const escapedName = escapeRegExp(name);
+    const m = line.match(new RegExp(`${escapedName}の【.*?】(\\d+)が復元された`));
+    return m ? parseInt(m[1], 10) - 1 : null;
+};
+
+const updateScarAtIndex = (scars: number[], idx: number, value: number): number[] => {
+    if (idx < 0 || idx >= scars.length || scars[idx] === value) return scars;
+    const next = [...scars];
+    next[idx] = value;
+    return next;
+};
+
+const clearAllScars = (scars: number[]): number[] => {
+    if (!scars.some((scar) => scar !== 0)) return scars;
+    return scars.map(() => 0);
+};
+
 const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onComplete, immediate, bossImage, bossName, battleInstance, battleStageCycle, processor, stageMode, stageContext, getStorageUrl }) => {
     const rounds = React.useMemo(() => log.split(/(?=【第\d+ラウンド】|【勝敗判定】)/).filter(r => r.trim() !== ''), [log]);
     const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
@@ -36,30 +54,49 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
     const scrollRef = useRef<HTMLDivElement>(null);
     const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
     const playerName = battleInstance?.pc1?.playerName || 'あなた';
+
+    const applyLineToScars = React.useCallback((line: string, pc1Scar: number[], pc2Scar: number[]) => {
+        let nextPc1Scar = pc1Scar;
+        let nextPc2Scar = pc2Scar;
+
+        if (line.includes('破壊された')) {
+            if (line.includes(`${playerName}の`)) {
+                const idx = getDestroyedSkillIndex(line, playerName);
+                if (idx !== null) nextPc1Scar = updateScarAtIndex(nextPc1Scar, idx, 1);
+            } else if (bossName && line.includes(`${bossName}の`)) {
+                const idx = getDestroyedSkillIndex(line, bossName);
+                if (idx !== null) nextPc2Scar = updateScarAtIndex(nextPc2Scar, idx, 1);
+            }
+        }
+
+        if (line.includes('復元された')) {
+            if (line.includes(`${playerName}の`)) {
+                const idx = getRestoredSkillIndex(line, playerName);
+                if (idx !== null) {
+                    nextPc1Scar = updateScarAtIndex(nextPc1Scar, idx, 0);
+                } else if (line.includes('【ＨＰ】が復元された')) {
+                    nextPc1Scar = clearAllScars(nextPc1Scar);
+                }
+            } else if (bossName && line.includes(`${bossName}の`)) {
+                const idx = getRestoredSkillIndex(line, bossName);
+                if (idx !== null) {
+                    nextPc2Scar = updateScarAtIndex(nextPc2Scar, idx, 0);
+                } else if (line.includes('【ＨＰ】が復元された')) {
+                    nextPc2Scar = clearAllScars(nextPc2Scar);
+                }
+            }
+        }
+
+        return { nextPc1Scar, nextPc2Scar };
+    }, [bossName, playerName]);
     
     useEffect(() => {
         if (!roundFinished[currentRoundIdx]) {
             const currentLineIdx = roundVisibleCounts[currentRoundIdx];
             if (currentLineIdx < currentRoundLines.length) {
                 const line = currentRoundLines[currentLineIdx];
-                if (line.includes('破壊された')) {
-                    if (line.includes(`${playerName}の`)) {
-                      const idx = getDestroyedSkillIndex(line, playerName);
-                      if (idx !== null) setCurrentPc1Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
-                    } else if (bossName && line.includes(`${bossName}の`)) {
-                      const idx = getDestroyedSkillIndex(line, bossName);
-                      if (idx !== null) setCurrentPc2Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
-                    }
-                }
-                if (line.includes('リミテッド') && line.includes('破壊された')) {
-                    if (line.includes(`${playerName}の`)) {
-                        const idx = getDestroyedSkillIndex(line, playerName);
-                        if (idx !== null) setCurrentPc1Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
-                    } else if (bossName && line.includes(`${bossName}の`)) {
-                        const idx = getDestroyedSkillIndex(line, bossName);
-                        if (idx !== null) setCurrentPc2Scar(prev => { const next = [...prev]; next[idx] = 1; return next; });
-                    }
-                }
+                setCurrentPc1Scar(prev => applyLineToScars(line, prev, currentPc2Scar).nextPc1Scar);
+                setCurrentPc2Scar(prev => applyLineToScars(line, currentPc1Scar, prev).nextPc2Scar);
                 if (bossName) {
                     if (line.includes(`${bossName}の勝利`) || line.includes(`${bossName}が破壊された`)) setBossAnim('defeat');
                     else if (line.includes(`${bossName}の【`) && line.includes('が発動')) { setBossAnim('counter'); setTimeout(() => setBossAnim('idle'), 800); }
@@ -68,7 +105,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                 }
             }
         }
-    }, [roundVisibleCounts, currentRoundIdx, bossName, currentRoundLines, roundFinished, playerName]);
+    }, [applyLineToScars, bossName, currentPc1Scar, currentPc2Scar, currentRoundIdx, currentRoundLines, roundFinished, roundVisibleCounts]);
 
     useEffect(() => {
       if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
@@ -108,20 +145,9 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
         const fullLines = currentRoundLines;
         let newPc1Scar = [...currentPc1Scar], newPc2Scar = [...currentPc2Scar];
         fullLines.forEach(line => {
-            if (line.includes('破壊された')) {
-                if (line.includes(`${playerName}の`)) { const idx = getDestroyedSkillIndex(line, playerName); if (idx !== null) newPc1Scar[idx] = 1; }
-                else if (bossName && line.includes(`${bossName}の`)) {
-                    const idx = getDestroyedSkillIndex(line, bossName);
-                    if (idx !== null) newPc2Scar[idx] = 1;
-                }
-            }
-            if (line.includes('リミテッド') && line.includes('破壊された')) {
-                if (line.includes(`${playerName}の`)) { const idx = getDestroyedSkillIndex(line, playerName); if (idx !== null) newPc1Scar[idx] = 1; }
-                else if (bossName && line.includes(`${bossName}の`)) {
-                    const idx = getDestroyedSkillIndex(line, bossName);
-                    if (idx !== null) newPc2Scar[idx] = 1;
-                }
-            }
+            const updated = applyLineToScars(line, newPc1Scar, newPc2Scar);
+            newPc1Scar = updated.nextPc1Scar;
+            newPc2Scar = updated.nextPc2Scar;
         });
         setCurrentPc1Scar(newPc1Scar); setCurrentPc2Scar(newPc2Scar);
         const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);

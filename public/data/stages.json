@@ -371,7 +371,8 @@
     "shopSkills": [],
     "bossSkillAbbrs": "搦隠待硬連隠防防",
     "bgm": "戦闘：ゴルゾアの胃袋",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "THE MAW OF GOLZOA"
   },
   {
     "no": 25,
@@ -469,7 +470,8 @@
     "shopSkills": [],
     "bossSkillAbbrs": "無水水刺紫反燐烈",
     "bgm": "戦闘：ジズ",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "MARI VIVENS, MARI REDDENS"
   },
   {
     "no": 31,
@@ -499,7 +501,8 @@
     "shopSkills": [],
     "bossSkillAbbrs": "搦転砲速受交一光",
     "bgm": "戦闘：デザインド・エッグ号2",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "AEVIS, THE DREAD PIRATE"
   },
   {
     "no": 33,
@@ -524,12 +527,13 @@
     "name": "第2章-8 (ボス)",
     "bossName": "大海賊 エーヴィス",
     "bossImage": "/images/monster/v2/11-2.webp",
-    "bossDescription": "",
+    "bossDescription": "信念は交錯する。\n彼は愛した。古き良き海賊の系譜を。\n彼は愛した。ウェルズランドに流れる海風を。\nかつて袂を分かった友が、夢を阻む者として立ち塞がる。\n乗り越えろ。一閃を研ぎ澄ませ。",
     "backgroundImage": "/images/background/v2/pirate-ship-deck2.webp",
     "shopSkills": [],
     "bossSkillAbbrs": "先封待連焦盾死燐死",
     "bgm": "戦闘：エーヴィス2",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "SHARPEN YOUR FLASH!"
   },
   {
     "no": 35,
@@ -544,7 +548,8 @@
     "shopSkills": [],
     "bossSkillAbbrs": "Ｈ受硬裏雷癒毒硬円",
     "bgm": "戦闘：リザベル",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "LUXURIA SERENADE"
   },
   {
     "no": 36,
@@ -559,7 +564,8 @@
     "shopSkills": [],
     "bossSkillAbbrs": ["罠硬待速玉速燐連砲錬","紫速霊飛燐癒盾隠反雷","紫速隠弓雷強燐連隠弓"],
     "bgm": "戦闘：グリザーベルク",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "GRIZABERG, THE DARK WITCH"
   },
   {
     "no": 37,
@@ -574,6 +580,7 @@
     "shopSkills": [],
     "bossSkillAbbrs": ["極掌爆連滅"],
     "bgm": "戦闘：グリザーベルク2",
-    "playerName": "レミエル"
+    "playerName": "レミエル",
+    "bossSkillTitle": "BEYOND THE LIGHTNING!"
   }
 ]

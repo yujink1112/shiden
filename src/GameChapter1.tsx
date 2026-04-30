@@ -1,6 +1,8 @@
 import React from 'react';
 import SkillCard from './components/SkillCard';
 import MobileSelectedSkillsTray from './components/MobileSelectedSkillsTray';
+import MobileEnemySkillsTray from './components/MobileEnemySkillsTray';
+import DesktopSelectedSkillsDock from './components/DesktopSelectedSkillsDock';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import Kamishibai from './components/Kamishibai';
 import AudioManager from './utils/audioManager';
@@ -189,6 +191,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
 
     return [];
   }, [gameStarted, stageMode, stageCycle, stageSkillTip]);
+  const enemyPanelRef = React.useRef<HTMLDivElement>(null);
   const defeatTips = React.useMemo(() => {
     if (stageMode === 'BOSS') {
       if (stageCycle <= 3) {
@@ -257,6 +260,16 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       backgroundColor: '#000',
       overflow: 'hidden'
     }}>
+    <DesktopSelectedSkillsDock
+      isMobile={isMobile}
+      gameStarted={gameStarted}
+      selectedPlayerSkills={selectedPlayerSkills}
+      getSkillCardsFromAbbrs={getSkillCardsFromAbbrs}
+      iconMode={iconMode}
+      handleSelectedSkillClick={handleSelectedSkillClick}
+      connections={connections}
+      dimmedIndices={dimmedIndices}
+    />
     <MobileSelectedSkillsTray
       isMobile={isMobile}
       selectedPlayerSkills={selectedPlayerSkills}
@@ -266,6 +279,15 @@ const GameChapter1: React.FC<GameProps> = (props) => {
       handleSelectedSkillClick={handleSelectedSkillClick}
       connections={connections}
       dimmedIndices={dimmedIndices}
+      panelRef={panelRef}
+    />
+    <MobileEnemySkillsTray
+      isMobile={isMobile}
+      gameStarted={gameStarted}
+      enemySkills={enemySkills}
+      enemyTitle={stageProcessor.getEnemyTitle?.({ ...stageContext, userName: currentKenjuBattle?.userName || myProfile?.displayName }) || '敵の編成'}
+      targetRef={enemyPanelRef}
+      accentColor={(stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') ? '#ffb3b3' : '#9edcff'}
     />
 
 {showStage1Tutorial && (
@@ -388,7 +410,7 @@ const GameChapter1: React.FC<GameProps> = (props) => {
               </div>
             )}
             {!gameStarted && (stageMode === 'BOSS' || stageMode === 'KENJU' || stageMode === 'DENEI') && (
-              <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
+              <div ref={enemyPanelRef} className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
                       {stageProcessor.getEnemyTitle?.({ ...stageContext, userName: currentKenjuBattle?.userName || myProfile?.displayName })}
                   </h2>

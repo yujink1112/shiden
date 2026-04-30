@@ -1,6 +1,8 @@
 import React from 'react';
 import SkillCard from './components/SkillCard';
 import MobileSelectedSkillsTray from './components/MobileSelectedSkillsTray';
+import MobileEnemySkillsTray from './components/MobileEnemySkillsTray';
+import DesktopSelectedSkillsDock from './components/DesktopSelectedSkillsDock';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import StoryCanvas from './components/StoryCanvas';
 import AudioManager from './utils/audioManager';
@@ -215,6 +217,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     battleResults[0]?.winner === 1;
   const [introEffectActive, setIntroEffectActive] = React.useState(false);
   const [finalClearEffectActive, setFinalClearEffectActive] = React.useState(false);
+  const enemyPanelRef = React.useRef<HTMLDivElement>(null);
   const showDebugBattleButton = process.env.NODE_ENV !== 'production';
   const finalClearStartedRef = React.useRef(false);
   const introEffectKeyRef = React.useRef('');
@@ -395,6 +398,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
 
   return (
     <div className={[
+      'AppContainer',
       isChapter2FinalBattle ? 'chapter2-final-battle' : '',
       introEffectActive ? 'chapter2-final-intro-effect' : '',
       finalClearEffectActive ? 'chapter2-final-clear-effect' : ''
@@ -416,6 +420,24 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         getSkillCardsFromAbbrs={getSkillCardsFromAbbrs}
         iconMode={iconMode}
         gameStarted={gameStarted}
+        handleSelectedSkillClick={handleSelectedSkillClick}
+        connections={connections}
+        dimmedIndices={dimmedIndices}
+        panelRef={panelRef}
+      />
+      <MobileEnemySkillsTray
+        isMobile={isMobile}
+        gameStarted={gameStarted}
+        enemySkills={enemySkills}
+        enemyTitle={stageProcessor.getEnemyTitle?.(stageContext) || '敵の編成'}
+        targetRef={enemyPanelRef}
+      />
+      <DesktopSelectedSkillsDock
+        isMobile={isMobile}
+        gameStarted={gameStarted}
+        selectedPlayerSkills={selectedPlayerSkills}
+        getSkillCardsFromAbbrs={getSkillCardsFromAbbrs}
+        iconMode={iconMode}
         handleSelectedSkillClick={handleSelectedSkillClick}
         connections={connections}
         dimmedIndices={dimmedIndices}
@@ -492,7 +514,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
               </div>
             )}
             {!gameStarted && (
-              <div className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
+              <div ref={enemyPanelRef} className="BossSkillPreview" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '10px', background: 'rgba(0, 0, 0, 0.4)', boxSizing: 'border-box', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backdropFilter: 'blur(2px)', paddingTop: '20px', overflow: 'visible' }}>
                   <h2 style={{ color: '#ff5252', textAlign: 'center', margin: '0 0 5px 0', fontSize: '1rem', textShadow: '0 0 5px #000' }}>
                       {stageProcessor.getEnemyTitle?.(stageContext)}
                   </h2>
