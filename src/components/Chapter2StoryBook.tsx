@@ -1,10 +1,12 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
 import { CreditsData, CreditSection, StoryEntry } from '../types/story';
+import { withSupporterCredits } from '../utils/supporterBenefits';
 import './Chapter2StoryBook.css';
 
 type Chapter2StoryBookProps = {
   onClose?: () => void;
+  supporterNames?: string[];
 };
 
 type Chapter2FlowStep = {
@@ -418,7 +420,7 @@ const PrintableBlock: React.FC<{ block: TextBlock }> = ({ block }) => {
   );
 };
 
-const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
+const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose, supporterNames = [] }) => {
   const [sections, setSections] = useState<StorySection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -452,7 +454,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
         const assets = await assetsRes.json() as StoryAssets;
         const flows = await flowRes.json() as Chapter2StageFlow[];
         const stages = await stagesRes.json() as StageRecord[];
-        const creditsData = await creditsRes.json() as CreditsData;
+        const creditsData = withSupporterCredits(await creditsRes.json() as CreditsData, supporterNames);
 
         const storyIds = [
           'prologue',
@@ -648,7 +650,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [supporterNames]);
 
   const contentPageLayouts = useMemo(
     () => paginateSectionBlocks(sections, measuredHeights, pageBodyHeight),
@@ -840,7 +842,7 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose }) => {
           return (
             <article
               key={`page-${page.sectionNo}-${pageIndex}`}
-              className="storybook-page"
+              className={`storybook-page ${isTheEndPage ? 'is-the-end-only-page' : ''}`}
               ref={(element) => {
                 if (isSectionStart) {
                   pageRefs.current[page.sectionNo] = element;

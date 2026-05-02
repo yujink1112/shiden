@@ -3,11 +3,13 @@ import { StoryScript, StoryEntry, CreditsData, CreditIllustration, CreditSection
 import { getStorageUrl } from '../firebase';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
 import AudioManager from '../utils/audioManager';
+import { withSupporterCredits } from '../utils/supporterBenefits';
 
 interface StoryCanvasProps {
   script?: StoryScript; // 以前の互換性のために残す
   scriptUrl?: string; // 新しいURL指定
   creditsUrl?: string; // エンドロール用URL
+  supporterNames?: string[];
   onEnd: () => void;
   onOpenSettings?: () => void;
   onToggleMute?: () => void;
@@ -197,7 +199,7 @@ const drawTextWithLetterSpacing = (
   });
 };
 
-const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile, autoEndOnScriptEnd = false }) => {
+const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, supporterNames = [], onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile, autoEndOnScriptEnd = false }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
@@ -511,15 +513,16 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         if (creditsUrl) {
           const creditsResponse = await fetch(creditsUrl);
           const creditsData: CreditsData = await creditsResponse.json();
-          setCreditsData(creditsData);
+          const decoratedCreditsData = withSupporterCredits(creditsData, supporterNames);
+          setCreditsData(decoratedCreditsData);
           setShowTheEnd(false);
           setTheEndAlpha(0);
           endingAlphaRef.current = 1;
           waitAfterEndingTimerRef.current = null;
           creditsBgmStartedRef.current = false;
 
-          creditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
-          creditsData.sections.forEach(sec => {
+          decoratedCreditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
+          decoratedCreditsData.sections.forEach(sec => {
             if (sec.icon) imageUrls.add(sec.icon);
           });
           setIsLoaded(false); // エンドロールモードでもロード待機
@@ -602,7 +605,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     };
 
     loadScriptAndAssets();
-  }, [scriptUrl, initialScript, creditsUrl]);
+  }, [scriptUrl, initialScript, creditsUrl, supporterNames]);
 
   useEffect(() => {
     if (!isLoaded || !creditsData?.bgm || creditsBgmStartedRef.current) return;

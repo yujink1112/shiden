@@ -8,6 +8,7 @@ import type { Chapter2StageFlow } from './types/chapter2';
 export interface UserProfile {
   uid: string;
   displayName: string;
+  supporterCreditsName?: string;
   photoURL: string;
   favoriteSkill: string;
   title: string;
@@ -42,6 +43,7 @@ export interface UserProfile {
   };
   lifukuHighscore?: number;
   storyBookCouponUnlocked?: boolean;
+  supporterCouponUnlocked?: boolean;
   chapter2?: {
     stageCycle?: number;
     flowIndex?: number;
@@ -50,6 +52,11 @@ export interface UserProfile {
     ownedSkills?: string[];
     claimedRewardSteps?: string[];
     lastUpdated?: number;
+    finalClearRecord?: {
+      skillAbbrs?: string[];
+      timestamp?: number;
+      clearCount?: number;
+    };
   };
 }
 
@@ -575,8 +582,11 @@ interface LoungeProps {
   onEmailSignIn: (email: string, pass: string) => void;
   onSignOut: () => void;
   onUpdateProfile: (displayName: string, favoriteSkill: string, comment: string, photoURL?: string, title?: string, oneThing?: string, isSpoiler?: boolean, myKenju?: UserProfile['myKenju'], photoUploaderUid?: string) => void;
+  onUpdateSupporterCreditsName: (supporterCreditsName: string) => void;
   onSaveKenju: (myKenju: UserProfile['myKenju'], shouldResetStats?: boolean, onComplete?: (success: boolean, message: string) => void) => void;
   onDeleteAccount: () => void;
+  onAdminResetCouponState: (profile: UserProfile) => void;
+  onAdminResetStageProgress: (profile: UserProfile) => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onLikeDenei: (masterUid: string, deneiName: string) => void;
   onBack: () => void;
@@ -621,8 +631,11 @@ export const Lounge: React.FC<LoungeProps> = ({
   onEmailSignIn,
   onSignOut,
   onUpdateProfile,
+  onUpdateSupporterCreditsName,
   onSaveKenju,
   onDeleteAccount,
+  onAdminResetCouponState,
+  onAdminResetStageProgress,
   onKenjuBattle,
   onLikeDenei,
   onBack,
@@ -645,7 +658,7 @@ onPageChange,
 }) => {
   const today = new Date().toLocaleDateString();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
-  const loungeBackgroundUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-lounge.png`;
+  const loungeBackgroundUrl = `${process.env.PUBLIC_URL}/images/title/title-hero-lounge.webp`;
   const loungeBackgroundImage = `radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0) 16%), radial-gradient(circle at 82% 18%, rgba(120, 210, 255, 0.18) 0%, rgba(120, 210, 255, 0) 22%), linear-gradient(180deg, rgba(4, 18, 38, 0.28), rgba(4, 18, 38, 0.5)), url(${loungeBackgroundUrl})`;
 
   const [email, setEmail] = React.useState("");

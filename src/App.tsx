@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, get } from "firebase/database";
-import { database, auth, googleProvider, recordAccess, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress } from "./firebase";
+import { database, auth, googleProvider, recordAccess, recordDailyAccess, recordBattleCount, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
@@ -25,6 +25,7 @@ import GameChapter2 from './GameChapter2';
 import StoryTitle from './components/StoryTitle';
 import Chapter2StoryBook from './components/Chapter2StoryBook';
 import { GameProps, BattleResult } from './types/GameProps';
+import { collectSupporterCreditsNames, getSupporterCreditsName, hasSupporterAccess, hasStoryBookAccess, hashCouponCode, resolveCouponFeaturesFromHash, sanitizeSupporterCreditsName } from './utils/supporterBenefits';
 import './App.css';
 
 // 2026/1/31 Ver 1.0リリース　やったー
@@ -35,7 +36,8 @@ const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強"
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
-const STORY_BOOK_COUPON_CODE = 'SHIDEN-BOOK-2026';
+const COUPON_CODE_HASHES_PATH = 'publicConfig/couponCodeHashes';
+const LOUNGE_STAGE_MODES: StageMode[] = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'VERIFY_EMAIL', 'ADMIN_ANALYTICS'];
 const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
   "狼": "ルーサー",
   "▽": "アダム",
@@ -65,6 +67,11 @@ type StoryCanvasState = {
 };
 
 function App() {
+  type AdminPanelTab = 'special' | 'maintenance' | 'chapter1' | 'chapter2' | 'chapter2ClearBuilds' | 'dailyMetrics';
+  type DailyMetricsState = {
+    accesses: Record<string, { total?: number }>;
+    battles: Record<string, { total?: number; byMode?: Record<string, number> }>;
+  };
   const [stagesLoaded, setStagesLoaded] = useState(false);
   const [preloadProgress, setPreloadProgress] = useState({ current: 0, total: 0 });
   const [chapter2Flows, setChapter2Flows] = useState<Chapter2StageFlow[]>([]);
@@ -196,6 +203,8 @@ function App() {
   const [adminEpilogueSequence, setAdminEpilogueSequence] = useState<'idle' | 'title' | 'story' | 'credits'>('idle');
   const [isAdminDebugSkillsActive, setIsAdminDebugSkillsActive] = useState(false);
   const [adminSaveMessage, setAdminSaveMessage] = useState<string | null>(null);
+  const [adminPanelTab, setAdminPanelTab] = useState<AdminPanelTab>('chapter2');
+  const [dailyMetrics, setDailyMetrics] = useState<DailyMetricsState>({ accesses: {}, battles: {} });
   const adminSaveMessageTimerRef = useRef<number | null>(null);
   const isAdminDebugSkillsActiveRef = useRef(false);
   useEffect(() => {
@@ -206,7 +215,12 @@ function App() {
     };
   }, []);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
-  const canAccessChapter2StoryBook = isAdmin || Boolean(myProfile?.storyBookCouponUnlocked);
+  const canAccessChapter2StoryBook = hasStoryBookAccess(myProfile, isAdmin);
+  const hasSupporterBenefit = hasSupporterAccess(myProfile, isAdmin);
+  const supporterCreditsNames = useMemo(
+    () => collectSupporterCreditsNames(allProfiles.filter(profile => profile.uid !== process.env.REACT_APP_ADMIN_UID)),
+    [allProfiles]
+  );
   const getAllDebugSkillAbbrs = () => Array.from(new Set(ALL_SKILLS.map(skill => skill.abbr)));
   const isDebugAllSkillSet = (skills: string[] | undefined) => {
     if (!skills) return false;
@@ -327,6 +341,8 @@ function App() {
   const [storyBookCouponInput, setStoryBookCouponInput] = useState('');
   const [storyBookCouponMessage, setStoryBookCouponMessage] = useState<string | null>(null);
   const [storyBookCouponMessageType, setStoryBookCouponMessageType] = useState<'success' | 'error' | 'info'>('info');
+  const [couponCodeHashes, setCouponCodeHashes] = useState<{ storyBookHashes: string[]; supporterHashes: string[] }>({ storyBookHashes: [], supporterHashes: [] });
+  const [isCouponCodeHashesLoaded, setIsCouponCodeHashesLoaded] = useState(false);
   const [showNewGameIntro, setShowNewGameIntro] = useState(false);
   const [newGameIntroChapter, setNewGameIntroChapter] = useState<1 | 2>(1);
   const [newGameIntroTrackIndex, setNewGameIntroTrackIndex] = useState(1);
@@ -343,7 +359,7 @@ function App() {
   const storyBookOverlay = showChapter2StoryBook && canAccessChapter2StoryBook && typeof document !== 'undefined'
     ? createPortal(
         <div className="StoryBookOverlayHost" style={{ position: 'fixed', inset: 0, zIndex: 40000, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', backgroundColor: '#120e0c' }}>
-          <Chapter2StoryBook onClose={() => setShowChapter2StoryBook(false)} />
+          <Chapter2StoryBook onClose={() => setShowChapter2StoryBook(false)} supporterNames={supporterCreditsNames} />
         </div>,
         document.body
       )
@@ -363,6 +379,34 @@ function App() {
     };
   }, [showChapter2StoryBook]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCouponCodeHashes = async () => {
+      try {
+        const snapshot = await get(ref(database, COUPON_CODE_HASHES_PATH));
+        if (cancelled) return;
+        const data = snapshot.val() || {};
+        setCouponCodeHashes({
+          storyBookHashes: Array.isArray(data.storyBookHashes) ? data.storyBookHashes.filter((value: unknown): value is string => typeof value === 'string') : [],
+          supporterHashes: Array.isArray(data.supporterHashes) ? data.supporterHashes.filter((value: unknown): value is string => typeof value === 'string') : []
+        });
+      } catch (error) {
+        console.error('Failed to load coupon code hashes:', error);
+      } finally {
+        if (!cancelled) {
+          setIsCouponCodeHashesLoaded(true);
+        }
+      }
+    };
+
+    loadCouponCodeHashes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleStoryBookCouponInput = () => {
     if (!user || !myProfile) {
       window.alert('クーポンコードの入力はユーザ登録後にご利用ください。');
@@ -370,11 +414,15 @@ function App() {
     }
     setStoryBookCouponInput('');
     setStoryBookCouponMessage(
-      myProfile.storyBookCouponUnlocked
-        ? 'このアカウントでは、すでにストーリーブックを閲覧できます。'
+      hasSupporterAccess(myProfile)
+        ? `Special Thanks掲載中: ${getSupporterCreditsName(myProfile)}`
+        : myProfile.storyBookCouponUnlocked
+          ? 'このアカウントでは、すでにストーリーブックを閲覧できます。'
         : null
     );
-    setStoryBookCouponMessageType(myProfile.storyBookCouponUnlocked ? 'success' : 'info');
+    setStoryBookCouponMessageType(
+      hasSupporterAccess(myProfile) || myProfile.storyBookCouponUnlocked ? 'success' : 'info'
+    );
     setShowStoryBookCouponModal(true);
   };
 
@@ -392,16 +440,33 @@ function App() {
       return;
     }
 
-    if (normalized === STORY_BOOK_COUPON_CODE) {
+    if (!isCouponCodeHashesLoaded) {
+      setStoryBookCouponMessage('特典コード設定を読み込み中です。少し待ってからもう一度お試しください。');
+      setStoryBookCouponMessageType('info');
+      return;
+    }
+
+    const couponHash = await hashCouponCode(normalized);
+    const features = resolveCouponFeaturesFromHash(couponHash, couponCodeHashes);
+
+    if (features.length > 0) {
       const profileRef = ref(database, `profiles/${user.uid}`);
       const updatedProfile: UserProfile = {
         ...myProfile,
-        storyBookCouponUnlocked: true
+        storyBookCouponUnlocked: myProfile.storyBookCouponUnlocked || features.includes('storyBook'),
+        supporterCouponUnlocked: myProfile.supporterCouponUnlocked || features.includes('supporter'),
+        supporterCreditsName: features.includes('supporter')
+          ? sanitizeSupporterCreditsName(myProfile.supporterCreditsName || '', myProfile.displayName)
+          : (myProfile.supporterCreditsName || '')
       };
       setMyProfile(updatedProfile);
       try {
         await set(profileRef, updatedProfile);
-        setStoryBookCouponMessage('ストーリーブックを閲覧できるようになりました。');
+        setStoryBookCouponMessage(
+          features.includes('supporter')
+            ? `ありがとうございました。Special Thanksには「${getSupporterCreditsName(updatedProfile)}」で掲載されます。`
+            : 'ストーリーブックを閲覧できるようになりました。'
+        );
         setStoryBookCouponMessageType('success');
       } catch (error) {
         console.error('Failed to save story book coupon state:', error);
@@ -630,6 +695,51 @@ function App() {
       return nonAdminProfiles.filter(profile => hasClearedChapter2Stage(profile, stageNo)).length;
     });
   }, [nonAdminProfiles]);
+
+  const chapter2FinalClearBuilds = React.useMemo(() => {
+    return nonAdminProfiles
+      .filter(profile => Array.isArray(profile.chapter2?.finalClearRecord?.skillAbbrs) && profile.chapter2!.finalClearRecord!.skillAbbrs!.length > 0)
+      .map(profile => ({
+        uid: profile.uid,
+        displayName: profile.displayName || '名無しの剣士',
+        photoURL: profile.photoURL,
+        title: profile.title,
+        clearCount: profile.chapter2?.finalClearRecord?.clearCount || 1,
+        timestamp: profile.chapter2?.finalClearRecord?.timestamp || 0,
+        skillAbbrs: profile.chapter2?.finalClearRecord?.skillAbbrs || []
+      }))
+      .sort((a, b) => {
+        if (b.clearCount !== a.clearCount) return b.clearCount - a.clearCount;
+        return b.timestamp - a.timestamp;
+      });
+  }, [nonAdminProfiles]);
+
+  const dailyMetricsRows = React.useMemo(() => {
+    const dateKeys = Array.from(new Set([
+      ...Object.keys(dailyMetrics.accesses || {}),
+      ...Object.keys(dailyMetrics.battles || {})
+    ])).sort((a, b) => a.localeCompare(b));
+
+    return dateKeys.map(date => {
+      const accessTotal = dailyMetrics.accesses?.[date]?.total || 0;
+      const battleEntry = dailyMetrics.battles?.[date];
+      const battleTotal = battleEntry?.total || 0;
+      return {
+        date,
+        accessTotal,
+        battleTotal,
+        storyBattles: battleEntry?.byMode?.story || 0,
+        kenjuBattles: battleEntry?.byMode?.kenju || 0,
+        deneiBattles: battleEntry?.byMode?.denei || 0,
+        otherBattles: battleEntry?.byMode?.other || 0
+      };
+    });
+  }, [dailyMetrics]);
+
+  const recentDailyMetricsRows = React.useMemo(
+    () => dailyMetricsRows.slice(-30).reverse(),
+    [dailyMetricsRows]
+  );
 
   const suppressChapter2ProgressSaveRef = useRef(false);
 
@@ -1386,6 +1496,76 @@ const PLAYER_SKILL_COUNT = 5;
     });
   };
 
+  const handleUpdateSupporterCreditsName = (supporterCreditsName: string) => {
+    if (!user || !myProfile || !myProfile.supporterCouponUnlocked) return;
+    const profileRef = ref(database, `profiles/${user.uid}`);
+    const filteredCreditsName = filterNGWords(supporterCreditsName || "");
+    const updatedProfile: UserProfile = {
+      ...myProfile,
+      supporterCreditsName: filteredCreditsName.slice(0, 24),
+      lastActive: Date.now()
+    };
+
+    setMyProfile(updatedProfile);
+    set(profileRef, JSON.parse(JSON.stringify(updatedProfile))).catch(err => {
+      console.error("Supporter credits name update failed:", err);
+    });
+  };
+
+  const handleAdminResetCouponState = async (profile: UserProfile) => {
+    if (!isAdmin || !profile?.uid) return;
+    if (!window.confirm(`${profile.displayName} の特典コード状態を初期化しますか？`)) return;
+
+    try {
+      const profileRef = ref(database, `profiles/${profile.uid}`);
+      const resetProfile: UserProfile = {
+        ...profile,
+        storyBookCouponUnlocked: false,
+        supporterCouponUnlocked: false,
+        supporterCreditsName: profile.displayName,
+        lastActive: Date.now()
+      };
+      await set(profileRef, JSON.parse(JSON.stringify(resetProfile)));
+      if (viewingProfile?.uid === profile.uid) {
+        setViewingProfile(resetProfile);
+      }
+      if (myProfile?.uid === profile.uid) {
+        setMyProfile(resetProfile);
+      }
+      window.alert('特典コード入力状態を初期化しました。');
+    } catch (error) {
+      console.error('Failed to reset coupon state:', error);
+      window.alert('特典コード入力状態の初期化に失敗しました。');
+    }
+  };
+
+  const handleAdminResetStageProgress = async (profile: UserProfile) => {
+    if (!isAdmin || !profile?.uid) return;
+    if (!window.confirm(`${profile.displayName} の進行中ステージを初期化しますか？\n第1章と第2章の現在進行位置を初期状態へ戻します。`)) return;
+
+    try {
+      await resetChapter1Progress(profile.uid, CHAPTER1_INITIAL_SKILLS);
+      await resetChapter2Progress(profile.uid, CHAPTER2_INITIAL_SKILLS);
+
+      const profileRef = ref(database, `profiles/${profile.uid}`);
+      const snapshot = await get(profileRef);
+      if (snapshot.exists()) {
+        const refreshedProfile = snapshot.val() as UserProfile;
+        if (viewingProfile?.uid === profile.uid) {
+          setViewingProfile(refreshedProfile);
+        }
+        if (myProfile?.uid === profile.uid) {
+          setMyProfile(refreshedProfile);
+        }
+      }
+
+      window.alert('進行中ステージを初期化しました。');
+    } catch (error) {
+      console.error('Failed to reset stage progress:', error);
+      window.alert('進行中ステージの初期化に失敗しました。');
+    }
+  };
+
   const handleSaveKenju = async (myKenju: UserProfile['myKenju'], shouldResetStats: boolean = true, onComplete?: (success: boolean, message: string) => void) => {
     if (!user || !myProfile || !myKenju) return;
 
@@ -2130,7 +2310,9 @@ const PLAYER_SKILL_COUNT = 5;
                 if (firebaseStageMode) {
                   localStorage.setItem('shiden_last_game_mode', firebaseStageMode);
                   localStorage.setItem('shiden_stage_mode', firebaseStageMode);
-                  setStageMode(firebaseStageMode);
+                  if (!LOUNGE_STAGE_MODES.includes(stageMode)) {
+                    setStageMode(firebaseStageMode);
+                  }
                 }
                 setCanGoToBoss(firebaseCanGoToBoss);
                 localStorage.setItem('shiden_can_go_to_boss', firebaseCanGoToBoss.toString());
@@ -2278,6 +2460,8 @@ const PLAYER_SKILL_COUNT = 5;
               title: "",
               comment: "よろしく！",
               storyBookCouponUnlocked: false,
+              supporterCouponUnlocked: false,
+              supporterCreditsName: authenticatedUser.displayName || "名無しの剣士",
               lastActive: Date.now(),
               points: 0,
               lastKenjuDate: new Date().toLocaleDateString()
@@ -2485,10 +2669,30 @@ const PLAYER_SKILL_COUNT = 5;
   useEffect(() => {
     // sessionStorage を使って、タブ/セッションごとに一度だけアクセスを記録
     const LOCAL_KEY = 'shiden_local_accessed';
+    const date = new Date();
+    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const DAILY_LOCAL_KEY = `shiden_daily_accessed_${dateKey}`;
     if (!localStorage.getItem(LOCAL_KEY)) {
       recordAccess();
       localStorage.setItem(LOCAL_KEY, 'true');
     }
+    if (!localStorage.getItem(DAILY_LOCAL_KEY)) {
+      recordDailyAccess();
+      localStorage.setItem(DAILY_LOCAL_KEY, 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    const dailyMetricsRef = ref(database, 'dailyMetrics');
+    const unsubscribe = onValue(dailyMetricsRef, (snapshot) => {
+      const value = snapshot.val() || {};
+      setDailyMetrics({
+        accesses: value.accesses || {},
+        battles: value.battles || {}
+      });
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -2734,6 +2938,8 @@ const PLAYER_SKILL_COUNT = 5;
       const playerSkillDetails = getSkillCardsFromAbbrs(selectedPlayerSkills);
       const battleCount = stageProcessor.getBattleCount();
       const context = stageContext;
+
+      recordBattleCount(stageMode, battleCount);
 
       // 挑戦回数をカウント
       if (stageMode === 'KENJU' && kenjuBoss) {
@@ -3385,7 +3591,7 @@ const PLAYER_SKILL_COUNT = 5;
       const isVictory = (['BOSS', 'KENJU', 'DENEI'] as StageMode[]).includes(stageMode) ? winCount >= 1 : winCount === 10;
       const saveKey = stageMode === 'KENJU' ? `KENJU_${kenjuBoss?.name}` :
                       stageMode === 'DENEI' ? `DENEI_${currentKenjuBattle?.name}` :
-                      `${stageMode}_${stageCycle}`;
+                      (isChapter2 ? `CH2_${Math.max(stageCycle - 12, 1)}_${chapter2SubStage || 1}` : `${stageMode}_${stageCycle}`);
       const currentBattleId = `${saveKey}_${battleResults.length}_${winCount}`;
 
       if (lastSavedVictoryRef.current !== currentBattleId) {
@@ -3409,6 +3615,20 @@ const PLAYER_SKILL_COUNT = 5;
             if (user) {
               const specificVictorySkillRef = ref(database, `profiles/${user.uid}/victorySkills/${saveKey.replace(/\.(?!\w+$)/g, '_').replace(/\./g, '_')}`);
               set(specificVictorySkillRef, selectedPlayerSkills);
+
+              if (
+                isChapter2 &&
+                stageMode === 'BOSS' &&
+                stageCycle === CHAPTER2_FINAL_STAGE_NO &&
+                chapter2FlowIndex === CHAPTER2_FINAL_BATTLE_FLOW_INDEX
+              ) {
+                const chapter2FinalClearRecordRef = ref(database, `profiles/${user.uid}/chapter2/finalClearRecord`);
+                set(chapter2FinalClearRecordRef, {
+                  skillAbbrs: selectedPlayerSkills,
+                  timestamp: Date.now(),
+                  clearCount: (myProfile?.chapter2?.loopCount || 0) + 1
+                });
+              }
 
               // クリア人数カウント用の記録
               if (stageMode === 'KENJU' && kenjuBoss) {
@@ -3452,7 +3672,7 @@ const PLAYER_SKILL_COUNT = 5;
           }
       }
     }
-  }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile]);
+  }, [gameStarted, stageMode, battleResults, stageCycle, selectedPlayerSkills, logComplete, user, myProfile, isChapter2, chapter2FlowIndex, chapter2SubStage]);
 
   if (stageMode === 'LIFUKU') {
     return (
@@ -3519,9 +3739,12 @@ const PLAYER_SKILL_COUNT = 5;
         onEmailSignIn={handleEmailSignIn}
         onSignOut={handleSignOut}
         onUpdateProfile={handleUpdateProfile}
+        onUpdateSupporterCreditsName={handleUpdateSupporterCreditsName}
         onSaveKenju={handleSaveKenju}
         onKenjuBattle={handleKenjuBattle}
         onLikeDenei={handleLikeDenei}
+        onAdminResetCouponState={handleAdminResetCouponState}
+        onAdminResetStageProgress={handleAdminResetStageProgress}
 	      kenjuBosses={KENJU_DATA.map(k => ({
           name: k.name,
           image: getStorageUrl(k.image),
@@ -3705,6 +3928,11 @@ const PLAYER_SKILL_COUNT = 5;
                     <span className="TitleUserNameValue">{myProfile?.displayName || "名もなき人"}</span>
                   </div>
                 )}
+                {user && hasSupporterBenefit && (
+                  <div className="TitleSupporterPanel">
+                    <div className="TitleSupporterPanelLabel">SPECIAL THANKS</div>
+                  </div>
+                )}
                 <div className="TitleFooterStat">{activeUsers}人がプレイ中です</div>
                 <div className="TitleFooterCopyright"> © 2026 Shiden Games </div>
                 <div className="TitleFooterLinks">
@@ -3799,7 +4027,7 @@ const PLAYER_SKILL_COUNT = 5;
                   <img 
                     src={getStorageUrl('/images/chapter/Chapter1.webp')} 
                     alt="Chapter 1" 
-                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '250px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
+                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '200px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
                   />
                   <div style={{ padding: '15px', textAlign: 'center' }}>
                     <div style={{ color: '#4fc3f7', fontSize: '1.2rem', fontWeight: 'bold' }}>第1章 ISLAND</div>
@@ -3855,7 +4083,7 @@ const PLAYER_SKILL_COUNT = 5;
                   <img 
                     src={getStorageUrl('/images/chapter/Chapter2.webp')} 
                     alt="Chapter 2" 
-                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '250px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
+                    style={{ width: '100%', height: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '200px' : '300px') : (isMobile ? '150px' : '200px'), objectFit: 'cover' }}
                   />
                   <div style={{ padding: '15px', textAlign: 'center' }}>
                     <div style={{ color: isChapter2PanelDimmed ? '#666' : '#ff5252', fontSize: '1.2rem', fontWeight: 'bold' }}>第2章 FLAG</div>
@@ -3982,7 +4210,7 @@ const PLAYER_SKILL_COUNT = 5;
                   disabled={!user}
                   style={{ fontSize: '0.92rem', opacity: user ? 1 : 0.58, cursor: user ? 'pointer' : 'not-allowed' }}
                 >
-                  クーポンコード入力
+                  特典コード入力
                 </button>
               </div>
             </div>
@@ -3990,7 +4218,7 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showStoryBookCouponModal && (
-          <div className="TitleStartModalOverlay" onClick={() => setShowStoryBookCouponModal(false)}>
+          <div className="TitleStartModalOverlay" onClick={() => setShowStoryBookCouponModal(false)} style={{ zIndex: 2200 }}>
             <div className="TitleStartModal TitleCouponModal" onClick={(e) => e.stopPropagation()}>
               <div className="TitleStartModalHeader">
                 <span>COUPON CODE</span>
@@ -3998,13 +4226,34 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
               <div className="TitleCouponLead">
                 <div className="TitleCouponEyebrow">BOOTH Bonus</div>
-                <h3 className="TitleCouponTitle">第2章ストーリーブック特典</h3>
+                <h3 className="TitleCouponTitle">特典は2種類から選べます</h3>
                 <p className="TitleCouponText">
-                  BOOTHで販売予定の特典コードを入力すると、このアカウントで第2章ストーリーブックを閲覧できます。
+                  BOOTHで購入した特典コードを入力すると、このアカウントで特典を受け取れます。
                 </p>
-                <p className="TitleCouponText">
-                  PDF版や冊子版とあわせて、ゲーム内の演出を振り返るための閲覧特典として使える想定です。
-                </p>
+                <div className="TitleCouponBenefitList">
+                  <div className="TitleCouponBenefitCard">
+                    <div className="TitleCouponBenefitLabel">特典コード①</div>
+                    <div className="TitleCouponBenefitTitle">ストーリーブックを楽しめるプラン</div>
+                    <p className="TitleCouponBenefitText">
+                      第2章ストーリーブックをこのアカウントで閲覧できます。
+                    </p>
+                  </div>
+                  <div className="TitleCouponBenefitCard is-supporter">
+                    <div className="TitleCouponBenefitLabel">特典コード②</div>
+                    <div className="TitleCouponBenefitTitle">ストーリー＋Special Thanks プラン</div>
+                    <p className="TitleCouponBenefitText">
+                      ストーリーブック閲覧に加えて、著作権表記とエンドロールの Special Thanks 掲載が有効になります。
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="https://shigen-games.booth.pm/items/8285332"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="TitleCouponBoothLink"
+                >
+                  BOOTHで特典を見る
+                </a>
               </div>
 
               <div className="TitleCouponForm">
@@ -4014,7 +4263,7 @@ const PLAYER_SKILL_COUNT = 5;
                   className="TitleCouponInput"
                   type="text"
                   value={storyBookCouponInput}
-                  onChange={(e) => setStoryBookCouponInput(e.target.value)}
+                  onChange={(e) => setStoryBookCouponInput(e.target.value.toUpperCase())}
                   placeholder="例: ABCD-EFGH-1234"
                   autoCapitalize="characters"
                   autoCorrect="off"
@@ -4028,18 +4277,6 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
 
               <div className="TitleCouponActions">
-                {canAccessChapter2StoryBook && (
-                  <button
-                    className="TitleButton neon-blue"
-                    onClick={() => {
-                      setShowStoryBookCouponModal(false);
-                      setShowTitleMenuModal(false);
-                      setShowChapter2StoryBook(true);
-                    }}
-                  >
-                    STORY BOOKを開く
-                  </button>
-                )}
                 <button className="TitleButton neon-gold" onClick={handleSubmitStoryBookCoupon}>
                   クーポンを適用
                 </button>
@@ -4411,226 +4648,389 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
 
-        {showRule && <Rule onClose={() => setShowRule(false)} />}
+        {showRule && <Rule onClose={() => setShowRule(false)} supporterNames={supporterCreditsNames} />}
         {isAdmin && showAdmin && (
-          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, maxHeight: '80vh', overflowY: 'auto', width: '90%', maxWidth: '800px' }}>
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#1a1a1a', border: '2px solid #ff5252', padding: '20px', borderRadius: '10px', zIndex: 10000, maxHeight: '80vh', overflowY: 'auto', width: '90%', maxWidth: '960px' }}>
             <h2 style={{ color: '#ff5252' }}>管理者パネル</h2>
-            <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444' }}>
-              <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button onClick={() => {
-                  setShowChapter2StoryBook(true);
-                  setShowAdmin(false);
-                }} style={{ background: '#00897b' }}>第2章ストーリーブック</button>
-                <button onClick={() => {
-                  setStoryContentV2(null);
-                  setCreditsUrl(null);
-                  setStoryUrl(null);
-                  setShowAdmin(false);
-                  setIsAdminPreview(true);
-                  setAdminEpilogueSequence('idle');
-                  setIsTitle(false);
-                  setShowPrologueTitle(true);
-                }} style={{ background: '#4527a0' }}>プロローグ (prologue.txt)</button>
-                <button onClick={() => {
-                  AudioManager.getInstance().stopBgm();
-                  setCreditsUrl('/data/credits.json');
-                  setShowAdmin(false);
-                  setIsAdminPreview(true);
-                  setAdminEpilogueSequence('credits');
-                  setTimeout(() => setShowStoryModal(true), 50);
-                }} style={{ background: '#2e7d32' }}>エンドロール (credits.json)</button>
-                <button onClick={async () => {
-                  const data = await loadV2Story('epilogue');
-                  if (!data) return;
-                  setStoryContent(null);
-                  setStoryContentV2(data);
-                  setStoryUrl(null);
-                  setCreditsUrl(null);
-                  setShowStoryModal(false);
-                  setShowChapterTitle(false);
-                  setShowChapter2Title(false);
-                  setShowPrologueTitle(false);
-                  setShowAdmin(false);
-                  setIsAdminPreview(true);
-                  setAdminEpilogueSequence('idle');
-                  setStageCycle(24);
-                  setStageMode('BOSS');
-                  setGameStarted(false);
-                  setIsTitle(false);
-                  setShowEpilogue(false);
-                  setTimeout(() => setShowStoryModal(true), 50);
-                }} style={{ background: '#8d6e63' }}>エピローグ (v2/epilogue.txt)</button>
-                <button onClick={startChapter2EpilogueSequence} style={{ background: '#ad1457' }}>エピローグ通し再生</button>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444' }}>
-              <h3 style={{ color: '#90caf9', marginTop: 0 }}>端末メンテナンス</h3>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+              {[
+                { key: 'chapter2' as const, label: '第2章操作', color: '#ff5252' },
+                { key: 'dailyMetrics' as const, label: '日次指標', color: '#80cbc4' },
+                { key: 'chapter2ClearBuilds' as const, label: '第2章クリア編成', color: '#ffd54f' },
+                { key: 'chapter1' as const, label: '第1章操作', color: '#4fc3f7' },
+                { key: 'special' as const, label: '特殊シナリオ', color: '#ce93d8' },
+                { key: 'maintenance' as const, label: '端末メンテ', color: '#90caf9' }
+              ].map(tab => (
                 <button
-                  onClick={handleAdminClearClientCache}
-                  style={{ background: '#1565c0', border: '1px solid #64b5f6', fontWeight: 'bold' }}
-                >
-                  この端末のキャッシュ削除
-                </button>
-              </div>
-              <div style={{ marginTop: '8px', color: '#bbb', fontSize: '0.85rem', lineHeight: 1.6 }}>
-                PC版・スマホ版とも、このボタンを押した端末のアプリキャッシュだけを削除します。
-              </div>
-            </div>
-
-            {/* 第1章 (Stage 1-12) */}
-            <div style={{ marginBottom: '30px' }}>
-              <h3 style={{ color: '#4fc3f7', borderBottom: '2px solid #4fc3f7', paddingBottom: '5px', marginBottom: '10px' }}>第1章 ISLAND</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                {STAGE_DATA.filter(s => s.no <= 12).map(s => (
-                  <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ minWidth: '80px', fontWeight: 'bold', color: '#eee' }}>Stage {s.no}</div>
-                    <button onClick={() => { applyAdminDebugSkills(); setStageCycle(s.no); setStageMode('MID'); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#333', color: '#fff', border: '1px solid #555' }}>
-                      開始
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 第2章 (Stage 13~) */}
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ color: '#ff5252', borderBottom: '2px solid #ff5252', paddingBottom: '5px', marginBottom: '10px' }}>第2章 FLAG (story/v2)</h3>
-              {adminSaveMessage && (
-                <div
+                  key={tab.key}
+                  onClick={() => setAdminPanelTab(tab.key)}
                   style={{
-                    marginBottom: '10px',
-                    padding: '8px 12px',
-                    border: '1px solid #66bb6a',
-                    borderRadius: '8px',
-                    background: 'rgba(46, 125, 50, 0.22)',
-                    color: '#c8e6c9',
-                    fontSize: '0.9rem',
+                    padding: '8px 14px',
+                    borderRadius: '999px',
+                    border: `1px solid ${tab.color}`,
+                    background: adminPanelTab === tab.key ? tab.color : 'transparent',
+                    color: adminPanelTab === tab.key ? '#111' : tab.color,
                     fontWeight: 'bold'
                   }}
                 >
-                  {adminSaveMessage}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {adminPanelTab === 'special' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#ffd700', marginTop: 0 }}>特殊シナリオ</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button onClick={() => {
+                    setShowChapter2StoryBook(true);
+                    setShowAdmin(false);
+                  }} style={{ background: '#00897b' }}>第2章ストーリーブック</button>
+                  <button onClick={() => {
+                    setStoryContentV2(null);
+                    setCreditsUrl(null);
+                    setStoryUrl(null);
+                    setShowAdmin(false);
+                    setIsAdminPreview(true);
+                    setAdminEpilogueSequence('idle');
+                    setIsTitle(false);
+                    setShowPrologueTitle(true);
+                  }} style={{ background: '#4527a0' }}>プロローグ (prologue.txt)</button>
+                  <button onClick={() => {
+                    AudioManager.getInstance().stopBgm();
+                    setCreditsUrl('/data/credits.json');
+                    setShowAdmin(false);
+                    setIsAdminPreview(true);
+                    setAdminEpilogueSequence('credits');
+                    setTimeout(() => setShowStoryModal(true), 50);
+                  }} style={{ background: '#2e7d32' }}>エンドロール (credits.json)</button>
+                  <button onClick={async () => {
+                    const data = await loadV2Story('epilogue');
+                    if (!data) return;
+                    setStoryContent(null);
+                    setStoryContentV2(data);
+                    setStoryUrl(null);
+                    setCreditsUrl(null);
+                    setShowStoryModal(false);
+                    setShowChapterTitle(false);
+                    setShowChapter2Title(false);
+                    setShowPrologueTitle(false);
+                    setShowAdmin(false);
+                    setIsAdminPreview(true);
+                    setAdminEpilogueSequence('idle');
+                    setStageCycle(24);
+                    setStageMode('BOSS');
+                    setGameStarted(false);
+                    setIsTitle(false);
+                    setShowEpilogue(false);
+                    setTimeout(() => setShowStoryModal(true), 50);
+                  }} style={{ background: '#8d6e63' }}>エピローグ (v2/epilogue.txt)</button>
+                  <button onClick={startChapter2EpilogueSequence} style={{ background: '#ad1457' }}>エピローグ通し再生</button>
                 </div>
-              )}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
-                  const n = s.stage!;
-                  const stageNo = n + 12;
-                  const flow = chapter2Flows.find(f => f.stageNo === stageNo);
-                  const battleSteps = flow?.flow
-                    .map((step, index) => ({ step, index }))
-                    .filter(({ step }) => step.type === 'battle') || [];
-                  return (
+              </div>
+            )}
+
+            {adminPanelTab === 'maintenance' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#90caf9', marginTop: 0 }}>端末メンテナンス</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleAdminClearClientCache}
+                    style={{ background: '#1565c0', border: '1px solid #64b5f6', fontWeight: 'bold' }}
+                  >
+                    この端末のキャッシュ削除
+                  </button>
+                </div>
+                <div style={{ marginTop: '8px', color: '#bbb', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  PC版・スマホ版とも、このボタンを押した端末のアプリキャッシュだけを削除します。
+                </div>
+              </div>
+            )}
+
+            {adminPanelTab === 'chapter1' && (
+              <div style={{ marginBottom: '30px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#4fc3f7', borderBottom: '2px solid #4fc3f7', paddingBottom: '5px', marginBottom: '10px' }}>第1章 ISLAND</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                  {STAGE_DATA.filter(s => s.no <= 12).map(s => (
                     <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>
-                      
-                      <button onClick={() => { 
-                        applyAdminDebugSkills();
-                        setStageCycle(stageNo); 
-                        setChapter2FlowIndex(0);
-                        setStageMode('BOSS');
-                        setIsTitle(false); 
-                        setShowAdmin(false); 
-                        if (flow) {
-                          moveToNextStep(flow, -1);
-                        }
-                      }} style={{ padding: '5px 10px', background: '#e91e63', border: '1px solid #c2185b', fontWeight: 'bold' }}>
-                        TEST
+                      <div style={{ minWidth: '80px', fontWeight: 'bold', color: '#eee' }}>Stage {s.no}</div>
+                      <button onClick={() => { applyAdminDebugSkills(); setStageCycle(s.no); setStageMode('MID'); setIsTitle(false); setShowAdmin(false); }} style={{ padding: '5px 10px', background: '#333', color: '#fff', border: '1px solid #555' }}>
+                        開始
                       </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-                      <button onClick={() => {
-                        setStageCycle(stageNo);
-                        setChapter2FlowIndex(0);
-                        setStageMode('BOSS');
-                        setGameStarted(false);
-                        setShowStoryModal(false);
-                        setShowChapter2Title(false);
-                        setIsTitle(false);
-                        setShowAdmin(false);
-                        setIsAdminTitlePreview(true);
-                        setShowChapterTitle(true);
-                      }} style={{ padding: '5px 10px', background: '#6a1b9a', border: '1px solid #ab47bc', fontWeight: 'bold' }}>
-                        TITLE
-                      </button>
+            {adminPanelTab === 'chapter2' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#ff5252', borderBottom: '2px solid #ff5252', paddingBottom: '5px', marginBottom: '10px' }}>第2章 FLAG (story/v2)</h3>
+                {adminSaveMessage && (
+                  <div
+                    style={{
+                      marginBottom: '10px',
+                      padding: '8px 12px',
+                      border: '1px solid #66bb6a',
+                      borderRadius: '8px',
+                      background: 'rgba(46, 125, 50, 0.22)',
+                      color: '#c8e6c9',
+                      fontSize: '0.9rem',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {adminSaveMessage}
+                  </div>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                  {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
+                    const n = s.stage!;
+                    const stageNo = n + 12;
+                    const flow = chapter2Flows.find(f => f.stageNo === stageNo);
+                    const battleSteps = flow?.flow
+                      .map((step, index) => ({ step, index }))
+                      .filter(({ step }) => step.type === 'battle') || [];
+                    return (
+                      <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>
+                        
+                        <button onClick={() => { 
+                          applyAdminDebugSkills();
+                          setStageCycle(stageNo); 
+                          setChapter2FlowIndex(0);
+                          setStageMode('BOSS');
+                          setIsTitle(false); 
+                          setShowAdmin(false); 
+                          if (flow) {
+                            moveToNextStep(flow, -1);
+                          }
+                        }} style={{ padding: '5px 10px', background: '#e91e63', border: '1px solid #c2185b', fontWeight: 'bold' }}>
+                          TEST
+                        </button>
 
-                      <button onClick={async () => {
-                        await handleAdminSetChapter2Save(stageNo);
-                      }} style={{ padding: '5px 10px', background: '#455a64', border: '1px solid #78909c', fontWeight: 'bold' }}>
-                        SAVE
-                      </button>
+                        <button onClick={() => {
+                          setStageCycle(stageNo);
+                          setChapter2FlowIndex(0);
+                          setStageMode('BOSS');
+                          setGameStarted(false);
+                          setShowStoryModal(false);
+                          setShowChapter2Title(false);
+                          setIsTitle(false);
+                          setShowAdmin(false);
+                          setIsAdminTitlePreview(true);
+                          setShowChapterTitle(true);
+                        }} style={{ padding: '5px 10px', background: '#6a1b9a', border: '1px solid #ab47bc', fontWeight: 'bold' }}>
+                          TITLE
+                        </button>
 
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        {battleSteps.map(({ step, index: flowIndex }) => {
-                          const subStage = step.subStage || 1;
-                          const label = subStage === 1 ? 'MID' : subStage === 2 ? 'BOSS' : `BATTLE ${subStage}`;
-                          const background = subStage === 1 ? '#1a237e' : subStage === 2 ? '#b71c1c' : '#4a148c';
-                          const border = subStage === 1 ? '#534bae' : subStage === 2 ? '#f05545' : '#7b1fa2';
+                        <button onClick={async () => {
+                          await handleAdminSetChapter2Save(stageNo);
+                        }} style={{ padding: '5px 10px', background: '#455a64', border: '1px solid #78909c', fontWeight: 'bold' }}>
+                          SAVE
+                        </button>
 
-                          return (
-                            <button key={`${stageNo}-${subStage}`} onClick={() => {
-                              applyAdminDebugSkills();
-                              suppressAdminBattleStoryOpenRef.current = true;
-                              setChapter2FlowIndex(flowIndex);
-                              setStageCycle(stageNo);
-                              setStageMode('BOSS');
-                              setGameStarted(false);
-                              setCanGoToBoss(false);
-                              setLogComplete(false);
-                              setBattleResults([]);
-                              setShowLogForBattleIndex(-1);
-                              setShowStoryModal(false);
-                              setStoryContent(null);
-                              setStoryContentV2(null);
-                              clearStoryCanvasState();
-                              setIsTitle(false);
-                              setShowAdmin(false);
-                            }} style={{ padding: '5px 10px', background, border: `1px solid ${border}` }}>
-                              {label}
-                            </button>
-                          );
-                        })}
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                          {battleSteps.map(({ step, index: flowIndex }) => {
+                            const subStage = step.subStage || 1;
+                            const label = subStage === 1 ? 'MID' : subStage === 2 ? 'BOSS' : `BATTLE ${subStage}`;
+                            const background = subStage === 1 ? '#1a237e' : subStage === 2 ? '#b71c1c' : '#4a148c';
+                            const border = subStage === 1 ? '#534bae' : subStage === 2 ? '#f05545' : '#7b1fa2';
+
+                            return (
+                              <button key={`${stageNo}-${subStage}`} onClick={() => {
+                                applyAdminDebugSkills();
+                                suppressAdminBattleStoryOpenRef.current = true;
+                                setChapter2FlowIndex(flowIndex);
+                                setStageCycle(stageNo);
+                                setStageMode('BOSS');
+                                setGameStarted(false);
+                                setCanGoToBoss(false);
+                                setLogComplete(false);
+                                setBattleResults([]);
+                                setShowLogForBattleIndex(-1);
+                                setShowStoryModal(false);
+                                setStoryContent(null);
+                                setStoryContentV2(null);
+                                clearStoryCanvasState();
+                                setIsTitle(false);
+                                setShowAdmin(false);
+                              }} style={{ padding: '5px 10px', background, border: `1px solid ${border}` }}>
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div style={{ width: '1px', height: '20px', background: '#555', margin: '0 5px' }}></div>
+
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                          <button onClick={async () => {
+                            const data = await loadV2Story(`${n}-1`);
+                            if (data) { 
+                              setStoryContentV2(data); 
+                              setShowAdmin(false); 
+                              setIsAdminPreview(true);
+                              setTimeout(() => setShowStoryModal(true), 50);
+                            }
+                          }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start ({n}-1)</button>
+
+                          <button onClick={async () => {
+                            const data = await loadV2Story(`${n}-2`);
+                            if (data) { 
+                              setStoryContentV2(data); 
+                              setShowAdmin(false); 
+                              setIsAdminPreview(true);
+                              setTimeout(() => setShowStoryModal(true), 50);
+                            }
+                          }} style={{ fontSize: '10px', background: '#c62828' }}>Boss ({n}-2)</button>
+
+                          <button onClick={async () => {
+                            const data = await loadV2Story(`${n}-3`);
+                            if (data) { 
+                              setStoryContentV2(data); 
+                              setShowAdmin(false); 
+                              setIsAdminPreview(true);
+                              setTimeout(() => setShowStoryModal(true), 50);
+                            }
+                          }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear ({n}-3)</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {adminPanelTab === 'chapter2ClearBuilds' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#ffd54f', borderBottom: '2px solid #ffd54f', paddingBottom: '5px', marginBottom: '10px' }}>第2章クリア時の保存編成</h3>
+                <div style={{ color: '#bbb', fontSize: '0.85rem', marginBottom: '14px', lineHeight: 1.6 }}>
+                  最終戦クリア時点の編成を、ユーザーごとに最新1件表示します。クリア回数が多い順、同数なら新しい順です。
+                </div>
+                {chapter2FinalClearBuilds.length === 0 ? (
+                  <div style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>まだ保存された第2章クリア編成はありません。</div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                    {chapter2FinalClearBuilds.map(profile => (
+                      <div key={profile.uid} style={{ background: '#161616', border: '1px solid #5d4d16', borderRadius: '12px', padding: '14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                          <img
+                            src={((profile.photoURL || '').startsWith('/') ? getStorageUrl(profile.photoURL) : (profile.photoURL || 'https://via.placeholder.com/40'))}
+                            alt={profile.displayName}
+                            style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover', background: '#222', border: '1px solid #66551f' }}
+                          />
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ color: '#fff7d6', fontWeight: 'bold', overflowWrap: 'anywhere' }}>{profile.displayName}</div>
+                            <div style={{ color: '#d7be6f', fontSize: '0.78rem' }}>
+                              クリア回数: {profile.clearCount} / 保存日時: {profile.timestamp ? new Date(profile.timestamp).toLocaleString('ja-JP') : '-'}
+                            </div>
+                            {profile.title && <div style={{ color: '#aaa', fontSize: '0.74rem' }}>{profile.title}</div>}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {profile.skillAbbrs.map((abbr: string, index: number) => {
+                            const skill = getSkillByAbbr(abbr);
+                            return skill ? (
+                              <img
+                                key={`${profile.uid}-${abbr}-${index}`}
+                                src={getStorageUrl(skill.icon)}
+                                alt={skill.name}
+                                title={`${skill.name} (${abbr})`}
+                                style={{ width: '36px', height: '36px', borderRadius: '6px', border: '1px solid #8c7330', background: '#111' }}
+                              />
+                            ) : (
+                              <div
+                                key={`${profile.uid}-${abbr}-${index}`}
+                                style={{ width: '36px', height: '36px', borderRadius: '6px', border: '1px solid #8c7330', background: '#111', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}
+                              >
+                                {abbr}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminPanelTab === 'dailyMetrics' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#80cbc4', borderBottom: '2px solid #80cbc4', paddingBottom: '5px', marginBottom: '10px' }}>日次訪問数 / 戦闘数</h3>
+                <div style={{ color: '#bbb', fontSize: '0.85rem', marginBottom: '14px', lineHeight: 1.6 }}>
+                  訪問数はその日その端末で最初のアクセス時に1件、戦闘数は実際に開始された戦闘回数です。表示は直近30日です。
+                </div>
+                {recentDailyMetricsRows.length === 0 ? (
+                  <div style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>まだ日次データはありません。</div>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '18px' }}>
+                      <div style={{ background: '#152226', border: '1px solid #2f5f60', borderRadius: '12px', padding: '12px' }}>
+                        <div style={{ color: '#b2dfdb', fontWeight: 'bold', marginBottom: '10px' }}>日別訪問数</div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '160px' }}>
+                          {recentDailyMetricsRows.slice().reverse().map(row => {
+                            const maxAccess = Math.max(...recentDailyMetricsRows.map(item => item.accessTotal), 1);
+                            const barHeight = `${Math.max((row.accessTotal / maxAccess) * 100, row.accessTotal > 0 ? 6 : 0)}%`;
+                            return (
+                              <div key={`access-${row.date}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
+                                <div style={{ color: '#d9fffb', fontSize: '0.68rem', marginBottom: '4px' }}>{row.accessTotal}</div>
+                                <div title={`${row.date}: ${row.accessTotal}`} style={{ width: '100%', maxWidth: '18px', height: barHeight, background: 'linear-gradient(180deg, #80cbc4, #26a69a)', borderRadius: '999px 999px 0 0' }} />
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
 
-                      <div style={{ width: '1px', height: '20px', background: '#555', margin: '0 5px' }}></div>
-
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${n}-1`);
-                          if (data) { 
-                            setStoryContentV2(data); 
-                            setShowAdmin(false); 
-                            setIsAdminPreview(true);
-                            setTimeout(() => setShowStoryModal(true), 50);
-                          }
-                        }} style={{ fontSize: '10px', background: '#2e7d32' }}>Start ({n}-1)</button>
-
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${n}-2`);
-                          if (data) { 
-                            setStoryContentV2(data); 
-                            setShowAdmin(false); 
-                            setIsAdminPreview(true);
-                            setTimeout(() => setShowStoryModal(true), 50);
-                          }
-                        }} style={{ fontSize: '10px', background: '#c62828' }}>Boss ({n}-2)</button>
-
-                        <button onClick={async () => {
-                          const data = await loadV2Story(`${n}-3`);
-                          if (data) { 
-                            setStoryContentV2(data); 
-                            setShowAdmin(false); 
-                            setIsAdminPreview(true);
-                            setTimeout(() => setShowStoryModal(true), 50);
-                          }
-                        }} style={{ fontSize: '10px', background: '#1565c0' }}>Clear ({n}-3)</button>
+                      <div style={{ background: '#201a12', border: '1px solid #6d5530', borderRadius: '12px', padding: '12px' }}>
+                        <div style={{ color: '#ffe0b2', fontWeight: 'bold', marginBottom: '10px' }}>日別戦闘数</div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '160px' }}>
+                          {recentDailyMetricsRows.slice().reverse().map(row => {
+                            const maxBattle = Math.max(...recentDailyMetricsRows.map(item => item.battleTotal), 1);
+                            const barHeight = `${Math.max((row.battleTotal / maxBattle) * 100, row.battleTotal > 0 ? 6 : 0)}%`;
+                            return (
+                              <div key={`battle-${row.date}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
+                                <div style={{ color: '#fff5e1', fontSize: '0.68rem', marginBottom: '4px' }}>{row.battleTotal}</div>
+                                <div title={`${row.date}: ${row.battleTotal}`} style={{ width: '100%', maxWidth: '18px', height: barHeight, background: 'linear-gradient(180deg, #ffcc80, #fb8c00)', borderRadius: '999px 999px 0 0' }} />
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
+
+                    <div style={{ overflowX: 'auto', background: '#111', border: '1px solid #2b2b2b', borderRadius: '12px' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '760px' }}>
+                        <thead>
+                          <tr style={{ background: '#1a1a1a', color: '#d7fffa' }}>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #333' }}>日付</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>訪問数</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>戦闘数</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>本編</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>剣獣</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>電影</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #333' }}>その他</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentDailyMetricsRows.map(row => (
+                            <tr key={`metrics-row-${row.date}`} style={{ borderBottom: '1px solid #262626' }}>
+                              <td style={{ padding: '10px', color: '#fff' }}>{row.date}</td>
+                              <td style={{ padding: '10px', color: '#80cbc4', textAlign: 'right', fontWeight: 'bold' }}>{row.accessTotal}</td>
+                              <td style={{ padding: '10px', color: '#ffcc80', textAlign: 'right', fontWeight: 'bold' }}>{row.battleTotal}</td>
+                              <td style={{ padding: '10px', color: '#ddd', textAlign: 'right' }}>{row.storyBattles}</td>
+                              <td style={{ padding: '10px', color: '#ddd', textAlign: 'right' }}>{row.kenjuBattles}</td>
+                              <td style={{ padding: '10px', color: '#ddd', textAlign: 'right' }}>{row.deneiBattles}</td>
+                              <td style={{ padding: '10px', color: '#777', textAlign: 'right' }}>{row.otherBattles}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
+            )}
 
             <button onClick={() => setShowAdmin(false)} style={{ width: '100%', marginTop: '20px', padding: '10px' }}>閉じる</button>
           </div>
@@ -4643,6 +5043,7 @@ const PLAYER_SKILL_COUNT = 5;
                 script={storyContentV2 || undefined}
                 scriptUrl={storyUrl || undefined}
                 creditsUrl={creditsUrl || undefined}
+                supporterNames={supporterCreditsNames}
                 loadingImageUrl={loadingImageUrl}
                 onOpenSettings={() => setShowSettings(true)}
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
@@ -4915,6 +5316,7 @@ const PLAYER_SKILL_COUNT = 5;
                 script={storyContentV2 || undefined}
                 scriptUrl={storyUrl || undefined}
                 creditsUrl={creditsUrl || undefined}
+                supporterNames={supporterCreditsNames}
                 loadingImageUrl={loadingImageUrl}
                 onOpenSettings={() => setShowSettings(true)}
                 onToggleMute={() => AudioManager.getInstance().setMute(bgmEnabled)}
@@ -5103,7 +5505,7 @@ const PLAYER_SKILL_COUNT = 5;
           </div>
         )}
 
-      {showRule && <Rule onClose={() => setShowRule(false)} />}
+      {showRule && <Rule onClose={() => setShowRule(false)} supporterNames={supporterCreditsNames} />}
     </div>
   );
 }

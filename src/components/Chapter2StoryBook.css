@@ -293,6 +293,16 @@
   padding-bottom: 0;
 }
 
+.storybook-page.is-the-end-only-page {
+  grid-template-rows: 1fr;
+}
+
+.storybook-page.is-the-end-only-page .storybook-page-body {
+  grid-row: 1;
+  min-height: 0;
+  max-height: none;
+}
+
 .storybook-page-footer {
   display: flex;
   justify-content: flex-end;

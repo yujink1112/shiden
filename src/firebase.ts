@@ -32,6 +32,13 @@ export const getStorageUrl = (path: string) => {
 
 export const googleProvider = new GoogleAuthProvider();
 
+const formatDateKey = (date: Date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 type Chapter2ProgressPatch = {
   stageCycle?: number;
   flowIndex?: number;
@@ -283,6 +290,46 @@ export const recordAccess = () => {
   })
   .then(() => console.log("Total access count incremented successfully!"))
   .catch((e) => console.error("Error incrementing total access count: ", e));
+};
+
+export const recordDailyAccess = () => {
+  const dateKey = formatDateKey();
+  const dailyAccessRef = ref(database, `dailyMetrics/accesses/${dateKey}/total`);
+  runTransaction(dailyAccessRef, (currentData) => {
+    if (currentData === null) {
+      return 1;
+    }
+    return currentData + 1;
+  })
+  .then(() => console.log(`[Firebase] Daily access count incremented for ${dateKey}`))
+  .catch((e) => console.error("Error incrementing daily access count: ", e));
+};
+
+export const recordBattleCount = (mode: string, count: number = 1) => {
+  const safeCount = Number.isFinite(count) ? Math.max(1, Math.floor(count)) : 1;
+  const dateKey = formatDateKey();
+  const bucket =
+    mode === 'DENEI'
+      ? 'denei'
+      : mode === 'KENJU'
+        ? 'kenju'
+        : mode === 'BOSS' || mode === 'MID'
+          ? 'story'
+          : 'other';
+
+  const refs = [
+    ref(database, `dailyMetrics/battles/${dateKey}/total`),
+    ref(database, `dailyMetrics/battles/${dateKey}/byMode/${bucket}`)
+  ];
+
+  refs.forEach(targetRef => {
+    runTransaction(targetRef, (currentData) => {
+      if (currentData === null) {
+        return safeCount;
+      }
+      return currentData + safeCount;
+    }).catch((e) => console.error("Error incrementing daily battle count: ", e));
+  });
 };
 
 export const uploadDeneiImage = async (uid: string, dataUrl: string) => {

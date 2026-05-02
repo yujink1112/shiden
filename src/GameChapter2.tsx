@@ -262,7 +262,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       <div className="RewardSelection" style={{ textAlign: 'center', padding: '30px', background: '#1a1a00', border: '2px solid #ffd700', borderRadius: '15px', maxWidth: '90%', maxHeight: '90%', overflowY: 'auto', boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)' }}>
         <h2 style={{ color: '#ffd700', margin: '0 0 15px 0' }}>
           {isPreBattleReward && displayedRewardStep?.skill ? '覚醒！！' : 'ステージクリア！'}<br />
-          {displayedRewardStep?.skill ? '新しいスキルを獲得しました！' :
+          {displayedRewardStep?.skill ? 'スキルを1つ選んでください' :
             displayedRewardStep?.choices ? 'スキルを1つ選んでください' :
             isChapter2Reward ? `スキルを${displayedRewardStep?.count || 1}つ選んでください` : 'スキルを1つ選んでください'}
         </h2>
@@ -474,7 +474,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
           勝利演出テスト
         </button>
       )}
-      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', display: (isLoungeMode || showEpilogue || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
+      <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', paddingBottom: isMobile && !gameStarted && selectedPlayerSkills.length > 0 ? '220px' : '20px', display: (isLoungeMode || showEpilogue || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: isMobile ? '10px 76px 10px 58px' : '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <button onClick={() => { handleResetGame(); setIsTitle(true); setKenjuBoss(null); localStorage.setItem('shiden_is_title', 'true');}} style={{ position: 'absolute', left: isMobile ? '6px' : '10px', top: isMobile ? '8px' : '10px', padding: isMobile ? '4px 7px' : '5px 10px', fontSize: '10px', background: '#333', color: '#888', border: '1px solid #444', borderRadius: '3px', cursor: 'pointer', zIndex: 11 }}>TITLE</button>
           <h1 style={{ margin: isMobile ? '0' : '0 20px', color: '#ff5252', fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem', wordBreak: 'break-all' }}>
@@ -591,7 +591,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
         )}
         {!gameStarted && rewardSelectionOverlay}
       </div>
-      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflow: 'hidden', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
+      <div className="GameLogFrame" style={{ flex: 1, padding: '20px', paddingBottom: isMobile && !gameStarted && selectedPlayerSkills.length > 0 ? '240px' : '20px', backgroundColor: 'rgba(26, 26, 26, 0.85)', overflow: 'hidden', borderLeft: '1px solid #333', visibility: (isLoungeMode || showStoryModal) ? 'hidden' : 'visible', display: (isLoungeMode || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', color: '#eee' }}>
         {(() => {
           const logHeading = !gameStarted ? 'BOSS' : (logComplete ? 'ゲームログ' : 'BOSS');
           return !(isMobile && logHeading === 'BOSS') ? (

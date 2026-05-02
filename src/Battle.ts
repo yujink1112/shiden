@@ -423,14 +423,9 @@ export class Battle {
         const type = pc.type[idx];
         if (pc.skill[idx] !== skill) return false;
         if (type === Player.NONE) return false;
+        if (pc.limited[idx] === StatusFlag.RESERVED) return false;
 
-        if (type === Player.ATTACK) {
-            const hasCounter = (idx < pc.getSkillsLength() - 1 && pc.skill[idx + 1] === "反");
-            const isHiddenNotActive = (pc.skill[idx] === "隠" && this.turn % 2 !== 0);
-            return !hasCounter && !isHiddenNotActive;
-        }
-
-        return type === Player.BUFF;
+        return type === Player.ATTACK || type === Player.BUFF;
     }
 
     /**

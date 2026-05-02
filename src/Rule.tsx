@@ -4,9 +4,10 @@ import { getStorageUrl } from './firebase';
 
 interface RuleProps {
   onClose: () => void;
+  supporterNames?: string[];
 }
 
-export const Rule: React.FC<RuleProps> = ({ onClose }) => {
+export const Rule: React.FC<RuleProps> = ({ onClose, supporterNames = [] }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const menuItems = [
@@ -209,8 +210,12 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
               <p>以下の順番に従って処理を行います。</p>
 
               <p>ⅰ. 終了フェイズに解除される状態の解除</p>
-              <p>ⅱ. 【影討】の指定スキル・リミテッドスキルの破壊</p>
-              <p>ⅲ. 状態「忘却」の処理</p>
+              <p>ⅱ. 状態「毒」による先頭スキルの破壊</p>
+              <p>ⅲ. 【凍結】の効果による先頭スキルの破壊</p>
+              <p>ⅳ. 【影討】の指定スキル・リミテッドスキルの破壊</p>
+              <p>ⅴ. 状態「治癒」による復元</p>
+              <p>ⅵ. 状態「忘却」の処理</p>
+              <p>終了フェイズの後、【円環】があれば終了フェイズをもう一度行います。</p>
           </div>
         </div>);
       case 6:
@@ -287,6 +292,16 @@ export const Rule: React.FC<RuleProps> = ({ onClose }) => {
                       <p>デジファミ音楽堂様</p>
                     </div>
                   </div>
+                {supporterNames.length > 0 && (
+                  <div style={{ marginBottom: '10px', padding: '15px', background: 'linear-gradient(135deg, rgba(255, 89, 89, 0.16), rgba(255, 193, 7, 0.13) 28%, rgba(0, 200, 255, 0.15) 58%, rgba(124, 77, 255, 0.14))', borderRadius: '8px', borderLeft: '4px solid #ffd54f' }}>
+                    <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff0b2' }}>Special Thanks</div>
+                    <div style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: '#f5f7ff', display: 'grid', gap: '6px' }}>
+                      {supporterNames.map((name) => (
+                        <p key={name} style={{ margin: 0 }}>{name}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <p>© 2026 Shiden Games</p>
 
                 <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '30px' }}>本アプリに使用されている画像、音声等の二次配布・AI学習を禁じます。</p>

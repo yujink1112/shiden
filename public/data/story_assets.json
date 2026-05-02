@@ -105,6 +105,7 @@
     "彼方の海": "images/background/v2/彼方の海.webp",
     "ベッドルーム": "images/background/v2/ベッドルーム.webp",
     "竜宮城": "images/background/v2/竜宮城.webp",
+    "竜宮城スマホ": "images/background/v2/竜宮城_スマホ.webp",
     "夕暮れの港": "images/background/v2/夕暮れの港.webp",
     "教室": "images/background/v2/教室.webp",
     "食堂": "images/background/v2/食堂.webp",
@@ -164,6 +165,7 @@
     "十字架": "images/still/十字架.webp",
     "深海のキス": "images/still/深海のキス.webp",
     "深海の銃": "images/still/深海の銃.webp",
+    "決闘": "images/still/決闘.webp",
     "魔女の封印2": "images/still/魔女の封印2.webp"
     
   },

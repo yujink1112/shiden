@@ -1179,6 +1179,10 @@
 .TitleChapterSelectModal {
   width: min(820px, calc(100vw - 40px));
   padding: 20px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
 }
 
 .TitleCouponModal {
@@ -1223,6 +1227,72 @@
 
 .TitleCouponText:last-child {
   margin-bottom: 0;
+}
+
+.TitleCouponBenefitList {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.TitleCouponBenefitCard {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(196, 220, 255, 0.22);
+  background: rgba(9, 19, 35, 0.3);
+}
+
+.TitleCouponBenefitCard.is-supporter {
+  border-color: rgba(255, 224, 130, 0.4);
+  background:
+    linear-gradient(120deg, rgba(255, 82, 82, 0.14), rgba(255, 193, 7, 0.12) 24%, rgba(79, 195, 247, 0.13) 58%, rgba(124, 77, 255, 0.1));
+  box-shadow: 0 0 18px rgba(255, 213, 79, 0.08);
+}
+
+.TitleCouponBenefitLabel {
+  color: rgba(255, 231, 164, 0.92);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.TitleCouponBenefitTitle {
+  margin-top: 6px;
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.TitleCouponBenefitText {
+  margin: 8px 0 0;
+  color: rgba(241, 246, 255, 0.88);
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
+
+.TitleCouponBoothLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 226, 136, 0.45);
+  background: rgba(255, 248, 214, 0.08);
+  color: #fff4ba;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.TitleCouponBoothLink:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 226, 136, 0.8);
+  box-shadow: 0 8px 20px rgba(255, 213, 79, 0.14);
 }
 
 .TitleCouponForm {
@@ -1285,10 +1355,48 @@
   color: #e9f7ff;
 }
 
+.TitleCouponMessage.is-rainbow {
+  border: 1px solid rgba(255, 239, 173, 0.5);
+  background:
+    linear-gradient(120deg, rgba(255, 82, 82, 0.22), rgba(255, 193, 7, 0.18) 20%, rgba(76, 217, 100, 0.18) 40%, rgba(79, 195, 247, 0.2) 60%, rgba(124, 77, 255, 0.18) 80%, rgba(255, 82, 82, 0.2));
+  color: #fffef7;
+  box-shadow: 0 0 22px rgba(255, 212, 79, 0.14);
+}
+
 .TitleCouponActions {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.TitleSupporterPanel {
+  width: min(520px, calc(100vw - 24px));
+  margin: 0 auto 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 236, 156, 0.52);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 32%),
+    linear-gradient(120deg, rgba(255, 82, 82, 0.2), rgba(255, 193, 7, 0.18) 22%, rgba(76, 217, 100, 0.15) 42%, rgba(79, 195, 247, 0.19) 64%, rgba(124, 77, 255, 0.16) 82%, rgba(255, 82, 82, 0.18));
+  box-shadow: 0 0 28px rgba(255, 215, 64, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.TitleSupporterPanelLabel {
+  color: #fff4ba;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.TitleSupporterPanelText {
+  margin-top: 4px;
+  color: #fff;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 .TitleNewGameIntroCarousel {
@@ -1328,7 +1436,7 @@
 .TitleNewGameIntroImage {
   display: block;
   width: 100%;
-  height: 340px;
+  height: 440px;
   object-fit: cover;
   filter: saturate(1.08) contrast(1.02);
   -webkit-tap-highlight-color: transparent;
@@ -1632,6 +1740,7 @@
     align-items: center;
     justify-content: center;
     padding: 14px;
+    overflow-y: auto;
   }
 
   .TitleStartModal {
@@ -1649,6 +1758,7 @@
   .TitleChapterSelectModal {
     width: min(440px, calc(100vw - 24px));
     padding: 16px;
+    max-height: calc(100vh - 28px);
   }
 
   .TitleCouponModal {
@@ -1667,6 +1777,28 @@
 
   .TitleCouponText {
     font-size: 0.9rem;
+  }
+
+  .TitleCouponBenefitCard {
+    padding: 12px 14px;
+  }
+
+  .TitleCouponBenefitTitle {
+    font-size: 0.95rem;
+  }
+
+  .TitleCouponBenefitText {
+    font-size: 0.86rem;
+  }
+
+  .TitleSupporterPanel {
+    width: min(100%, calc(100vw - 16px));
+    max-width: 100%;
+    padding: 10px 12px;
+  }
+
+  .TitleSupporterPanelText {
+    font-size: 0.82rem;
   }
 
   .TitleNewGameIntroPanel {

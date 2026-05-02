@@ -79,7 +79,7 @@ const MobileEnemySkillsTray: React.FC<MobileEnemySkillsTrayProps> = ({
         <div style={{ color: '#d8bfc2', fontSize: '0.64rem', textAlign: 'right', lineHeight: 1.4 }}>
         </div>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
         {enemySkills.map((skill, index) => (
           <SkillCard
             key={`${skill.abbr}-${index}`}
