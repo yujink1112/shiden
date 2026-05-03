@@ -1,0 +1,20 @@
+[
+  {
+    "key": "6-2",
+    "bossName": "ゴルゾアの胃袋",
+    "clearable": true,
+    "searchMode": "ordered-with-dup",
+    "checked": 7826,
+    "samples": [
+      "一一玉待毒",
+      "一刺玉待毒",
+      "一果玉待毒",
+      "一待玉待毒",
+      "一待速待毒"
+    ],
+    "pool": "一刺果待搦玉強速拳飛奏焦毒",
+    "requireSkills": [],
+    "bossIndexes": null,
+    "stopReason": "sample-limit"
+  }
+]

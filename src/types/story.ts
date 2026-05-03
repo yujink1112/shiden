@@ -32,6 +32,16 @@ export interface CreditIllustration {
   duration?: number; // 表示時間
 }
 
+export interface CreditSpeedProfile {
+  scrollSpeedFactor?: number;
+  illustrationSpeedFactor?: number;
+}
+
+export interface CreditTypographyProfile {
+  afterstoryTitleFontSize?: number;
+  afterstoryTextFontSize?: number;
+}
+
 export interface CreditSection {
   type: "title" | "role" | "afterstory" | "text" | "space";
   title?: string;
@@ -48,4 +58,12 @@ export interface CreditsData {
   sections: CreditSection[];
   scrollSpeed?: number;
   bgm?: string;
+  speedProfile?: {
+    mobile?: CreditSpeedProfile;
+    desktop?: CreditSpeedProfile;
+  };
+  typographyProfile?: {
+    mobile?: CreditTypographyProfile;
+    desktop?: CreditTypographyProfile;
+  };
 }

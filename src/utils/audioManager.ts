@@ -108,10 +108,12 @@ class AudioManager {
 
     console.log(`Playing BGM: ${bgmName} (loop: ${loop}) (${targetUrl})`);
 
+    const effectiveLoop = onEnded ? false : loop;
+
     this.currentBgm = new Audio(targetUrl);
     this.currentBgmName = bgmName;
     this.currentBgmUrl = targetUrl;
-    this.currentBgm.loop = loop;
+    this.currentBgm.loop = effectiveLoop;
     this.currentBgm.volume = this.isMuted ? 0 : this.volume;
     this.currentBgmEndedListener = onEnded || null;
     if (this.currentBgmEndedListener) {

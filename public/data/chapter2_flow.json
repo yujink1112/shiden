@@ -20,7 +20,7 @@
       { "type": "story", "id": "2-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "飛" },
-      { "type": "reward", "choices": ["罠", "怒"] },
+      { "type": "reward", "choices": ["罠", "崩"] },
       { "type": "story", "id": "2-3" }
     ]
   },
@@ -56,7 +56,7 @@
       { "type": "story", "id": "5-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "毒" },
-      { "type": "reward", "choices": ["弓", "玉"] },
+      { "type": "reward", "choices": ["弓", "呪"] },
       { "type": "story", "id": "5-3" }
     ]
   },
@@ -68,7 +68,7 @@
       { "type": "story", "id": "6-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "礁" },
-      { "type": "reward", "choices": ["光", "反"] },
+      { "type": "reward", "choices": ["光", "影"] },
       { "type": "story", "id": "6-3" }
     ]
   },
@@ -82,7 +82,7 @@
       { "type": "reward", "skill": "▽" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "霊" },
-      { "type": "reward", "choices": ["水", "封"] },
+      { "type": "reward", "choices": ["水", "硬"] },
       { "type": "story", "id": "7-3" }
     ]
   },
@@ -108,7 +108,7 @@
       { "type": "story", "id": "9-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "滅" },
-      { "type": "reward", "choices": ["水", "燐"] },
+      { "type": "reward", "choices": ["水", "烈"] },
       { "type": "story", "id": "9-3" }
     ]
   },
@@ -120,7 +120,7 @@
       { "type": "story", "id": "10-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "受" },
-      { "type": "reward", "choices": ["瘴", "錬"] },
+      { "type": "reward", "choices": ["瘴", "雷"] },
       { "type": "story", "id": "10-3" }
     ]
   },
@@ -132,7 +132,7 @@
       { "type": "story", "id": "11-2" },
       { "type": "battle", "subStage": 2},
       { "type": "reward", "skill": "死" },
-      { "type": "reward", "choices": ["無", "連"] },
+      { "type": "reward", "choices": ["幻", "覚"] },
       { "type": "story", "id": "11-3" }
     ]
   },

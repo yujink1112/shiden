@@ -114,7 +114,8 @@ const getLatestChapter1ClearedStage = (profile: UserProfile): number => {
       const match = key.match(/^BOSS_(\d+)$/);
       return match ? Number(match[1]) : 0;
     })
-    .filter((stage) => Number.isFinite(stage) && stage > 0);
+    // 古いデータで第2章が BOSS_13 以降として保存されていても、第1章表示には混ぜない
+    .filter((stage) => Number.isFinite(stage) && stage >= 1 && stage <= 12);
 
   if (clearedStages.length === 0) return 0;
   return Math.max(...clearedStages);
@@ -134,7 +135,8 @@ const ChapterRankingCards: React.FC<{
   chapter2Flows: Chapter2StageFlow[];
   mode: 'chapter1' | 'chapter2';
   currentUserUid?: string;
-}> = ({ profiles, chapter2Flows, mode, currentUserUid }) => {
+  onViewProfile: (profile: UserProfile) => void;
+}> = ({ profiles, chapter2Flows, mode, currentUserUid, onViewProfile }) => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
   const chapter2Profiles = profiles
     .filter((profile) => profile.uid !== process.env.REACT_APP_ADMIN_UID && profile.chapter2 && typeof profile.chapter2.stageCycle === 'number')
@@ -176,7 +178,7 @@ const ChapterRankingCards: React.FC<{
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
         <h2 style={{ color: '#4fc3f7', margin: 0, fontSize: isMobile ? '1.05rem' : '1.2rem' }}>{mode === 'chapter2' ? '第2章ランキング' : '第1章ランキング'}</h2>
         <div style={{ color: '#9bb7c9', fontSize: isMobile ? '0.68rem' : '0.75rem' }}>
-          {mode === 'chapter2' ? '周回数 → 現在進行中Stage の順で表示' : '現在進行中Stage の順で表示'}
+          現在進行中Stage の順で表示
         </div>
       </div>
       <div
@@ -193,6 +195,7 @@ const ChapterRankingCards: React.FC<{
           return (
             <div
               key={profile.uid}
+              onClick={() => onViewProfile(profile)}
               style={{
                 minWidth: isMobile ? '132px' : '145px',
                 flex: isMobile ? '0 0 132px' : '0 0 145px',
@@ -201,7 +204,22 @@ const ChapterRankingCards: React.FC<{
                 borderRadius: '14px',
                 padding: isMobile ? '12px 10px' : '14px 12px',
                 boxSizing: 'border-box',
-                scrollSnapAlign: isMobile ? 'start' : undefined
+                scrollSnapAlign: isMobile ? 'start' : undefined,
+                cursor: 'pointer',
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+                boxShadow: isMe ? '0 0 14px rgba(79, 195, 247, 0.22)' : '0 0 10px rgba(0, 0, 0, 0.18)'
+              }}
+              onMouseEnter={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = isMe ? '0 0 18px rgba(79, 195, 247, 0.3)' : '0 0 16px rgba(79, 195, 247, 0.18)';
+                e.currentTarget.style.borderColor = '#4fc3f7';
+              }}
+              onMouseLeave={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = isMe ? '0 0 14px rgba(79, 195, 247, 0.22)' : '0 0 10px rgba(0, 0, 0, 0.18)';
+                e.currentTarget.style.borderColor = isMe ? '#4fc3f7' : '#35506a';
               }}
             >
               <div style={{ color: index === 0 ? '#ffd700' : '#c7d7e5', fontWeight: 'bold', fontSize: isMobile ? '0.78rem' : '0.85rem', marginBottom: '8px' }}>
@@ -221,9 +239,6 @@ const ChapterRankingCards: React.FC<{
                 </div>
               </div>
               <div style={{ color: '#cfe8f7', fontSize: isMobile ? '0.72rem' : '0.78rem', lineHeight: 1.45 }}>
-                <div>
-                  周回数: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{mode === 'chapter2' ? getChapter2LoopCount(profile) : '-'}</span>
-                </div>
                 <div>
                   現在: <span style={{ color: '#fff', fontWeight: 'bold' }}>
                     {mode === 'chapter2'
@@ -587,6 +602,7 @@ interface LoungeProps {
   onDeleteAccount: () => void;
   onAdminResetCouponState: (profile: UserProfile) => void;
   onAdminResetStageProgress: (profile: UserProfile) => void;
+  onAdminResetAllProgressData: (profile: UserProfile) => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onLikeDenei: (masterUid: string, deneiName: string) => void;
   onBack: () => void;
@@ -636,6 +652,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   onDeleteAccount,
   onAdminResetCouponState,
   onAdminResetStageProgress,
+  onAdminResetAllProgressData,
   onKenjuBattle,
   onLikeDenei,
   onBack,
@@ -915,6 +932,7 @@ onPageChange,
               chapter2Flows={chapter2Flows}
               mode="chapter2"
               currentUserUid={user?.uid}
+              onViewProfile={onViewProfile}
             />
 
             <ChapterRankingCards
@@ -922,6 +940,7 @@ onPageChange,
               chapter2Flows={chapter2Flows}
               mode="chapter1"
               currentUserUid={user?.uid}
+              onViewProfile={onViewProfile}
             />
 
             <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
@@ -1720,6 +1739,31 @@ onPageChange,
             <h3 style={{ fontSize: '1rem', color: '#ffd700', marginTop: 0 }}>お気に入りスキル</h3>
             {favSkill && <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><img src={getStorageUrl(favSkill.icon)} alt={favSkill.name} style={{ width: '40px' }} /><span ><div style={{ color: '#FFFFFF' }}>{favSkill.name}</div></span></div>}
           </div>
+
+          {isAdmin && (
+            <div style={{ textAlign: 'left', background: 'rgba(255, 82, 82, 0.08)', padding: '15px', borderRadius: '10px', marginBottom: '20px', border: '1px solid rgba(255, 82, 82, 0.45)' }}>
+              <h3 style={{ fontSize: '0.95rem', color: '#ff8a80', margin: '0 0 10px 0' }}>管理者デバッグ</h3>
+              <button
+                onClick={() => onAdminResetAllProgressData(viewingProfile)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#b71c1c',
+                  color: '#fff',
+                  border: '1px solid #ff8a80',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  WebkitTapHighlightColor: 'transparent'
+                }}
+              >
+                このユーザの進行データを全て消去
+              </button>
+              <p style={{ color: '#ffb4ab', fontSize: '0.72rem', margin: '10px 0 0 0', lineHeight: '1.5' }}>
+                第1章・第2章の進行、所持スキル、撃破記録、電影撃破履歴、メダル、BATTLE STATS を初期化します。
+              </p>
+            </div>
+          )}
 
           {viewingProfile.myKenju && (
             <div style={{ textAlign: 'center', background: '#1a1a1a', padding: '20px', borderRadius: '10px', border: '2px solid #ff5252' }}>

@@ -1,6 +1,26 @@
 {
   "bgm": "audio/Go-Against-the-Compass.mp3",
   "scrollSpeed": 1.2,
+  "speedProfile": {
+    "mobile": {
+      "scrollSpeedFactor": 0.7,
+      "illustrationSpeedFactor": 1.1
+    },
+    "desktop": {
+      "scrollSpeedFactor": 1,
+      "illustrationSpeedFactor": 1
+    }
+  },
+  "typographyProfile": {
+    "mobile": {
+      "afterstoryTitleFontSize": 17,
+      "afterstoryTextFontSize": 15
+    },
+    "desktop": {
+      "afterstoryTitleFontSize": 22,
+      "afterstoryTextFontSize": 19
+    }
+  },
   "illustrations": [
     { "image": "images/background/v2/pirate-ship-deck1.jpg", "startTime": 0, "duration": 360 },
     { "image": "images/background/v2/オルゴール.png", "startTime": 550, "duration": 360 },
@@ -49,7 +69,7 @@
     { "type": "space", "height": 250 },
     { "type": "afterstory", "title": "レミエル", "icon": "", "text": "幻の島から有形無形の財宝を持ち帰り、女王陛下に謁見した。とりわけ冷凍保存の技術は、ウェルズランドの物流に革命をもたらした。レッド家は伯爵の爵位を与えられ、レミエル自身も名門貴族として長く内政に励むことになる。\n\nそれは、《アノマ》から持ち帰った技術で作った偽者だった。再び海賊団を結成し、4人の仲間と共に未知なる大陸を目指す――！" },
     { "type": "space", "height": 350 },
-    { "type": "afterstory", "title": "あなた", "icon": "", "text": "幻の島《アノマ》の女王にして、物語の観測者。このゲームを最後までプレイしてくれたことに、この上ない感謝を捧げます。" },
+    { "type": "afterstory", "title": "あなた", "icon": "", "text": "《アノマ》の女王にして、物語の観測者。このゲームを最後までプレイしてくれたことに、この上ない感謝を捧げます。" },
 
 
     { "type": "space", "height": 500 },

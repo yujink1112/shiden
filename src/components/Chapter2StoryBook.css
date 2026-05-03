@@ -592,6 +592,18 @@
     display: block;
     transform-origin: top left;
   }
+
+  .storybook-page-header {
+    padding: 12mm 10mm 5mm;
+  }
+
+  .storybook-page-body {
+    padding: 5mm 10mm 10mm;
+  }
+
+  .storybook-page-footer {
+    padding: 3mm 10mm 6mm;
+  }
 }
 
 @media print {

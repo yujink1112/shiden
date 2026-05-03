@@ -52,8 +52,19 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
     const [currentPc1Scar, setCurrentPc1Scar] = useState<number[]>(battleInstance?.pc1?.scar || []);
     const [currentPc2Scar, setCurrentPc2Scar] = useState<number[]>(battleInstance?.pc2?.scar || []);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const completionNotifiedRef = useRef(false);
     const currentRoundLines = React.useMemo(() => rounds[currentRoundIdx]?.split('\n').filter(line => !line.includes('====') && line.trim() !== '') || [], [rounds, currentRoundIdx]);
     const playerName = battleInstance?.pc1?.playerName || 'あなた';
+
+    const notifyCompleteOnce = React.useCallback(() => {
+        if (completionNotifiedRef.current) return;
+        completionNotifiedRef.current = true;
+        onComplete();
+    }, [onComplete]);
+
+    useEffect(() => {
+        completionNotifiedRef.current = false;
+    }, [log]);
 
     const applyLineToScars = React.useCallback((line: string, pc1Scar: number[], pc2Scar: number[]) => {
         let nextPc1Scar = pc1Scar;
@@ -108,7 +119,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
     }, [applyLineToScars, bossName, currentPc1Scar, currentPc2Scar, currentRoundIdx, currentRoundLines, roundFinished, roundVisibleCounts]);
 
     useEffect(() => {
-      if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); onComplete(); return; }
+      if (immediate) { setRoundVisibleCounts(new Array(rounds.length).fill(100)); setRoundFinished(new Array(rounds.length).fill(true)); setCurrentRoundIdx(rounds.length - 1); notifyCompleteOnce(); return; }
       if (rounds[currentRoundIdx]?.includes('勝敗判定')) {
           const nc = [...roundVisibleCounts];
           if (nc[currentRoundIdx] !== currentRoundLines.length) {
@@ -120,7 +131,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
             nf[currentRoundIdx] = true;
             setRoundFinished(nf);
           }
-          onComplete();
+          notifyCompleteOnce();
           return;
       }
       if (!roundFinished[currentRoundIdx]) {
@@ -129,10 +140,10 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
           return () => clearTimeout(timer);
         } else {
           const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
-          if (currentRoundIdx === rounds.length - 1) onComplete();
+          if (currentRoundIdx === rounds.length - 1) notifyCompleteOnce();
         }
       }
-    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds, onComplete]);
+    }, [currentRoundIdx, roundVisibleCounts, roundFinished, currentRoundLines, immediate, rounds, notifyCompleteOnce]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -153,12 +164,12 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
         const nc = [...roundVisibleCounts]; nc[currentRoundIdx] = currentRoundLines.length; setRoundVisibleCounts(nc);
         const nf = [...roundFinished]; nf[currentRoundIdx] = true; setRoundFinished(nf);
         if (currentRoundIdx === rounds.length - 1) {
-          onComplete();
+          notifyCompleteOnce();
         }
       } else if (currentRoundIdx < rounds.length - 1) {
         setCurrentRoundIdx(prev => prev + 1);
       } else {
-        onComplete();
+        notifyCompleteOnce();
       }
     };
     const goBack = () => { if (currentRoundIdx > 0) setCurrentRoundIdx(prev => prev - 1); };
@@ -191,6 +202,7 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
     };
 
     const isMobile = window.innerWidth < 768;
+    const isNextAction = roundFinished[currentRoundIdx];
 
     return (
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#000', border: '4px double #fff', borderRadius: '4px', overflow: 'hidden' }}>
@@ -245,8 +257,47 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
         )}
         <div style={{ flex: 1, backgroundColor: 'rgba(0,0,50,0.9)', borderTop: '2px solid #fff', padding: '10px', display: 'flex', flexDirection: 'column', minHeight: isMobile ? '400px' : 0, height: isMobile ? '400px' : '1px', boxSizing: 'border-box', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
-            <button disabled={currentRoundIdx === 0} onClick={goBack} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{'<'}</button>
-            <button disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1} onClick={goNext} style={{ background: '#000', color: '#fff', border: '1px solid #fff' }}>{!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}</button>
+            <button
+              disabled={currentRoundIdx === 0}
+              onClick={goBack}
+              style={{
+                minWidth: '48px',
+                height: '40px',
+                background: currentRoundIdx === 0 ? '#111' : '#000',
+                color: currentRoundIdx === 0 ? '#666' : '#fff',
+                border: '1px solid #777',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: currentRoundIdx === 0 ? 'default' : 'pointer'
+              }}
+            >
+              {'<'}
+            </button>
+            <button
+              disabled={roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1}
+              onClick={goNext}
+              style={{
+                minWidth: isNextAction ? '72px' : '92px',
+                height: '42px',
+                padding: '0 16px',
+                background: isNextAction
+                  ? 'linear-gradient(180deg, #4fc3f7, #1e88e5)'
+                  : 'linear-gradient(180deg, #ffca28, #ff8f00)',
+                color: '#081018',
+                border: '1px solid rgba(255,255,255,0.7)',
+                borderRadius: '10px',
+                fontSize: isNextAction ? '1.1rem' : '0.98rem',
+                fontWeight: 'bold',
+                letterSpacing: isNextAction ? '0.04em' : '0.08em',
+                boxShadow: isNextAction
+                  ? '0 0 16px rgba(79,195,247,0.5)'
+                  : '0 0 20px rgba(255,167,38,0.55)',
+                cursor: roundFinished[currentRoundIdx] && currentRoundIdx === rounds.length - 1 ? 'default' : 'pointer'
+              }}
+            >
+              {!roundFinished[currentRoundIdx] ? 'SKIP' : '>'}
+            </button>
           </div>
           <div ref={scrollRef} className="rich-log-modern" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', minHeight: 0, boxSizing: 'border-box' }}>
 
@@ -255,6 +306,10 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
               let style: React.CSSProperties = { marginBottom: '12px', opacity: 0, transform: 'translateY(10px)', animation: 'slideUp 0.3s forwards', WebkitTransform: 'translateY(10px)', WebkitAnimation: 'slideUp 0.3s forwards' };
               if (line.includes('VS')) {
                 const [p1, p2] = line.split('VS');
+                const enemyName = p2.trim();
+                const enemyNameFontSize = isMobile
+                  ? (enemyName.length > 9 ? '0.92rem' : '1.08rem')
+                  : (enemyName.length > 10 ? '1.2rem' : '1.8rem');
                 return (
                   <div key={i} className="battle-start-header" style={{ margin: '30px 0', textAlign: 'center', animation: 'zoomIn 0.8s forwards', background: 'linear-gradient(90deg, transparent, rgba(255,82,82,0.2), transparent)', padding: '20px 0', borderTop: '2px solid #ff5252', borderBottom: '2px solid #ff5252', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ fontSize: '1.2rem', color: '#aaa', marginBottom: '10px' }}>BATTLE START</div>
@@ -264,19 +319,19 @@ const AnimatedRichLog: React.FC<AnimatedRichLogProps> = React.memo(({ log, onCom
                       <span
                         className="battle-start-enemy-name"
                         style={{
-                          fontSize: p2.trim().length > 10 ? '1.2rem' : '1.8rem',
+                          fontSize: enemyNameFontSize,
                           fontWeight: 'bold',
                           color: '#ff5252',
                           textShadow: '0 0 10px rgba(255,255,255,0.5)',
-                          wordBreak: 'break-all',
-                          whiteSpace: isMobile ? 'pre-line' : 'nowrap',
-                          overflowWrap: 'anywhere',
+                          wordBreak: isMobile ? 'keep-all' : 'break-all',
+                          whiteSpace: 'nowrap',
+                          overflowWrap: 'normal',
                           lineHeight: isMobile ? 1.2 : 1,
                           textAlign: 'center',
-                          maxWidth: isMobile ? 'min(180px, 42vw)' : 'none'
+                          maxWidth: isMobile ? '100%' : 'none'
                         }}
                       >
-                        {p2.trim()}
+                        {enemyName}
                       </span>
                     </div>
                   </div>

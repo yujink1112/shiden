@@ -79,15 +79,17 @@ const MobileEnemySkillsTray: React.FC<MobileEnemySkillsTrayProps> = ({
         <div style={{ color: '#d8bfc2', fontSize: '0.64rem', textAlign: 'right', lineHeight: 1.4 }}>
         </div>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-        {enemySkills.map((skill, index) => (
-          <SkillCard
-            key={`${skill.abbr}-${index}`}
-            skill={skill}
-            isSelected={false}
-            disableTooltip={true}
-          />
-        ))}
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', justifyContent: 'start', justifyItems: 'center', width: 'fit-content', maxWidth: '100%' }}>
+          {enemySkills.map((skill, index) => (
+            <SkillCard
+              key={`${skill.abbr}-${index}`}
+              skill={skill}
+              isSelected={false}
+              disableTooltip={true}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

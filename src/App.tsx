@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, get } from "firebase/database";
-import { database, auth, googleProvider, recordAccess, recordDailyAccess, recordBattleCount, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress } from "./firebase";
+import { database, auth, googleProvider, recordAccess, recordDailyAccess, recordBattleCount, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress, resetAllProgressData } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
@@ -612,6 +612,33 @@ function App() {
 
   const clearStoryCanvasState = () => {
     localStorage.removeItem(STORY_CANVAS_STATE_KEY);
+  };
+
+  const resetLocalProgressState = () => {
+    clearStoryCanvasState();
+    localStorage.removeItem('shiden_chapter1_stage');
+    localStorage.removeItem('shiden_chapter2_stage');
+    localStorage.removeItem('shiden_chapter2_reward_choices');
+    localStorage.removeItem('shiden_current_kenju_battle');
+    localStorage.setItem('shiden_owned_skills', JSON.stringify(CHAPTER1_INITIAL_SKILLS));
+    localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(CHAPTER2_INITIAL_SKILLS));
+    localStorage.setItem(CHAPTER2_CLAIMED_REWARD_STEPS_KEY, JSON.stringify([]));
+    localStorage.setItem('shiden_stage_cycle', '1');
+    localStorage.setItem('shiden_chapter2_flow_index', '0');
+    localStorage.setItem('shiden_stage_victory_skills', JSON.stringify({}));
+    localStorage.setItem('shiden_medals', JSON.stringify([]));
+    localStorage.setItem('shiden_last_game_mode', 'MID');
+    localStorage.setItem('shiden_can_go_to_boss', 'false');
+    localStorage.setItem('shiden_updated_at', Date.now().toString());
+
+    setCurrentKenjuBattle(null);
+    setOwnedSkillAbbrs(CHAPTER1_INITIAL_SKILLS);
+    setClaimedRewardSteps([]);
+    setStageCycle(1);
+    setChapter2FlowIndex(0);
+    setChapterProgress({ 1: 1, 2: 13 });
+    setCanGoToBoss(false);
+    setHasChapter2Save(false);
   };
 
   const getRewardStepKey = (stageNo: number = stageCycle, flowIndex: number = chapter2FlowIndex) => `${stageNo}:${flowIndex}`;
@@ -1563,6 +1590,39 @@ const PLAYER_SKILL_COUNT = 5;
     } catch (error) {
       console.error('Failed to reset stage progress:', error);
       window.alert('進行中ステージの初期化に失敗しました。');
+    }
+  };
+
+  const handleAdminResetAllProgressData = async (profile: UserProfile) => {
+    if (!isAdmin || !profile?.uid) return;
+    if (!window.confirm(
+      `${profile.displayName} の進行データをすべて消去しますか？\n` +
+      `第1章・第2章の進行、所持スキル、撃破記録、電影撃破履歴、メダル、BATTLE STATS が初期化されます。`
+    )) return;
+
+    try {
+      await resetAllProgressData(profile.uid, CHAPTER1_INITIAL_SKILLS, CHAPTER2_INITIAL_SKILLS);
+
+      if (user?.uid === profile.uid) {
+        resetLocalProgressState();
+      }
+
+      const profileRef = ref(database, `profiles/${profile.uid}`);
+      const snapshot = await get(profileRef);
+      if (snapshot.exists()) {
+        const refreshedProfile = snapshot.val() as UserProfile;
+        if (viewingProfile?.uid === profile.uid) {
+          setViewingProfile(refreshedProfile);
+        }
+        if (myProfile?.uid === profile.uid) {
+          setMyProfile(refreshedProfile);
+        }
+      }
+
+      window.alert('進行データをすべて消去しました。');
+    } catch (error) {
+      console.error('Failed to reset all progress data:', error);
+      window.alert('進行データの消去に失敗しました。');
     }
   };
 
@@ -2714,6 +2774,8 @@ const PLAYER_SKILL_COUNT = 5;
             hasSynergy = prev.type.includes("攻撃"); // +錬は攻撃スキルのみに反応
           } else if (current.name === "＋強") {
             hasSynergy = prev.type.includes("攻撃"); // +強は攻撃スキルのみに反応
+          } else if (current.name === "＋弓") {
+            hasSynergy = prev.type.includes("攻撃"); // +弓は攻撃スキルのみに反応
           } else if (current.name === "＋光") {
             hasSynergy = prev.name === "一閃"; // +光は一閃のみに反応
           } else {
@@ -3745,6 +3807,7 @@ const PLAYER_SKILL_COUNT = 5;
         onLikeDenei={handleLikeDenei}
         onAdminResetCouponState={handleAdminResetCouponState}
         onAdminResetStageProgress={handleAdminResetStageProgress}
+        onAdminResetAllProgressData={handleAdminResetAllProgressData}
 	      kenjuBosses={KENJU_DATA.map(k => ({
           name: k.name,
           image: getStorageUrl(k.image),
@@ -4233,14 +4296,14 @@ const PLAYER_SKILL_COUNT = 5;
                 <div className="TitleCouponBenefitList">
                   <div className="TitleCouponBenefitCard">
                     <div className="TitleCouponBenefitLabel">特典コード①</div>
-                    <div className="TitleCouponBenefitTitle">ストーリーブックを楽しめるプラン</div>
+                    <div className="TitleCouponBenefitTitle">ストーリーブックプラン</div>
                     <p className="TitleCouponBenefitText">
                       第2章ストーリーブックをこのアカウントで閲覧できます。
                     </p>
                   </div>
                   <div className="TitleCouponBenefitCard is-supporter">
                     <div className="TitleCouponBenefitLabel">特典コード②</div>
-                    <div className="TitleCouponBenefitTitle">ストーリー＋Special Thanks プラン</div>
+                    <div className="TitleCouponBenefitTitle">ストーリーブック＋Special Thanks プラン</div>
                     <p className="TitleCouponBenefitText">
                       ストーリーブック閲覧に加えて、著作権表記とエンドロールの Special Thanks 掲載が有効になります。
                     </p>

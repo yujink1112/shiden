@@ -1,0 +1,7 @@
+[2026-05-02T14:00:43.756Z] 7-1 バクバク: search start (pool=一刺果待搦玉強速拳飛奏焦毒礁狼, bosses=1, bossIndexes=all, kamiwazaLimit=1, seeds=0, require=狼, sampleLimit=5, maxChecks=none).
+[2026-05-02T14:00:43.890Z] 7-1 バクバク: found #1 一速待待狼 after 4204 checks.
+[2026-05-02T14:00:43.891Z] 7-1 バクバク: found #2 一速待狼待 after 4218 checks.
+[2026-05-02T14:00:43.893Z] 7-1 バクバク: found #3 一速玉待狼 after 4260 checks.
+[2026-05-02T14:00:43.895Z] 7-1 バクバク: found #4 一速玉狼待 after 4274 checks.
+[2026-05-02T14:00:43.898Z] 7-1 バクバク: found #5 一速飛搦狼 after 4373 checks.
+[2026-05-02T14:00:43.900Z] 7-1 バクバク: done (4373 checks, wins=5, stopReason=sample-limit).

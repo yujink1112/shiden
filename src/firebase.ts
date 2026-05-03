@@ -255,6 +255,38 @@ export const resetChapter2Progress = async (uid: string, initialSkills: string[]
   await saveProfileProgress(uid, { updatedAt: now });
 };
 
+export const resetAllProgressData = async (uid: string, chapter1InitialSkills: string[], chapter2InitialSkills: string[]) => {
+  const now = Date.now();
+  const profileRef = ref(database, `profiles/${uid}`);
+  const chapter2Ref = ref(database, `profiles/${uid}/chapter2`);
+
+  await runTransaction(profileRef, (currentData) => {
+    const current = currentData && typeof currentData === 'object' ? currentData as any : {};
+    return {
+      ...current,
+      stageCycle: 1,
+      lastGameMode: 'MID',
+      canGoToBoss: false,
+      ownedSkills: uniqueStrings(chapter1InitialSkills),
+      victorySkills: null,
+      deneiVictories: null,
+      medals: [],
+      updatedAt: now
+    };
+  });
+
+  await set(chapter2Ref, {
+    stageCycle: 13,
+    flowIndex: 0,
+    loopCount: 0,
+    ownedSkills: uniqueStrings(chapter2InitialSkills),
+    claimedRewardSteps: [],
+    canGoToBoss: false,
+    lastUpdated: now,
+    finalClearRecord: null
+  });
+};
+
 export const saveUserSkills = async (uid: string, skillAbbrs: string[]) => {
   console.log(`[Firebase] Saving skills for ${uid}:`, skillAbbrs);
   await saveChapter2Progress(uid, { ownedSkills: skillAbbrs });

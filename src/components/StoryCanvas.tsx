@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StoryScript, StoryEntry, CreditsData, CreditIllustration, CreditSection } from '../types/story';
+import { StoryScript, StoryEntry, CreditsData, CreditIllustration, CreditSection, CreditSpeedProfile, CreditTypographyProfile } from '../types/story';
 import { getStorageUrl } from '../firebase';
 import { parseStoryText, StoryAssets } from '../types/storyParser';
 import AudioManager from '../utils/audioManager';
@@ -28,6 +28,8 @@ interface RubySegment {
 }
 
 const STORY_CANVAS_TEXT_FONT = '"Yu Mincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif';
+const DEFAULT_MOBILE_SCROLL_SPEED_FACTOR = 0.8;
+const DEFAULT_MOBILE_ILLUSTRATION_SPEED_FACTOR = 1;
 
 const parseRubyText = (text: string): RubySegment[] => {
   const segments: RubySegment[] = [];
@@ -199,6 +201,27 @@ const drawTextWithLetterSpacing = (
   });
 };
 
+const clampCreditsSpeedFactor = (value: number, fallback: number): number => {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(2.5, Math.max(0.3, value));
+};
+
+const getCreditsSpeedProfile = (
+  creditsData: CreditsData,
+  isMobileMode: boolean
+): CreditSpeedProfile => {
+  const profile = isMobileMode ? creditsData.speedProfile?.mobile : creditsData.speedProfile?.desktop;
+  return profile || {};
+};
+
+const getCreditsTypographyProfile = (
+  creditsData: CreditsData,
+  isMobileMode: boolean
+): CreditTypographyProfile => {
+  const profile = isMobileMode ? creditsData.typographyProfile?.mobile : creditsData.typographyProfile?.desktop;
+  return profile || {};
+};
+
 const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, scriptUrl, creditsUrl, supporterNames = [], onEnd, onOpenSettings, onToggleMute, isBgmEnabled = true, loadingImageUrl, charScalePC, charScaleMobile, offsetYPC, offsetYMobile, autoEndOnScriptEnd = false }) => {
   const [script, setScript] = useState<StoryScript>(initialScript || []);
   const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
@@ -235,6 +258,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
   // エンドロール用
   const scrollOffsetRef = useRef(0);
+  const illustrationProgressRef = useRef(0);
   const lastTimeRef = useRef<number>(0);
   const [showTheEnd, setShowTheEnd] = useState(false);
   const [theEndAlpha, setTheEndAlpha] = useState(0);
@@ -250,9 +274,25 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
 
     // スマホ判定 (縦長または幅が狭い場合)
     const isMobileMode = (width / dpr) < 800;
-    const mobileScrollSpeedFactor = isMobileMode ? 0.8 : 1;
-    const scrollSpeed = (creditsData.scrollSpeed || 1) * mobileScrollSpeedFactor * dpr * (delta / 16.6);
+    const speedProfile = getCreditsSpeedProfile(creditsData, isMobileMode);
+    const typographyProfile = getCreditsTypographyProfile(creditsData, isMobileMode);
+    const scrollSpeedFactor = isMobileMode
+      ? clampCreditsSpeedFactor(
+          speedProfile.scrollSpeedFactor ?? DEFAULT_MOBILE_SCROLL_SPEED_FACTOR,
+          DEFAULT_MOBILE_SCROLL_SPEED_FACTOR
+        )
+      : clampCreditsSpeedFactor(speedProfile.scrollSpeedFactor ?? 1, 1);
+    const illustrationSpeedFactor = isMobileMode
+      ? clampCreditsSpeedFactor(
+          speedProfile.illustrationSpeedFactor ?? DEFAULT_MOBILE_ILLUSTRATION_SPEED_FACTOR,
+          DEFAULT_MOBILE_ILLUSTRATION_SPEED_FACTOR
+        )
+      : clampCreditsSpeedFactor(speedProfile.illustrationSpeedFactor ?? 1, 1);
+    const baseScrollSpeed = creditsData.scrollSpeed || 1;
+    const scrollSpeed = baseScrollSpeed * scrollSpeedFactor * dpr * (delta / 16.6);
+    const illustrationSpeed = baseScrollSpeed * illustrationSpeedFactor * dpr * (delta / 16.6);
     scrollOffsetRef.current += scrollSpeed;
+    illustrationProgressRef.current += illustrationSpeed;
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
@@ -265,7 +305,7 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
     const creditsWidth = isMobileMode ? width : width * 0.5;
     const creditsHeight = isMobileMode ? height - creditsY : height;
 
-    const illProgress = scrollOffsetRef.current; // スクロール量を時間軸として利用
+    const illustrationProgress = illustrationProgressRef.current;
 
     // 背景描画
     ctx.fillStyle = '#000';
@@ -276,13 +316,15 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         ctx.fillStyle = '#050505';
         ctx.fillRect(creditsX, creditsY, creditsWidth, creditsHeight);
         
-        // 境界線
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2 * dpr;
-        ctx.beginPath();
-        ctx.moveTo(0, illAreaHeight);
-        ctx.lineTo(width, illAreaHeight);
-        ctx.stroke();
+        if (!showTheEnd) {
+            // 境界線
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(0, illAreaHeight);
+            ctx.lineTo(width, illAreaHeight);
+            ctx.stroke();
+        }
     }
 
     // --- 左側（または上部）: イラスト ---
@@ -294,16 +336,16 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
         const end = start + duration;
         return { ill, start, fadeTime, end };
       })
-      .filter(({ start, end }) => illProgress >= start && illProgress <= end)
+      .filter(({ start, end }) => illustrationProgress >= start && illustrationProgress <= end)
       .pop();
 
     if (activeIllustration) {
         const { ill, start, fadeTime, end } = activeIllustration;
         let alpha = 0;
-        if (illProgress < start + fadeTime) {
-            alpha = (illProgress - start) / fadeTime;
-        } else if (illProgress > end - fadeTime) {
-            alpha = (end - illProgress) / fadeTime;
+        if (illustrationProgress < start + fadeTime) {
+            alpha = (illustrationProgress - start) / fadeTime;
+        } else if (illustrationProgress > end - fadeTime) {
+            alpha = (end - illustrationProgress) / fadeTime;
         } else {
             alpha = 1;
         }
@@ -377,8 +419,8 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
                 currentY += roleBlockHeight + (isMobileMode ? 25 : 40) * dpr;
                 break;
             case "afterstory":
-                const titleFontSize = (isMobileMode ? 15 : 20) * dpr;
-                const textFontSize = (isMobileMode ? 13 : 18) * dpr;
+                const titleFontSize = (typographyProfile.afterstoryTitleFontSize ?? (isMobileMode ? 17 : 22)) * dpr;
+                const textFontSize = (typographyProfile.afterstoryTextFontSize ?? (isMobileMode ? 15 : 19)) * dpr;
                 const iconSize = (isMobileMode ? 28 : 40) * dpr;
 
                 // アイコン描画
@@ -520,6 +562,9 @@ const StoryCanvas: React.FC<StoryCanvasProps> = ({ script: initialScript, script
           endingAlphaRef.current = 1;
           waitAfterEndingTimerRef.current = null;
           creditsBgmStartedRef.current = false;
+          scrollOffsetRef.current = 0;
+          illustrationProgressRef.current = 0;
+          lastTimeRef.current = 0;
 
           decoratedCreditsData.illustrations.forEach(ill => imageUrls.add(ill.image));
           decoratedCreditsData.sections.forEach(sec => {
@@ -1399,7 +1444,10 @@ const wrapTextWithRuby = (ctx: CanvasRenderingContext2D, segments: RubySegment[]
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm('ストーリーをスキップしますか？')) {
+                const skipMessage = creditsData
+                  ? 'エンドロールをスキップしますか？'
+                  : 'ストーリーをスキップしますか？';
+                if (window.confirm(skipMessage)) {
                   setIsEnding(true);
                 }
               }}
