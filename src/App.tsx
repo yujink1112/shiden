@@ -4315,7 +4315,7 @@ const PLAYER_SKILL_COUNT = 5;
                   rel="noopener noreferrer"
                   className="TitleCouponBoothLink"
                 >
-                  BOOTHで特典を見る
+                  BOOTHで特典を見る(後日公開)
                 </a>
               </div>
 

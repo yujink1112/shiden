@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "shiden-issen-dev",
+    "site": "shiden-games",
     "public": "build",
     "ignore": [
       "firebase.json",

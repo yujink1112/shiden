@@ -636,7 +636,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
           <div style={{ textAlign: 'center' }}>
             <img src={stageProcessor.getBossImage(stageContext) || ""} alt="" style={stageProcessor.getBossImageStyle(stageContext, isMobile, 'sidebar')} />
             <h3>{stageProcessor.getEnemyName(0, stageContext)}</h3>
-            <p style={{ textAlign: 'left', whiteSpace: 'pre-wrap', padding: '0 10px' }}>
+            <p style={{ textAlign: 'left', whiteSpace: 'pre-wrap', padding: '0 10px', lineHeight: isMobile ? 1.5 : 1.8 }}>
               {stageProcessor.getBossDescription(stageContext).replace(/\\n/g, '\n')}
             </p>
           </div>
