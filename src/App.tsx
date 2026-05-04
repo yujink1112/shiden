@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { ref, onValue, push, onDisconnect, set, update, serverTimestamp, get } from "firebase/database";
-import { database, auth, googleProvider, recordAccess, recordDailyAccess, recordBattleCount, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress, resetAllProgressData } from "./firebase";
+import { database, auth, googleProvider, recordAccess, recordDailyAccess, recordBattleCount, getStorageUrl, saveUserSkills, loadUserSkills, saveChapter2Progress, saveProfileProgress, claimChapter2Reward, resetChapter1Progress, resetChapter2Progress, resetAllProgressData, updateBugReportStatus } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser } from "firebase/auth";
 import { Game } from './Game';
 import { ALL_SKILLS, getSkillByAbbr, SkillDetail, STATUS_DATA } from './skillsData';
@@ -13,6 +13,7 @@ import { Rule } from './Rule';
 import { MidStageProcessor, BossStageProcessor, KenjuStageProcessor, Stage11MidStageProcessor } from './stageProcessors';
 import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
+import BugReportModal from './BugReportModal';
 import Kamishibai from './components/Kamishibai';
 import { parseStoryText, StoryAssets } from './types/storyParser';
 import { Chapter2StageFlow, Chapter2FlowStep, PendingChapter2Reward } from './types/chapter2';
@@ -36,6 +37,7 @@ const CHAPTER2_INITIAL_SKILLS = ["一", "刺", "果", "待", "搦", "玉", "強"
 const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
+const CHAPTER2_DIRECT_START_INTENT_KEY = 'shiden_chapter2_direct_start_intent';
 const COUPON_CODE_HASHES_PATH = 'publicConfig/couponCodeHashes';
 const LOUNGE_STAGE_MODES: StageMode[] = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'VERIFY_EMAIL', 'ADMIN_ANALYTICS'];
 const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
@@ -67,10 +69,40 @@ type StoryCanvasState = {
 };
 
 function App() {
-  type AdminPanelTab = 'special' | 'maintenance' | 'chapter1' | 'chapter2' | 'chapter2ClearBuilds' | 'dailyMetrics';
+  type AdminPanelTab = 'special' | 'maintenance' | 'chapter1' | 'chapter2' | 'chapter2ClearBuilds' | 'dailyMetrics' | 'bugReports';
   type DailyMetricsState = {
     accesses: Record<string, { total?: number }>;
     battles: Record<string, { total?: number; byMode?: Record<string, number> }>;
+  };
+  type BugReportRecord = {
+    id: string;
+    ownerUid?: string;
+    category?: string;
+    title?: string;
+    location?: string;
+    summary?: string;
+    stepsToReproduce?: string;
+    expectedBehavior?: string;
+    actualBehavior?: string;
+    contact?: string;
+    appVersion?: string;
+    page?: string;
+    status?: 'new' | 'reviewing' | 'resolved';
+    createdAt?: number;
+    updatedAt?: number;
+    reporter?: {
+      uid?: string;
+      displayName?: string;
+      email?: string;
+      isAuthenticated?: boolean;
+    };
+    environment?: {
+      userAgent?: string;
+      viewport?: {
+        width?: number;
+        height?: number;
+      };
+    };
   };
   const [stagesLoaded, setStagesLoaded] = useState(false);
   const [preloadProgress, setPreloadProgress] = useState({ current: 0, total: 0 });
@@ -205,6 +237,7 @@ function App() {
   const [adminSaveMessage, setAdminSaveMessage] = useState<string | null>(null);
   const [adminPanelTab, setAdminPanelTab] = useState<AdminPanelTab>('chapter2');
   const [dailyMetrics, setDailyMetrics] = useState<DailyMetricsState>({ accesses: {}, battles: {} });
+  const [bugReports, setBugReports] = useState<BugReportRecord[]>([]);
   const adminSaveMessageTimerRef = useRef<number | null>(null);
   const isAdminDebugSkillsActiveRef = useRef(false);
   useEffect(() => {
@@ -335,6 +368,7 @@ function App() {
   const [showRuleHint, setShowRuleHint] = useState(false);
   const [showClearStats, setShowClearStats] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
+  const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [showTitleMenuModal, setShowTitleMenuModal] = useState(false);
   const [showStoryBookCouponModal, setShowStoryBookCouponModal] = useState(false);
@@ -355,6 +389,8 @@ function App() {
   const newGameIntroTouchStartXRef = useRef<number | null>(null);
   const newGameIntroInputLockedRef = useRef(false);
   const suppressAdminBattleStoryOpenRef = useRef(false);
+  const chapter2DirectStartInFlightRef = useRef(false);
+  const isDeletingAccountRef = useRef(false);
 
   const storyBookOverlay = showChapter2StoryBook && canAccessChapter2StoryBook && typeof document !== 'undefined'
     ? createPortal(
@@ -1410,11 +1446,26 @@ const PLAYER_SKILL_COUNT = 5;
     if (!window.confirm("本当にアカウントを削除しますか？この操作は取り消せません。")) return;
 
     try {
+      isDeletingAccountRef.current = true;
       const uid = user.uid;
+      const tombstoneProfile = {
+        uid,
+        displayName: '',
+        photoURL: '',
+        favoriteSkill: '一',
+        title: '',
+        comment: '',
+        storyBookCouponUnlocked: false,
+        supporterCouponUnlocked: false,
+        supporterCreditsName: '',
+        lastActive: Date.now(),
+        points: 0,
+        deletedAt: Date.now()
+      };
       // 1. Delete profile from RTDB (Failure is okay here)
       try {
         const profileRef = ref(database, `profiles/${uid}`);
-        await set(profileRef, null);
+        await set(profileRef, tombstoneProfile);
       } catch (dbError) {
         console.warn("Database profile deletion failed (ignoring):", dbError);
       }
@@ -1445,6 +1496,7 @@ const PLAYER_SKILL_COUNT = 5;
       setStageMode('MID');
       setIsTitle(true);
     } catch (error: any) {
+      isDeletingAccountRef.current = false;
       if (error.code === 'auth/requires-recent-login') {
         alert("セキュリティのため、再ログインしてから再度お試しください。");
         await signOut(auth);
@@ -1623,6 +1675,58 @@ const PLAYER_SKILL_COUNT = 5;
     } catch (error) {
       console.error('Failed to reset all progress data:', error);
       window.alert('進行データの消去に失敗しました。');
+    }
+  };
+
+  const handleAdminDeleteUserAccount = async (profile: UserProfile) => {
+    if (!isAdmin || !profile?.uid) return;
+    if (profile.uid === user?.uid) {
+      window.alert('管理者自身のアカウント削除は、このボタンからは実行できません。');
+      return;
+    }
+    if (!window.confirm(
+      `${profile.displayName} のプロフィール公開データを削除しますか？\n` +
+      `参加者一覧・プロフィール・電影データが削除されます。`
+    )) return;
+
+    try {
+      const tombstoneProfile = {
+        uid: profile.uid,
+        displayName: '',
+        photoURL: '',
+        favoriteSkill: '一',
+        title: '',
+        comment: '',
+        storyBookCouponUnlocked: false,
+        supporterCouponUnlocked: false,
+        supporterCreditsName: '',
+        lastActive: Date.now(),
+        points: 0,
+        deletedAt: Date.now()
+      };
+      await Promise.all([
+        set(ref(database, `profiles/${profile.uid}`), tombstoneProfile),
+        set(ref(database, `deneiClears/${profile.uid}`), null),
+        set(ref(database, `deneiTrials/${profile.uid}`), null),
+        set(ref(database, `deneiLikes/${profile.uid}`), null)
+      ]);
+
+      setAllProfiles(prev => prev.filter(entry => entry.uid !== profile.uid));
+      setAllDeneiStats(prev => {
+        const next = { ...prev };
+        delete next[profile.uid];
+        return next;
+      });
+
+      if (viewingProfile?.uid === profile.uid) {
+        setViewingProfile(null);
+        setStageMode('LOUNGE');
+      }
+
+      window.alert('ユーザの公開アカウントデータを削除しました。');
+    } catch (error) {
+      console.error('Failed to delete user account data:', error);
+      window.alert('ユーザの削除に失敗しました。');
     }
   };
 
@@ -1993,24 +2097,47 @@ const PLAYER_SKILL_COUNT = 5;
     setIsTitle(false);
   };
 
-  const handleChapterSelect = async (chapter: number, isNewGame: boolean = false) => {
+  const handleChapterSelect = async (chapter: number, isNewGame: boolean = false, skipResetConfirm: boolean = false) => {
     setIsAdminDebugSkillsActive(false);
+    const saveChapter2DirectStartIntent = () => {
+      localStorage.setItem(CHAPTER2_DIRECT_START_INTENT_KEY, 'NEW_GAME');
+    };
+    const clearChapter2DirectStartIntent = () => {
+      localStorage.removeItem(CHAPTER2_DIRECT_START_INTENT_KEY);
+    };
     // 第2章はログイン必須
     if (chapter === 2 && !user) {
+      if (isNewGame) {
+        saveChapter2DirectStartIntent();
+      } else {
+        clearChapter2DirectStartIntent();
+      }
+      refreshKenju();
       setStageMode('LOUNGE');
       setIsTitle(false);
       setShowChapterSelect(null);
       return;
     }
 
+    if (!(chapter === 2 && isNewGame)) {
+      clearChapter2DirectStartIntent();
+    }
+
     if (isNewGame) {
-      const chapterLabel = chapter === 1 ? "第1章" : `第${chapter}章`;
-      const confirmed = window.confirm(
-        
-        `進行中のステージと獲得済みのスキルがリセットされますが、よろしいですか？\n` +
-        `別の章の進行状況や獲得済みスキルには影響しません。`
-      );
-      if (!confirmed) return;
+      const shouldSkipResetConfirm =
+        skipResetConfirm ||
+        (chapter === 2 && localStorage.getItem(CHAPTER2_DIRECT_START_INTENT_KEY) === 'NEW_GAME');
+      if (!shouldSkipResetConfirm) {
+        const confirmed = window.confirm(
+          `進行中のステージと獲得済みのスキルがリセットされますが、よろしいですか？\n` +
+          `別の章の進行状況や獲得済みスキルには影響しません。`
+        );
+        if (!confirmed) return;
+      }
+    }
+
+    if (chapter === 2 && isNewGame) {
+      clearChapter2DirectStartIntent();
     }
 
     let stage = isNewGame ? (chapter === 2 ? 13 : 1) : (chapterProgress[chapter] || (chapter === 2 ? 13 : 1));
@@ -2187,6 +2314,24 @@ const PLAYER_SKILL_COUNT = 5;
       setIsTitle(false);
     }
   };
+
+  useEffect(() => {
+    if (!user || !stagesLoaded) return;
+    if (chapter2DirectStartInFlightRef.current) return;
+    if (localStorage.getItem(CHAPTER2_DIRECT_START_INTENT_KEY) !== 'NEW_GAME') return;
+    if (!user.emailVerified && user.providerData.some(provider => provider.providerId === 'password')) return;
+
+    chapter2DirectStartInFlightRef.current = true;
+    localStorage.removeItem(CHAPTER2_DIRECT_START_INTENT_KEY);
+
+    window.setTimeout(async () => {
+      try {
+        await handleChapterSelect(2, true, true);
+      } finally {
+        chapter2DirectStartInFlightRef.current = false;
+      }
+    }, 0);
+  }, [user, stagesLoaded]);
 
   useEffect(() => {
     if (allKenjuClearsData && kenjuBoss) {
@@ -2512,6 +2657,10 @@ const PLAYER_SKILL_COUNT = 5;
               localStorage.setItem('shiden_stage_victory_skills', JSON.stringify(firebaseVictorySkills)); // 更新後のFirebaseデータをローカルにも保存
             }
           } else {
+            if (isDeletingAccountRef.current) {
+              setMyProfile(null);
+              return;
+            }
             const initialProfile: UserProfile = {
               uid: authenticatedUser.uid,
               displayName: authenticatedUser.displayName || "名無しの剣士",
@@ -2556,6 +2705,8 @@ const PLAYER_SKILL_COUNT = 5;
         } catch (err) {
           console.error("Error processing profiles:", err);
         }
+      } else {
+        setAllProfiles([]);
       }
     });
 
@@ -2754,6 +2905,27 @@ const PLAYER_SKILL_COUNT = 5;
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setBugReports([]);
+      return;
+    }
+
+    const reports = allProfiles.flatMap((profile) => {
+      const rawReports = (profile as UserProfile & { bugReports?: Record<string, Omit<BugReportRecord, 'id' | 'ownerUid'>> }).bugReports;
+      if (!rawReports || typeof rawReports !== 'object') return [];
+
+      return Object.entries(rawReports).map(([reportId, report]) => ({
+        id: `${profile.uid}:${reportId}`,
+        ownerUid: profile.uid,
+        ...report
+      }));
+    });
+
+    reports.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    setBugReports(reports);
+  }, [allProfiles, isAdmin]);
 
   useEffect(() => {
     const newConnections: { fromId: string; toId: string }[] = [];
@@ -3466,6 +3638,11 @@ const PLAYER_SKILL_COUNT = 5;
     applyPostLogBattleOutcome(winCount);
   };
 
+  const currentVersionLabel = changelogData.length > 0
+    ? `${changelogData[changelogData.length - 1].date}_${changelogData[changelogData.length - 1].title}`
+    : 'unknown_version';
+  const openBugReportCount = bugReports.filter(report => report.status !== 'resolved').length;
+
   const handleForceUpdate = () => {
     if (changelogData.length > 0) {
       const latestVersion = changelogData[changelogData.length - 1].date + "_" + changelogData[changelogData.length - 1].title;
@@ -3497,6 +3674,15 @@ const PLAYER_SKILL_COUNT = 5;
     } catch (error) {
       console.error('Failed to clear client cache:', error);
       window.alert('キャッシュ削除に失敗しました。コンソールを確認してください。');
+    }
+  };
+
+  const handleAdminUpdateBugReportStatus = async (reportId: string, status: 'new' | 'reviewing' | 'resolved') => {
+    try {
+      await updateBugReportStatus(reportId, status);
+    } catch (error) {
+      console.error('Failed to update bug report status:', error);
+      window.alert('不具合報告の状態更新に失敗しました。');
     }
   };
 
@@ -3532,7 +3718,7 @@ const PLAYER_SKILL_COUNT = 5;
         <>
           幻の島《アノマ》を追い求める、海賊の物語。
           {isMobile && <br />}
-          第1章未クリアでも遊べます。 ※BGMが流れます
+          第1章未プレイでも遊べます。 ※BGMが流れます
         </>
       ),
       cta: '第2章を始める'
@@ -3808,6 +3994,7 @@ const PLAYER_SKILL_COUNT = 5;
         onAdminResetCouponState={handleAdminResetCouponState}
         onAdminResetStageProgress={handleAdminResetStageProgress}
         onAdminResetAllProgressData={handleAdminResetAllProgressData}
+        onAdminDeleteUserAccount={handleAdminDeleteUserAccount}
 	      kenjuBosses={KENJU_DATA.map(k => ({
           name: k.name,
           image: getStorageUrl(k.image),
@@ -3817,6 +4004,7 @@ const PLAYER_SKILL_COUNT = 5;
 
         onDeleteAccount={handleDeleteAccount}
         onBack={() => {
+          localStorage.removeItem(CHAPTER2_DIRECT_START_INTENT_KEY);
           clearStoryCanvasState();
           setShowStoryModal(false);
           setShowChapterTitle(false);
@@ -3942,9 +4130,9 @@ const PLAYER_SKILL_COUNT = 5;
                 ×
               </button>
             </div>
-            <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
+            {/* <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
               【重要】複数の端末でゲームをする場合、最新の進捗状況を全ての端末で共有するように改善しました。よりクリアしたStageの多い端末で「今すぐ更新」ボタンを押すことを推奨します。
-            </div>
+            </div> */}
           </div>
         )}
         <div className="TitleBackgroundEffect"></div>
@@ -4001,6 +4189,7 @@ const PLAYER_SKILL_COUNT = 5;
                 <div className="TitleFooterLinks">
                   <span className="TitleFooterLinkButton" onClick={(e) => { e.stopPropagation(); setShowLegal(true); }}>規約・運営情報</span>
                   <a href="https://x.com/ShidenGames" target="_blank" rel="noopener noreferrer" className="TitleFooterLinkButton" onClick={(e) => e.stopPropagation()}>お問い合わせ</a>
+                  <span className="TitleFooterLinkButton" onClick={(e) => { e.stopPropagation(); setShowBugReportModal(true); }}>不具合報告</span>
                 </div>
                 {isAdmin && (
                   <>
@@ -4103,8 +4292,10 @@ const PLAYER_SKILL_COUNT = 5;
                 {/* 第2章 */}
                 {(() => {
                   const needsChapter2Login = !user;
-                  const isChapter2ContinueUnavailable = showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save && !needsChapter2Login;
-                  const isChapter2PanelDimmed = needsChapter2Login || isChapter2ContinueUnavailable;
+                  const shouldStartChapter2AsNew =
+                    showChapterSelect.mode === 'NEW' ||
+                    (showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save && !needsChapter2Login);
+                  const isChapter2PanelDimmed = needsChapter2Login;
 
                   return (
                 <div 
@@ -4114,13 +4305,16 @@ const PLAYER_SKILL_COUNT = 5;
                       handleChapterSelect(2, showChapterSelect.mode === 'NEW');
                       return;
                     }
-                    if (isChapter2ContinueUnavailable) return;
-                    handleChapterSelect(2, showChapterSelect.mode === 'NEW');
+                    handleChapterSelect(
+                      2,
+                      shouldStartChapter2AsNew,
+                      showChapterSelect.mode === 'CONTINUE' && !hasChapter2Save
+                    );
                   }}
                   style={{ 
                     flex: 1,
                     minHeight: showChapterSelect.mode === 'CONTINUE' ? (isMobile ? '260px' : '310px') : undefined,
-                    cursor: isChapter2ContinueUnavailable ? 'default' : 'pointer',
+                    cursor: 'pointer',
                     border: isChapter2PanelDimmed ? '1px solid rgba(80, 80, 80, 0.5)' : '1px solid rgba(255, 120, 120, 0.56)',
                     borderRadius: '18px',
                     overflow: 'hidden',
@@ -4133,12 +4327,12 @@ const PLAYER_SKILL_COUNT = 5;
                     backdropFilter: 'blur(12px)'
                   }}
                   onMouseEnter={(e) => {
-                    if (!isChapter2ContinueUnavailable) {
+                    if (!needsChapter2Login) {
                       e.currentTarget.style.transform = 'scale(1.02)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (!isChapter2ContinueUnavailable) {
+                    if (!needsChapter2Login) {
                       e.currentTarget.style.transform = 'scale(1)';
                     }
                   }}
@@ -4153,7 +4347,7 @@ const PLAYER_SKILL_COUNT = 5;
                     <div style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '5px' }}>
                       {needsChapter2Login ? 'LOUNGEでユーザ登録が必要です' :
                         showChapterSelect.mode === 'NEW' ? '最初から開始' : 
-                        !hasChapter2Save ? '未プレイ' : (() => {
+                        !hasChapter2Save ? '未プレイ（最初から開始）' : (() => {
                         const stage = chapterProgress[2] || 13;
                         return `現在進行中: ${getChapter2StageLabel(stage, chapter2FlowIndex)}`;
                       })()}
@@ -4449,13 +4643,6 @@ const PLAYER_SKILL_COUNT = 5;
                           <button
                             className="TitleButton neon-blue"
                             onClick={() => {
-                              if (panel.chapter === 2 && !user) {
-                                setShowNewGameIntro(false);
-                                setStageMode('LOUNGE');
-                                setIsTitle(false);
-                                refreshKenju();
-                                return;
-                              }
                               setShowNewGameIntro(false);
                               handleChapterSelect(panel.chapter, true);
                             }}
@@ -4719,6 +4906,7 @@ const PLAYER_SKILL_COUNT = 5;
               {[
                 { key: 'chapter2' as const, label: '第2章操作', color: '#ff5252' },
                 { key: 'dailyMetrics' as const, label: '日次指標', color: '#80cbc4' },
+                { key: 'bugReports' as const, label: `不具合報告${openBugReportCount > 0 ? ` (${openBugReportCount})` : ''}`, color: '#ffab91' },
                 { key: 'chapter2ClearBuilds' as const, label: '第2章クリア編成', color: '#ffd54f' },
                 { key: 'chapter1' as const, label: '第1章操作', color: '#4fc3f7' },
                 { key: 'special' as const, label: '特殊シナリオ', color: '#ce93d8' },
@@ -5018,6 +5206,94 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
             )}
 
+            {adminPanelTab === 'bugReports' && (
+              <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
+                <h3 style={{ color: '#ffab91', borderBottom: '2px solid #ffab91', paddingBottom: '5px', marginBottom: '10px' }}>不具合報告一覧</h3>
+                <div style={{ color: '#bbb', fontSize: '0.85rem', marginBottom: '14px', lineHeight: 1.6 }}>
+                  タイトル画面の不具合報告フォームから届いた内容です。まず `new` を確認し、着手したら `reviewing`、対応完了したら `resolved` に切り替えます。
+                </div>
+                {bugReports.length === 0 ? (
+                  <div style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>まだ不具合報告はありません。</div>
+                ) : (
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    {bugReports.map((report) => (
+                      <div key={report.id} style={{ background: '#161616', border: '1px solid #5f463f', borderRadius: '12px', padding: '14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem', overflowWrap: 'anywhere' }}>{report.title || '件名なし'}</div>
+                            <div style={{ color: '#ffccbc', fontSize: '0.8rem', marginTop: '4px', overflowWrap: 'anywhere' }}>
+                              {report.category || '未分類'} / {report.location || '発生箇所未入力'} / {report.createdAt ? new Date(report.createdAt).toLocaleString('ja-JP') : '日時不明'}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {([
+                              { key: 'new' as const, label: 'new', color: '#ef5350' },
+                              { key: 'reviewing' as const, label: 'reviewing', color: '#ffa726' },
+                              { key: 'resolved' as const, label: 'resolved', color: '#66bb6a' }
+                            ]).map((statusOption) => (
+                              <button
+                                key={`${report.id}-${statusOption.key}`}
+                                onClick={() => handleAdminUpdateBugReportStatus(report.id, statusOption.key)}
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '999px',
+                                  border: `1px solid ${statusOption.color}`,
+                                  background: report.status === statusOption.key ? statusOption.color : 'transparent',
+                                  color: report.status === statusOption.key ? '#111' : statusOption.color,
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                {statusOption.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '10px' }}>
+                          <div style={{ color: '#ddd', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{report.summary || '内容なし'}</div>
+                          {report.stepsToReproduce && (
+                            <div style={{ color: '#cfd8dc', fontSize: '0.9rem', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                              <strong style={{ color: '#ffe0b2' }}>再現手順:</strong> {report.stepsToReproduce}
+                            </div>
+                          )}
+                          {(report.expectedBehavior || report.actualBehavior) && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                              <div style={{ background: '#1f1f1f', border: '1px solid #333', borderRadius: '10px', padding: '10px', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                                <div style={{ color: '#ffe0b2', fontWeight: 'bold', marginBottom: '4px' }}>期待した挙動</div>
+                                <div style={{ color: '#ddd' }}>{report.expectedBehavior || '-'}</div>
+                              </div>
+                              <div style={{ background: '#1f1f1f', border: '1px solid #333', borderRadius: '10px', padding: '10px', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                                <div style={{ color: '#ffe0b2', fontWeight: 'bold', marginBottom: '4px' }}>実際の挙動</div>
+                                <div style={{ color: '#ddd' }}>{report.actualBehavior || '-'}</div>
+                              </div>
+                            </div>
+                          )}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', fontSize: '0.85rem' }}>
+                            <div style={{ background: '#1f1f1f', border: '1px solid #333', borderRadius: '10px', padding: '10px', color: '#ccc', overflowWrap: 'anywhere' }}>
+                              <div style={{ color: '#ffccbc', fontWeight: 'bold', marginBottom: '4px' }}>報告者</div>
+                              <div>{report.reporter?.displayName || '未ログイン'}</div>
+                              {report.reporter?.email && <div>{report.reporter.email}</div>}
+                              {report.reporter?.uid && <div>UID: {report.reporter.uid}</div>}
+                            </div>
+                            <div style={{ background: '#1f1f1f', border: '1px solid #333', borderRadius: '10px', padding: '10px', color: '#ccc', overflowWrap: 'anywhere' }}>
+                              <div style={{ color: '#ffccbc', fontWeight: 'bold', marginBottom: '4px' }}>環境</div>
+                              <div>Version: {report.appVersion || '-'}</div>
+                              <div>Page: {report.page || '-'}</div>
+                              {report.environment?.viewport && <div>Viewport: {report.environment.viewport.width} x {report.environment.viewport.height}</div>}
+                            </div>
+                            <div style={{ background: '#1f1f1f', border: '1px solid #333', borderRadius: '10px', padding: '10px', color: '#ccc', overflowWrap: 'anywhere' }}>
+                              <div style={{ color: '#ffccbc', fontWeight: 'bold', marginBottom: '4px' }}>補足</div>
+                              <div>{report.contact || '連絡先なし'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {adminPanelTab === 'dailyMetrics' && (
               <div style={{ marginBottom: '20px', padding: '14px', border: '1px solid #444', borderRadius: '10px' }}>
                 <h3 style={{ color: '#80cbc4', borderBottom: '2px solid #80cbc4', paddingBottom: '5px', marginBottom: '10px' }}>日次訪問数 / 戦闘数</h3>
@@ -5172,6 +5448,14 @@ const PLAYER_SKILL_COUNT = 5;
         )}
 
         {showLegal && <LegalInfo onClose={() => setShowLegal(false)} />}
+        {showBugReportModal && (
+          <BugReportModal
+            onClose={() => setShowBugReportModal(false)}
+            user={user}
+            profile={myProfile}
+            appVersion={currentVersionLabel}
+          />
+        )}
       </div>
     );
   }

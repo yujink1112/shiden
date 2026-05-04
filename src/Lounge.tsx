@@ -603,6 +603,7 @@ interface LoungeProps {
   onAdminResetCouponState: (profile: UserProfile) => void;
   onAdminResetStageProgress: (profile: UserProfile) => void;
   onAdminResetAllProgressData: (profile: UserProfile) => void;
+  onAdminDeleteUserAccount: (profile: UserProfile) => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onLikeDenei: (masterUid: string, deneiName: string) => void;
   onBack: () => void;
@@ -653,6 +654,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   onAdminResetCouponState,
   onAdminResetStageProgress,
   onAdminResetAllProgressData,
+  onAdminDeleteUserAccount,
   onKenjuBattle,
   onLikeDenei,
   onBack,
@@ -857,9 +859,9 @@ onPageChange,
                 ×
               </button>
             </div>
-            <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
+            {/* <div style={{ backgroundColor: '#ff5252', padding: '5px 15px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', maxWidth: '90%', lineHeight: '1.4' }}>
               【重要】複数の端末でゲームをする場合、最新の進捗状況を全ての端末で共有するように改善しました。よりクリアしたStageの多い端末で「今すぐ更新」ボタンを押すことを推奨します。
-            </div>
+            </div> */}
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: !user ? '400px' : '800px', marginBottom: '10px',  marginTop: showUpdateNotify ? '100px' : '0'  }}>
@@ -1283,11 +1285,14 @@ onPageChange,
           <div style={{ marginBottom: '20px' }}>
             <label style={{ color: '#fff', display: 'block', marginBottom: '5px' }}>好きなスキル</label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', maxHeight: '200px', overflowY: 'auto', padding: '10px', background: '#222', borderRadius: '5px', border: '1px solid #444' }}>
-              {[...allSkills].sort((a, b) => {
-                if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
-                if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
-                return 0;
-              }).map(s => (
+              {[...allSkills]
+                .filter((skill) => skill.denei === 1)
+                .sort((a, b) => {
+                  if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
+                  if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
+                  return 0;
+                })
+                .map(s => (
                 <div
                   key={s.abbr}
                   onClick={() => onUpdateProfile(myProfile.displayName, s.abbr, myProfile.comment, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
@@ -1465,19 +1470,22 @@ onPageChange,
                 </button>
               </div>
               <div id='deneiSkillPanel' style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '5px', maxHeight: '460px', overflowY: 'auto', padding: '10px', background: '#111', borderRadius: '8px', border: '1px solid #444', scrollbarWidth: 'thin' }}>
-                {[...allSkills].sort((a, b) => {
-                  if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
-                  if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
-                  return 0;
-                }).map(s => (
-                  <div key={s.abbr} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <SkillCard
-                      skill={s}
-                      isSelected={false}
-                      onClick={() => handleKenjuSkillToggle(s.abbr)}
-                    />
-                  </div>
-                ))}
+                {[...allSkills]
+                  .filter((skill) => skill.denei === 1)
+                  .sort((a, b) => {
+                    if (a.kamiwaza === 1 && b.kamiwaza !== 1) return -1;
+                    if (a.kamiwaza !== 1 && b.kamiwaza === 1) return 1;
+                    return 0;
+                  })
+                  .map(s => (
+                    <div key={s.abbr} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <SkillCard
+                        skill={s}
+                        isSelected={false}
+                        onClick={() => handleKenjuSkillToggle(s.abbr)}
+                      />
+                    </div>
+                  ))}
               </div>
               <div style={{ marginTop: '10px', color: '#aaa', fontSize: '0.8rem' }}>
                 現在のスキル構成（クリックで削除）:
@@ -1759,8 +1767,28 @@ onPageChange,
               >
                 このユーザの進行データを全て消去
               </button>
+              <button
+                onClick={() => onAdminDeleteUserAccount(viewingProfile)}
+                style={{
+                  width: '100%',
+                  marginTop: '10px',
+                  padding: '12px',
+                  background: '#5a1212',
+                  color: '#fff',
+                  border: '1px solid #ff8a80',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  WebkitTapHighlightColor: 'transparent'
+                }}
+              >
+                このユーザのアカウントを削除
+              </button>
               <p style={{ color: '#ffb4ab', fontSize: '0.72rem', margin: '10px 0 0 0', lineHeight: '1.5' }}>
                 第1章・第2章の進行、所持スキル、撃破記録、電影撃破履歴、メダル、BATTLE STATS を初期化します。
+              </p>
+              <p style={{ color: '#d7a8a8', fontSize: '0.7rem', margin: '8px 0 0 0', lineHeight: '1.5' }}>
+                アカウント削除は、公開プロフィールと電影関連データを削除します。
               </p>
             </div>
           )}

@@ -1008,11 +1008,11 @@
 .TitleFooterLinks {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 12px;
   font-size: 0.75rem;
   color: #d7ecff;
   margin-bottom: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .TitleFooterLinkButton {
@@ -1890,11 +1890,11 @@
   }
 
   .TitleFooterLinks {
-    gap: 6px;
-    font-size: 0.68rem;
+    gap: 4px;
+    font-size: 0.62rem;
     margin-bottom: 0;
     line-height: 1.15;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .TitleAdminButton {

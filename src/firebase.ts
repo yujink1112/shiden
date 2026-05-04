@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, runTransaction, get, set } from "firebase/database";
+import { getDatabase, ref, runTransaction, get, set, push, serverTimestamp, update } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
@@ -309,6 +309,82 @@ export const resetUserSkills = async (uid: string, initialSkills: string[]) => {
   console.log(`[Firebase] Resetting skills for ${uid}:`, initialSkills);
   const userSkillsRef = ref(database, `profiles/${uid}/chapter2/ownedSkills`);
   await set(userSkillsRef, initialSkills);
+};
+
+export type BugReportInput = {
+  category: string;
+  title: string;
+  location: string;
+  summary: string;
+  stepsToReproduce?: string;
+  expectedBehavior?: string;
+  actualBehavior?: string;
+  contact?: string;
+  appVersion?: string;
+  page?: string;
+  uid?: string;
+  displayName?: string;
+  email?: string;
+  isAuthenticated: boolean;
+  userAgent?: string;
+  viewport?: {
+    width: number;
+    height: number;
+  };
+};
+
+const normalizeBugReportText = (value: string, maxLength: number) =>
+  value.replace(/\r\n/g, '\n').trim().slice(0, maxLength);
+
+export const submitBugReport = async (input: BugReportInput) => {
+  if (!input.uid) {
+    throw new Error('BUG_REPORT_AUTH_REQUIRED');
+  }
+
+  const bugReportsRef = ref(database, `profiles/${input.uid}/bugReports`);
+  const reportRef = push(bugReportsRef);
+
+  const payload = {
+    category: normalizeBugReportText(input.category, 40),
+    title: normalizeBugReportText(input.title, 80),
+    location: normalizeBugReportText(input.location, 80),
+    summary: normalizeBugReportText(input.summary, 2000),
+    stepsToReproduce: normalizeBugReportText(input.stepsToReproduce || '', 2000),
+    expectedBehavior: normalizeBugReportText(input.expectedBehavior || '', 1000),
+    actualBehavior: normalizeBugReportText(input.actualBehavior || '', 1000),
+    contact: normalizeBugReportText(input.contact || '', 200),
+    appVersion: normalizeBugReportText(input.appVersion || '', 120),
+    page: normalizeBugReportText(input.page || '', 40),
+    status: 'new',
+    source: 'title_bug_report_form',
+    reporter: {
+      uid: input.uid || '',
+      displayName: normalizeBugReportText(input.displayName || '', 80),
+      email: normalizeBugReportText(input.email || '', 160),
+      isAuthenticated: Boolean(input.isAuthenticated)
+    },
+    environment: {
+      userAgent: normalizeBugReportText(input.userAgent || '', 400),
+      viewport: input.viewport || null
+    },
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  await set(reportRef, payload);
+  return reportRef.key;
+};
+
+export const updateBugReportStatus = async (reportId: string, status: 'new' | 'reviewing' | 'resolved') => {
+  if (!reportId) return;
+  const [ownerUid, pureReportId] = reportId.includes(':') ? reportId.split(':') : ['', reportId];
+  const reportRef = ownerUid
+    ? ref(database, `profiles/${ownerUid}/bugReports/${pureReportId}`)
+    : ref(database, `bugReports/${pureReportId}`);
+  await update(reportRef, {
+    status,
+    updatedAt: serverTimestamp()
+  });
 };
 
 export const recordAccess = () => {

@@ -1,3 +1,5 @@
+const DENEI_DISABLED_SKILL_ABBRS = new Set(["空","弱","Ｈ","瘴","拳","烈","滅","砲","死","焦","毒","癒","凍","奏","盗","幻","水","転","罠","受","光","弓", "極","掌","飛","円","礁","霊","狼","▽","爆","魔"]);
+
 export const ALL_SKILLS: SkillDetail[] = [
   { abbr: "一", name: "一閃", kana:"いっせん", icon: "/images/skill/a01.gif", type: "攻撃", speed: "LV", description: "相手に1点のダメージを与える。", exclude: 0 },
   { abbr: "刺", name: "刺突", kana:"しとつ", icon: "/images/skill/a02.gif", type: "攻撃", speed: "LV-2（最低0）", description: "相手に1点のダメージを与える。\nダメージの対象は、このスキルと最もLVが近いスキル（より高いLVを優先）に変更される。", exclude: 0 },
@@ -85,7 +87,10 @@ export const ALL_SKILLS: SkillDetail[] = [
   // { abbr: "色", name: "色欲", kana:"ルクスリア", icon: "/images/skill/v2/luxuria.png", type: "敵専用", speed: "LV", description: "相手を魅了し、相手の次の攻撃対象を自分自身に変更させる。", ruleDisplay: false, exclude: 1  },
   // { abbr: "暴", name: "暴食", kana:"グーラ", icon: "/images/skill/v2/gula.png", type: "敵専用", speed: "LV", description: "相手のスキルを1つ食べ（破壊し）、自身のHP（スキル数）を1回復する。", ruleDisplay: false, exclude: 1  },
   // { abbr: "怠", name: "怠惰", kana:"アケディア", icon: "/images/skill/v2/acedia.png", type: "敵専用", speed: "0", description: "何もしない。ただしダメージを受けると反撃する。", ruleDisplay: false, exclude: 1  },
-];
+].map((skill) => ({
+  ...skill,
+  denei: DENEI_DISABLED_SKILL_ABBRS.has(skill.abbr) ? 0 : 1
+}));
 
 export interface SkillDetail {
   exclude: number;
@@ -97,6 +102,7 @@ export interface SkillDetail {
   speed: string;
   description: string;
   kamiwaza?: number;
+  denei?: number;
   ruleDisplay?: boolean;
 }
 
