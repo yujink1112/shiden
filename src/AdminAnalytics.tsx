@@ -58,10 +58,14 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ onBack, getSkill
         const profiles = snapshot.val();
         Object.keys(profiles).forEach(uid => {
           const profile = profiles[uid];
+          let hasFinalChapter2VictoryInVictorySkills = false;
           if (profile && profile.victorySkills) {
             Object.keys(profile.victorySkills).forEach(stageKey => {
               const skills = profile.victorySkills[stageKey];
               if (Array.isArray(skills)) {
+                if (stageKey === 'CH2_12_3') {
+                  hasFinalChapter2VictoryInVictorySkills = true;
+                }
                 allVictories.push({
                   stageKey,
                   skills,
@@ -70,6 +74,17 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({ onBack, getSkill
                   playerName: profile?.displayName || '名無しの剣士'
                 });
               }
+            });
+          }
+
+          const finalClearSkills = profile?.chapter2?.finalClearRecord?.skillAbbrs;
+          if (!hasFinalChapter2VictoryInVictorySkills && Array.isArray(finalClearSkills) && finalClearSkills.length > 0) {
+            allVictories.push({
+              stageKey: 'CH2_12_3',
+              skills: finalClearSkills,
+              uid,
+              isAnonymous: false,
+              playerName: profile?.displayName || '名無しの剣士'
             });
           }
         });

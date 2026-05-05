@@ -62,6 +62,7 @@ export interface UserProfile {
 
 const CHAPTER2_FINAL_STAGE_NO = 24;
 const CHAPTER2_FINAL_BATTLE_FLOW_INDEX = 5;
+const CHAPTER2_CLEAR_MEDAL_ID = 'great_pirate';
 
 const getChapter2SubStageForDisplay = (chapter2Flows: Chapter2StageFlow[], stageNo: number, flowIndex: number): number => {
   const flow = chapter2Flows.find((entry) => entry.stageNo === stageNo);
@@ -82,6 +83,20 @@ const getChapter2StageLabel = (chapter2Flows: Chapter2StageFlow[], stageNo?: num
   const chapterStage = Math.max(stageNo - 12, 1);
   const subStage = getChapter2SubStageForDisplay(chapter2Flows, stageNo, typeof flowIndex === 'number' ? flowIndex : 0);
   return `Stage${chapterStage}-${subStage}`;
+};
+
+const hasDisplayedChapter2StageClearProof = (profile: UserProfile): boolean => {
+  if ((profile.medals || []).includes(CHAPTER2_CLEAR_MEDAL_ID)) return true;
+
+  const finalClearRecord = profile.chapter2?.finalClearRecord;
+  const finalClearSkills = finalClearRecord?.skillAbbrs;
+  if (Array.isArray(finalClearSkills) && finalClearSkills.length > 0) return true;
+
+  return (
+    profile.chapter2?.stageCycle === CHAPTER2_FINAL_STAGE_NO &&
+    profile.chapter2?.flowIndex === CHAPTER2_FINAL_BATTLE_FLOW_INDEX &&
+    Boolean(profile.chapter2?.canGoToBoss)
+  );
 };
 
 const getChapter2LoopCount = (profile: UserProfile): number => {
@@ -175,6 +190,16 @@ const ChapterRankingCards: React.FC<{
 
   return (
     <div style={{ background: '#111822', padding: isMobile ? '14px' : '20px', borderRadius: '18px', border: '2px solid #4fc3f7', marginBottom: '20px', boxShadow: '0 0 20px rgba(79, 195, 247, 0.18)' }}>
+      <style>{`
+        @keyframes chapter2-clear-rainbow-glow {
+          0% { color: #ff6b6b; text-shadow: 0 0 6px rgba(255, 107, 107, 0.55), 0 0 12px rgba(255, 107, 107, 0.35); }
+          20% { color: #ffd166; text-shadow: 0 0 6px rgba(255, 209, 102, 0.55), 0 0 12px rgba(255, 209, 102, 0.35); }
+          40% { color: #7ae582; text-shadow: 0 0 6px rgba(122, 229, 130, 0.55), 0 0 12px rgba(122, 229, 130, 0.35); }
+          60% { color: #4cc9f0; text-shadow: 0 0 6px rgba(76, 201, 240, 0.55), 0 0 12px rgba(76, 201, 240, 0.35); }
+          80% { color: #b388ff; text-shadow: 0 0 6px rgba(179, 136, 255, 0.55), 0 0 12px rgba(179, 136, 255, 0.35); }
+          100% { color: #ff6b6b; text-shadow: 0 0 6px rgba(255, 107, 107, 0.55), 0 0 12px rgba(255, 107, 107, 0.35); }
+        }
+      `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
         <h2 style={{ color: '#4fc3f7', margin: 0, fontSize: isMobile ? '1.05rem' : '1.2rem' }}>{mode === 'chapter2' ? '第2章ランキング' : '第1章ランキング'}</h2>
         <div style={{ color: '#9bb7c9', fontSize: isMobile ? '0.68rem' : '0.75rem' }}>
@@ -192,6 +217,13 @@ const ChapterRankingCards: React.FC<{
       >
         {rankingProfiles.map((profile, index) => {
           const isMe = profile.uid === currentUserUid;
+          const hasChapter2ClearProof = mode === 'chapter2' && hasDisplayedChapter2StageClearProof(profile);
+          const currentStageLabel = mode === 'chapter2'
+            ? getChapter2StageLabel(chapter2Flows, profile.chapter2?.stageCycle, profile.chapter2?.flowIndex)
+            : getChapter1StageLabel(profile);
+          const shouldRainbowGlow =
+            (hasChapter2ClearProof && currentStageLabel === 'Stage12-3') ||
+            (mode === 'chapter1' && currentStageLabel === 'Stage12');
           return (
             <div
               key={profile.uid}
@@ -240,10 +272,35 @@ const ChapterRankingCards: React.FC<{
               </div>
               <div style={{ color: '#cfe8f7', fontSize: isMobile ? '0.72rem' : '0.78rem', lineHeight: 1.45 }}>
                 <div>
-                  現在: <span style={{ color: '#fff', fontWeight: 'bold' }}>
-                    {mode === 'chapter2'
-                      ? getChapter2StageLabel(chapter2Flows, profile.chapter2?.stageCycle, profile.chapter2?.flowIndex)
-                      : getChapter1StageLabel(profile)}
+                  現在: <span style={{ color: '#fff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={shouldRainbowGlow ? {
+                      animation: 'chapter2-clear-rainbow-glow 2.4s linear infinite'
+                    } : undefined}>
+                      {currentStageLabel}
+                    </span>
+                    <span
+                      title={hasChapter2ClearProof ? 'クリア証明' : undefined}
+                      aria-label={hasChapter2ClearProof ? 'クリア証明' : undefined}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: isMobile ? '14px' : '16px',
+                        height: isMobile ? '14px' : '16px',
+                        flexShrink: 0
+                      }}
+                    >
+                      <img
+                        src={getStorageUrl('/images/icon/2011-12-23_3-096.gif')}
+                        alt=""
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          opacity: hasChapter2ClearProof ? 1 : 0
+                        }}
+                      />
+                    </span>
                   </span>
                 </div>
               </div>
@@ -770,6 +827,7 @@ onPageChange,
     { id: 'master', name: 'クリアしたよ！', description: 'Stage12をクリア' },
     { id: 'traveler', name: '旅人', description: '無条件で獲得' },
     { id: 'monkey', name: 'サルの一味', description: '無条件で獲得' },
+    { id: CHAPTER2_CLEAR_MEDAL_ID, name: '大海賊の証明', description: '第2章をすべてクリア' },
     { id: 'kriemhild', name: '王家の冠月の友', description: 'クリームヒルトを撃破' },
     { id: 'wadachi', name: '紅蓮を越えし者', description: 'ワダチを撃破' },
     { id: 'shiran', name: '氷彗の解凍者', description: 'シーランを撃破' },

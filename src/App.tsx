@@ -38,6 +38,8 @@ const STORY_CANVAS_STATE_KEY = 'shiden_story_canvas_state';
 const CHAPTER2_CLAIMED_REWARD_STEPS_KEY = 'shiden_chapter2_claimed_reward_steps';
 const CHAPTER2_OWNED_SKILLS_KEY = 'shiden_chapter2_owned_skills';
 const CHAPTER2_DIRECT_START_INTENT_KEY = 'shiden_chapter2_direct_start_intent';
+const CHAPTER2_CLEAR_MEDAL_ID = 'great_pirate';
+const CHAPTER2_CLEAR_TITLE = '大海賊の証明';
 const COUPON_CODE_HASHES_PATH = 'publicConfig/couponCodeHashes';
 const LOUNGE_STAGE_MODES: StageMode[] = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'VERIFY_EMAIL', 'ADMIN_ANALYTICS'];
 const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
@@ -246,7 +248,7 @@ function App() {
         window.clearTimeout(adminSaveMessageTimerRef.current);
       }
     };
-  }, []);
+  }, [user?.uid]);
   const isAdmin = user?.uid === process.env.REACT_APP_ADMIN_UID;
   const canAccessChapter2StoryBook = hasStoryBookAccess(myProfile, isAdmin);
   const hasSupporterBenefit = hasSupporterAccess(myProfile, isAdmin);
@@ -2764,27 +2766,25 @@ const PLAYER_SKILL_COUNT = 5;
       setIsDeneiStatsLoaded(true);
     };
 
+    const refreshDeneiStats = (overrides?: { clearsData?: any; trialsData?: any; likesData?: any }) => {
+      Promise.all([
+        overrides && 'clearsData' in overrides ? Promise.resolve(overrides.clearsData) : get(deneiClearsRootRef).then(snap => snap.val()),
+        overrides && 'trialsData' in overrides ? Promise.resolve(overrides.trialsData) : get(deneiTrialsRootRef).then(snap => snap.val()),
+        overrides && 'likesData' in overrides ? Promise.resolve(overrides.likesData) : get(deneiLikesRootRef).then(snap => snap.val())
+      ]).then(([clearsData, trialsData, likesData]) => {
+        updateDeneiStats(clearsData, trialsData, likesData, user?.uid || null);
+      });
+    };
+
     // onValue に戻してリアルタイム更新を有効化
     const unsubClears = onValue(deneiClearsRootRef, (snap) => {
-      get(deneiTrialsRootRef).then(trialsSnap => {
-        get(deneiLikesRootRef).then(likesSnap => {
-          updateDeneiStats(snap.val(), trialsSnap.val(), likesSnap.val(), auth.currentUser?.uid || null);
-        });
-      });
+      refreshDeneiStats({ clearsData: snap.val() });
     });
     const unsubTrials = onValue(deneiTrialsRootRef, (snap) => {
-      get(deneiClearsRootRef).then(clearsSnap => {
-        get(deneiLikesRootRef).then(likesSnap => {
-          updateDeneiStats(clearsSnap.val(), snap.val(), likesSnap.val(), auth.currentUser?.uid || null);
-        });
-      });
+      refreshDeneiStats({ trialsData: snap.val() });
     });
     const unsubLikes = onValue(deneiLikesRootRef, (snap) => {
-      get(deneiClearsRootRef).then(clearsSnap => {
-        get(deneiTrialsRootRef).then(trialsSnap => {
-          updateDeneiStats(clearsSnap.val(), trialsSnap.val(), snap.val(), auth.currentUser?.uid || null);
-        });
-      });
+      refreshDeneiStats({ likesData: snap.val() });
     });
 
     setBattleResults([]);
@@ -3876,6 +3876,27 @@ const PLAYER_SKILL_COUNT = 5;
                   timestamp: Date.now(),
                   clearCount: (myProfile?.chapter2?.loopCount || 0) + 1
                 });
+
+                const currentMedals = myProfile?.medals || [];
+                if (!currentMedals.includes(CHAPTER2_CLEAR_MEDAL_ID)) {
+                  const awardedMedals = [...currentMedals, CHAPTER2_CLEAR_MEDAL_ID];
+                  const currentTitle = myProfile?.title || '';
+                  const shouldAutoEquipTitle = !currentTitle || currentTitle === '旅人' || currentTitle === 'サルの一味';
+                  const nextTitle = shouldAutoEquipTitle ? CHAPTER2_CLEAR_TITLE : currentTitle;
+                  const profileRef = ref(database, `profiles/${user.uid}`);
+                  update(profileRef, {
+                    medals: awardedMedals,
+                    title: nextTitle,
+                    lastActive: Date.now()
+                  });
+                  localStorage.setItem('shiden_medals', JSON.stringify(awardedMedals));
+                  setMyProfile(prev => prev ? {
+                    ...prev,
+                    medals: awardedMedals,
+                    title: nextTitle || prev.title,
+                    lastActive: Date.now()
+                  } : prev);
+                }
               }
 
               // クリア人数カウント用の記録
