@@ -15,8 +15,9 @@ import Lifuku from './Lifuku';
 import LegalInfo from './LegalInfo';
 import BugReportModal from './BugReportModal';
 import Kamishibai from './components/Kamishibai';
-import { parseStoryText, StoryAssets } from './types/storyParser';
-import { Chapter2StageFlow, Chapter2FlowStep, PendingChapter2Reward } from './types/chapter2';
+import { parseStoryText } from './types/storyParser';
+import type { StoryAssets } from './types/storyParser';
+import type { Chapter2StageFlow, Chapter2FlowStep, PendingChapter2Reward } from './types/chapter2';
 import StoryCanvas from './components/StoryCanvas';
 import AudioManager from './utils/audioManager';
 import AnimatedRichLog, { StageMode } from './components/AnimatedRichLog';
@@ -25,7 +26,7 @@ import GameChapter1 from './GameChapter1';
 import GameChapter2 from './GameChapter2';
 import StoryTitle from './components/StoryTitle';
 import Chapter2StoryBook from './components/Chapter2StoryBook';
-import { GameProps, BattleResult } from './types/GameProps';
+import type { GameProps, BattleResult } from './types/GameProps';
 import { collectSupporterCreditsNames, getSupporterCreditsName, hasSupporterAccess, hasStoryBookAccess, hashCouponCode, resolveCouponFeaturesFromHash, sanitizeSupporterCreditsName } from './utils/supporterBenefits';
 import './App.css';
 
@@ -701,10 +702,10 @@ function App() {
     const currentStep = flow.flow[flowIndex];
     if (currentStep?.type === 'battle' && currentStep.subStage) return currentStep.subStage;
 
-    const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find(step => step.type === 'battle');
+    const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find((step: Chapter2FlowStep) => step.type === 'battle');
     if (nextBattleStep?.subStage) return nextBattleStep.subStage;
 
-    const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find(step => step.type === 'battle');
+    const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find((step: Chapter2FlowStep) => step.type === 'battle');
     return previousBattleStep?.subStage || 1;
   };
 
@@ -2029,7 +2030,7 @@ const PLAYER_SKILL_COUNT = 5;
 
     const now = Date.now();
     const flow = chapter2Flows.find(entry => entry.stageNo === stageNo);
-    const firstStoryIndex = flow?.flow.findIndex(step => step.type === 'story') ?? -1;
+    const firstStoryIndex = flow?.flow.findIndex((step: Chapter2FlowStep) => step.type === 'story') ?? -1;
     const flowIndex = firstStoryIndex >= 0 ? firstStoryIndex : 0;
     const chapter2Ref = ref(database, `profiles/${user.uid}/chapter2`);
     const snapshot = await get(chapter2Ref);
@@ -5060,8 +5061,8 @@ const PLAYER_SKILL_COUNT = 5;
                     const stageNo = n + 12;
                     const flow = chapter2Flows.find(f => f.stageNo === stageNo);
                     const battleSteps = flow?.flow
-                      .map((step, index) => ({ step, index }))
-                      .filter(({ step }) => step.type === 'battle') || [];
+                      .map((step: Chapter2FlowStep, index: number) => ({ step, index }))
+                      .filter(({ step }: { step: Chapter2FlowStep }) => step.type === 'battle') || [];
                     return (
                       <div key={s.no} style={{ borderBottom: '1px solid #333', paddingBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
                         <div style={{ minWidth: '120px', fontWeight: 'bold', color: '#ff8a80' }}>第2章 No.{n}</div>

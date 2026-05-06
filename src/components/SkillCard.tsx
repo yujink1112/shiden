@@ -26,6 +26,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   const touchTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchMovedRef = useRef(false);
+  const lastStatusTouchAtRef = useRef(0);
   const tooltipInstanceIdRef = useRef(`${skill.abbr}-${Math.random()}`);
 
   const closeTooltip = (forceClosed = false) => {
@@ -77,6 +78,12 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
   };
 
   const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const stopTooltipPropagation = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  };
+  const toggleHoveredStatus = (statusName: string) => {
+    setHoveredStatus((current) => current === statusName ? null : statusName);
+  };
 
   const getStatusPatterns = (statusName: string) => {
     if (statusName === "治癒(X)") {
@@ -104,8 +111,24 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
                 <span 
                   key={status.name + subPart + Math.random()}
                   onMouseEnter={() => setHoveredStatus(status.name)}
-                  onMouseLeave={() => setHoveredStatus(null)}
-                  style={{ color: '#ffeb3b', textDecoration: 'underline', cursor: 'help', fontWeight: 'bold', pointerEvents: 'auto' }}
+                  onMouseLeave={() => setHoveredStatus((current) => current === status.name ? null : current)}
+                  onPointerDown={stopTooltipPropagation}
+                  onTouchStart={stopTooltipPropagation}
+                  onPointerUp={(e) => {
+                    stopTooltipPropagation(e);
+                    if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+                      lastStatusTouchAtRef.current = Date.now();
+                      toggleHoveredStatus(status.name);
+                    }
+                  }}
+                  onClick={(e) => {
+                    stopTooltipPropagation(e);
+                    if (Date.now() - lastStatusTouchAtRef.current < 500) {
+                      return;
+                    }
+                    toggleHoveredStatus(status.name);
+                  }}
+                  style={{ color: '#ffeb3b', textDecoration: 'underline', cursor: 'pointer', fontWeight: 'bold', pointerEvents: 'auto' }}
                 >
                   {subPart}
                 </span>
@@ -363,7 +386,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, isSelected, onClick, id, i
       {showTooltip && !isTooltipForceClosed && createPortal(
         <div 
           style={getTooltipStyle()}
-          onClick={(e) => e.stopPropagation()}
+          onPointerDownCapture={stopTooltipPropagation}
+          onTouchStartCapture={stopTooltipPropagation}
+          onClick={stopTooltipPropagation}
           onMouseEnter={() => {
             if (tooltipTimeoutRef.current) {
               clearTimeout(tooltipTimeoutRef.current);

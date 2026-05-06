@@ -6,7 +6,7 @@ import DesktopSelectedSkillsDock from './components/DesktopSelectedSkillsDock';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import StoryCanvas from './components/StoryCanvas';
 import AudioManager from './utils/audioManager';
-import { GameProps, BattleResult } from './types/GameProps';
+import type { GameProps, BattleResult } from './types/GameProps';
 import { getAvailableSkillsUntilStage } from './stageData';
 import { SkillDetail } from './skillsData';
 

@@ -6,7 +6,7 @@ import DesktopSelectedSkillsDock from './components/DesktopSelectedSkillsDock';
 import AnimatedRichLog from './components/AnimatedRichLog';
 import Kamishibai from './components/Kamishibai';
 import AudioManager from './utils/audioManager';
-import { GameProps, BattleResult } from './types/GameProps';
+import type { GameProps, BattleResult } from './types/GameProps';
 import { StageMode } from './components/AnimatedRichLog';
 import { STAGE_DATA, getAvailableSkillsUntilStage, getSkillByName } from './stageData';
 import { SkillDetail } from './skillsData';

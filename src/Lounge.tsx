@@ -3,7 +3,7 @@ import { User } from "firebase/auth";
 import { SkillDetail } from './skillsData';
 import { AdminAnalytics } from './AdminAnalytics';
 import { getStorageUrl, uploadDeneiImage } from './firebase';
-import type { Chapter2StageFlow } from './types/chapter2';
+import type { Chapter2FlowStep, Chapter2StageFlow } from './types/chapter2';
 
 export interface UserProfile {
   uid: string;
@@ -71,10 +71,10 @@ const getChapter2SubStageForDisplay = (chapter2Flows: Chapter2StageFlow[], stage
   const currentStep = flow.flow[flowIndex];
   if (currentStep?.type === 'battle' && currentStep.subStage) return currentStep.subStage;
 
-  const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find((step) => step.type === 'battle');
+  const nextBattleStep = flow.flow.slice(Math.max(flowIndex, 0)).find((step: Chapter2FlowStep) => step.type === 'battle');
   if (nextBattleStep?.subStage) return nextBattleStep.subStage;
 
-  const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find((step) => step.type === 'battle');
+  const previousBattleStep = [...flow.flow.slice(0, flowIndex + 1)].reverse().find((step: Chapter2FlowStep) => step.type === 'battle');
   return previousBattleStep?.subStage || 1;
 };
 
