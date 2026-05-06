@@ -63,6 +63,9 @@ export interface UserProfile {
 const CHAPTER2_FINAL_STAGE_NO = 24;
 const CHAPTER2_FINAL_BATTLE_FLOW_INDEX = 5;
 const CHAPTER2_CLEAR_MEDAL_ID = 'great_pirate';
+const SUPPORTER_RAINBOW_BACKGROUND = 'linear-gradient(135deg, rgba(255, 107, 107, 0.28), rgba(255, 209, 102, 0.24), rgba(122, 229, 130, 0.22), rgba(76, 201, 240, 0.24), rgba(179, 136, 255, 0.24))';
+const SUPPORTER_RAINBOW_BACKGROUND_STRONG = 'linear-gradient(135deg, rgba(255, 107, 107, 0.4), rgba(255, 209, 102, 0.34), rgba(122, 229, 130, 0.3), rgba(76, 201, 240, 0.34), rgba(179, 136, 255, 0.34))';
+const SUPPORTER_RAINBOW_BORDER = '1px solid rgba(255, 230, 128, 0.85)';
 
 const getChapter2SubStageForDisplay = (chapter2Flows: Chapter2StageFlow[], stageNo: number, flowIndex: number): number => {
   const flow = chapter2Flows.find((entry) => entry.stageNo === stageNo);
@@ -217,6 +220,7 @@ const ChapterRankingCards: React.FC<{
       >
         {rankingProfiles.map((profile, index) => {
           const isMe = profile.uid === currentUserUid;
+          const isSupporter = Boolean(profile.supporterCouponUnlocked);
           const hasChapter2ClearProof = mode === 'chapter2' && hasDisplayedChapter2StageClearProof(profile);
           const currentStageLabel = mode === 'chapter2'
             ? getChapter2StageLabel(chapter2Flows, profile.chapter2?.stageCycle, profile.chapter2?.flowIndex)
@@ -231,27 +235,43 @@ const ChapterRankingCards: React.FC<{
               style={{
                 minWidth: isMobile ? '132px' : '145px',
                 flex: isMobile ? '0 0 132px' : '0 0 145px',
-                background: isMe ? 'linear-gradient(180deg, rgba(79,195,247,0.2), rgba(17,24,34,0.95))' : 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(17,24,34,0.95))',
-                border: isMe ? '1px solid #4fc3f7' : '1px solid #35506a',
+                background: isSupporter
+                  ? SUPPORTER_RAINBOW_BACKGROUND
+                  : isMe
+                    ? 'linear-gradient(180deg, rgba(79,195,247,0.2), rgba(17,24,34,0.95))'
+                    : 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(17,24,34,0.95))',
+                border: isSupporter ? SUPPORTER_RAINBOW_BORDER : isMe ? '1px solid #4fc3f7' : '1px solid #35506a',
                 borderRadius: '14px',
                 padding: isMobile ? '12px 10px' : '14px 12px',
                 boxSizing: 'border-box',
                 scrollSnapAlign: isMobile ? 'start' : undefined,
                 cursor: 'pointer',
                 transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
-                boxShadow: isMe ? '0 0 14px rgba(79, 195, 247, 0.22)' : '0 0 10px rgba(0, 0, 0, 0.18)'
+                boxShadow: isSupporter
+                  ? '0 0 18px rgba(255, 209, 102, 0.26)'
+                  : isMe
+                    ? '0 0 14px rgba(79, 195, 247, 0.22)'
+                    : '0 0 10px rgba(0, 0, 0, 0.18)'
               }}
               onMouseEnter={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = isMe ? '0 0 18px rgba(79, 195, 247, 0.3)' : '0 0 16px rgba(79, 195, 247, 0.18)';
-                e.currentTarget.style.borderColor = '#4fc3f7';
+                e.currentTarget.style.boxShadow = isSupporter
+                  ? '0 0 24px rgba(255, 209, 102, 0.34)'
+                  : isMe
+                    ? '0 0 18px rgba(79, 195, 247, 0.3)'
+                    : '0 0 16px rgba(79, 195, 247, 0.18)';
+                e.currentTarget.style.borderColor = isSupporter ? 'rgba(255, 245, 180, 0.95)' : '#4fc3f7';
               }}
               onMouseLeave={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = isMe ? '0 0 14px rgba(79, 195, 247, 0.22)' : '0 0 10px rgba(0, 0, 0, 0.18)';
-                e.currentTarget.style.borderColor = isMe ? '#4fc3f7' : '#35506a';
+                e.currentTarget.style.boxShadow = isSupporter
+                  ? '0 0 18px rgba(255, 209, 102, 0.26)'
+                  : isMe
+                    ? '0 0 14px rgba(79, 195, 247, 0.22)'
+                    : '0 0 10px rgba(0, 0, 0, 0.18)';
+                e.currentTarget.style.borderColor = isSupporter ? 'rgba(255, 230, 128, 0.85)' : isMe ? '#4fc3f7' : '#35506a';
               }}
             >
               <div style={{ color: index === 0 ? '#ffd700' : '#c7d7e5', fontWeight: 'bold', fontSize: isMobile ? '0.78rem' : '0.85rem', marginBottom: '8px' }}>
@@ -367,6 +387,7 @@ const UserListTable: React.FC<UserListTableProps> = ({
               const isActive = !!lastActiveProfiles[p.uid];
               const favSkill = getSkillByAbbr(p.favoriteSkill);
               const isMe = p.uid === currentUserUid;
+              const isSupporter = Boolean(p.supporterCouponUnlocked);
               return (
                 <tr
                   key={p.uid}
@@ -375,11 +396,15 @@ const UserListTable: React.FC<UserListTableProps> = ({
                     borderBottom: '1px solid #333',
                     cursor: 'pointer',
                     transition: 'background 0.2s',
-                    background: isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent',
-                    borderLeft: isMe ? '4px solid #4fc3f7' : 'none'
+                    background: isSupporter ? SUPPORTER_RAINBOW_BACKGROUND : isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent',
+                    borderLeft: isSupporter ? '4px solid rgba(255, 230, 128, 0.9)' : isMe ? '4px solid #4fc3f7' : 'none'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.25)' : '#222'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = isSupporter ? SUPPORTER_RAINBOW_BACKGROUND_STRONG : isMe ? 'rgba(79, 195, 247, 0.25)' : '#222';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isSupporter ? SUPPORTER_RAINBOW_BACKGROUND : isMe ? 'rgba(79, 195, 247, 0.15)' : 'transparent';
+                  }}
                 >
                   <td style={{ padding: isMobile ? '8px 4px' : '8px 5px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '8px' }}>
@@ -663,6 +688,7 @@ interface LoungeProps {
   onAdminDeleteUserAccount: (profile: UserProfile) => void;
   onKenjuBattle: (boss?: { name: string; image: string; skills: SkillDetail[]; background?: string; title?: string; description?: string }, mode?: 'KENJU' | 'DENEI' | 'MID' | 'BOSS') => void;
   onLikeDenei: (masterUid: string, deneiName: string) => void;
+  onOpenChapter2Credits: () => void;
   onBack: () => void;
   onViewProfile: (profile: UserProfile) => void;
   stageMode: 'LOUNGE' | 'MYPAGE' | 'PROFILE' | 'RANKING' | 'DELETE_ACCOUNT' | 'VERIFY_EMAIL' | 'ADMIN_ANALYTICS';
@@ -714,6 +740,7 @@ export const Lounge: React.FC<LoungeProps> = ({
   onAdminDeleteUserAccount,
   onKenjuBattle,
   onLikeDenei,
+  onOpenChapter2Credits,
   onBack,
   onViewProfile,
   stageMode,
@@ -1240,6 +1267,7 @@ onPageChange,
       "mon_211.gif", "mon_212.gif", "mon_215.gif", "mon_216.gif",
       "mon_217.gif", "mon_286.gif"
     ];
+    const canReplayChapter2Credits = hasDisplayedChapter2StageClearProof(myProfile);
 
     const handlePresetIconSelect = (iconName: string) => {
       const iconPath = `/images/icon/${iconName}`;
@@ -1398,7 +1426,45 @@ onPageChange,
               onChange={(e) => onUpdateProfile(myProfile.displayName, myProfile.favoriteSkill, e.target.value, myProfile.photoURL, myProfile.title, myProfile.oneThing, myProfile.isSpoiler, myProfile.myKenju)}
               style={{ width: '100%', padding: '10px', background: '#333', color: '#fff', border: '1px solid #444', borderRadius: '5px', boxSizing: 'border-box' }}
             />
-            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#2c1010', padding: '8px', borderRadius: '5px', border: '1px solid #ff5252' }}>
+          </div>
+
+          {myProfile.supporterCouponUnlocked && (
+            <div style={{ marginBottom: '20px', background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.16), rgba(76, 201, 240, 0.12), rgba(179, 136, 255, 0.14))', border: '1px solid rgba(255, 215, 128, 0.65)', borderRadius: '12px', padding: '16px', boxShadow: '0 0 18px rgba(255, 209, 102, 0.14)' }}>
+              <label style={{ color: '#fff4bf', display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Special Thanks に表示する名前</label>
+              <p style={{ color: '#d7dbe6', fontSize: '0.75rem', margin: '0 0 8px 0', lineHeight: 1.6 }}>
+                著作権表記とエンドロールに表示される名前です。10文字以内で設定できます。
+              </p>
+              <input
+                type="text"
+                maxLength={10}
+                value={myProfile.supporterCreditsName || myProfile.displayName || ''}
+                onChange={(e) => onUpdateSupporterCreditsName(e.target.value)}
+                placeholder="Special Thanks 表示名"
+                style={{ width: '100%', padding: '10px', background: 'rgba(19, 24, 34, 0.86)', color: '#fff', border: '1px solid rgba(255, 215, 128, 0.55)', borderRadius: '8px', boxSizing: 'border-box' }}
+              />
+              <div style={{ marginTop: '8px', color: '#fff0b2', fontSize: '0.72rem' }}>
+                現在の表示名: {myProfile.supporterCreditsName || myProfile.displayName}
+              </div>
+            </div>
+          )}
+
+          {canReplayChapter2Credits && (
+            <div style={{ marginBottom: '20px', background: 'linear-gradient(180deg, rgba(24, 56, 28, 0.92), rgba(10, 28, 16, 0.92))', border: '1px solid rgba(129, 199, 132, 0.8)', borderRadius: '12px', padding: '16px', boxShadow: '0 0 18px rgba(76, 175, 80, 0.16)' }}>
+              <label style={{ color: '#c8f7cc', display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>第2章エンドロール</label>
+              <p style={{ color: '#d8e7da', fontSize: '0.78rem', margin: '0 0 10px 0', lineHeight: 1.6 }}>
+                第2章クリア済みのため、マイページからいつでも再生できます。
+              </p>
+              <button
+                type="button"
+                onClick={onOpenChapter2Credits}
+                style={{ width: '100%', padding: '11px 14px', background: '#2e7d32', color: '#fff', border: '1px solid #66bb6a', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', WebkitTapHighlightColor: 'transparent' }}
+              >
+                エンドロールを見る
+              </button>
+            </div>
+          )}
+
+          <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#2c1010', padding: '8px', borderRadius: '5px', border: '1px solid #ff5252' }}>
               <input
                 type="checkbox"
                 id="spoiler-checkbox"
@@ -1408,7 +1474,6 @@ onPageChange,
               />
               <label htmlFor="spoiler-checkbox" style={{ color: '#ff5252', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer', userSelect: 'none' }}>ネタバレ注意 (クリア構成などを書く場合はチェック)</label>
             </div>
-          </div>
 
           <p style={{ fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>※入力すると自動で保存されます</p>
 

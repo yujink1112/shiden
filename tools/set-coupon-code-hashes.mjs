@@ -10,6 +10,11 @@ const DATABASE_URL = 'https://shiden-games-default-rtdb.firebaseio.com';
 const TARGET_PATH = 'publicConfig/couponCodeHashes';
 
 const normalizeCouponCode = (value) => value.trim().toUpperCase();
+const parseCouponCodes = (value) =>
+  String(value)
+    .split(',')
+    .map((code) => normalizeCouponCode(code))
+    .filter((code) => code.length > 0);
 const hashCouponCode = (value) => createHash('sha256').update(normalizeCouponCode(value)).digest('hex');
 
 const parseArgs = () => {
@@ -23,13 +28,13 @@ const parseArgs = () => {
     if (!value) continue;
 
     if (arg === '--storybook') {
-      storyBookCodes.push(value);
+      storyBookCodes.push(...parseCouponCodes(value));
       index += 1;
       continue;
     }
 
     if (arg === '--supporter') {
-      supporterCodes.push(value);
+      supporterCodes.push(...parseCouponCodes(value));
       index += 1;
     }
   }

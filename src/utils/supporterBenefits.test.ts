@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { collectSupporterCreditsNames, parseCouponCodes, resolveCouponFeaturesFromHash, sanitizeSupporterCreditsName, withSupporterCredits } from './supporterBenefits';
+import { collectSupporterCreditsNames, hashCouponCode, parseCouponCodes, resolveCouponFeaturesFromHash, sanitizeSupporterCreditsName, withSupporterCredits } from './supporterBenefits';
 import type { CreditsData } from '../types/story';
 
 describe('supporterBenefits', () => {
@@ -14,6 +14,12 @@ describe('supporterBenefits', () => {
     });
 
     expect(features).toEqual(['storyBook', 'supporter']);
+  });
+
+  it('hashes coupon codes with sha256 even when input casing differs', async () => {
+    await expect(hashCouponCode('aaa-aaaa-aaaa-aaaa')).resolves.toBe(
+      '2288837338447ee6c1771db21087b1812d78e6cea9c27640589c3f11d995a5f9'
+    );
   });
 
   it('sanitizes supporter credit names and falls back to display name', () => {

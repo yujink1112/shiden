@@ -42,6 +42,24 @@ const CHAPTER2_DIRECT_START_INTENT_KEY = 'shiden_chapter2_direct_start_intent';
 const CHAPTER2_CLEAR_MEDAL_ID = 'great_pirate';
 const CHAPTER2_CLEAR_TITLE = '大海賊の証明';
 const COUPON_CODE_HASHES_PATH = 'publicConfig/couponCodeHashes';
+const formatCouponCodeInput = (value: string): string => {
+  const normalized = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+  if (!normalized) return '';
+
+  const firstChunk = normalized.slice(0, 3);
+  const rest = normalized.slice(3);
+  const restChunks = rest.match(/.{1,4}/g) || [];
+  return [firstChunk, ...restChunks].filter((chunk) => chunk.length > 0).join('-');
+};
+const toHashStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((entry): entry is string => typeof entry === 'string');
+  }
+  if (value && typeof value === 'object') {
+    return Object.values(value).filter((entry): entry is string => typeof entry === 'string');
+  }
+  return [];
+};
 const LOUNGE_STAGE_MODES: StageMode[] = ['LOUNGE', 'MYPAGE', 'PROFILE', 'RANKING', 'DELETE_ACCOUNT', 'VERIFY_EMAIL', 'ADMIN_ANALYTICS'];
 const KAMIWAZA_PLAYER_NAMES: Record<string, string> = {
   "狼": "ルーサー",
@@ -162,7 +180,7 @@ function App() {
         });
 
         // 共通リソース
-        imageUrls.add(getStorageUrl('/images/background/background.jpg'));
+        imageUrls.add(getStorageUrl('/images/background/background.webp'));
         imageUrls.add(getStorageUrl('/images/title/titlelogo.webp'));
         imageUrls.add(titleHeroPcUrl);
         imageUrls.add(titleHeroMobileUrl);
@@ -427,8 +445,8 @@ function App() {
         if (cancelled) return;
         const data = snapshot.val() || {};
         setCouponCodeHashes({
-          storyBookHashes: Array.isArray(data.storyBookHashes) ? data.storyBookHashes.filter((value: unknown): value is string => typeof value === 'string') : [],
-          supporterHashes: Array.isArray(data.supporterHashes) ? data.supporterHashes.filter((value: unknown): value is string => typeof value === 'string') : []
+          storyBookHashes: toHashStringArray(data.storyBookHashes),
+          supporterHashes: toHashStringArray(data.supporterHashes)
         });
       } catch (error) {
         console.error('Failed to load coupon code hashes:', error);
@@ -448,7 +466,7 @@ function App() {
 
   const handleStoryBookCouponInput = () => {
     if (!user || !myProfile) {
-      window.alert('クーポンコードの入力はユーザ登録後にご利用ください。');
+      window.alert('特典コードの入力はユーザ登録後にご利用ください。');
       return;
     }
     setStoryBookCouponInput('');
@@ -467,14 +485,14 @@ function App() {
 
   const handleSubmitStoryBookCoupon = async () => {
     if (!user || !myProfile) {
-      setStoryBookCouponMessage('クーポンコードの入力はユーザ登録後にご利用ください。');
+      setStoryBookCouponMessage('特典コードの入力はユーザ登録後にご利用ください。');
       setStoryBookCouponMessageType('error');
       return;
     }
 
     const normalized = storyBookCouponInput.trim();
     if (!normalized) {
-      setStoryBookCouponMessage('クーポンコードを入力してください。');
+      setStoryBookCouponMessage('特典コードを入力してください。');
       setStoryBookCouponMessageType('error');
       return;
     }
@@ -501,21 +519,22 @@ function App() {
       setMyProfile(updatedProfile);
       try {
         await set(profileRef, updatedProfile);
+        triggerCouponSuccessCelebration();
         setStoryBookCouponMessage(
           features.includes('supporter')
-            ? `ありがとうございました。Special Thanksには「${getSupporterCreditsName(updatedProfile)}」で掲載されます。`
+            ? `応援ありがとうございます！Special Thanksに掲載する名前はLOUNGEのマイページから変更できます。`
             : 'ストーリーブックを閲覧できるようになりました。'
         );
         setStoryBookCouponMessageType('success');
       } catch (error) {
         console.error('Failed to save story book coupon state:', error);
-        setStoryBookCouponMessage('クーポンコードの保存に失敗しました。');
+        setStoryBookCouponMessage('特典コードの保存に失敗しました。');
         setStoryBookCouponMessageType('error');
       }
       return;
     }
 
-    setStoryBookCouponMessage('クーポンコードが正しくありません。');
+    setStoryBookCouponMessage('特典コードが正しくありません。');
     setStoryBookCouponMessageType('error');
   };
   
@@ -846,6 +865,7 @@ function App() {
     setStoryContentV2(null);
     setStoryUrl(null);
     setCreditsUrl(null);
+    setCreditsReturnStageMode(null);
     setShowStoryModal(false);
     setShowChapterTitle(false);
     setShowChapter2Title(false);
@@ -858,6 +878,19 @@ function App() {
     setGameStarted(false);
     setIsTitle(false);
     setShowEpilogue(false);
+  };
+
+  const openChapter2CreditsFromMyPage = () => {
+    AudioManager.getInstance().stopBgm();
+    clearStoryCanvasState();
+    setStoryContent(null);
+    setStoryContentV2(null);
+    setStoryUrl(null);
+    setCreditsUrl('/data/credits.json');
+    setCreditsReturnStageMode('MYPAGE');
+    setShowStoryModal(true);
+    setIsAdminPreview(false);
+    setAdminEpilogueSequence('idle');
   };
 
   // 第2章の次のステップへ進む
@@ -976,6 +1009,7 @@ function App() {
   const [storyContentV2, setStoryContentV2] = useState<any[] | null>(null);
   const [storyUrl, setStoryUrl] = useState<string | null>(null);
   const [creditsUrl, setCreditsUrl] = useState<string | null>(null);
+  const [creditsReturnStageMode, setCreditsReturnStageMode] = useState<StageMode | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [showChapterTitle, setShowChapterTitle] = useState(false);
   const [isStoryTransitioning, setIsStoryTransitioning] = useState(false);
@@ -1584,7 +1618,7 @@ const PLAYER_SKILL_COUNT = 5;
     const filteredCreditsName = filterNGWords(supporterCreditsName || "");
     const updatedProfile: UserProfile = {
       ...myProfile,
-      supporterCreditsName: filteredCreditsName.slice(0, 24),
+      supporterCreditsName: filteredCreditsName.slice(0, 10),
       lastActive: Date.now()
     };
 
@@ -3018,6 +3052,62 @@ const PLAYER_SKILL_COUNT = 5;
     });
   };
 
+  const triggerCouponSuccessConfetti = () => {
+    const colors = ['#fff176', '#ffd54f', '#ffb300', '#ff7043', '#ec407a', '#ab47bc', '#42a5f5', '#66bb6a'];
+    const bursts = [
+      { delay: 0, options: { particleCount: 180, spread: 80, startVelocity: 50, origin: { x: 0.5, y: 0.2 } } },
+      { delay: 120, options: { particleCount: 120, spread: 70, angle: 60, startVelocity: 55, origin: { x: 0.15, y: 0.78 } } },
+      { delay: 120, options: { particleCount: 120, spread: 70, angle: 120, startVelocity: 55, origin: { x: 0.85, y: 0.78 } } },
+      { delay: 260, options: { particleCount: 160, spread: 110, startVelocity: 45, origin: { x: 0.5, y: 0.45 } } },
+      { delay: 520, options: { particleCount: 90, spread: 140, scalar: 1.15, startVelocity: 38, origin: { x: 0.5, y: 0.3 } } }
+    ];
+
+    bursts.forEach(({ delay, options }) => {
+      setTimeout(() => {
+        confetti({
+          ...options,
+          colors,
+          ticks: 300,
+          gravity: 0.95,
+          zIndex: 10000,
+        });
+      }, delay);
+    });
+  };
+
+  const triggerCouponSuccessCelebration = () => {
+    const applause = new Audio(getStorageUrl('audio/拍手・会場.mp3'));
+    applause.volume = bgmEnabled ? bgmVolume : 0;
+
+    applause.play().catch((error) => {
+      console.error('Failed to play coupon celebration audio:', error);
+    });
+
+    triggerCouponSuccessConfetti();
+
+    const fadeOutDelay = 2200;
+    const fadeOutDuration = 1200;
+    window.setTimeout(() => {
+      const startVolume = applause.volume;
+      const startTime = performance.now();
+
+      const fade = (now: number) => {
+        const progress = Math.min((now - startTime) / fadeOutDuration, 1);
+        applause.volume = Math.max(0, startVolume * (1 - progress));
+
+        if (progress < 1) {
+          requestAnimationFrame(fade);
+          return;
+        }
+
+        applause.pause();
+        applause.currentTime = 0;
+      };
+
+      requestAnimationFrame(fade);
+    }, fadeOutDelay);
+  };
+
   const [showBossClearPanel, setShowBossClearPanel] = useState(false);
 
   const applyPostLogBattleOutcome = (winCount: number) => {
@@ -4013,6 +4103,7 @@ const PLAYER_SKILL_COUNT = 5;
         onSaveKenju={handleSaveKenju}
         onKenjuBattle={handleKenjuBattle}
         onLikeDenei={handleLikeDenei}
+        onOpenChapter2Credits={openChapter2CreditsFromMyPage}
         onAdminResetCouponState={handleAdminResetCouponState}
         onAdminResetStageProgress={handleAdminResetStageProgress}
         onAdminResetAllProgressData={handleAdminResetAllProgressData}
@@ -4536,14 +4627,15 @@ const PLAYER_SKILL_COUNT = 5;
               </div>
 
               <div className="TitleCouponForm">
-                <label className="TitleCouponLabel" htmlFor="story-book-coupon-input">クーポンコード</label>
+                <label className="TitleCouponLabel" htmlFor="story-book-coupon-input">特典コード</label>
                 <input
                   id="story-book-coupon-input"
                   className="TitleCouponInput"
                   type="text"
                   value={storyBookCouponInput}
-                  onChange={(e) => setStoryBookCouponInput(e.target.value.toUpperCase())}
-                  placeholder="例: ABCD-EFGH-1234"
+                  onChange={(e) => setStoryBookCouponInput(formatCouponCodeInput(e.target.value))}
+                  placeholder="例: AAA-AAAA-AAAA-AAAA"
+                  maxLength={18}
                   autoCapitalize="characters"
                   autoCorrect="off"
                   spellCheck={false}
@@ -5436,6 +5528,12 @@ const PLAYER_SKILL_COUNT = 5;
                   }
 
                   if (isCredits) {
+                    if (creditsReturnStageMode) {
+                      setCreditsReturnStageMode(null);
+                      setIsAdminPreview(false);
+                      setStageMode(creditsReturnStageMode);
+                      return;
+                    }
                     if (adminEpilogueSequence === 'credits') {
                       setAdminEpilogueSequence('idle');
                     }
@@ -5717,6 +5815,12 @@ const PLAYER_SKILL_COUNT = 5;
                   }
 
                   if (isCredits) {
+                    if (creditsReturnStageMode) {
+                      setCreditsReturnStageMode(null);
+                      setIsAdminPreview(false);
+                      setStageMode(creditsReturnStageMode);
+                      return;
+                    }
                     if (adminEpilogueSequence === 'credits') {
                       setAdminEpilogueSequence('idle');
                     }
