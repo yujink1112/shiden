@@ -38,6 +38,7 @@ type TextBlock = {
   names?: string[];
   spaceHeight?: number;
   pageNumber?: number;
+  forcePageBreakBefore?: boolean;
 };
 
 type BackgroundOption = {
@@ -303,6 +304,18 @@ const paginateSectionBlocks = (
     let usedHeight = 0;
 
     section.blocks.forEach((block) => {
+      if (block.forcePageBreakBefore && currentPage.blocks.length > 0) {
+        pages.push(currentPage);
+        currentPage = {
+          sectionNo: section.sectionNo,
+          sectionLabel: section.displayLabel,
+          sectionTitle: section.title,
+          continuation: true,
+          blocks: []
+        };
+        usedHeight = 0;
+      }
+
       const blockHeight = measuredHeights[block.key] || 0;
       const exceedsPage = usedHeight > 0 && usedHeight + blockHeight > maxBodyHeight;
 
@@ -582,7 +595,8 @@ const Chapter2StoryBook: React.FC<Chapter2StoryBookProps> = ({ onClose, supporte
                 key: 'section-100-afterstory-title',
                 kind: 'creditTitle' as const,
                 text: '後日談',
-                align: 'center' as const
+                align: 'center' as const,
+                forcePageBreakBefore: true
               } satisfies TextBlock,
               ...rawCreditBlocks.slice(firstAfterstoryIndex)
             ]

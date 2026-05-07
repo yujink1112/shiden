@@ -886,8 +886,13 @@ function App() {
     setStoryContent(null);
     setStoryContentV2(null);
     setStoryUrl(null);
+    setShowChapterTitle(false);
+    setShowChapter2Title(false);
+    setShowPrologueTitle(false);
     setCreditsUrl('/data/credits.json');
     setCreditsReturnStageMode('MYPAGE');
+    setStageMode('BOSS');
+    setGameStarted(false);
     setShowStoryModal(true);
     setIsAdminPreview(false);
     setAdminEpilogueSequence('idle');
@@ -2121,6 +2126,114 @@ const PLAYER_SKILL_COUNT = 5;
     window.setTimeout(() => {
       suppressChapter2ProgressSaveRef.current = false;
     }, 0);
+  };
+
+  const handleAdminMarkChapter2Cleared = async () => {
+    if (!user) return;
+
+    const now = Date.now();
+    const currentChapter2Skills = Array.from(new Set([
+      ...getStoredChapter2Skills(),
+      ...ownedSkillAbbrs
+    ]));
+    const currentClaimedRewardSteps = getStoredClaimedRewardSteps();
+    const currentMedals = myProfile?.medals || [];
+    const awardedMedals = currentMedals.includes(CHAPTER2_CLEAR_MEDAL_ID)
+      ? currentMedals
+      : [...currentMedals, CHAPTER2_CLEAR_MEDAL_ID];
+    const currentTitle = myProfile?.title || '';
+    const shouldAutoEquipTitle = !currentTitle || currentTitle === '旅人' || currentTitle === 'サルの一味';
+    const nextTitle = shouldAutoEquipTitle ? CHAPTER2_CLEAR_TITLE : currentTitle;
+    const nextClearCount = Math.max(myProfile?.chapter2?.finalClearRecord?.clearCount || 0, 1);
+
+    suppressChapter2ProgressSaveRef.current = true;
+
+    try {
+      await set(ref(database, `profiles/${user.uid}/chapter2`), {
+        stageCycle: 24,
+        flowIndex: 5,
+        loopCount: Math.max(myProfile?.chapter2?.loopCount || 0, 1),
+        ownedSkills: currentChapter2Skills,
+        claimedRewardSteps: currentClaimedRewardSteps,
+        canGoToBoss: true,
+        lastUpdated: now,
+        finalClearRecord: {
+          skillAbbrs: currentChapter2Skills,
+          timestamp: now,
+          clearCount: nextClearCount
+        }
+      });
+
+      await update(ref(database, `profiles/${user.uid}`), {
+        medals: awardedMedals,
+        title: nextTitle,
+        lastActive: now,
+        updatedAt: now
+      });
+
+      localStorage.setItem('shiden_chapter2_stage', '24');
+      localStorage.setItem('shiden_chapter2_flow_index', '5');
+      localStorage.setItem('shiden_stage_cycle', '24');
+      localStorage.setItem('shiden_stage_mode', 'BOSS');
+      localStorage.setItem('shiden_last_game_mode', 'BOSS');
+      localStorage.setItem('shiden_can_go_to_boss', 'true');
+      localStorage.setItem('shiden_updated_at', now.toString());
+      localStorage.setItem(CHAPTER2_OWNED_SKILLS_KEY, JSON.stringify(currentChapter2Skills));
+      localStorage.setItem(CHAPTER2_CLAIMED_REWARD_STEPS_KEY, JSON.stringify(currentClaimedRewardSteps));
+      localStorage.setItem('shiden_medals', JSON.stringify(awardedMedals));
+
+      setChapterProgress(prev => ({ ...prev, 2: 24 }));
+      setStageCycle(24);
+      setChapter2FlowIndex(5);
+      setCanGoToBoss(true);
+      setOwnedSkillAbbrs(currentChapter2Skills);
+      setClaimedRewardSteps(currentClaimedRewardSteps);
+      setHasChapter2Save(true);
+      setMyProfile(prev => prev ? {
+        ...prev,
+        medals: awardedMedals,
+        title: nextTitle || prev.title,
+        lastActive: now,
+        chapter2: {
+          ...prev.chapter2,
+          stageCycle: 24,
+          flowIndex: 5,
+          loopCount: Math.max(prev.chapter2?.loopCount || 0, 1),
+          ownedSkills: currentChapter2Skills,
+          claimedRewardSteps: currentClaimedRewardSteps,
+          canGoToBoss: true,
+          lastUpdated: now,
+          finalClearRecord: {
+            skillAbbrs: currentChapter2Skills,
+            timestamp: now,
+            clearCount: nextClearCount
+          }
+        }
+      } : prev);
+
+      setAdminSaveMessage('自分の進行を第2章クリア済みに設定しました。');
+      if (adminSaveMessageTimerRef.current !== null) {
+        window.clearTimeout(adminSaveMessageTimerRef.current);
+      }
+      adminSaveMessageTimerRef.current = window.setTimeout(() => {
+        setAdminSaveMessage(null);
+        adminSaveMessageTimerRef.current = null;
+      }, 2400);
+    } catch (error) {
+      console.error('Failed to mark chapter 2 as cleared:', error);
+      setAdminSaveMessage('第2章クリア済み状態の設定に失敗しました。');
+      if (adminSaveMessageTimerRef.current !== null) {
+        window.clearTimeout(adminSaveMessageTimerRef.current);
+      }
+      adminSaveMessageTimerRef.current = window.setTimeout(() => {
+        setAdminSaveMessage(null);
+        adminSaveMessageTimerRef.current = null;
+      }, 2400);
+    } finally {
+      window.setTimeout(() => {
+        suppressChapter2ProgressSaveRef.current = false;
+      }, 0);
+    }
   };
 
   const handleEpilogueComplete = () => {
@@ -4622,7 +4735,7 @@ const PLAYER_SKILL_COUNT = 5;
                   rel="noopener noreferrer"
                   className="TitleCouponBoothLink"
                 >
-                  BOOTHで特典を見る(後日公開)
+                  BOOTHで特典を見る
                 </a>
               </div>
 
@@ -4797,11 +4910,26 @@ const PLAYER_SKILL_COUNT = 5;
                       <div className="ChangelogDate" style={{ fontSize: '0.8rem', color: '#888', marginBottom: '10px' }}>{item.date}</div>
                       {item.image && (
                         <div style={{ marginBottom: '15px', textAlign: 'center' }}>
-                          <img
-                            src={getStorageUrl(item.image)}
-                            alt=""
-                            style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #444' }}
-                          />
+                          {typeof (item.imageLink || item.link) === 'string' && (item.imageLink || item.link) ? (
+                            <a
+                              href={item.imageLink || item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: 'inline-block', WebkitTapHighlightColor: 'transparent' }}
+                            >
+                              <img
+                                src={getStorageUrl(item.image)}
+                                alt=""
+                                style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #444', cursor: 'pointer' }}
+                              />
+                            </a>
+                          ) : (
+                            <img
+                              src={getStorageUrl(item.image)}
+                              alt=""
+                              style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #444' }}
+                            />
+                          )}
                         </div>
                       )}
                       <div className="ChangelogText" style={{ whiteSpace: 'pre-wrap' }}>
@@ -5147,6 +5275,14 @@ const PLAYER_SKILL_COUNT = 5;
                     {adminSaveMessage}
                   </div>
                 )}
+                <div style={{ marginBottom: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleAdminMarkChapter2Cleared}
+                    style={{ padding: '8px 12px', background: '#2e7d32', border: '1px solid #66bb6a', color: '#fff', fontWeight: 'bold', borderRadius: '6px' }}
+                  >
+                    自分を第2章クリア済みにする
+                  </button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                   {STAGE_DATA.filter(s => s.chapter === 2 && s.stage && s.battle === 1).map(s => {
                     const n = s.stage!;
