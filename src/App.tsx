@@ -1279,6 +1279,12 @@ const PLAYER_SKILL_COUNT = 5;
             });
           }
         }
+        if (stageMode === 'KENJU' || stageMode === 'DENEI') {
+          skillAbbrs = skillAbbrs.filter(abbr => {
+            const skill = getSkillByAbbr(abbr);
+            return skill?.denei === 1;
+          });
+        }
         const owned = skillAbbrs.map(abbr => getSkillByAbbr(abbr)).filter(Boolean) as SkillDetail[];
         return owned.sort((a, b) => {
           // 神業スキルを最優先
@@ -4492,7 +4498,7 @@ const PLAYER_SKILL_COUNT = 5;
                     <span className="TitleUserNameValue">{myProfile?.displayName || "名もなき人"}</span>
                   </div>
                 )}
-                {user && hasSupporterBenefit && (
+                {user && hasSupporterBenefit && !isAdmin && (
                   <div className="TitleSupporterPanel">
                     <div className="TitleSupporterPanelLabel">SPECIAL THANKS</div>
                   </div>
@@ -5930,7 +5936,8 @@ const PLAYER_SKILL_COUNT = 5;
   const storyTitleName = stageCycle >= 13
     ? STAGE_DATA.find(s => s.chapter === 2 && s.stage === storyTitleStage && s.battle === 1)?.name || ""
     : STAGE_DATA.find(s => s.no === stageCycle)?.name || "";
-  const gameContent = isChapter2 ? <GameChapter2 {...gameProps} /> : <GameChapter1 {...gameProps} />;
+  const isLoungeBattleMode = stageMode === 'KENJU' || stageMode === 'DENEI';
+  const gameContent = (isChapter2 && !isLoungeBattleMode) ? <GameChapter2 {...gameProps} /> : <GameChapter1 {...gameProps} />;
   const shouldRenderStoryCanvas = showStoryModal && (isChapter2 || !!storyUrl || !!creditsUrl || (isAdmin && showAdmin === false));
   
   return (
