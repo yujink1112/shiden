@@ -266,5 +266,19 @@
     ],
     "image": "/images/title/booth.webp",
     "imageLink": "https://shigen-games.booth.pm/items/8285332"
+  },
+  {
+    "date": "2026-05-11",
+    "title": "デバッグ用ボタンの消去",
+    "content": [
+      "デバッグ用ボタンが残っていたので消去しました。"
+    ]
+  },
+  {
+    "date": "2026-05-12",
+    "title": "電影への❤が表示されない不具合を修正",
+    "content": [
+      "ラウンジにアクセスした時、電影につけた❤がOFF状態になる不具合を修正しました。"
+    ]
   }
 ]

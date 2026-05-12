@@ -13,7 +13,6 @@ import { SkillDetail } from './skillsData';
 // 第2章 Stage12-3 勝利演出の手動調整ポイント。
 // CSS側の .chapter2-final-* と合わせて調整すると、余韻や崩落速度を変えられます。
 const FINAL_CLEAR_AUTO_ADVANCE_MS = 8200;
-const FINAL_CLEAR_TEST_RESET_MS = 9200;
 
 const GameChapter2: React.FC<GameProps> = (props) => {
   const {
@@ -347,7 +346,7 @@ const GameChapter2: React.FC<GameProps> = (props) => {
     };
   }, []);
 
-  const startFinalClearEffect = React.useCallback((autoAdvance: boolean) => {
+  const startFinalClearEffect = React.useCallback(() => {
     AudioManager.getInstance().stopBgm();
     setFinalClearEffectActive(true);
 
@@ -360,25 +359,17 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       finalClearResetTimerRef.current = null;
     }
 
-    if (autoAdvance) {
-      finalClearTimerRef.current = window.setTimeout(() => {
-        moveToNextStepRef.current();
-        finalClearTimerRef.current = null;
-      }, FINAL_CLEAR_AUTO_ADVANCE_MS);
-      return;
-    }
-
-    finalClearResetTimerRef.current = window.setTimeout(() => {
-      setFinalClearEffectActive(false);
-      finalClearResetTimerRef.current = null;
-    }, FINAL_CLEAR_TEST_RESET_MS);
+    finalClearTimerRef.current = window.setTimeout(() => {
+      moveToNextStepRef.current();
+      finalClearTimerRef.current = null;
+    }, FINAL_CLEAR_AUTO_ADVANCE_MS);
   }, []);
 
   React.useEffect(() => {
     if (!isFinalBattleVictoryComplete || finalClearStartedRef.current) return;
 
     finalClearStartedRef.current = true;
-    startFinalClearEffect(true);
+    startFinalClearEffect();
   }, [isFinalBattleVictoryComplete, startFinalClearEffect]);
 
   // 敵のスキル数に応じたスケール計算
@@ -451,28 +442,6 @@ const GameChapter2: React.FC<GameProps> = (props) => {
       )}
       {(introEffectActive || finalClearEffectActive) && (
         <div className="chapter2-final-white-flash" aria-hidden="true" />
-      )}
-      {isChapter2FinalBattle && !gameStarted && !showStoryModal && !finalClearEffectActive && (
-        <button
-          type="button"
-          onClick={() => startFinalClearEffect(false)}
-          style={{
-            position: 'fixed',
-            right: isMobile ? '12px' : '24px',
-            bottom: isMobile ? '12px' : '24px',
-            zIndex: 13000,
-            padding: '8px 12px',
-            background: '#fff',
-            color: '#111',
-            border: '2px solid #ff5252',
-            borderRadius: '6px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 0 18px rgba(255, 82, 82, 0.55)'
-          }}
-        >
-          勝利演出テスト
-        </button>
       )}
       <div ref={mainGameAreaRef} className={`MainGameArea stage-${stageCycle}`} style={{ flex: 2, padding: '20px', paddingBottom: isMobile && !gameStarted && selectedPlayerSkills.length > 0 ? '220px' : '20px', display: (isLoungeMode || showEpilogue || showStoryModal) ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', backgroundColor: 'rgba(10, 10, 10, 0.7)', position: 'relative', color: '#eee' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: isMobile ? '10px 76px 10px 58px' : '10px 40px', border: '2px solid #555', borderRadius: '15px', background: '#1a1a1a', position: 'relative', width: '100%', maxWidth: '800px', boxSizing: 'border-box', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

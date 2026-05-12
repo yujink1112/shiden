@@ -244,6 +244,9 @@ function App() {
   }, [isTitle]);
 
   const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    currentUserUidRef.current = user?.uid || null;
+  }, [user]);
   const [chapter2SkillsHydrated, setChapter2SkillsHydrated] = useState(false);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
   const [viewingProfile, setViewingProfile] = useState<UserProfile | null>(null);
@@ -611,6 +614,10 @@ function App() {
   const [anonymousVictories, setAnonymousVictories] = useState<{[visitorId: string]: {[stageKey: string]: string[]}}>({});
   const [isDeneiStatsLoaded, setIsDeneiStatsLoaded] = useState(false);
   const [isLoungeDataLoaded, setIsLoungeDataLoaded] = useState(false); // 新しい状態変数
+  const deneiClearsDataRef = useRef<any>(null);
+  const deneiTrialsDataRef = useRef<any>(null);
+  const deneiLikesDataRef = useRef<any>(null);
+  const currentUserUidRef = useRef<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -2915,24 +2922,45 @@ const PLAYER_SKILL_COUNT = 5;
     };
 
     const refreshDeneiStats = (overrides?: { clearsData?: any; trialsData?: any; likesData?: any }) => {
-      Promise.all([
-        overrides && 'clearsData' in overrides ? Promise.resolve(overrides.clearsData) : get(deneiClearsRootRef).then(snap => snap.val()),
-        overrides && 'trialsData' in overrides ? Promise.resolve(overrides.trialsData) : get(deneiTrialsRootRef).then(snap => snap.val()),
-        overrides && 'likesData' in overrides ? Promise.resolve(overrides.likesData) : get(deneiLikesRootRef).then(snap => snap.val())
-      ]).then(([clearsData, trialsData, likesData]) => {
-        updateDeneiStats(clearsData, trialsData, likesData, user?.uid || null);
+      const clearsPromise = overrides && 'clearsData' in overrides
+        ? Promise.resolve(overrides.clearsData)
+        : deneiClearsDataRef.current !== null
+          ? Promise.resolve(deneiClearsDataRef.current)
+          : get(deneiClearsRootRef).then(snap => snap.val());
+      const trialsPromise = overrides && 'trialsData' in overrides
+        ? Promise.resolve(overrides.trialsData)
+        : deneiTrialsDataRef.current !== null
+          ? Promise.resolve(deneiTrialsDataRef.current)
+          : get(deneiTrialsRootRef).then(snap => snap.val());
+      const likesPromise = overrides && 'likesData' in overrides
+        ? Promise.resolve(overrides.likesData)
+        : deneiLikesDataRef.current !== null
+          ? Promise.resolve(deneiLikesDataRef.current)
+          : get(deneiLikesRootRef).then(snap => snap.val());
+
+      Promise.all([clearsPromise, trialsPromise, likesPromise]).then(([clearsData, trialsData, likesData]) => {
+        if (overrides && 'clearsData' in overrides) deneiClearsDataRef.current = clearsData;
+        if (overrides && 'trialsData' in overrides) deneiTrialsDataRef.current = trialsData;
+        if (overrides && 'likesData' in overrides) deneiLikesDataRef.current = likesData;
+        updateDeneiStats(clearsData, trialsData, likesData, currentUserUidRef.current);
       });
     };
 
     // onValue に戻してリアルタイム更新を有効化
     const unsubClears = onValue(deneiClearsRootRef, (snap) => {
-      refreshDeneiStats({ clearsData: snap.val() });
+      const clearsData = snap.val();
+      deneiClearsDataRef.current = clearsData;
+      refreshDeneiStats({ clearsData });
     });
     const unsubTrials = onValue(deneiTrialsRootRef, (snap) => {
-      refreshDeneiStats({ trialsData: snap.val() });
+      const trialsData = snap.val();
+      deneiTrialsDataRef.current = trialsData;
+      refreshDeneiStats({ trialsData });
     });
     const unsubLikes = onValue(deneiLikesRootRef, (snap) => {
-      refreshDeneiStats({ likesData: snap.val() });
+      const likesData = snap.val();
+      deneiLikesDataRef.current = likesData;
+      refreshDeneiStats({ likesData });
     });
 
     setBattleResults([]);
@@ -3024,6 +3052,65 @@ const PLAYER_SKILL_COUNT = 5;
       if (deneiClearsUnsubscribe) deneiClearsUnsubscribe();
     };
   }, [viewingProfile]);
+
+  useEffect(() => {
+    if (
+      deneiClearsDataRef.current === null &&
+      deneiTrialsDataRef.current === null &&
+      deneiLikesDataRef.current === null
+    ) {
+      return;
+    }
+
+    const currentUid = user?.uid || null;
+    const newState: { [uid: string]: { [kenjuName: string]: { clears: number, trials: number, likes: number, isLiked?: boolean } } } = {};
+    const ensureStats = (uid: string, kenjuName: string) => {
+      if (!newState[uid]) newState[uid] = {};
+      if (!newState[uid][kenjuName]) newState[uid][kenjuName] = { clears: 0, trials: 0, likes: 0 };
+    };
+
+    const clearsData = deneiClearsDataRef.current;
+    if (clearsData) {
+      Object.entries(clearsData).forEach(([uid, kenjus]) => {
+        if (typeof kenjus !== 'object' || kenjus === null) return;
+        Object.entries(kenjus).forEach(([kenjuName, clears]) => {
+          if (typeof clears !== 'object' || clears === null) return;
+          ensureStats(uid, kenjuName);
+          newState[uid][kenjuName].clears = Object.keys(clears).length;
+        });
+      });
+    }
+
+    const trialsData = deneiTrialsDataRef.current;
+    if (trialsData) {
+      Object.entries(trialsData).forEach(([uid, kenjus]) => {
+        if (typeof kenjus !== 'object' || kenjus === null) return;
+        Object.entries(kenjus).forEach(([kenjuName, trials]) => {
+          if (typeof trials !== 'object' || trials === null) return;
+          ensureStats(uid, kenjuName);
+          newState[uid][kenjuName].trials = Object.keys(trials).length;
+        });
+      });
+    }
+
+    const likesData = deneiLikesDataRef.current;
+    if (likesData) {
+      Object.entries(likesData).forEach(([uid, kenjus]) => {
+        if (typeof kenjus !== 'object' || kenjus === null) return;
+        Object.entries(kenjus).forEach(([kenjuName, likes]) => {
+          if (typeof likes !== 'object' || likes === null) return;
+          ensureStats(uid, kenjuName);
+          newState[uid][kenjuName].likes = Object.keys(likes).length;
+          if (currentUid && likes[currentUid]) {
+            newState[uid][kenjuName].isLiked = true;
+          }
+        });
+      });
+    }
+
+    setAllDeneiStats(newState);
+    setIsDeneiStatsLoaded(true);
+  }, [user]);
 
   useEffect(() => {
     // sessionStorage を使って、タブ/セッションごとに一度だけアクセスを記録
